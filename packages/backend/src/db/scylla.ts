@@ -231,3 +231,27 @@ export async function filterChannel(
 
 	return foundNotes;
 }
+
+export async function filterReply(
+	notes: ScyllaNote[],
+	withReplies: boolean,
+	user: { id: User["id"] } | null,
+): Promise<ScyllaNote[]> {
+	let foundNotes = notes;
+
+	if (!user) {
+		foundNotes = foundNotes.filter(
+			(note) => !note.replyId || note.replyUserId === note.userId,
+		);
+	} else if (!withReplies) {
+		foundNotes = foundNotes.filter(
+			(note) =>
+				!note.replyId ||
+				note.replyUserId === user.id ||
+				note.userId === user.id ||
+				note.replyUserId === note.userId,
+		);
+	}
+
+	return foundNotes;
+}

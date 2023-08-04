@@ -17,6 +17,7 @@ import {
 	prepared,
 	scyllaClient,
 	filterChannel,
+	filterReply,
 } from "@/db/scylla.js";
 import { LocalFollowingsCache } from "@/misc/cache.js";
 
@@ -76,7 +77,7 @@ export default define(meta, paramDef, async (ps, user) => {
 
 	if (scyllaClient) {
 		let untilDate = new Date();
-		let foundNotes: ScyllaNote[] = [];
+		const foundNotes: ScyllaNote[] = [];
 		const validIds = [user.id].concat(await followingsCache.getAll());
 
 		while (foundNotes.length < ps.limit) {
@@ -97,14 +98,15 @@ export default define(meta, paramDef, async (ps, user) => {
 			}
 
 			const notes = result.rows.map(parseScyllaNote);
-			const filtered = notes.filter((note) => validIds.includes(note.userId));
+			let filtered = notes.filter((note) => validIds.includes(note.userId));
+
+			filtered = await filterChannel(filtered, user);
+			filtered = await filterReply(filtered, ps.withReplies, user);
+
 			foundNotes.push(...filtered);
 
 			untilDate = notes[notes.length - 1].createdAt;
 		}
-
-		// Filter channels
-		foundNotes = await filterChannel(foundNotes, user);
 
 		return Notes.packMany(foundNotes, user);
 	}
