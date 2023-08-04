@@ -148,12 +148,13 @@ class SetCache {
 	protected async fetch() {
 		// Sync from DB if nothing is cached yet or cache is expired
 		const ttlKey = `${this.key}:fetched`;
-		const fetched = await redisClient.exists(ttlKey);
-
-		if (!(await this.hasFollowing()) || fetched === 0) {
+		if (
+			!(await this.hasFollowing()) ||
+			(await redisClient.exists(ttlKey)) === 0
+		) {
 			await redisClient.del(this.key);
 			await this.follow(...(await this.fetcher()));
-			await redisClient.set(ttlKey, "yes", "EX", 60 * 30);
+			await redisClient.set(ttlKey, "yes", "EX", 60 * 30); // Expires in 30 minutes
 		}
 	}
 
