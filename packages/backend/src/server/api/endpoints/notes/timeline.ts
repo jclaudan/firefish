@@ -1,5 +1,5 @@
 import { Brackets } from "typeorm";
-import { Notes, Followings } from "@/models/index.js";
+import { Notes, Followings, ChannelFollowings } from "@/models/index.js";
 import { activeUsersChart } from "@/services/chart/index.js";
 import define from "../../define.js";
 import { makePaginationQuery } from "../../common/make-pagination-query.js";
@@ -17,7 +17,7 @@ import {
 	prepared,
 	scyllaClient,
 } from "@/db/scylla.js";
-import { LocalFollowingsCache } from "@/misc/cache.js";
+import { ChannelFollowingsCache, LocalFollowingsCache } from "@/misc/cache.js";
 
 export const meta = {
 	tags: ["notes"],
@@ -75,7 +75,7 @@ export default define(meta, paramDef, async (ps, user) => {
 
 	if (scyllaClient) {
 		let untilDate = new Date();
-		const foundNotes: ScyllaNote[] = [];
+		let foundNotes: ScyllaNote[] = [];
 		const validIds = [user.id].concat(await followingsCache.getAll());
 
 		while (foundNotes.length < ps.limit) {
@@ -100,6 +100,20 @@ export default define(meta, paramDef, async (ps, user) => {
 			foundNotes.push(...filtered);
 
 			untilDate = notes[notes.length - 1].createdAt;
+		}
+
+		// Filter channels
+		if (!user) {
+			foundNotes = foundNotes.filter((note) => !note.channelId);
+		} else {
+			const channelNotes = foundNotes.filter((note) => !!note.channelId);
+			if (channelNotes.length > 0) {
+				const cache = await ChannelFollowingsCache.init(user.id);
+				const followingIds = await cache.getAll();
+				foundNotes = foundNotes.filter(
+					(note) => !note.channelId || followingIds.includes(note.channelId),
+				);
+			}
 		}
 
 		return Notes.packMany(foundNotes, user);

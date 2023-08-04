@@ -1,7 +1,9 @@
+import { ChannelFollowingsCache } from "@/misc/cache.js";
 import define from "../../define.js";
 import { ApiError } from "../../error.js";
 import { Channels, ChannelFollowings } from "@/models/index.js";
 import { publishUserEvent } from "@/services/stream.js";
+import { scyllaClient } from "@/db/scylla.js";
 
 export const meta = {
 	tags: ["channels"],
@@ -40,6 +42,11 @@ export default define(meta, paramDef, async (ps, user) => {
 		followerId: user.id,
 		followeeId: channel.id,
 	});
+
+	if (scyllaClient) {
+		const cache = await ChannelFollowingsCache.init(user.id);
+		await cache.unfollow(channel.id);
+	}
 
 	publishUserEvent(user.id, "unfollowChannel", channel);
 });

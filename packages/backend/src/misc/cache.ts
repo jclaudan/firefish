@@ -1,7 +1,7 @@
 import { redisClient } from "@/db/redis.js";
 import { encode, decode } from "msgpackr";
 import { ChainableCommander } from "ioredis";
-import { Followings } from "@/models/index.js";
+import { ChannelFollowings, Followings } from "@/models/index.js";
 import { IsNull } from "typeorm";
 
 export class Cache<T> {
@@ -132,28 +132,29 @@ export class Cache<T> {
 	}
 }
 
-export class LocalFollowingsCache {
-	private myId: string;
+class SetCache {
 	private key: string;
+	private fetcher: () => Promise<string[]>;
 
-	private constructor(userId: string) {
-		this.myId = userId;
-		this.key = `follow:${userId}`;
+	protected constructor(
+		name: string,
+		userId: string,
+		fetcher: () => Promise<string[]>,
+	) {
+		this.key = `setcache:${name}:${userId}`;
+		this.fetcher = fetcher;
 	}
 
-	public static async init(userId: string): Promise<LocalFollowingsCache> {
-		const cache = new LocalFollowingsCache(userId);
+	protected async fetch() {
+		// Sync from DB if nothing is cached yet or cache is expired
+		const ttlKey = `${this.key}:fetched`;
+		const fetched = await redisClient.exists(ttlKey);
 
-		// Sync from DB if no followings are cached
-		if (!(await cache.hasFollowing())) {
-			const rel = await Followings.find({
-				select: { followeeId: true },
-				where: { followerId: cache.myId, followerHost: IsNull() },
-			});
-			await cache.follow(...rel.map((r) => r.followeeId));
+		if (!(await this.hasFollowing()) || fetched === 0) {
+			await redisClient.del(this.key);
+			await this.follow(...(await this.fetcher()));
+			await redisClient.set(ttlKey, "yes", "EX", 60 * 30);
 		}
-
-		return cache;
 	}
 
 	public async follow(...targetIds: string[]) {
@@ -180,5 +181,45 @@ export class LocalFollowingsCache {
 
 	public async getAll(): Promise<string[]> {
 		return await redisClient.smembers(this.key);
+	}
+}
+
+export class LocalFollowingsCache extends SetCache {
+	private constructor(userId: string) {
+		const fetcher = () =>
+			Followings.find({
+				select: { followeeId: true },
+				where: { followerId: userId, followerHost: IsNull() },
+			}).then((follows) => follows.map((follow) => follow.followeeId));
+
+		super("follow", userId, fetcher);
+	}
+
+	public static async init(userId: string): Promise<LocalFollowingsCache> {
+		const cache = new LocalFollowingsCache(userId);
+		await cache.fetch();
+
+		return cache;
+	}
+}
+
+export class ChannelFollowingsCache extends SetCache {
+	private constructor(userId: string) {
+		const fetcher = () =>
+			ChannelFollowings.find({
+				select: { followeeId: true },
+				where: {
+					followerId: userId,
+				},
+			}).then((follows) => follows.map((follow) => follow.followeeId));
+
+		super("channel", userId, fetcher);
+	}
+
+	public static async init(userId: string): Promise<ChannelFollowingsCache> {
+		const cache = new ChannelFollowingsCache(userId);
+		await cache.fetch();
+
+		return cache;
 	}
 }
