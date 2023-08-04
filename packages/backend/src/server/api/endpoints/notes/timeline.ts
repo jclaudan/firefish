@@ -1,5 +1,5 @@
 import { Brackets } from "typeorm";
-import { Notes, Followings, ChannelFollowings } from "@/models/index.js";
+import { Notes, Followings } from "@/models/index.js";
 import { activeUsersChart } from "@/services/chart/index.js";
 import define from "../../define.js";
 import { makePaginationQuery } from "../../common/make-pagination-query.js";
@@ -16,8 +16,9 @@ import {
 	parseScyllaNote,
 	prepared,
 	scyllaClient,
+	filterChannel,
 } from "@/db/scylla.js";
-import { ChannelFollowingsCache, LocalFollowingsCache } from "@/misc/cache.js";
+import { LocalFollowingsCache } from "@/misc/cache.js";
 
 export const meta = {
 	tags: ["notes"],
@@ -103,18 +104,7 @@ export default define(meta, paramDef, async (ps, user) => {
 		}
 
 		// Filter channels
-		if (!user) {
-			foundNotes = foundNotes.filter((note) => !note.channelId);
-		} else {
-			const channelNotes = foundNotes.filter((note) => !!note.channelId);
-			if (channelNotes.length > 0) {
-				const cache = await ChannelFollowingsCache.init(user.id);
-				const followingIds = await cache.getAll();
-				foundNotes = foundNotes.filter(
-					(note) => !note.channelId || followingIds.includes(note.channelId),
-				);
-			}
-		}
+		foundNotes = await filterChannel(foundNotes, user);
 
 		return Notes.packMany(foundNotes, user);
 	}

@@ -4,7 +4,7 @@ import type { Note } from "@/models/entities/note.js";
 import type { NoteReaction } from "@/models/entities/note-reaction.js";
 import { Client, types } from "cassandra-driver";
 import type { User } from "@/models/entities/user.js";
-import { LocalFollowingsCache } from "@/misc/cache.js";
+import { ChannelFollowingsCache, LocalFollowingsCache } from "@/misc/cache.js";
 
 function newClient(): Client | null {
 	if (!config.scylla) {
@@ -208,4 +208,26 @@ export async function isVisible(
 	}
 
 	return visible;
+}
+
+export async function filterChannel(
+	notes: ScyllaNote[],
+	user: { id: User["id"] } | null,
+): Promise<ScyllaNote[]> {
+	let foundNotes = notes;
+
+	if (!user) {
+		foundNotes = foundNotes.filter((note) => !note.channelId);
+	} else {
+		const channelNotes = foundNotes.filter((note) => !!note.channelId);
+		if (channelNotes.length > 0) {
+			const cache = await ChannelFollowingsCache.init(user.id);
+			const followingIds = await cache.getAll();
+			foundNotes = foundNotes.filter(
+				(note) => !note.channelId || followingIds.includes(note.channelId),
+			);
+		}
+	}
+
+	return foundNotes;
 }
