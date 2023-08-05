@@ -1,7 +1,12 @@
 import { redisClient } from "@/db/redis.js";
 import { encode, decode } from "msgpackr";
 import { ChainableCommander } from "ioredis";
-import { ChannelFollowings, Followings } from "@/models/index.js";
+import {
+	ChannelFollowings,
+	Followings,
+	Mutings,
+	UserProfiles,
+} from "@/models/index.js";
 import { IsNull } from "typeorm";
 
 export class Cache<T> {
@@ -133,8 +138,8 @@ export class Cache<T> {
 }
 
 class SetCache {
-	private key: string;
-	private fetcher: () => Promise<string[]>;
+	private readonly key: string;
+	private readonly fetcher: () => Promise<string[]>;
 
 	protected constructor(
 		name: string,
@@ -147,41 +152,104 @@ class SetCache {
 
 	protected async fetch() {
 		// Sync from DB if nothing is cached yet or cache is expired
-		const ttlKey = `${this.key}:fetched`;
-		if (
-			!(await this.hasFollowing()) ||
-			(await redisClient.exists(ttlKey)) === 0
-		) {
-			await redisClient.del(this.key);
-			await this.follow(...(await this.fetcher()));
-			await redisClient.set(ttlKey, "yes", "EX", 60 * 30); // Expires in 30 minutes
+		if (!(await this.exists())) {
+			await this.clear();
+			await this.add(...(await this.fetcher()));
 		}
 	}
 
-	public async follow(...targetIds: string[]) {
+	public async add(...targetIds: string[]) {
 		if (targetIds.length > 0) {
 			// This is no-op if targets are already in cache
 			await redisClient.sadd(this.key, targetIds);
 		}
+		if ((await redisClient.ttl(this.key)) < 0) {
+			await redisClient.expire(this.key, 60 * 30); // Expires in 30 minutes
+		}
 	}
 
-	public async unfollow(...targetIds: string[]) {
+	public async delete(...targetIds: string[]) {
 		if (targetIds.length > 0) {
 			// This is no-op if targets are not in cache
 			await redisClient.srem(this.key, targetIds);
 		}
 	}
 
-	public async isFollowing(targetId: string): Promise<boolean> {
+	public async clear() {
+		await redisClient.del(this.key);
+	}
+
+	public async has(targetId: string): Promise<boolean> {
 		return (await redisClient.sismember(this.key, targetId)) === 1;
 	}
 
-	public async hasFollowing(): Promise<boolean> {
+	public async exists(): Promise<boolean> {
 		return (await redisClient.scard(this.key)) !== 0;
 	}
 
 	public async getAll(): Promise<string[]> {
 		return await redisClient.smembers(this.key);
+	}
+}
+
+class HashCache {
+	private readonly key: string;
+	private readonly fetcher: () => Promise<Map<string, string>>;
+
+	protected constructor(
+		name: string,
+		userId: string,
+		fetcher: () => Promise<Map<string, string>>,
+	) {
+		this.key = `hashcache:${name}:${userId}`;
+		this.fetcher = fetcher;
+	}
+
+	protected async fetch() {
+		// Sync from DB if nothing is cached yet or cache is expired
+		if (!(await this.exists())) {
+			await redisClient.del(this.key);
+			await this.setHash(await this.fetcher());
+		}
+	}
+
+	public async exists(): Promise<boolean> {
+		return (await redisClient.hlen(this.key)) > 0;
+	}
+
+	public async setHash(hash: Map<string, string>) {
+		if (hash.size > 0) {
+			await redisClient.hset(this.key, hash);
+		}
+		if ((await redisClient.ttl(this.key)) < 0) {
+			await redisClient.expire(this.key, 60 * 30); // Expires in 30 minutes
+		}
+	}
+
+	public async set(field: string, value: string) {
+		await this.setHash(new Map([[field, value]]));
+	}
+
+	public async delete(...fields: string[]) {
+		await redisClient.hdel(this.key, ...fields);
+	}
+
+	public async clear() {
+		await redisClient.del(this.key);
+	}
+
+	public async get(...fields: string[]): Promise<Map<string, string>> {
+		let pairs: [string, string][] = [];
+
+		if (fields.length > 0) {
+			pairs = (await redisClient.hmget(this.key, ...fields))
+				.map((v, i) => [fields[i], v] as [string, string | null])
+				.filter(([_, value]) => value !== null) as [string, string][];
+		} else {
+			pairs = Object.entries(await redisClient.hgetall(this.key));
+		}
+
+		return new Map(pairs);
 	}
 }
 
@@ -191,7 +259,7 @@ export class LocalFollowingsCache extends SetCache {
 			Followings.find({
 				select: { followeeId: true },
 				where: { followerId: userId, followerHost: IsNull() },
-			}).then((follows) => follows.map((follow) => follow.followeeId));
+			}).then((follows) => follows.map(({ followeeId }) => followeeId));
 
 		super("follow", userId, fetcher);
 	}
@@ -212,13 +280,99 @@ export class ChannelFollowingsCache extends SetCache {
 				where: {
 					followerId: userId,
 				},
-			}).then((follows) => follows.map((follow) => follow.followeeId));
+			}).then((follows) => follows.map(({ followeeId }) => followeeId));
 
 		super("channel", userId, fetcher);
 	}
 
 	public static async init(userId: string): Promise<ChannelFollowingsCache> {
 		const cache = new ChannelFollowingsCache(userId);
+		await cache.fetch();
+
+		return cache;
+	}
+}
+
+export class UserMutingsCache extends HashCache {
+	private constructor(userId: string) {
+		const fetcher = () =>
+			Mutings.find({
+				select: { muteeId: true, expiresAt: true },
+				where: { muterId: userId },
+			}).then(
+				(mutes) =>
+					new Map(
+						mutes.map(({ muteeId, expiresAt }) => [
+							muteeId,
+							expiresAt?.toISOString() ?? "",
+						]),
+					),
+			);
+
+		super("mute", userId, fetcher);
+	}
+
+	public static async init(userId: string): Promise<UserMutingsCache> {
+		const cache = new UserMutingsCache(userId);
+		await cache.fetch();
+
+		return cache;
+	}
+
+	public async mute(muteeId: string, expiresAt?: Date | null) {
+		await this.set(muteeId, expiresAt?.toISOString() ?? "");
+	}
+
+	public async unmute(muteeId: string) {
+		await this.delete(muteeId);
+	}
+
+	public async getAll(): Promise<string[]> {
+		const mutes = await this.get();
+		const expired: string[] = [];
+		const valid: string[] = [];
+
+		for (const [k, v] of mutes.entries()) {
+			if (v !== "" && new Date(v) < new Date()) {
+				expired.push(k);
+			} else {
+				valid.push(k);
+			}
+		}
+
+		await this.delete(...expired);
+
+		return valid;
+	}
+
+	public async isMuting(muteeId: string): Promise<boolean> {
+		const result = (await this.get(muteeId)).get(muteeId); // Could be undefined or ""
+		let muting = result === "";
+
+		if (result) {
+			muting = new Date(result) > new Date(); // Check if not expired yet
+			if (!muting) {
+				await this.unmute(muteeId);
+			}
+		}
+
+		return muting;
+	}
+}
+
+export class InstanceMutingsCache extends SetCache {
+	private constructor(userId: string) {
+		const fetcher = () =>
+			UserProfiles.findOne({
+				select: { mutedInstances: true },
+				where: { userId },
+			}).then((profile) => (profile ? profile.mutedInstances : []));
+
+		super("instanceMute", userId, fetcher);
+	}
+
+	public static async init(userId: string): Promise<InstanceMutingsCache> {
+		const cache = new InstanceMutingsCache(userId);
 		await cache.fetch();
 
 		return cache;

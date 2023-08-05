@@ -3,6 +3,7 @@ import { ApiError } from "../../error.js";
 import { getUser } from "../../common/getters.js";
 import { Mutings } from "@/models/index.js";
 import { publishUserEvent } from "@/services/stream.js";
+import { UserMutingsCache } from "@/misc/cache.js";
 
 export const meta = {
 	tags: ["account"],
@@ -56,19 +57,19 @@ export default define(meta, paramDef, async (ps, user) => {
 	});
 
 	// Check not muting
-	const muting = await Mutings.findOneBy({
-		muterId: muter.id,
-		muteeId: mutee.id,
-	});
+	const cache = await UserMutingsCache.init(muter.id);
+	const muting = await cache.isMuting(mutee.id);
 
-	if (muting == null) {
+	if (!muting) {
 		throw new ApiError(meta.errors.notMuting);
 	}
 
 	// Delete mute
 	await Mutings.delete({
-		id: muting.id,
+		muterId: muter.id,
+		muteeId: mutee.id,
 	});
+	await cache.unmute(mutee.id);
 
 	publishUserEvent(user.id, "unmute", mutee);
 });

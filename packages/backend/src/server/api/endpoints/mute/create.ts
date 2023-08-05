@@ -5,6 +5,7 @@ import { genId } from "@/misc/gen-id.js";
 import { Mutings, NoteWatchings } from "@/models/index.js";
 import type { Muting } from "@/models/entities/muting.js";
 import { publishUserEvent } from "@/services/stream.js";
+import { UserMutingsCache } from "@/misc/cache.js";
 
 export const meta = {
 	tags: ["account"],
@@ -64,12 +65,8 @@ export default define(meta, paramDef, async (ps, user) => {
 	});
 
 	// Check if already muting
-	const exist = await Mutings.exist({
-		where: {
-			muterId: muter.id,
-			muteeId: mutee.id,
-		},
-	});
+	const cache = await UserMutingsCache.init(muter.id);
+	const exist = await cache.isMuting(mutee.id);
 
 	if (exist) {
 		throw new ApiError(meta.errors.alreadyMuting);
@@ -79,14 +76,17 @@ export default define(meta, paramDef, async (ps, user) => {
 		return;
 	}
 
+	const expiresAt = ps.expiresAt ? new Date(ps.expiresAt) : null;
+
 	// Create mute
 	await Mutings.insert({
 		id: genId(),
 		createdAt: new Date(),
-		expiresAt: ps.expiresAt ? new Date(ps.expiresAt) : null,
+		expiresAt,
 		muterId: muter.id,
 		muteeId: mutee.id,
 	} as Muting);
+	await cache.mute(mutee.id, expiresAt);
 
 	publishUserEvent(user.id, "mute", mutee);
 

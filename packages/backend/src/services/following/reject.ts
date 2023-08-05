@@ -94,7 +94,7 @@ async function removeFollow(followee: Both, follower: Both) {
 	await Followings.delete(following.id);
 	if (Users.isLocalUser(follower)) {
 		const cache = await LocalFollowingsCache.init(follower.id);
-		await cache.unfollow(followee.id);
+		await cache.delete(followee.id);
 	}
 	decrementFollowing(follower, followee);
 }

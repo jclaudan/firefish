@@ -5,7 +5,12 @@ import type { Note } from "@/models/entities/note.js";
 import type { NoteReaction } from "@/models/entities/note-reaction.js";
 import { Client, types, tracker } from "cassandra-driver";
 import type { User } from "@/models/entities/user.js";
-import { ChannelFollowingsCache, LocalFollowingsCache } from "@/misc/cache.js";
+import {
+	ChannelFollowingsCache,
+	InstanceMutingsCache,
+	LocalFollowingsCache,
+	UserMutingsCache,
+} from "@/misc/cache.js";
 import { getTimestamp } from "@/misc/gen-id.js";
 import Logger from "@/services/logger.js";
 
@@ -267,13 +272,12 @@ export async function execTimelineQuery(
 
 	let { query, untilDate, sinceDate } = prepareTimelineQuery(ps);
 
-	let scannedPartitions = 0;
+	let scannedEmptyPartitions = 0;
 	const foundNotes: ScyllaNote[] = [];
 
 	// Try to get posts of at most <maxDays> in the single request
-	while (foundNotes.length < ps.limit && scannedPartitions < maxDays) {
+	while (foundNotes.length < ps.limit && scannedEmptyPartitions < maxDays) {
 		const params: (Date | string | string[])[] = [untilDate, untilDate];
-
 		if (sinceDate) {
 			params.push(sinceDate);
 		}
@@ -284,7 +288,7 @@ export async function execTimelineQuery(
 
 		if (result.rowLength === 0) {
 			// Reached the end of partition. Queries posts created one day before.
-			scannedPartitions++;
+			scannedEmptyPartitions++;
 			untilDate = new Date(
 				untilDate.getFullYear(),
 				untilDate.getMonth(),
@@ -298,6 +302,8 @@ export async function execTimelineQuery(
 
 			continue;
 		}
+
+		scannedEmptyPartitions = 0;
 
 		const notes = result.rows.map(parseScyllaNote);
 		foundNotes.push(...(filter ? await filter(notes) : notes));
@@ -391,4 +397,30 @@ export async function filterReply(
 	}
 
 	return filtered;
+}
+
+export async function filterMutedUser(
+	notes: ScyllaNote[],
+	user: { id: User["id"] },
+	exclude?: User,
+) {
+	const userCache = await UserMutingsCache.init(user.id);
+	let mutedUserIds = await userCache.getAll();
+
+	if (exclude) {
+		mutedUserIds = mutedUserIds.filter((id) => id !== exclude.id);
+	}
+
+	const instanceCache = await InstanceMutingsCache.init(user.id);
+	const mutedInstances = await instanceCache.getAll();
+
+	return notes.filter(
+		(note) =>
+			!mutedUserIds.includes(note.userId) &&
+			!(note.replyUserId && mutedUserIds.includes(note.replyUserId)) &&
+			!(note.renoteUserId && mutedUserIds.includes(note.renoteUserId)) &&
+			!(note.userHost && mutedInstances.includes(note.userHost)) &&
+			!(note.replyUserHost && mutedInstances.includes(note.replyUserHost)) &&
+			!(note.renoteUserHost && mutedInstances.includes(note.renoteUserHost)),
+	);
 }

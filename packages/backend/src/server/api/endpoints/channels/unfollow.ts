@@ -45,7 +45,7 @@ export default define(meta, paramDef, async (ps, user) => {
 
 	if (scyllaClient) {
 		const cache = await ChannelFollowingsCache.init(user.id);
-		await cache.unfollow(channel.id);
+		await cache.delete(channel.id);
 	}
 
 	publishUserEvent(user.id, "unfollowChannel", channel);

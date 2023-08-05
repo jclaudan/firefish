@@ -139,7 +139,7 @@ export const NoteRepository = db.getRepository(Note).extend({
 
 				if (Users.isLocalUser(user)) {
 					const cache = await LocalFollowingsCache.init(meId);
-					return await cache.isFollowing(note.userId);
+					return await cache.has(note.userId);
 				}
 
 				const following = await Followings.exist({

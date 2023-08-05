@@ -14,9 +14,9 @@ import { normalizeForSearch } from "@/misc/normalize-for-search.js";
 import { langmap } from "@/misc/langmap.js";
 import { verifyLink } from "@/services/fetch-rel-me.js";
 import { ApiError } from "../../error.js";
-import config from "@/config/index.js";
 import define from "../../define.js";
 import { userByIdCache, userDenormalizedCache } from "@/services/user-cache.js";
+import { InstanceMutingsCache } from "@/misc/cache.js";
 
 export const meta = {
 	tags: ["account"],
@@ -323,8 +323,16 @@ export default define(meta, paramDef, async (ps, _user, token) => {
 		}
 		await userDenormalizedCache.set(data.id, data);
 	}
-	if (Object.keys(profileUpdates).length > 0)
+
+	if (Object.keys(profileUpdates).length > 0) {
 		await UserProfiles.update(user.id, profileUpdates);
+
+		if (profileUpdates.mutedInstances) {
+			const cache = await InstanceMutingsCache.init(user.id);
+			await cache.clear();
+			await cache.add(...profileUpdates.mutedInstances);
+		}
+	}
 
 	const iObj = await Users.pack<true, true>(user.id, user, {
 		detail: true,

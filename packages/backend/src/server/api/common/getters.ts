@@ -9,6 +9,7 @@ import {
 	prepared,
 	scyllaClient,
 } from "@/db/scylla.js";
+import { userByIdCache } from "@/services/user-cache.js";
 
 /**
  * Get note for API processing, taking into account visibility.
@@ -59,9 +60,11 @@ export async function getNote(
  * Get user for API processing
  */
 export async function getUser(userId: User["id"]) {
-	const user = await Users.findOneBy({ id: userId });
+	const user = await userByIdCache.fetchMaybe(userId, () =>
+		Users.findOneBy({ id: userId }).then((u) => u ?? undefined),
+	);
 
-	if (user == null) {
+	if (!user) {
 		throw new IdentifiableError(
 			"15348ddd-432d-49c2-8a5a-8069753becff",
 			"No such user.",

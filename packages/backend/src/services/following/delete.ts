@@ -48,7 +48,7 @@ export default async function (
 
 	if (Users.isLocalUser(follower)) {
 		const cache = await LocalFollowingsCache.init(follower.id);
-		await cache.unfollow(followee.id);
+		await cache.delete(followee.id);
 	}
 
 	decrementFollowing(follower, followee);

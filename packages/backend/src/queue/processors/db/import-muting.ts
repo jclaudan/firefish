@@ -10,6 +10,7 @@ import type { DbUserImportJobData } from "@/queue/types.js";
 import type { User } from "@/models/entities/user.js";
 import { genId } from "@/misc/gen-id.js";
 import { IsNull } from "typeorm";
+import { UserMutingsCache } from "@/misc/cache.js";
 
 const logger = queueLogger.createSubLogger("import-muting");
 
@@ -86,4 +87,6 @@ async function mute(user: User, target: User) {
 		muterId: user.id,
 		muteeId: target.id,
 	});
+	const cache = await UserMutingsCache.init(user.id);
+	await cache.mute(target.id);
 }

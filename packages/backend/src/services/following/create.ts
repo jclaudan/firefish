@@ -85,7 +85,7 @@ export async function insertFollowingDoc(
 	if (Users.isLocalUser(follower)) {
 		// Cache following ID set
 		const cache = await LocalFollowingsCache.init(follower.id);
-		await cache.follow(followee.id);
+		await cache.add(followee.id);
 	}
 
 	const req = await FollowRequests.findOneBy({

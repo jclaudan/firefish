@@ -84,7 +84,7 @@ export default define(meta, paramDef, async (ps, user) => {
 
 	// Check if already following
 	const cache = await LocalFollowingsCache.init(follower.id);
-	const exist = await cache.isFollowing(followee.id);
+	const exist = await cache.has(followee.id);
 
 	if (exist) {
 		throw new ApiError(meta.errors.alreadyFollowing);
