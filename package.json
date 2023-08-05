@@ -15,6 +15,7 @@
 		"start:test": "pnpm --filter backend run start:test",
 		"init": "pnpm run migrate",
 		"migrate": "pnpm --filter backend run migrate",
+		"migrate:scylla": "pnpm --filter backend run migrate:scylla",
 		"revertmigration": "pnpm --filter backend run revertmigration",
 		"migrateandstart": "pnpm run migrate && pnpm run start",
 		"gulp": "gulp build",
