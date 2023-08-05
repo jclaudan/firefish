@@ -20,6 +20,7 @@ import {
 	filterReply,
 } from "@/db/scylla.js";
 import { LocalFollowingsCache } from "@/misc/cache.js";
+import { getTimestamp } from "@/misc/gen-id.js";
 
 export const meta = {
 	tags: ["notes"],
@@ -79,22 +80,35 @@ export default define(meta, paramDef, async (ps, user) => {
 		let untilDate = new Date();
 		const foundNotes: ScyllaNote[] = [];
 		const validIds = [user.id].concat(await followingsCache.getAll());
+		const query = `${prepared.note.select.byDate} AND "createdAt" < ? LIMIT 50`; // LIMIT is hardcoded to prepare
 
-		while (foundNotes.length < ps.limit) {
-			const query = [`${prepared.note.select.byDate} AND "createdAt" < ?`];
+		if (ps.untilId) {
+			untilDate = new Date(getTimestamp(ps.untilId));
+		}
+
+		let scanned_partitions = 0;
+
+		// Try to get posts of at most 30 days in the single request
+		while (foundNotes.length < ps.limit && scanned_partitions < 30) {
 			const params: (Date | string | string[])[] = [untilDate, untilDate];
-			if (ps.untilId) {
-				query.push(`AND "id" < ?`);
-				params.push(ps.untilId);
-			}
-			query.push("LIMIT 50"); // Hardcoded for prepared query
 
-			const result = await scyllaClient.execute(query.join(" "), params, {
+			const result = await scyllaClient.execute(query, params, {
 				prepare: true,
 			});
 
 			if (result.rowLength === 0) {
-				break;
+				// Reached the end of partition. Queries posts created one day before.
+				scanned_partitions++;
+				untilDate = new Date(
+					untilDate.getUTCFullYear(),
+					untilDate.getUTCMonth(),
+					untilDate.getUTCDate() - 1,
+					23,
+					59,
+					59,
+					999,
+				);
+				continue;
 			}
 
 			const notes = result.rows.map(parseScyllaNote);
@@ -108,7 +122,7 @@ export default define(meta, paramDef, async (ps, user) => {
 			untilDate = notes[notes.length - 1].createdAt;
 		}
 
-		return Notes.packMany(foundNotes, user);
+		return Notes.packMany(foundNotes.slice(0, ps.limit), user);
 	}
 
 	const hasFollowing = await followingsCache.hasFollowing();

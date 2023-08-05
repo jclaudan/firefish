@@ -19,3 +19,9 @@ nativeInitIdGenerator(length, fingerprint);
 export function genId(date?: Date): string {
 	return nativeCreateId((date ?? new Date()).getTime());
 }
+
+const TIME_2000 = 946_684_800_000;
+
+export function getTimestamp(id: string): number {
+	return parseInt(id.slice(0, 8), 36) + TIME_2000;
+}
