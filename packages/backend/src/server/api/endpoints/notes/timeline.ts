@@ -90,7 +90,9 @@ export default define(meta, paramDef, async (ps, user) => {
 		};
 
 		const foundNotes = await execTimelineQuery(ps, filter);
-		return await Notes.packMany(foundNotes.slice(0, ps.limit), user);
+		return await Notes.packMany(foundNotes.slice(0, ps.limit), user, {
+			scyllaNote: true,
+		});
 	}
 
 	const hasFollowing = await followingsCache.hasFollowing();

@@ -137,8 +137,7 @@ export const NoteRepository = db.getRepository(Note).extend({
 					Users.findOneByOrFail({ id: meId }),
 				);
 
-				if (!user.host) {
-					// user is local
+				if (Users.isLocalUser(user)) {
 					const cache = await LocalFollowingsCache.init(meId);
 					return await cache.isFollowing(note.userId);
 				}
@@ -169,6 +168,7 @@ export const NoteRepository = db.getRepository(Note).extend({
 		me?: { id: User["id"] } | null | undefined,
 		options?: {
 			detail?: boolean;
+			scyllaNote?: boolean;
 			_hint_?: {
 				myReactions: Map<Note["id"], NoteReaction | null>;
 			};
@@ -187,7 +187,7 @@ export const NoteRepository = db.getRepository(Note).extend({
 		const isSrcNote = typeof src === "object";
 
 		// Always lookup from ScyllaDB if enabled
-		if (isSrcNote && !scyllaClient) {
+		if (isSrcNote && (!scyllaClient || options?.scyllaNote)) {
 			note = src;
 		} else {
 			const noteId = isSrcNote ? src.id : src;
@@ -346,6 +346,7 @@ export const NoteRepository = db.getRepository(Note).extend({
 		me?: { id: User["id"] } | null | undefined,
 		options?: {
 			detail?: boolean;
+			scyllaNote?: boolean;
 		},
 	) {
 		if (notes.length === 0) return [];
