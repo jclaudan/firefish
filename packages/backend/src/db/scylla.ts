@@ -1,10 +1,12 @@
 import config from "@/config/index.js";
 import type { PopulatedEmoji } from "@/misc/populate-emojis.js";
+import type { Channel } from "@/models/entities/channel.js";
 import type { Note } from "@/models/entities/note.js";
 import type { NoteReaction } from "@/models/entities/note-reaction.js";
 import { Client, types } from "cassandra-driver";
 import type { User } from "@/models/entities/user.js";
 import { ChannelFollowingsCache, LocalFollowingsCache } from "@/misc/cache.js";
+import { getTimestamp } from "@/misc/gen-id";
 
 function newClient(): Client | null {
 	if (!config.scylla) {
@@ -185,51 +187,162 @@ export function parseScyllaReaction(row: types.Row): ScyllaNoteReaction {
 	};
 }
 
-export async function isVisible(
-	note: ScyllaNote,
-	user: { id: User["id"] } | null,
-): Promise<boolean> {
-	let visible = false;
+export function prepareTimelineQuery(
+	untilId?: string,
+	untilDate?: number,
+	sinceId?: string,
+	sinceDate?: number,
+): { query: string; untilDate: Date; sinceDate: Date | null } {
+	const queryParts = [`${prepared.note.select.byDate} AND "createdAt" < ?`];
 
-	if (
-		["public", "home"].includes(note.visibility) // public post
-	) {
-		visible = true;
-	} else if (user) {
-		const cache = await LocalFollowingsCache.init(user.id);
-
-		visible =
-			note.userId === user.id || // my own post
-			note.visibleUserIds.includes(user.id) || // visible to me
-			note.mentions.includes(user.id) || // mentioned me
-			(note.visibility === "followers" &&
-				(await cache.isFollowing(note.userId))) || // following
-			note.replyUserId === user.id; // replied to myself
+	let _untilDate = new Date();
+	if (untilId) {
+		_untilDate = new Date(getTimestamp(untilId));
+	}
+	if (untilDate && untilDate < _untilDate.getTime()) {
+		_untilDate = new Date(untilDate);
+	}
+	let _sinceDate: Date | null = null;
+	if (sinceId) {
+		_sinceDate = new Date(getTimestamp(sinceId));
+	}
+	if (sinceDate && (!_sinceDate || sinceDate > _sinceDate.getTime())) {
+		_sinceDate = new Date(sinceDate);
+	}
+	if (_sinceDate !== null) {
+		queryParts.push(`AND "createdAt" > ?`);
 	}
 
-	return visible;
+	queryParts.push("LIMIT 50"); // Hardcoded to issue a prepared query
+	const query = queryParts.join(" ");
+
+	return {
+		query,
+		untilDate: _untilDate,
+		sinceDate: _sinceDate,
+	};
+}
+
+export async function execTimelineQuery(
+	ps: {
+		limit: number;
+		untilId?: string;
+		untilDate?: number;
+		sinceId?: string;
+		sinceDate?: number;
+	},
+	maxDays = 30,
+	filter?: (_: ScyllaNote[]) => Promise<ScyllaNote[]>,
+): Promise<ScyllaNote[]> {
+	if (!scyllaClient) return [];
+
+	let { query, untilDate, sinceDate } = prepareTimelineQuery(
+		ps.untilId,
+		ps.untilDate,
+		ps.sinceId,
+		ps.sinceDate,
+	);
+
+	let scannedPartitions = 0;
+	const foundNotes: ScyllaNote[] = [];
+
+	// Try to get posts of at most <maxDays> in the single request
+	while (foundNotes.length < ps.limit && scannedPartitions < maxDays) {
+		const params: (Date | string | string[])[] = [untilDate, untilDate];
+
+		if (sinceDate) {
+			params.push(sinceDate);
+		}
+
+		const result = await scyllaClient.execute(query, params, {
+			prepare: true,
+		});
+
+		if (result.rowLength === 0) {
+			// Reached the end of partition. Queries posts created one day before.
+			scannedPartitions++;
+			untilDate = new Date(
+				untilDate.getUTCFullYear(),
+				untilDate.getUTCMonth(),
+				untilDate.getUTCDate() - 1,
+				23,
+				59,
+				59,
+				999,
+			);
+			if (sinceDate && untilDate < sinceDate) break;
+
+			continue;
+		}
+
+		const notes = result.rows.map(parseScyllaNote);
+		foundNotes.push(...(filter ? await filter(notes) : notes));
+		untilDate = notes[notes.length - 1].createdAt;
+	}
+
+	return foundNotes;
+}
+
+export async function filterVisibility(
+	notes: ScyllaNote[],
+	user: { id: User["id"] } | null,
+	followingIds?: User["id"][],
+): Promise<ScyllaNote[]> {
+	let filtered = notes;
+
+	if (!user) {
+		filtered = filtered.filter((note) =>
+			["public", "home"].includes(note.visibility),
+		);
+	} else {
+		let followings: User["id"][];
+		if (followingIds) {
+			followings = followingIds;
+		} else {
+			const cache = await LocalFollowingsCache.init(user.id);
+			followings = await cache.getAll();
+		}
+
+		filtered = filtered.filter(
+			(note) =>
+				["public", "home"].includes(note.visibility) ||
+				note.userId === user.id ||
+				note.visibleUserIds.includes(user.id) ||
+				note.mentions.includes(user.id) ||
+				(note.visibility === "followers" &&
+					(followings.includes(note.userId) || note.replyUserId === user.id)),
+		);
+	}
+
+	return filtered;
 }
 
 export async function filterChannel(
 	notes: ScyllaNote[],
 	user: { id: User["id"] } | null,
+	followingIds?: Channel["id"][],
 ): Promise<ScyllaNote[]> {
-	let foundNotes = notes;
+	let filtered = notes;
 
 	if (!user) {
-		foundNotes = foundNotes.filter((note) => !note.channelId);
+		filtered = filtered.filter((note) => !note.channelId);
 	} else {
-		const channelNotes = foundNotes.filter((note) => !!note.channelId);
+		const channelNotes = filtered.filter((note) => !!note.channelId);
 		if (channelNotes.length > 0) {
-			const cache = await ChannelFollowingsCache.init(user.id);
-			const followingIds = await cache.getAll();
-			foundNotes = foundNotes.filter(
-				(note) => !note.channelId || followingIds.includes(note.channelId),
+			let followings: Channel["id"][];
+			if (followingIds) {
+				followings = followingIds;
+			} else {
+				const cache = await ChannelFollowingsCache.init(user.id);
+				followings = await cache.getAll();
+			}
+			filtered = filtered.filter(
+				(note) => !note.channelId || followings.includes(note.channelId),
 			);
 		}
 	}
 
-	return foundNotes;
+	return filtered;
 }
 
 export async function filterReply(
@@ -237,14 +350,14 @@ export async function filterReply(
 	withReplies: boolean,
 	user: { id: User["id"] } | null,
 ): Promise<ScyllaNote[]> {
-	let foundNotes = notes;
+	let filtered = notes;
 
 	if (!user) {
-		foundNotes = foundNotes.filter(
+		filtered = filtered.filter(
 			(note) => !note.replyId || note.replyUserId === note.userId,
 		);
 	} else if (!withReplies) {
-		foundNotes = foundNotes.filter(
+		filtered = filtered.filter(
 			(note) =>
 				!note.replyId ||
 				note.replyUserId === user.id ||
@@ -253,5 +366,5 @@ export async function filterReply(
 		);
 	}
 
-	return foundNotes;
+	return filtered;
 }

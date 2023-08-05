@@ -13,14 +13,13 @@ import { generateMutedUserRenotesQueryForNotes } from "../../common/generated-mu
 import { ApiError } from "../../error.js";
 import {
 	type ScyllaNote,
-	parseScyllaNote,
-	prepared,
 	scyllaClient,
 	filterChannel,
 	filterReply,
+	filterVisibility,
+	execTimelineQuery,
 } from "@/db/scylla.js";
-import { LocalFollowingsCache } from "@/misc/cache.js";
-import { getTimestamp } from "@/misc/gen-id.js";
+import { ChannelFollowingsCache, LocalFollowingsCache } from "@/misc/cache.js";
 
 export const meta = {
 	tags: ["notes"],
@@ -77,50 +76,20 @@ export default define(meta, paramDef, async (ps, user) => {
 	const followingsCache = await LocalFollowingsCache.init(user.id);
 
 	if (scyllaClient) {
-		let untilDate = new Date();
-		const foundNotes: ScyllaNote[] = [];
-		const validIds = [user.id].concat(await followingsCache.getAll());
-		const query = `${prepared.note.select.byDate} AND "createdAt" < ? LIMIT 50`; // LIMIT is hardcoded to prepare
+		const channelCache = await ChannelFollowingsCache.init(user.id);
+		const followingChannelIds = await channelCache.getAll();
+		const followingUserIds = await followingsCache.getAll();
+		const validUserIds = [user.id].concat(followingUserIds);
 
-		if (ps.untilId) {
-			untilDate = new Date(getTimestamp(ps.untilId));
-		}
+		const filter = async (notes: ScyllaNote[]) => {
+			let found = notes.filter((note) => validUserIds.includes(note.userId));
+			found = await filterChannel(found, user, followingChannelIds);
+			found = await filterReply(found, ps.withReplies, user);
+			found = await filterVisibility(found, user, followingUserIds);
+			return found;
+		};
 
-		let scanned_partitions = 0;
-
-		// Try to get posts of at most 30 days in the single request
-		while (foundNotes.length < ps.limit && scanned_partitions < 30) {
-			const params: (Date | string | string[])[] = [untilDate, untilDate];
-
-			const result = await scyllaClient.execute(query, params, {
-				prepare: true,
-			});
-
-			if (result.rowLength === 0) {
-				// Reached the end of partition. Queries posts created one day before.
-				scanned_partitions++;
-				untilDate = new Date(
-					untilDate.getUTCFullYear(),
-					untilDate.getUTCMonth(),
-					untilDate.getUTCDate() - 1,
-					23,
-					59,
-					59,
-					999,
-				);
-				continue;
-			}
-
-			const notes = result.rows.map(parseScyllaNote);
-			let filtered = notes.filter((note) => validIds.includes(note.userId));
-
-			filtered = await filterChannel(filtered, user);
-			filtered = await filterReply(filtered, ps.withReplies, user);
-
-			foundNotes.push(...filtered);
-
-			untilDate = notes[notes.length - 1].createdAt;
-		}
+		const foundNotes = await execTimelineQuery(ps, 30, filter);
 
 		return Notes.packMany(foundNotes.slice(0, ps.limit), user);
 	}

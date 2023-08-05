@@ -4,7 +4,7 @@ import type { Note } from "@/models/entities/note.js";
 import { Notes, Users } from "@/models/index.js";
 import { generateVisibilityQuery } from "./generate-visibility-query.js";
 import {
-	isVisible,
+	filterVisibility,
 	parseScyllaNote,
 	prepared,
 	scyllaClient,
@@ -26,8 +26,9 @@ export async function getNote(
 		);
 		if (result.rowLength > 0) {
 			const candidate = parseScyllaNote(result.first());
-			if (await isVisible(candidate, me)) {
-				note = candidate;
+			const filtered = await filterVisibility([candidate], me);
+			if (filtered.length > 0) {
+				note = filtered[0];
 			}
 		}
 	}
