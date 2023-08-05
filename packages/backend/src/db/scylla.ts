@@ -403,7 +403,7 @@ export async function filterMutedUser(
 	notes: ScyllaNote[],
 	user: { id: User["id"] },
 	exclude?: User,
-) {
+): Promise<ScyllaNote[]> {
 	const userCache = await UserMutingsCache.init(user.id);
 	let mutedUserIds = await userCache.getAll();
 
