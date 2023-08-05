@@ -187,29 +187,29 @@ export function parseScyllaReaction(row: types.Row): ScyllaNoteReaction {
 	};
 }
 
-export function prepareTimelineQuery(
-	untilId?: string,
-	untilDate?: number,
-	sinceId?: string,
-	sinceDate?: number,
-): { query: string; untilDate: Date; sinceDate: Date | null } {
+export function prepareTimelineQuery(ps: {
+	untilId?: string;
+	untilDate?: number;
+	sinceId?: string;
+	sinceDate?: number;
+}): { query: string; untilDate: Date; sinceDate: Date | null } {
 	const queryParts = [`${prepared.note.select.byDate} AND "createdAt" < ?`];
 
-	let _untilDate = new Date();
-	if (untilId) {
-		_untilDate = new Date(getTimestamp(untilId));
+	let until = new Date();
+	if (ps.untilId) {
+		until = new Date(getTimestamp(ps.untilId));
 	}
-	if (untilDate && untilDate < _untilDate.getTime()) {
-		_untilDate = new Date(untilDate);
+	if (ps.untilDate && ps.untilDate < until.getTime()) {
+		until = new Date(ps.untilDate);
 	}
-	let _sinceDate: Date | null = null;
-	if (sinceId) {
-		_sinceDate = new Date(getTimestamp(sinceId));
+	let since: Date | null = null;
+	if (ps.sinceId) {
+		since = new Date(getTimestamp(ps.sinceId));
 	}
-	if (sinceDate && (!_sinceDate || sinceDate > _sinceDate.getTime())) {
-		_sinceDate = new Date(sinceDate);
+	if (ps.sinceDate && (!since || ps.sinceDate > since.getTime())) {
+		since = new Date(ps.sinceDate);
 	}
-	if (_sinceDate !== null) {
+	if (since !== null) {
 		queryParts.push(`AND "createdAt" > ?`);
 	}
 
@@ -218,8 +218,8 @@ export function prepareTimelineQuery(
 
 	return {
 		query,
-		untilDate: _untilDate,
-		sinceDate: _sinceDate,
+		untilDate: until,
+		sinceDate: since,
 	};
 }
 
@@ -236,12 +236,7 @@ export async function execTimelineQuery(
 ): Promise<ScyllaNote[]> {
 	if (!scyllaClient) return [];
 
-	let { query, untilDate, sinceDate } = prepareTimelineQuery(
-		ps.untilId,
-		ps.untilDate,
-		ps.sinceId,
-		ps.sinceDate,
-	);
+	let { query, untilDate, sinceDate } = prepareTimelineQuery(ps);
 
 	let scannedPartitions = 0;
 	const foundNotes: ScyllaNote[] = [];
