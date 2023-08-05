@@ -33,6 +33,7 @@ import {
 	Channels,
 	ChannelFollowings,
 	NoteThreadMutings,
+	DriveFiles,
 } from "@/models/index.js";
 import type { DriveFile } from "@/models/entities/drive-file.js";
 import type { App } from "@/models/entities/app.js";
@@ -68,9 +69,8 @@ import meilisearch from "../../db/meilisearch.js";
 import { redisClient } from "@/db/redis.js";
 import { Mutex } from "redis-semaphore";
 import { parseScyllaNote, prepared, scyllaClient } from "@/db/scylla.js";
-import { populateEmojis } from "@/misc/populate-emojis.js";
 
-const mutedWordsCache = new Cache<
+export const mutedWordsCache = new Cache<
 	{ userId: UserProfile["userId"]; mutedWords: UserProfile["mutedWords"] }[]
 >("mutedWords", 60 * 5);
 
@@ -358,31 +358,34 @@ export default async (
 		incNotesCountOfUser(user);
 
 		// Word mute
-		mutedWordsCache
-			.fetch(null, () =>
-				UserProfiles.find({
-					where: {
-						enableWordMute: true,
-					},
-					select: ["userId", "mutedWords"],
-				}),
-			)
-			.then((us) => {
-				for (const u of us) {
-					getWordHardMute(data, { id: u.userId }, u.mutedWords).then(
-						(shouldMute) => {
-							if (shouldMute) {
-								MutedNotes.insert({
-									id: genId(),
-									userId: u.userId,
-									noteId: note.id,
-									reason: "word",
-								});
-							}
+		if (!scyllaClient) {
+			mutedWordsCache
+				.fetch(null, () =>
+					UserProfiles.find({
+						where: {
+							enableWordMute: true,
 						},
-					);
-				}
-			});
+						select: ["userId", "mutedWords"],
+					}),
+				)
+				.then((us) => {
+					for (const u of us) {
+						const shouldMute = getWordHardMute(
+							data,
+							{ id: u.userId },
+							u.mutedWords,
+						);
+						if (shouldMute) {
+							MutedNotes.insert({
+								id: genId(),
+								userId: u.userId,
+								noteId: note.id,
+								reason: "word",
+							});
+						}
+					}
+				});
+		}
 
 		// Antenna
 		for (const antenna of await getAntennas()) {
@@ -408,7 +411,7 @@ export default async (
 		}
 
 		if (data.reply) {
-			saveReply(data.reply, note);
+			saveReply(data.reply);
 		}
 
 		if (
@@ -775,6 +778,12 @@ async function insertNote(
 	// 投稿を作成
 	try {
 		if (scyllaClient) {
+			const fileMapper = (file: DriveFile) => ({
+				...file,
+				width: file.properties.width ?? null,
+				height: file.properties.height ?? null,
+			});
+
 			await scyllaClient.execute(
 				prepared.note.insert,
 				[
@@ -791,11 +800,7 @@ async function insertNote(
 					insert.uri,
 					insert.url,
 					insert.score ?? 0,
-					data.files?.map((file) => ({
-						...file,
-						width: file.properties.width ?? null,
-						height: file.properties.height ?? null,
-					})),
+					data.files?.map(fileMapper),
 					insert.visibleUserIds,
 					insert.mentions,
 					insert.mentionedRemoteUsers,
@@ -809,9 +814,23 @@ async function insertNote(
 					insert.replyId,
 					insert.replyUserId,
 					insert.replyUserHost,
+					data.reply?.text ?? null,
+					data.reply?.cw ?? null,
+					data.reply?.fileIds
+						? await DriveFiles.findBy({ id: In(data.reply.fileIds) }).then(
+								(files) => files.map(fileMapper),
+						  )
+						: null,
 					insert.renoteId,
 					insert.renoteUserId,
 					insert.renoteUserHost,
+					data.renote?.text ?? null,
+					data.renote?.cw ?? null,
+					data.renote?.fileIds
+						? await DriveFiles.findBy({ id: In(data.renote.fileIds) }).then(
+								(files) => files.map(fileMapper),
+						  )
+						: null,
 					null,
 					null,
 					null,
@@ -982,8 +1001,16 @@ async function createMentionedEvents(
 	}
 }
 
-function saveReply(reply: Note, note: Note) {
-	Notes.increment({ id: reply.id }, "repliesCount", 1);
+async function saveReply(reply: Note) {
+	if (scyllaClient) {
+		await scyllaClient.execute(
+			prepared.note.update.repliesCount,
+			[reply.repliesCount + 1, reply.createdAt, reply.createdAt, reply.id],
+			{ prepare: true },
+		);
+	} else {
+		await Notes.increment({ id: reply.id }, "repliesCount", 1);
+	}
 }
 
 function incNotesCountOfUser(user: { id: User["id"] }) {

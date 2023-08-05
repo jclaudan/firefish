@@ -10,9 +10,12 @@ import {
 	InstanceMutingsCache,
 	LocalFollowingsCache,
 	UserMutingsCache,
+	userWordMuteCache,
 } from "@/misc/cache.js";
 import { getTimestamp } from "@/misc/gen-id.js";
 import Logger from "@/services/logger.js";
+import { UserProfiles } from "@/models/index.js";
+import { getWordHardMute } from "@/misc/check-word-mute";
 
 function newClient(): Client | null {
 	if (!config.scylla) {
@@ -86,15 +89,21 @@ export const prepared = {
 				"replyId",
 				"replyUserId",
 				"replyUserHost",
+				"replyContent",
+				"replyCw",
+				"replyFiles",
 				"renoteId",
 				"renoteUserId",
 				"renoteUserHost",
+				"renoteContent",
+				"renoteCw",
+				"renoteFiles",
 				"reactions",
 				"noteEdit",
 				"updatedAt"
 			)
 			VALUES
-			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		select: {
 			byDate: `SELECT * FROM note WHERE "createdAtDate" = ?`,
 			byUri: `SELECT * FROM note WHERE "uri" IN ?`,
@@ -107,6 +116,9 @@ export const prepared = {
 			renoteCount: `UPDATE note SET
 				"renoteCount" = ?,
 				"score" = ?
+				WHERE "createdAtDate" = ? AND "createdAt" = ? AND "id" = ? IF EXISTS`,
+			repliesCount: `UPDATE note SET
+				"repliesCount" = ?,
 				WHERE "createdAtDate" = ? AND "createdAt" = ? AND "id" = ? IF EXISTS`,
 			reactions: `UPDATE note SET
 				"emojis" = ?,
@@ -157,6 +169,12 @@ export type ScyllaNote = Note & {
 	createdAtDate: Date;
 	files: ScyllaDriveFile[];
 	noteEdit: ScyllaNoteEditHistory[];
+	replyText: string | null;
+	replyCw: string | null;
+	replyFiles: ScyllaDriveFile[];
+	renoteText: string | null;
+	renoteCw: string | null;
+	renoteFiles: ScyllaDriveFile[];
 };
 
 export function parseScyllaNote(row: types.Row): ScyllaNote {
@@ -191,9 +209,15 @@ export function parseScyllaNote(row: types.Row): ScyllaNote {
 		replyId: row.get("replyId") ?? null,
 		replyUserId: row.get("replyUserId") ?? null,
 		replyUserHost: row.get("replyUserHost") ?? null,
+		replyText: row.get("replyContent") ?? null,
+		replyCw: row.get("replyCw") ?? null,
+		replyFiles: row.get("replyFiles") ?? [],
 		renoteId: row.get("renoteId") ?? null,
 		renoteUserId: row.get("renoteUserId") ?? null,
 		renoteUserHost: row.get("renoteUserHost") ?? null,
+		renoteText: row.get("renoteContent") ?? null,
+		renoteCw: row.get("renoteCw") ?? null,
+		renoteFiles: row.get("renoteFiles") ?? [],
 		reactions: row.get("reactions") ?? {},
 		noteEdit: row.get("noteEdit") ?? [],
 		updatedAt: row.get("updatedAt") ?? null,
@@ -423,4 +447,22 @@ export async function filterMutedUser(
 			!(note.replyUserHost && mutedInstances.includes(note.replyUserHost)) &&
 			!(note.renoteUserHost && mutedInstances.includes(note.renoteUserHost)),
 	);
+}
+
+export async function filterMutedNote(
+	notes: ScyllaNote[],
+	user: { id: User["id"] },
+): Promise<ScyllaNote[]> {
+	const mutedWords = await userWordMuteCache.fetchMaybe(user.id, () =>
+		UserProfiles.findOne({
+			select: ["mutedWords"],
+			where: { userId: user.id },
+		}).then((profile) => profile?.mutedWords),
+	);
+
+	if (!mutedWords) {
+		return notes;
+	}
+
+	return notes.filter((note) => !getWordHardMute(note, user, mutedWords));
 }

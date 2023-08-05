@@ -57,9 +57,15 @@ CREATE TABLE IF NOT EXISTS note ( -- Models timeline
 	"replyId" ascii, -- Reply
 	"replyUserId" ascii,
 	"replyUserHost" text,
+	"replyContent" text,
+	"replyCw" text,
+	"replyFiles" set<frozen<drive_file>>,
 	"renoteId" ascii, -- Boost
 	"renoteUserId" ascii,
 	"renoteUserHost" text,
+	"renoteContent" text,
+	"renoteCw" text,
+	"renoteFiles" set<frozen<drive_file>>,
 	"reactions" map<text, int>, -- Reactions
 	"noteEdit" set<frozen<note_edit_history>>, -- Edit History
 	"updatedAt" timestamp,

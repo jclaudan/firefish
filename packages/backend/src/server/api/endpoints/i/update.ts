@@ -16,7 +16,7 @@ import { verifyLink } from "@/services/fetch-rel-me.js";
 import { ApiError } from "../../error.js";
 import define from "../../define.js";
 import { userByIdCache, userDenormalizedCache } from "@/services/user-cache.js";
-import { InstanceMutingsCache } from "@/misc/cache.js";
+import { InstanceMutingsCache, userWordMuteCache } from "@/misc/cache.js";
 
 export const meta = {
 	tags: ["account"],
@@ -331,6 +331,11 @@ export default define(meta, paramDef, async (ps, _user, token) => {
 			const cache = await InstanceMutingsCache.init(user.id);
 			await cache.clear();
 			await cache.add(...profileUpdates.mutedInstances);
+		}
+		if (profileUpdates.enableWordMute && profileUpdates.mutedWords) {
+			await userWordMuteCache.set(user.id, profileUpdates.mutedWords)
+		} else {
+			await userWordMuteCache.delete(user.id);
 		}
 	}
 

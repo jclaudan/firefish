@@ -1,11 +1,13 @@
 import RE2 from "re2";
 import type { Note } from "@/models/entities/note.js";
 import type { User } from "@/models/entities/user.js";
+import { DriveFile } from "@/models/entities/drive-file";
+import { scyllaClient, type ScyllaNote } from "@/db/scylla.js";
 
 type NoteLike = {
 	userId: Note["userId"];
 	text: Note["text"];
-	files?: Note["files"];
+	files?: DriveFile[];
 	cw?: Note["cw"];
 };
 
@@ -14,14 +16,30 @@ type UserLike = {
 };
 
 function checkWordMute(
-	note: NoteLike,
+	note: NoteLike | ScyllaNote,
 	mutedWords: Array<string | string[]>,
 ): boolean {
 	if (note == null) return false;
 
 	let text = `${note.cw ?? ""} ${note.text ?? ""}`;
-	if (note.files != null)
+	if (note.files && note.files.length > 0)
 		text += ` ${note.files.map((f) => f.comment ?? "").join(" ")}`;
+
+	if (scyllaClient) {
+		const scyllaNote = note as ScyllaNote;
+		text += `${scyllaNote.replyCw ?? ""} ${scyllaNote.replyText ?? ""} ${
+			scyllaNote.renoteCw ?? ""
+		} ${scyllaNote.renoteText ?? ""}`;
+
+		if (scyllaNote.replyFiles.length > 0) {
+			text += ` ${scyllaNote.replyFiles.map((f) => f.comment ?? "").join(" ")}`;
+		}
+		if (scyllaNote.renoteFiles.length > 0) {
+			text += ` ${scyllaNote.renoteFiles
+				.map((f) => f.comment ?? "")
+				.join(" ")}`;
+		}
+	}
 	text = text.trim();
 
 	if (text === "") return false;
@@ -57,23 +75,28 @@ function checkWordMute(
 	return false;
 }
 
-export async function getWordHardMute(
-	note: NoteLike,
+export function getWordHardMute(
+	note: NoteLike | ScyllaNote,
 	me: UserLike | null | undefined,
 	mutedWords: Array<string | string[]>,
-): Promise<boolean> {
+): boolean {
 	// 自分自身
 	if (me && note.userId === me.id) {
 		return false;
 	}
 
+	let ng = false;
+
 	if (mutedWords.length > 0) {
-		return (
-			checkWordMute(note, mutedWords) ||
-			checkWordMute(note.reply, mutedWords) ||
-			checkWordMute(note.renote, mutedWords)
-		);
+		ng = checkWordMute(note, mutedWords);
+
+		if (!scyllaClient) {
+			ng =
+				ng ||
+				checkWordMute(note.reply, mutedWords) ||
+				checkWordMute(note.renote, mutedWords);
+		}
 	}
 
-	return false;
+	return ng;
 }

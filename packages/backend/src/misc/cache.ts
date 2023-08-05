@@ -4,6 +4,7 @@ import { ChainableCommander } from "ioredis";
 import {
 	ChannelFollowings,
 	Followings,
+	MutedNotes,
 	Mutings,
 	UserProfiles,
 } from "@/models/index.js";
@@ -257,7 +258,7 @@ export class LocalFollowingsCache extends SetCache {
 	private constructor(userId: string) {
 		const fetcher = () =>
 			Followings.find({
-				select: { followeeId: true },
+				select: ["followeeId"],
 				where: { followerId: userId, followerHost: IsNull() },
 			}).then((follows) => follows.map(({ followeeId }) => followeeId));
 
@@ -276,7 +277,7 @@ export class ChannelFollowingsCache extends SetCache {
 	private constructor(userId: string) {
 		const fetcher = () =>
 			ChannelFollowings.find({
-				select: { followeeId: true },
+				select: ["followeeId"],
 				where: {
 					followerId: userId,
 				},
@@ -297,7 +298,7 @@ export class UserMutingsCache extends HashCache {
 	private constructor(userId: string) {
 		const fetcher = () =>
 			Mutings.find({
-				select: { muteeId: true, expiresAt: true },
+				select: ["muteeId", "expiresAt"],
 				where: { muterId: userId },
 			}).then(
 				(mutes) =>
@@ -364,7 +365,7 @@ export class InstanceMutingsCache extends SetCache {
 	private constructor(userId: string) {
 		const fetcher = () =>
 			UserProfiles.findOne({
-				select: { mutedInstances: true },
+				select: ["mutedInstances"],
 				where: { userId },
 			}).then((profile) => (profile ? profile.mutedInstances : []));
 
@@ -378,3 +379,5 @@ export class InstanceMutingsCache extends SetCache {
 		return cache;
 	}
 }
+
+export const userWordMuteCache = new Cache<string[][]>("mutedWord", 60 * 30);
