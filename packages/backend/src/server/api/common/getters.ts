@@ -16,6 +16,7 @@ import {
 export async function getNote(
 	noteId: Note["id"],
 	me: { id: User["id"] } | null,
+	followingIds?: User["id"][]
 ) {
 	let note: Note | null = null;
 	if (scyllaClient) {
@@ -26,15 +27,12 @@ export async function getNote(
 		);
 		if (result.rowLength > 0) {
 			const candidate = parseScyllaNote(result.first());
-			const filtered = await filterVisibility([candidate], me);
+			const filtered = await filterVisibility([candidate], me, followingIds);
 			if (filtered.length > 0) {
 				note = filtered[0];
 			}
 		}
-	}
-
-	// Fallback to Postgres
-	if (!note) {
+	} else {
 		const query = Notes.createQueryBuilder("note").where("note.id = :id", {
 			id: noteId,
 		});

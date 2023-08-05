@@ -82,16 +82,15 @@ export default define(meta, paramDef, async (ps, user) => {
 		const validUserIds = [user.id].concat(followingUserIds);
 
 		const filter = async (notes: ScyllaNote[]) => {
-			let found = notes.filter((note) => validUserIds.includes(note.userId));
-			found = await filterChannel(found, user, followingChannelIds);
-			found = await filterReply(found, ps.withReplies, user);
-			found = await filterVisibility(found, user, followingUserIds);
-			return found;
+			let filtered = notes.filter((n) => validUserIds.includes(n.userId));
+			filtered = await filterChannel(filtered, user, followingChannelIds);
+			filtered = await filterReply(filtered, ps.withReplies, user);
+			filtered = await filterVisibility(filtered, user, followingUserIds);
+			return filtered;
 		};
 
-		const foundNotes = await execTimelineQuery(ps, 30, filter);
-
-		return Notes.packMany(foundNotes.slice(0, ps.limit), user);
+		const foundNotes = await execTimelineQuery(ps, filter);
+		return await Notes.packMany(foundNotes.slice(0, ps.limit), user);
 	}
 
 	const hasFollowing = await followingsCache.hasFollowing();

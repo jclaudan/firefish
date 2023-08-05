@@ -6,7 +6,7 @@ import type { NoteReaction } from "@/models/entities/note-reaction.js";
 import { Client, types } from "cassandra-driver";
 import type { User } from "@/models/entities/user.js";
 import { ChannelFollowingsCache, LocalFollowingsCache } from "@/misc/cache.js";
-import { getTimestamp } from "@/misc/gen-id";
+import { getTimestamp } from "@/misc/gen-id.js";
 
 function newClient(): Client | null {
 	if (!config.scylla) {
@@ -231,8 +231,8 @@ export async function execTimelineQuery(
 		sinceId?: string;
 		sinceDate?: number;
 	},
-	maxDays = 30,
 	filter?: (_: ScyllaNote[]) => Promise<ScyllaNote[]>,
+	maxDays = 30,
 ): Promise<ScyllaNote[]> {
 	if (!scyllaClient) return [];
 
@@ -257,9 +257,9 @@ export async function execTimelineQuery(
 			// Reached the end of partition. Queries posts created one day before.
 			scannedPartitions++;
 			untilDate = new Date(
-				untilDate.getUTCFullYear(),
-				untilDate.getUTCMonth(),
-				untilDate.getUTCDate() - 1,
+				untilDate.getFullYear(),
+				untilDate.getMonth(),
+				untilDate.getDate() - 1,
 				23,
 				59,
 				59,

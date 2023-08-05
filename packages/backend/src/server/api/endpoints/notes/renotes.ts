@@ -6,6 +6,12 @@ import { generateVisibilityQuery } from "../../common/generate-visibility-query.
 import { generateMutedUserQuery } from "../../common/generate-muted-user-query.js";
 import { makePaginationQuery } from "../../common/make-pagination-query.js";
 import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
+import {
+	ScyllaNote,
+	execTimelineQuery,
+	filterVisibility,
+	scyllaClient,
+} from "@/db/scylla.js";
 
 export const meta = {
 	tags: ["notes"],
@@ -52,6 +58,17 @@ export default define(meta, paramDef, async (ps, user) => {
 			throw new ApiError(meta.errors.noSuchNote);
 		throw err;
 	});
+
+	if (scyllaClient) {
+		const filter = async (notes: ScyllaNote[]) => {
+			let filtered = notes.filter((n) => n.renoteId === note.id);
+			filtered = await filterVisibility(filtered, user);
+			return filtered;
+		};
+
+		const foundNotes = await execTimelineQuery(ps, filter);
+		return await Notes.packMany(foundNotes.slice(0, ps.limit), user);
+	}
 
 	const query = makePaginationQuery(
 		Notes.createQueryBuilder("note"),
