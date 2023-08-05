@@ -3,21 +3,50 @@ import type { PopulatedEmoji } from "@/misc/populate-emojis.js";
 import type { Channel } from "@/models/entities/channel.js";
 import type { Note } from "@/models/entities/note.js";
 import type { NoteReaction } from "@/models/entities/note-reaction.js";
-import { Client, types } from "cassandra-driver";
+import { Client, types, tracker } from "cassandra-driver";
 import type { User } from "@/models/entities/user.js";
 import { ChannelFollowingsCache, LocalFollowingsCache } from "@/misc/cache.js";
 import { getTimestamp } from "@/misc/gen-id.js";
+import Logger from "@/services/logger.js";
 
 function newClient(): Client | null {
 	if (!config.scylla) {
 		return null;
 	}
 
-	return new Client({
+	const requestTracker = new tracker.RequestLogger({
+		slowThreshold: 1000,
+	});
+	const client = new Client({
 		contactPoints: config.scylla.nodes,
 		localDataCenter: config.scylla.localDataCentre,
 		keyspace: config.scylla.keyspace,
+		requestTracker,
 	});
+
+	const logger = new Logger("scylla");
+	client.on("log", (level, loggerName, message, _furtherInfo) => {
+		const msg = `${loggerName} - ${message}`;
+		switch (level) {
+			case "info":
+				logger.info(msg);
+				break;
+			case "warning":
+				logger.warn(msg);
+				break;
+			case "error":
+				logger.error(msg);
+				break;
+		}
+	});
+	client.on("slow", (message) => {
+		logger.warn(message);
+	});
+	client.on("large", (message) => {
+		logger.warn(message);
+	});
+
+	return client;
 }
 
 export const scyllaClient = newClient();
