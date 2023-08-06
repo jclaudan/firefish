@@ -2,7 +2,7 @@ import create from "@/services/blocking/create.js";
 import define from "../../define.js";
 import { ApiError } from "../../error.js";
 import { getUser } from "../../common/getters.js";
-import { Blockings, NoteWatchings, Users } from "@/models/index.js";
+import { NoteWatchings, Users } from "@/models/index.js";
 import { HOUR } from "@/const.js";
 import { UserBlockedCache } from "@/misc/cache.js";
 

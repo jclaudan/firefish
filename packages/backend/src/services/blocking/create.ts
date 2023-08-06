@@ -17,10 +17,9 @@ import {
 } from "@/models/index.js";
 import { perUserFollowingChart } from "@/services/chart/index.js";
 import { genId } from "@/misc/gen-id.js";
-import { IdentifiableError } from "@/misc/identifiable-error.js";
 import { getActiveWebhooks } from "@/misc/webhook-cache.js";
 import { webhookDeliver } from "@/queue/index.js";
-import { UserBlockedCache } from "@/misc/cache";
+import { UserBlockedCache } from "@/misc/cache.js";
 
 export default async function (blocker: User, blockee: User) {
 	await Promise.all([
