@@ -4,6 +4,7 @@ import { ApiError } from "../../error.js";
 import { getUser } from "../../common/getters.js";
 import { Blockings, Users } from "@/models/index.js";
 import { HOUR } from "@/const.js";
+import { UserBlockedCache } from "@/misc/cache.js";
 
 export const meta = {
 	tags: ["account"],
@@ -69,12 +70,8 @@ export default define(meta, paramDef, async (ps, user) => {
 	});
 
 	// Check not blocking
-	const exist = await Blockings.exist({
-		where: {
-			blockerId: blocker.id,
-			blockeeId: blockee.id,
-		},
-	});
+	const cache = await UserBlockedCache.init(blockee.id);
+	const exist = await cache.has(blocker.id);
 
 	if (!exist) {
 		throw new ApiError(meta.errors.notBlocking);

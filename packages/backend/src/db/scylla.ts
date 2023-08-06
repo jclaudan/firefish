@@ -9,6 +9,7 @@ import {
 	ChannelFollowingsCache,
 	InstanceMutingsCache,
 	LocalFollowingsCache,
+	UserBlockedCache,
 	UserMutingsCache,
 	userWordMuteCache,
 } from "@/misc/cache.js";
@@ -465,4 +466,19 @@ export async function filterMutedNote(
 	}
 
 	return notes.filter((note) => !getWordHardMute(note, user, mutedWords));
+}
+
+export async function filterBlockedUser(
+	notes: ScyllaNote[],
+	user: { id: User["id"] },
+): Promise<ScyllaNote[]> {
+	const cache = await UserBlockedCache.init(user.id);
+	const blockerIds = await cache.getAll();
+
+	return notes.filter(
+		(note) =>
+			!blockerIds.includes(note.userId) &&
+			!(note.replyUserId && blockerIds.includes(note.replyUserId)) &&
+			!(note.renoteUserId && blockerIds.includes(note.renoteUserId)),
+	);
 }

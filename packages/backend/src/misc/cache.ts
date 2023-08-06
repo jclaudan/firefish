@@ -2,6 +2,7 @@ import { redisClient } from "@/db/redis.js";
 import { encode, decode } from "msgpackr";
 import { ChainableCommander } from "ioredis";
 import {
+	Blockings,
 	ChannelFollowings,
 	Followings,
 	MutedNotes,
@@ -374,6 +375,25 @@ export class InstanceMutingsCache extends SetCache {
 
 	public static async init(userId: string): Promise<InstanceMutingsCache> {
 		const cache = new InstanceMutingsCache(userId);
+		await cache.fetch();
+
+		return cache;
+	}
+}
+
+export class UserBlockedCache extends SetCache {
+	private constructor(userId: string) {
+		const fetcher = () =>
+			Blockings.find({
+				select: ["blockerId"],
+				where: { blockeeId: userId },
+			}).then((blocks) => blocks.map(({ blockerId }) => blockerId));
+
+		super("blocked", userId, fetcher);
+	}
+
+	public static async init(userId: string): Promise<UserBlockedCache> {
+		const cache = new UserBlockedCache(userId);
 		await cache.fetch();
 
 		return cache;

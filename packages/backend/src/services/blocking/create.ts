@@ -20,6 +20,7 @@ import { genId } from "@/misc/gen-id.js";
 import { IdentifiableError } from "@/misc/identifiable-error.js";
 import { getActiveWebhooks } from "@/misc/webhook-cache.js";
 import { webhookDeliver } from "@/queue/index.js";
+import { UserBlockedCache } from "@/misc/cache";
 
 export default async function (blocker: User, blockee: User) {
 	await Promise.all([
@@ -40,6 +41,9 @@ export default async function (blocker: User, blockee: User) {
 	} as Blocking;
 
 	await Blockings.insert(blocking);
+
+	const cache = await UserBlockedCache.init(blockee.id);
+	await cache.add(blocker.id);
 
 	if (Users.isLocalUser(blocker) && Users.isRemoteUser(blockee)) {
 		const content = renderActivity(renderBlock(blocking));

@@ -20,6 +20,7 @@ import {
 	execTimelineQuery,
 	filterMutedUser,
 	filterMutedNote,
+	filterBlockedUser,
 } from "@/db/scylla.js";
 import { ChannelFollowingsCache, LocalFollowingsCache } from "@/misc/cache.js";
 
@@ -90,6 +91,7 @@ export default define(meta, paramDef, async (ps, user) => {
 			filtered = await filterVisibility(filtered, user, followingUserIds);
 			filtered = await filterMutedUser(filtered, user);
 			filtered = await filterMutedNote(filtered, user);
+			filtered = await filterBlockedUser(filtered, user);
 			return filtered;
 		};
 

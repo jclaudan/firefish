@@ -4,8 +4,8 @@ import renderUndo from "@/remote/activitypub/renderer/undo.js";
 import { deliver } from "@/queue/index.js";
 import Logger from "../logger.js";
 import type { CacheableUser } from "@/models/entities/user.js";
-import { User } from "@/models/entities/user.js";
 import { Blockings, Users } from "@/models/index.js";
+import { UserBlockedCache } from "@/misc/cache.js";
 
 const logger = new Logger("blocking/delete");
 
@@ -14,6 +14,9 @@ export default async function (blocker: CacheableUser, blockee: CacheableUser) {
 		blockerId: blocker.id,
 		blockeeId: blockee.id,
 	});
+
+	const cache = await UserBlockedCache.init(blockee.id);
+	await cache.delete(blocker.id);
 
 	if (blocking == null) {
 		logger.warn(
