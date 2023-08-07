@@ -1,5 +1,5 @@
 import { Brackets } from "typeorm";
-import { Notes, Followings } from "@/models/index.js";
+import { Notes, Followings, UserProfiles } from "@/models/index.js";
 import { activeUsersChart } from "@/services/chart/index.js";
 import define from "../../define.js";
 import { makePaginationQuery } from "../../common/make-pagination-query.js";
@@ -23,7 +23,7 @@ import {
 	filterBlockedUser,
 	filterMutedRenotes,
 } from "@/db/scylla.js";
-import { ChannelFollowingsCache, LocalFollowingsCache } from "@/misc/cache.js";
+import { ChannelFollowingsCache, LocalFollowingsCache, RenoteMutingsCache, UserBlockedCache, UserMutingsCache, userWordMuteCache } from "@/misc/cache.js";
 
 export const meta = {
 	tags: ["notes"],
@@ -79,21 +79,54 @@ export const paramDef = {
 export default define(meta, paramDef, async (ps, user) => {
 	const followingsCache = await LocalFollowingsCache.init(user.id);
 
+	process.nextTick(() => {
+		activeUsersChart.read(user);
+	});
+
 	if (scyllaClient) {
 		const channelCache = await ChannelFollowingsCache.init(user.id);
 		const followingChannelIds = await channelCache.getAll();
 		const followingUserIds = await followingsCache.getAll();
 		const validUserIds = [user.id].concat(followingUserIds);
+		const userMutingsCache = await UserMutingsCache.init(user.id);
+		const mutedUserIds = await userMutingsCache.getAll();
+		const mutedWords = await userWordMuteCache.fetchMaybe(user.id, () =>
+			UserProfiles.findOne({
+				select: ["mutedWords"],
+				where: { userId: user.id },
+			}).then((profile) => profile?.mutedWords),
+		);
+		const blockedCache = await UserBlockedCache.init(user.id);
+		const blockerIds = await blockedCache.getAll();
+		const renoteMutingsCache = await RenoteMutingsCache.init(user.id);
+		const renoteMutedIds = await renoteMutingsCache.getAll();
+		const optFilter = (n: ScyllaNote) =>
+			!n.renoteId || !!n.text || n.files.length > 0 || n.hasPoll;
 
 		const filter = async (notes: ScyllaNote[]) => {
 			let filtered = notes.filter((n) => validUserIds.includes(n.userId));
 			filtered = await filterChannel(filtered, user, followingChannelIds);
 			filtered = await filterReply(filtered, ps.withReplies, user);
 			filtered = await filterVisibility(filtered, user, followingUserIds);
-			filtered = await filterMutedUser(filtered, user);
-			filtered = await filterMutedNote(filtered, user);
-			filtered = await filterBlockedUser(filtered, user);
-			filtered = await filterMutedRenotes(filtered, user);
+			filtered = await filterMutedUser(filtered, user, mutedUserIds);
+			filtered = await filterMutedNote(filtered, user, mutedWords ?? []);
+			filtered = await filterBlockedUser(filtered, user, blockerIds);
+			filtered = await filterMutedRenotes(filtered, user, renoteMutedIds);
+			if (!ps.includeMyRenotes) {
+				filtered = filtered.filter((n) => n.userId !== user.id || optFilter(n));
+			}
+			if (!ps.includeRenotedMyNotes) {
+				filtered = filtered.filter(
+					(n) => n.renoteUserId !== user.id || optFilter(n),
+				);
+			}
+			if (!ps.includeLocalRenotes) {
+				filtered = filtered.filter((n) => n.renoteUserHost || optFilter(n));
+			}
+			if (ps.withFiles) {
+				filtered = filtered.filter((n) => n.files.length > 0);
+			}
+			filtered = filtered.filter((n) => n.visibility !== "hidden");
 			return filtered;
 		};
 
@@ -182,10 +215,6 @@ export default define(meta, paramDef, async (ps, user) => {
 
 	query.andWhere("note.visibility != 'hidden'");
 	//#endregion
-
-	process.nextTick(() => {
-		activeUsersChart.read(user);
-	});
 
 	// We fetch more than requested because some may be filtered out, and if there's less than
 	// requested, the pagination stops.
