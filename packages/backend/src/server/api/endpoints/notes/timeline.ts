@@ -91,12 +91,20 @@ export default define(meta, paramDef, async (ps, user) => {
 	});
 
 	if (scyllaClient) {
-		const channelCache = await ChannelFollowingsCache.init(user.id);
-		const followingChannelIds = await channelCache.getAll();
-		const followingUserIds = await followingsCache.getAll();
+		const [
+			followingChannelIds,
+			followingUserIds,
+			mutedUserIds,
+			blockerIds,
+			renoteMutedIds,
+		] = await Promise.all([
+			ChannelFollowingsCache.init(user.id).then((cache) => cache.getAll()),
+			followingsCache.getAll(),
+			UserMutingsCache.init(user.id).then((cache) => cache.getAll()),
+			UserBlockedCache.init(user.id).then((cache) => cache.getAll()),
+			RenoteMutingsCache.init(user.id).then((cache) => cache.getAll()),
+		]);
 		const validUserIds = [user.id].concat(followingUserIds);
-		const userMutingsCache = await UserMutingsCache.init(user.id);
-		const mutedUserIds = await userMutingsCache.getAll();
 		const mutedWords =
 			(await userWordMuteCache.fetchMaybe(user.id, () =>
 				UserProfiles.findOne({
@@ -104,10 +112,6 @@ export default define(meta, paramDef, async (ps, user) => {
 					where: { userId: user.id },
 				}).then((profile) => profile?.mutedWords),
 			)) ?? [];
-		const blockedCache = await UserBlockedCache.init(user.id);
-		const blockerIds = await blockedCache.getAll();
-		const renoteMutingsCache = await RenoteMutingsCache.init(user.id);
-		const renoteMutedIds = await renoteMutingsCache.getAll();
 		const optFilter = (n: ScyllaNote) =>
 			!n.renoteId || !!n.text || n.files.length > 0 || n.hasPoll;
 
