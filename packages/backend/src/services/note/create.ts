@@ -711,7 +711,7 @@ async function insertNote(
 	emojis: string[],
 	mentionedUsers: MinimumUser[],
 ) {
-	if (data.createdAt === null || data.createdAt === undefined) {
+	if (!data.createdAt || isNaN(data.createdAt.getTime())) {
 		data.createdAt = new Date();
 	}
 	const insert = new Note({

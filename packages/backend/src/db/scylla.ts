@@ -9,6 +9,7 @@ import {
 	ChannelFollowingsCache,
 	InstanceMutingsCache,
 	LocalFollowingsCache,
+	RenoteMutingsCache,
 	UserBlockedCache,
 	UserMutingsCache,
 	userWordMuteCache,
@@ -16,7 +17,7 @@ import {
 import { getTimestamp } from "@/misc/gen-id.js";
 import Logger from "@/services/logger.js";
 import { UserProfiles } from "@/models/index.js";
-import { getWordHardMute } from "@/misc/check-word-mute";
+import { getWordHardMute } from "@/misc/check-word-mute.js";
 
 function newClient(): Client | null {
 	if (!config.scylla) {
@@ -107,8 +108,8 @@ export const prepared = {
 			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		select: {
 			byDate: `SELECT * FROM note WHERE "createdAtDate" = ?`,
-			byUri: `SELECT * FROM note WHERE "uri" IN ?`,
-			byUrl: `SELECT * FROM note WHERE "url" IN ?`,
+			byUri: `SELECT * FROM note WHERE "uri" = ?`,
+			byUrl: `SELECT * FROM note WHERE "url" = ?`,
 			byId: `SELECT * FROM note_by_id WHERE "id" IN ?`,
 			byUserId: `SELECT * FROM note_by_userid WHERE "userId" IN ?`,
 		},
@@ -480,5 +481,17 @@ export async function filterBlockedUser(
 			!blockerIds.includes(note.userId) &&
 			!(note.replyUserId && blockerIds.includes(note.replyUserId)) &&
 			!(note.renoteUserId && blockerIds.includes(note.renoteUserId)),
+	);
+}
+
+export async function filterMutedRenotes(
+	notes: ScyllaNote[],
+	user: { id: User["id"] },
+): Promise<ScyllaNote[]> {
+	const cache = await RenoteMutingsCache.init(user.id);
+	const muteeIds = await cache.getAll();
+
+	return notes.filter(
+		(note) => note.text || !note.renoteId || !muteeIds.includes(note.userId),
 	);
 }

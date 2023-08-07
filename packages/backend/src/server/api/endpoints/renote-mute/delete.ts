@@ -2,6 +2,7 @@ import { RenoteMutings } from "@/models/index.js";
 import define from "../../define.js";
 import { ApiError } from "../../error.js";
 import { getUser } from "../../common/getters.js";
+import { RenoteMutingsCache } from "@/misc/cache.js";
 
 export const meta = {
 	tags: ["account"],
@@ -45,19 +46,19 @@ export default define(meta, paramDef, async (ps, user) => {
 	});
 
 	// Check not muting
-	const muting = await RenoteMutings.findOneBy({
-		muterId: muter.id,
-		muteeId: mutee.id,
-	});
+	const cache = await RenoteMutingsCache.init(muter.id);
+	const muting = await cache.has(mutee.id);
 
-	if (muting == null) {
+	if (!muting) {
 		throw new ApiError(meta.errors.notMuting);
 	}
 
 	// Delete mute
 	await RenoteMutings.delete({
-		id: muting.id,
+		muterId: muter.id,
+		muteeId: mutee.id,
 	});
+	await cache.delete(mutee.id);
 
 	// publishUserEvent(user.id, "unmute", mutee);
 });

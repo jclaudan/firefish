@@ -7,6 +7,7 @@ import {
 	Followings,
 	MutedNotes,
 	Mutings,
+	RenoteMutings,
 	UserProfiles,
 } from "@/models/index.js";
 import { IsNull } from "typeorm";
@@ -73,7 +74,7 @@ export class Cache<T> {
 
 	public async delete(...keys: (string | null)[]): Promise<void> {
 		if (keys.length > 0) {
-			const _keys = keys.map(this.prefixedKey);
+			const _keys = keys.map((key) => this.prefixedKey(key));
 			await redisClient.del(_keys);
 		}
 	}
@@ -233,7 +234,9 @@ class HashCache {
 	}
 
 	public async delete(...fields: string[]) {
-		await redisClient.hdel(this.key, ...fields);
+		if (fields.length > 0) {
+			await redisClient.hdel(this.key, ...fields);
+		}
 	}
 
 	public async clear() {
@@ -401,3 +404,22 @@ export class UserBlockedCache extends SetCache {
 }
 
 export const userWordMuteCache = new Cache<string[][]>("mutedWord", 60 * 30);
+
+export class RenoteMutingsCache extends SetCache {
+	private constructor(userId: string) {
+		const fetcher = () =>
+			RenoteMutings.find({
+				select: ["muteeId"],
+				where: { muterId: userId },
+			}).then((mutes) => mutes.map(({ muteeId }) => muteeId));
+
+		super("renoteMute", userId, fetcher);
+	}
+
+	public static async init(userId: string): Promise<RenoteMutingsCache> {
+		const cache = new RenoteMutingsCache(userId);
+		await cache.fetch();
+
+		return cache;
+	}
+}

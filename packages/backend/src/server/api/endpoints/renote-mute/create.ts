@@ -4,6 +4,7 @@ import { RenoteMuting } from "@/models/entities/renote-muting.js";
 import define from "../../define.js";
 import { ApiError } from "../../error.js";
 import { getUser } from "../../common/getters.js";
+import { RenoteMutingsCache } from "@/misc/cache.js";
 
 export const meta = {
 	tags: ["account"],
@@ -47,12 +48,8 @@ export default define(meta, paramDef, async (ps, user) => {
 	});
 
 	// Check if already muting
-	const exist = await RenoteMutings.exist({
-		where: {
-			muterId: muter.id,
-			muteeId: mutee.id,
-		},
-	});
+	const cache = await RenoteMutingsCache.init(muter.id);
+	const exist = await cache.has(mutee.id);
 
 	if (exist) {
 		throw new ApiError(meta.errors.alreadyMuting);
@@ -65,6 +62,8 @@ export default define(meta, paramDef, async (ps, user) => {
 		muterId: muter.id,
 		muteeId: mutee.id,
 	} as RenoteMuting);
+
+	await cache.add(mutee.id);
 
 	// publishUserEvent(user.id, "mute", mutee);
 });
