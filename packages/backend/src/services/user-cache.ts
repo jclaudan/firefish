@@ -4,7 +4,7 @@ import type {
 	ILocalUser,
 } from "@/models/entities/user.js";
 import { Users } from "@/models/index.js";
-import { Cache, HashCache } from "@/misc/cache.js";
+import { Cache } from "@/misc/cache.js";
 import { redisClient, subscriber } from "@/db/redis.js";
 
 export const userByIdCache = new Cache<CacheableUser>("userById", 60 * 30);
