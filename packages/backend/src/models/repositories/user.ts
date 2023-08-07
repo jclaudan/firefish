@@ -384,14 +384,17 @@ export const UserRepository = db.getRepository(User).extend({
 		);
 
 		const userId = typeof src === "object" ? src.id : src;
-		const user = await userDenormalizedCache.fetch(userId, () =>
-			this.findOneOrFail({
-				where: { id: userId },
-				relations: {
-					avatar: true,
-					banner: true,
-				},
-			}),
+		const user = await userDenormalizedCache.fetch(
+			userId,
+			() =>
+				this.findOneOrFail({
+					where: { id: userId },
+					relations: {
+						avatar: true,
+						banner: true,
+					},
+				}),
+			true,
 		);
 
 		const meId = me ? me.id : null;

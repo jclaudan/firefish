@@ -114,7 +114,7 @@ router.use(wellKnown.routes());
 router.get("/avatar/@:acct", async (ctx) => {
 	const { username, host } = Acct.parse(ctx.params.acct);
 	const userId = await acctToUserIdCache.fetchMaybe(
-		`${username}@${host ?? config.host}`,
+		`${username.toLowerCase()}@${host ?? config.host}`,
 		() =>
 			Users.findOne({
 				where: {
@@ -123,17 +123,19 @@ router.get("/avatar/@:acct", async (ctx) => {
 					isSuspended: false,
 				},
 			}).then((user) => user?.id ?? undefined),
-		true,
 	);
 
 	if (!userId) {
 		ctx.redirect("/static-assets/user-unknown.png");
 	} else {
-		const user = await userDenormalizedCache.fetch(userId, () =>
-			Users.findOneOrFail({
-				relations: { avatar: true, banner: true },
-				where: { id: userId },
-			}),
+		const user = await userDenormalizedCache.fetch(
+			userId,
+			() =>
+				Users.findOneOrFail({
+					relations: { avatar: true, banner: true },
+					where: { id: userId },
+				}),
+			true,
 		);
 		ctx.redirect(Users.getAvatarUrlSync(user));
 	}

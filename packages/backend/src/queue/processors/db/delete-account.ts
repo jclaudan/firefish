@@ -8,6 +8,8 @@ import { MoreThan } from "typeorm";
 import { deleteFileSync } from "@/services/drive/delete-file.js";
 import { sendEmail } from "@/services/send-email.js";
 import meilisearch from "@/db/meilisearch.js";
+import { acctToUserIdCache, userByIdCache, userDenormalizedCache } from "@/services/user-cache.js";
+import config from "@/config/index.js";
 
 const logger = queueLogger.createSubLogger("delete-account");
 
@@ -98,6 +100,8 @@ export async function deleteAccount(
 		// nop
 	} else {
 		await Users.delete(job.data.user.id);
+		await userDenormalizedCache.delete(job.data.user.id);
+		await userByIdCache.delete(job.data.user.id);
 	}
 
 	return "Account deleted";
