@@ -25,6 +25,7 @@ import {
 } from "@/db/scylla.js";
 import {
 	ChannelFollowingsCache,
+	InstanceMutingsCache,
 	LocalFollowingsCache,
 	RenoteMutingsCache,
 	UserBlockedCache,
@@ -95,12 +96,14 @@ export default define(meta, paramDef, async (ps, user) => {
 			followingChannelIds,
 			followingUserIds,
 			mutedUserIds,
+			mutedInstances,
 			blockerIds,
 			renoteMutedIds,
 		] = await Promise.all([
 			ChannelFollowingsCache.init(user.id).then((cache) => cache.getAll()),
 			followingsCache.getAll(),
 			UserMutingsCache.init(user.id).then((cache) => cache.getAll()),
+			InstanceMutingsCache.init(user.id).then((cache) => cache.getAll()),
 			UserBlockedCache.init(user.id).then((cache) => cache.getAll()),
 			RenoteMutingsCache.init(user.id).then((cache) => cache.getAll()),
 		]);
@@ -120,7 +123,12 @@ export default define(meta, paramDef, async (ps, user) => {
 			filtered = await filterChannel(filtered, user, followingChannelIds);
 			filtered = await filterReply(filtered, ps.withReplies, user);
 			filtered = await filterVisibility(filtered, user, followingUserIds);
-			filtered = await filterMutedUser(filtered, user, mutedUserIds);
+			filtered = await filterMutedUser(
+				filtered,
+				user,
+				mutedUserIds,
+				mutedInstances,
+			);
 			filtered = await filterMutedNote(filtered, user, mutedWords);
 			filtered = await filterBlockedUser(filtered, user, blockerIds);
 			filtered = await filterMutedRenotes(filtered, user, renoteMutedIds);

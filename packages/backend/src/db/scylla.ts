@@ -18,6 +18,7 @@ import { getTimestamp } from "@/misc/gen-id.js";
 import Logger from "@/services/logger.js";
 import { UserProfiles } from "@/models/index.js";
 import { getWordHardMute } from "@/misc/check-word-mute.js";
+import type { UserProfile } from "@/models/entities/user-profile.js";
 
 function newClient(): Client | null {
 	if (!config.scylla) {
@@ -355,8 +356,9 @@ export async function filterVisibility(
 		if (followingIds) {
 			followings = followingIds;
 		} else {
-			const cache = await LocalFollowingsCache.init(user.id);
-			followings = await cache.getAll();
+			followings = await LocalFollowingsCache.init(user.id).then((cache) =>
+				cache.getAll(),
+			);
 		}
 
 		filtered = filtered.filter(
@@ -389,8 +391,9 @@ export async function filterChannel(
 			if (followingIds) {
 				followings = followingIds;
 			} else {
-				const cache = await ChannelFollowingsCache.init(user.id);
-				followings = await cache.getAll();
+				followings = await ChannelFollowingsCache.init(user.id).then((cache) =>
+					cache.getAll(),
+				);
 			}
 			filtered = filtered.filter(
 				(note) => !note.channelId || followings.includes(note.channelId),
@@ -429,32 +432,38 @@ export async function filterMutedUser(
 	notes: ScyllaNote[],
 	user: { id: User["id"] },
 	mutedIds?: User["id"][],
+	mutedInstances?: UserProfile["mutedInstances"],
 	exclude?: User,
 ): Promise<ScyllaNote[]> {
 	let ids: User["id"][];
+	let instances: UserProfile["mutedInstances"];
 
 	if (mutedIds) {
 		ids = mutedIds;
 	} else {
-		const userCache = await UserMutingsCache.init(user.id);
-		ids = await userCache.getAll();
+		ids = await UserMutingsCache.init(user.id).then((cache) => cache.getAll());
+	}
+
+	if (mutedInstances) {
+		instances = mutedInstances;
+	} else {
+		instances = await InstanceMutingsCache.init(user.id).then((cache) =>
+			cache.getAll(),
+		);
 	}
 
 	if (exclude) {
 		ids = ids.filter((id) => id !== exclude.id);
 	}
 
-	const instanceCache = await InstanceMutingsCache.init(user.id);
-	const mutedInstances = await instanceCache.getAll();
-
 	return notes.filter(
 		(note) =>
 			!ids.includes(note.userId) &&
 			!(note.replyUserId && ids.includes(note.replyUserId)) &&
 			!(note.renoteUserId && ids.includes(note.renoteUserId)) &&
-			!(note.userHost && mutedInstances.includes(note.userHost)) &&
-			!(note.replyUserHost && mutedInstances.includes(note.replyUserHost)) &&
-			!(note.renoteUserHost && mutedInstances.includes(note.renoteUserHost)),
+			!(note.userHost && instances.includes(note.userHost)) &&
+			!(note.replyUserHost && instances.includes(note.replyUserHost)) &&
+			!(note.renoteUserHost && instances.includes(note.renoteUserHost)),
 	);
 }
 
@@ -493,8 +502,7 @@ export async function filterBlockedUser(
 	if (blockerIds) {
 		ids = blockerIds;
 	} else {
-		const cache = await UserBlockedCache.init(user.id);
-		ids = await cache.getAll();
+		ids = await UserBlockedCache.init(user.id).then((cache) => cache.getAll());
 	}
 
 	return notes.filter(
@@ -515,8 +523,9 @@ export async function filterMutedRenotes(
 	if (muteeIds) {
 		ids = muteeIds;
 	} else {
-		const cache = await RenoteMutingsCache.init(user.id);
-		ids = await cache.getAll();
+		ids = await RenoteMutingsCache.init(user.id).then((cache) =>
+			cache.getAll(),
+		);
 	}
 
 	return notes.filter(
