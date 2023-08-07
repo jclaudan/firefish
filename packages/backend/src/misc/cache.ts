@@ -142,6 +142,7 @@ export class Cache<T> {
 
 class SetCache {
 	private readonly key: string;
+	private readonly fetchedKey: string;
 	private readonly fetcher: () => Promise<string[]>;
 
 	protected constructor(
@@ -150,14 +151,16 @@ class SetCache {
 		fetcher: () => Promise<string[]>,
 	) {
 		this.key = `setcache:${name}:${userId}`;
+		this.fetchedKey = `${this.key}:fetched`;
 		this.fetcher = fetcher;
 	}
 
 	protected async fetch() {
 		// Sync from DB if nothing is cached yet or cache is expired
-		if (!(await this.exists())) {
+		if ((await redisClient.exists(this.fetchedKey)) === 0) {
 			await this.clear();
 			await this.add(...(await this.fetcher()));
+			await redisClient.set(this.fetchedKey, "", "EX", 60 * 30);
 		}
 	}
 
@@ -167,7 +170,7 @@ class SetCache {
 			await redisClient.sadd(this.key, targetIds);
 		}
 		if ((await redisClient.ttl(this.key)) < 0) {
-			await redisClient.expire(this.key, 60 * 30); // Expires in 30 minutes
+			await redisClient.expire(this.key, 60 * 60);
 		}
 	}
 
@@ -197,6 +200,7 @@ class SetCache {
 
 class HashCache {
 	private readonly key: string;
+	private readonly fetchedKey: string;
 	private readonly fetcher: () => Promise<Map<string, string>>;
 
 	protected constructor(
@@ -205,14 +209,16 @@ class HashCache {
 		fetcher: () => Promise<Map<string, string>>,
 	) {
 		this.key = `hashcache:${name}:${userId}`;
+		this.fetchedKey = `${this.key}:fetched`;
 		this.fetcher = fetcher;
 	}
 
 	protected async fetch() {
 		// Sync from DB if nothing is cached yet or cache is expired
-		if (!(await this.exists())) {
-			await redisClient.del(this.key);
+		if ((await redisClient.exists(this.fetchedKey)) === 0) {
+			await this.clear();
 			await this.setHash(await this.fetcher());
+			await redisClient.set(this.fetchedKey, "", "EX", 60 * 30);
 		}
 	}
 
@@ -225,7 +231,7 @@ class HashCache {
 			await redisClient.hset(this.key, hash);
 		}
 		if ((await redisClient.ttl(this.key)) < 0) {
-			await redisClient.expire(this.key, 60 * 30); // Expires in 30 minutes
+			await redisClient.expire(this.key, 60 * 60);
 		}
 	}
 

@@ -352,11 +352,11 @@ export async function filterVisibility(
 			["public", "home"].includes(note.visibility),
 		);
 	} else {
-		let followings: User["id"][];
+		let ids: User["id"][];
 		if (followingIds) {
-			followings = followingIds;
+			ids = followingIds;
 		} else {
-			followings = await LocalFollowingsCache.init(user.id).then((cache) =>
+			ids = await LocalFollowingsCache.init(user.id).then((cache) =>
 				cache.getAll(),
 			);
 		}
@@ -368,7 +368,7 @@ export async function filterVisibility(
 				note.visibleUserIds.includes(user.id) ||
 				note.mentions.includes(user.id) ||
 				(note.visibility === "followers" &&
-					(followings.includes(note.userId) || note.replyUserId === user.id)),
+					(ids.includes(note.userId) || note.replyUserId === user.id)),
 		);
 	}
 

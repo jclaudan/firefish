@@ -97,6 +97,7 @@ export default define(meta, paramDef, async (ps, user) => {
 			followingUserIds,
 			mutedUserIds,
 			mutedInstances,
+			mutedWords,
 			blockerIds,
 			renoteMutedIds,
 		] = await Promise.all([
@@ -104,17 +105,18 @@ export default define(meta, paramDef, async (ps, user) => {
 			followingsCache.getAll(),
 			UserMutingsCache.init(user.id).then((cache) => cache.getAll()),
 			InstanceMutingsCache.init(user.id).then((cache) => cache.getAll()),
+			userWordMuteCache
+				.fetchMaybe(user.id, () =>
+					UserProfiles.findOne({
+						select: ["mutedWords"],
+						where: { userId: user.id },
+					}).then((profile) => profile?.mutedWords),
+				)
+				.then((words) => words ?? []),
 			UserBlockedCache.init(user.id).then((cache) => cache.getAll()),
 			RenoteMutingsCache.init(user.id).then((cache) => cache.getAll()),
 		]);
 		const validUserIds = [user.id].concat(followingUserIds);
-		const mutedWords =
-			(await userWordMuteCache.fetchMaybe(user.id, () =>
-				UserProfiles.findOne({
-					select: ["mutedWords"],
-					where: { userId: user.id },
-				}).then((profile) => profile?.mutedWords),
-			)) ?? [];
 		const optFilter = (n: ScyllaNote) =>
 			!n.renoteId || !!n.text || n.files.length > 0 || n.hasPoll;
 
