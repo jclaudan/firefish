@@ -34,6 +34,10 @@ import { initializeStreamingServer } from "./api/streaming.js";
 import { koaBody } from "koa-body";
 import removeTrailingSlash from "koa-remove-trailing-slashes";
 import { v4 as uuid } from "uuid";
+import {
+	acctToUserIdCache,
+	userDenormalizedCache,
+} from "@/services/user-cache.js";
 
 export const serverLogger = new Logger("server", "gray", false);
 
@@ -109,19 +113,29 @@ router.use(wellKnown.routes());
 
 router.get("/avatar/@:acct", async (ctx) => {
 	const { username, host } = Acct.parse(ctx.params.acct);
-	const user = await Users.findOne({
-		where: {
-			usernameLower: username.toLowerCase(),
-			host: host == null || host === config.host ? IsNull() : host,
-			isSuspended: false,
-		},
-		relations: ["avatar"],
-	});
+	const userId = await acctToUserIdCache.fetchMaybe(
+		`${username}@${host ?? config.host}`,
+		() =>
+			Users.findOne({
+				where: {
+					usernameLower: username.toLowerCase(),
+					host: !host || host === config.host ? IsNull() : host,
+					isSuspended: false,
+				},
+			}).then((user) => user?.id ?? undefined),
+		true,
+	);
 
-	if (user) {
-		ctx.redirect(Users.getAvatarUrlSync(user));
-	} else {
+	if (!userId) {
 		ctx.redirect("/static-assets/user-unknown.png");
+	} else {
+		const user = await userDenormalizedCache.fetch(userId, () =>
+			Users.findOneOrFail({
+				relations: { avatar: true, banner: true },
+				where: { id: userId },
+			}),
+		);
+		ctx.redirect(Users.getAvatarUrlSync(user));
 	}
 });
 

@@ -140,7 +140,7 @@ export class Cache<T> {
 	}
 }
 
-class SetCache {
+export class SetCache {
 	private readonly key: string;
 	private readonly fetchedKey: string;
 	private readonly fetcher: () => Promise<string[]>;
@@ -198,7 +198,7 @@ class SetCache {
 	}
 }
 
-class HashCache {
+export class HashCache {
 	private readonly key: string;
 	private readonly fetchedKey: string;
 	private readonly fetcher: () => Promise<Map<string, string>>;

@@ -4,7 +4,7 @@ import type {
 	ILocalUser,
 } from "@/models/entities/user.js";
 import { Users } from "@/models/index.js";
-import { Cache } from "@/misc/cache.js";
+import { Cache, HashCache } from "@/misc/cache.js";
 import { redisClient, subscriber } from "@/db/redis.js";
 
 export const userByIdCache = new Cache<CacheableUser>("userById", 60 * 30);
@@ -24,6 +24,7 @@ export const userDenormalizedCache = new Cache<CacheableUser>(
 	"userDenormalized",
 	60 * 30,
 );
+export const acctToUserIdCache = new Cache<string>("acctToUserId", 60 * 60 * 24);
 
 subscriber.on("message", async (_, data) => {
 	const obj = JSON.parse(data);
