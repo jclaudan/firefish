@@ -23,7 +23,14 @@ import {
 	filterBlockedUser,
 	filterMutedRenotes,
 } from "@/db/scylla.js";
-import { ChannelFollowingsCache, LocalFollowingsCache, RenoteMutingsCache, UserBlockedCache, UserMutingsCache, userWordMuteCache } from "@/misc/cache.js";
+import {
+	ChannelFollowingsCache,
+	LocalFollowingsCache,
+	RenoteMutingsCache,
+	UserBlockedCache,
+	UserMutingsCache,
+	userWordMuteCache,
+} from "@/misc/cache.js";
 
 export const meta = {
 	tags: ["notes"],
@@ -90,12 +97,13 @@ export default define(meta, paramDef, async (ps, user) => {
 		const validUserIds = [user.id].concat(followingUserIds);
 		const userMutingsCache = await UserMutingsCache.init(user.id);
 		const mutedUserIds = await userMutingsCache.getAll();
-		const mutedWords = await userWordMuteCache.fetchMaybe(user.id, () =>
-			UserProfiles.findOne({
-				select: ["mutedWords"],
-				where: { userId: user.id },
-			}).then((profile) => profile?.mutedWords),
-		);
+		const mutedWords =
+			(await userWordMuteCache.fetchMaybe(user.id, () =>
+				UserProfiles.findOne({
+					select: ["mutedWords"],
+					where: { userId: user.id },
+				}).then((profile) => profile?.mutedWords),
+			)) ?? [];
 		const blockedCache = await UserBlockedCache.init(user.id);
 		const blockerIds = await blockedCache.getAll();
 		const renoteMutingsCache = await RenoteMutingsCache.init(user.id);
@@ -109,7 +117,7 @@ export default define(meta, paramDef, async (ps, user) => {
 			filtered = await filterReply(filtered, ps.withReplies, user);
 			filtered = await filterVisibility(filtered, user, followingUserIds);
 			filtered = await filterMutedUser(filtered, user, mutedUserIds);
-			filtered = await filterMutedNote(filtered, user, mutedWords ?? []);
+			filtered = await filterMutedNote(filtered, user, mutedWords);
 			filtered = await filterBlockedUser(filtered, user, blockerIds);
 			filtered = await filterMutedRenotes(filtered, user, renoteMutedIds);
 			if (!ps.includeMyRenotes) {
