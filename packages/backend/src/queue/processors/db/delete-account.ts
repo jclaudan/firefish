@@ -31,7 +31,7 @@ export async function deleteAccount(
 					userId: user.id,
 					...(cursor ? { id: MoreThan(cursor) } : {}),
 				},
-				take: 100,
+				take: 10,
 				order: {
 					id: 1,
 				},

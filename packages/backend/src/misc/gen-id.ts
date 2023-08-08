@@ -2,6 +2,7 @@ import config from "@/config/index.js";
 import {
 	nativeCreateId,
 	nativeInitIdGenerator,
+	nativeGetTimestamp,
 } from "native-utils/built/index.js";
 
 const length = Math.min(Math.max(config.cuid?.length ?? 16, 16), 24);
@@ -20,8 +21,6 @@ export function genId(date?: Date): string {
 	return nativeCreateId((date ?? new Date()).getTime());
 }
 
-const TIME_2000 = 946_684_800_000;
-
 export function getTimestamp(id: string): number {
-	return parseInt(id.slice(0, 8), 36) + TIME_2000;
+	return nativeGetTimestamp(id);
 }
