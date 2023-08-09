@@ -4,6 +4,7 @@ import type { NoteReaction } from "@/models/entities/note-reaction.js";
 import define from "../../define.js";
 import { ApiError } from "../../error.js";
 import { getNote } from "../../common/getters.js";
+import { parseScyllaReaction, prepared, scyllaClient } from "@/db/scylla.js";
 
 export const meta = {
 	tags: ["notes", "reactions"],
@@ -50,7 +51,7 @@ export const paramDef = {
 
 export default define(meta, paramDef, async (ps, user) => {
 	// check note visibility
-	const note = await getNote(ps.noteId, user).catch((err) => {
+	await getNote(ps.noteId, user).catch((err) => {
 		if (err.id === "9725d0ce-ba28-4dde-95a7-2cbb2c15de24")
 			throw new ApiError(meta.errors.noSuchNote);
 		throw err;
@@ -61,8 +62,7 @@ export default define(meta, paramDef, async (ps, user) => {
 	} as FindOptionsWhere<NoteReaction>;
 
 	if (ps.type) {
-		// ローカルリアクションはホスト名が . とされているが
-		// DB 上ではそうではないので、必要に応じて変換
+		// Remove "." suffix of local emojis here because they are actually null in DB.
 		const suffix = "@.:";
 		const type = ps.type.endsWith(suffix)
 			? `${ps.type.slice(0, ps.type.length - suffix.length)}:`
@@ -70,15 +70,39 @@ export default define(meta, paramDef, async (ps, user) => {
 		query.reaction = type;
 	}
 
-	const reactions = await NoteReactions.find({
-		where: query,
-		take: ps.limit,
-		skip: ps.offset,
-		order: {
-			id: -1,
-		},
-		relations: ["user", "user.avatar", "user.banner", "note"],
-	});
+	let reactions: NoteReaction[] = [];
+	if (scyllaClient) {
+		const scyllaQuery = [prepared.reaction.select.byNoteId]
+		const params: (string | string[] | number)[] = [[ps.noteId]];
+		if (ps.type) {
+			scyllaQuery.push(`AND "reaction" = ?`);
+			params.push(query.reaction as string)
+		}
+		scyllaQuery.push("LIMIT ?");
+		params.push(ps.limit);
+
+		// Note: This query fails if the number of returned rows exceeds 5000 by
+		// default, i.e., 5000 reactions with the same emoji from different users.
+		// This limitation can be relaxed via "fetchSize" option.
+		// Note: Remote emojis and local emojis are different.
+		// Ref: https://github.com/datastax/nodejs-driver#paging
+		const result = await scyllaClient.execute(
+			scyllaQuery.join(" "),
+			params,
+			{ prepare: true },
+		);
+		reactions = result.rows.map(parseScyllaReaction);
+	} else {
+		reactions = await NoteReactions.find({
+			where: query,
+			take: ps.limit,
+			skip: ps.offset,
+			order: {
+				id: -1,
+			},
+			relations: ["user", "user.avatar", "user.banner", "note"],
+		});
+	}
 
 	return await NoteReactions.packMany(reactions, user);
 });

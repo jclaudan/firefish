@@ -1,3 +1,4 @@
+DROP MATERIALIZED VIEW IF EXISTS reaction_by_id;
 DROP MATERIALIZED VIEW IF EXISTS reaction_by_userid;
 DROP INDEX IF EXISTS reaction_by_id;
 DROP TABLE IF EXISTS reaction;

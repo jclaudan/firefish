@@ -135,7 +135,7 @@ export const prepared = {
 			("id", "noteId", "userId", "reaction", "emoji", "createdAt")
 			VALUES (?, ?, ?, ?, ?, ?)`,
 		select: {
-			byNoteId: `SELECT * FROM reaction WHERE "noteId" IN ?`,
+			byNoteId: `SELECT * FROM reaction_by_id WHERE "noteId" IN ?`,
 			byUserId: `SELECT * FROM reaction_by_userid WHERE "userId" IN ?`,
 			byNoteAndUser: `SELECT * FROM reaction WHERE "noteId" IN ? AND "userId" IN ?`,
 			byId: `SELECT * FROM reaction WHERE "id" IN ?`,
@@ -274,7 +274,7 @@ export function prepareTimelineQuery(ps: {
 		queryParts.push(`AND "createdAt" > ?`);
 	}
 
-	queryParts.push("LIMIT 50"); // Hardcoded to issue a prepared query
+	queryParts.push("LIMIT ?");
 	const query = queryParts.join(" ");
 
 	return {
@@ -304,10 +304,11 @@ export async function execTimelineQuery(
 
 	// Try to get posts of at most <maxDays> in the single request
 	while (foundNotes.length < ps.limit && scannedEmptyPartitions < maxDays) {
-		const params: (Date | string | string[])[] = [untilDate, untilDate];
+		const params: (Date | string | string[] | number)[] = [untilDate, untilDate];
 		if (sinceDate) {
 			params.push(sinceDate);
 		}
+		params.push(ps.limit)
 
 		const result = await scyllaClient.execute(query, params, {
 			prepare: true,

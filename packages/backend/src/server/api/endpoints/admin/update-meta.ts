@@ -2,6 +2,8 @@ import { Meta } from "@/models/entities/meta.js";
 import { insertModerationLog } from "@/services/insert-moderation-log.js";
 import { db } from "@/db/postgre.js";
 import define from "../../define.js";
+import { Metas } from "@/models/index.js";
+import { metaCache } from "@/misc/fetch-meta.js";
 
 export const meta = {
 	tags: ["admin"],
@@ -594,21 +596,17 @@ export default define(meta, paramDef, async (ps, me) => {
 		}
 	}
 
-	await db.transaction(async (transactionalEntityManager) => {
-		const metas = await transactionalEntityManager.find(Meta, {
-			order: {
-				id: "DESC",
-			},
-		});
-
+	const metas = await Metas.find({ order: { id: "DESC" }});
+	let newMeta: Meta;
+	if (metas.length > 0) {
 		const meta = metas[0];
-
-		if (meta) {
-			await transactionalEntityManager.update(Meta, meta.id, set);
-		} else {
-			await transactionalEntityManager.save(Meta, set);
-		}
-	});
+		await Metas.update(meta.id, set);
+		newMeta = {...meta, ...set};
+	} else {
+		await Metas.save(set);
+		newMeta = set as Meta;
+	}
+	await metaCache.set(null, newMeta);
 
 	insertModerationLog(me, "updateMeta");
 });

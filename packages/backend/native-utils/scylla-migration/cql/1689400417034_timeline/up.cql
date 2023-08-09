@@ -99,10 +99,8 @@ CREATE TABLE IF NOT EXISTS reaction (
 	"reaction" text,
 	"emoji" frozen<emoji>,
 	"createdAt" timestamp,
-	PRIMARY KEY ("noteId", "userId")
+	PRIMARY KEY ("noteId", "userId") -- this key constraints one reaction per user for the same post
 );
-
-CREATE INDEX IF NOT EXISTS reaction_by_id ON reaction ("id");
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS reaction_by_userid AS
 	SELECT * FROM reaction
@@ -111,3 +109,10 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS reaction_by_userid AS
 	AND "noteId" IS NOT NULL
 	PRIMARY KEY ("userId", "createdAt", "noteId")
 	WITH CLUSTERING ORDER BY ("createdAt" DESC);
+
+CREATE MATERIALIZED VIEW IF NOT EXISTS reaction_by_id AS
+	SELECT * FROM reaction
+	WHERE "noteId" IS NOT NULL
+	AND "reaction" IS NOT NULL
+	AND "userId" IS NOT NULL
+	PRIMARY KEY ("noteId", "reaction", "userId");

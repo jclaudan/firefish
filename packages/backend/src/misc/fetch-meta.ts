@@ -1,7 +1,8 @@
 import { db } from "@/db/postgre.js";
 import { Meta } from "@/models/entities/meta.js";
+import { Cache } from "@/misc/cache.js";
 
-let cache: Meta;
+export const metaCache = new Cache<Meta>("meta", 10);
 
 export function metaToPugArgs(meta: Meta): object {
 	let motd = ["Loading..."];
@@ -30,43 +31,38 @@ export function metaToPugArgs(meta: Meta): object {
 }
 
 export async function fetchMeta(noCache = false): Promise<Meta> {
-	if (!noCache && cache) return cache;
+	const fetcher = () =>
+		db.transaction(async (transactionalEntityManager) => {
+			// New IDs are prioritized because multiple records may have been created due to past bugs.
+			const metas = await transactionalEntityManager.find(Meta, {
+				order: {
+					id: "DESC",
+				},
+			});
 
-	return await db.transaction(async (transactionalEntityManager) => {
-		// New IDs are prioritized because multiple records may have been created due to past bugs.
-		const metas = await transactionalEntityManager.find(Meta, {
-			order: {
-				id: "DESC",
-			},
+			if (metas.length > 0) {
+				return metas[0];
+			} else {
+				// If fetchMeta is called at the same time when meta is empty, this part may be called at the same time, so use fail-safe upsert.
+				const saved = await transactionalEntityManager
+					.upsert(
+						Meta,
+						{
+							id: "x",
+						},
+						["id"],
+					)
+					.then((x) =>
+						transactionalEntityManager.findOneByOrFail(Meta, x.identifiers[0]),
+					);
+
+				return saved;
+			}
 		});
 
-		const meta = metas[0];
+	if (noCache) {
+		return await fetcher();
+	}
 
-		if (meta) {
-			cache = meta;
-			return meta;
-		} else {
-			// If fetchMeta is called at the same time when meta is empty, this part may be called at the same time, so use fail-safe upsert.
-			const saved = await transactionalEntityManager
-				.upsert(
-					Meta,
-					{
-						id: "x",
-					},
-					["id"],
-				)
-				.then((x) =>
-					transactionalEntityManager.findOneByOrFail(Meta, x.identifiers[0]),
-				);
-
-			cache = saved;
-			return saved;
-		}
-	});
+	return await metaCache.fetch(null, fetcher);
 }
-
-setInterval(() => {
-	fetchMeta(true).then((meta) => {
-		cache = meta;
-	});
-}, 1000 * 10);
