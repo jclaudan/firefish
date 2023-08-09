@@ -137,7 +137,7 @@ export const prepared = {
 		select: {
 			byNoteId: `SELECT * FROM reaction WHERE "noteId" IN ?`,
 			byUserId: `SELECT * FROM reaction_by_userid WHERE "userId" IN ?`,
-			byNoteAndUser: `SELECT * FROM reaction WHERE "noteId" = ? AND "userId" = ?`,
+			byNoteAndUser: `SELECT * FROM reaction WHERE "noteId" IN ? AND "userId" IN ?`,
 			byId: `SELECT * FROM reaction WHERE "id" IN ?`,
 		},
 		delete: `DELETE FROM reaction WHERE "noteId" = ? AND "userId" = ?`,

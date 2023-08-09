@@ -1,5 +1,4 @@
 import type { FindOptionsWhere } from "typeorm";
-import { DeepPartial } from "typeorm";
 import { NoteReactions } from "@/models/index.js";
 import type { NoteReaction } from "@/models/entities/note-reaction.js";
 import define from "../../define.js";

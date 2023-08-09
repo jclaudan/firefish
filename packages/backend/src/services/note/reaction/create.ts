@@ -22,7 +22,7 @@ import { isDuplicateKeyValueError } from "@/misc/is-duplicate-key-value-error.js
 import type { NoteReaction } from "@/models/entities/note-reaction.js";
 import { IdentifiableError } from "@/misc/identifiable-error.js";
 import { prepared, scyllaClient } from "@/db/scylla.js";
-import { populateEmojis } from "@/misc/populate-emojis.js";
+import { EmojiCache } from "@/misc/populate-emojis.js";
 
 export default async (
 	user: { id: User["id"]; host: User["host"] },
@@ -137,13 +137,16 @@ export default async (
 	// カスタム絵文字リアクションだったら絵文字情報も送る
 	const decodedReaction = decodeReaction(_reaction);
 
-	const emoji = await Emojis.findOne({
-		where: {
-			name: decodedReaction.name,
-			host: decodedReaction.host ?? IsNull(),
-		},
-		select: ["name", "host", "originalUrl", "publicUrl"],
-	});
+	const emoji = await EmojiCache.fetch(
+		`${decodedReaction.name} ${decodedReaction.host}`,
+		() =>
+			Emojis.findOne({
+				where: {
+					name: decodedReaction.name,
+					host: decodedReaction.host ?? IsNull(),
+				},
+			}),
+	);
 
 	publishNoteStream(note.id, "reacted", {
 		reaction: decodedReaction.reaction,

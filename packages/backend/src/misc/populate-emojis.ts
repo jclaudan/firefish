@@ -152,9 +152,12 @@ export function aggregateNoteEmojis(notes: Note[]) {
 export async function prefetchEmojis(
 	emojis: { name: string; host: string | null }[],
 ): Promise<void> {
-	const notCachedEmojis = emojis.filter(
-		async (emoji) => !(await EmojiCache.get(`${emoji.name} ${emoji.host}`)),
-	);
+	const notCachedEmojis: { name: string; host: string | null }[] = [];
+	for (const emoji of emojis) {
+		if (!(await EmojiCache.exists(`${emoji.name} ${emoji.host}`))) {
+			notCachedEmojis.push(emoji);
+		}
+	}
 	const emojisQuery: any[] = [];
 	const hosts = new Set(notCachedEmojis.map((e) => e.host));
 	for (const host of hosts) {

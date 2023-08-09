@@ -28,10 +28,11 @@ import {
 import { db } from "@/db/postgre.js";
 import { IdentifiableError } from "@/misc/identifiable-error.js";
 import {
-	ScyllaNote,
+	type ScyllaNote,
 	parseScyllaNote,
 	prepared,
 	scyllaClient,
+	parseScyllaReaction,
 } from "@/db/scylla.js";
 import { LocalFollowingsCache } from "@/misc/cache.js";
 import { userByIdCache } from "@/services/user-cache.js";
@@ -91,10 +92,22 @@ async function populateMyReaction(
 		// 実装上抜けがあるだけかもしれないので、「ヒントに含まれてなかったら(=undefinedなら)return」のようにはしない
 	}
 
-	const reaction = await NoteReactions.findOneBy({
-		userId: meId,
-		noteId: note.id,
-	});
+	let reaction: NoteReaction | null = null;
+	if (scyllaClient) {
+		const result = await scyllaClient.execute(
+			prepared.reaction.select.byNoteAndUser,
+			[[note.id], [meId]],
+			{ prepare: true },
+		);
+		if (result.rowLength > 0) {
+			reaction = parseScyllaReaction(result.first());
+		}
+	} else {
+		reaction = await NoteReactions.findOneBy({
+			userId: meId,
+			noteId: note.id,
+		});
+	}
 
 	if (reaction) {
 		return convertLegacyReaction(reaction.reaction);
@@ -358,10 +371,20 @@ export const NoteRepository = db.getRepository(Note).extend({
 				.filter((n) => !!n.renoteId)
 				.map((n) => n.renoteId) as string[];
 			const targets = [...notes.map((n) => n.id), ...renoteIds];
-			const myReactions = await NoteReactions.findBy({
-				userId: meId,
-				noteId: In(targets),
-			});
+			let myReactions: NoteReaction[] = [];
+			if (scyllaClient) {
+				const result = await scyllaClient.execute(
+					prepared.reaction.select.byNoteAndUser,
+					[targets, [meId]],
+					{ prepare: true },
+				);
+				myReactions = result.rows.map(parseScyllaReaction);
+			} else {
+				myReactions = await NoteReactions.findBy({
+					userId: meId,
+					noteId: In(targets),
+				});
+			}
 
 			for (const target of targets) {
 				myReactionsMap.set(

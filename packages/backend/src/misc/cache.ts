@@ -36,6 +36,12 @@ export class Cache<T> {
 		await commander.set(_key, _value, "EX", this.ttl);
 	}
 
+	public async exists(...keys: string[]): Promise<boolean> {
+		return (
+			(await redisClient.exists(keys.map((key) => this.prefixedKey(key)))) > 0
+		);
+	}
+
 	public async get(key: string | null, renew = false): Promise<T | undefined> {
 		const _key = this.prefixedKey(key);
 		const cached = await redisClient.getBuffer(_key);
