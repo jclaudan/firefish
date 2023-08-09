@@ -1,5 +1,5 @@
 import { fetchMeta } from "@/misc/fetch-meta.js";
-import { Notes } from "@/models/index.js";
+import { Notes, UserProfiles } from "@/models/index.js";
 import { activeUsersChart } from "@/services/chart/index.js";
 import define from "../../define.js";
 import { ApiError } from "../../error.js";
@@ -9,6 +9,23 @@ import { generateRepliesQuery } from "../../common/generate-replies-query.js";
 import { generateMutedNoteQuery } from "../../common/generate-muted-note-query.js";
 import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
 import { generateMutedUserRenotesQueryForNotes } from "../../common/generated-muted-renote-query.js";
+import {
+	ScyllaNote,
+	execTimelineQuery,
+	filterBlockedUser,
+	filterMutedNote,
+	filterMutedRenotes,
+	filterMutedUser,
+	filterReply,
+	scyllaClient,
+} from "@/db/scylla.js";
+import {
+	InstanceMutingsCache,
+	RenoteMutingsCache,
+	UserBlockedCache,
+	UserMutingsCache,
+	userWordMuteCache,
+} from "@/misc/cache.js";
 
 export const meta = {
 	tags: ["notes"],
@@ -70,6 +87,63 @@ export default define(meta, paramDef, async (ps, user) => {
 		}
 	}
 
+	process.nextTick(() => {
+		if (user) {
+			activeUsersChart.read(user);
+		}
+	});
+
+	if (scyllaClient) {
+		let [mutedUserIds, mutedInstances, blockerIds, renoteMutedIds]: string[][] =
+			[];
+		let mutedWords: string[][];
+		if (user) {
+			[mutedUserIds, mutedInstances, mutedWords, blockerIds, renoteMutedIds] =
+				await Promise.all([
+					UserMutingsCache.init(user.id).then((cache) => cache.getAll()),
+					InstanceMutingsCache.init(user.id).then((cache) => cache.getAll()),
+					userWordMuteCache
+						.fetchMaybe(user.id, () =>
+							UserProfiles.findOne({
+								select: ["mutedWords"],
+								where: { userId: user.id },
+							}).then((profile) => profile?.mutedWords),
+						)
+						.then((words) => words ?? []),
+					UserBlockedCache.init(user.id).then((cache) => cache.getAll()),
+					RenoteMutingsCache.init(user.id).then((cache) => cache.getAll()),
+				]);
+		}
+
+		const filter = async (notes: ScyllaNote[]) => {
+			let filtered = notes.filter(
+				(n) => n.visibility === "public" && !n.channelId,
+			);
+			filtered = await filterReply(filtered, ps.withReplies, user);
+			if (user) {
+				filtered = await filterMutedUser(
+					filtered,
+					user,
+					mutedUserIds,
+					mutedInstances,
+				);
+				filtered = await filterMutedNote(filtered, user, mutedWords);
+				filtered = await filterBlockedUser(filtered, user, blockerIds);
+				filtered = await filterMutedRenotes(filtered, user, renoteMutedIds);
+			}
+			if (ps.withFiles) {
+				filtered = filtered.filter((n) => n.files.length > 0);
+			}
+			filtered = filtered.filter((n) => n.visibility !== "hidden");
+			return filtered;
+		};
+
+		const foundNotes = await execTimelineQuery(ps, filter);
+		return await Notes.packMany(foundNotes.slice(0, ps.limit), user, {
+			scyllaNote: true,
+		});
+	}
+
 	//#region Construct query
 	const query = makePaginationQuery(
 		Notes.createQueryBuilder("note"),
@@ -94,12 +168,6 @@ export default define(meta, paramDef, async (ps, user) => {
 	}
 	query.andWhere("note.visibility != 'hidden'");
 	//#endregion
-
-	process.nextTick(() => {
-		if (user) {
-			activeUsersChart.read(user);
-		}
-	});
 
 	// We fetch more than requested because some may be filtered out, and if there's less than
 	// requested, the pagination stops.
