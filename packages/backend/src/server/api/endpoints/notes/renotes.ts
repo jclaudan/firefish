@@ -9,9 +9,17 @@ import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
 import {
 	ScyllaNote,
 	execTimelineQuery,
+	filterBlockedUser,
+	filterMutedUser,
 	filterVisibility,
 	scyllaClient,
 } from "@/db/scylla.js";
+import {
+	InstanceMutingsCache,
+	LocalFollowingsCache,
+	UserBlockedCache,
+	UserMutingsCache,
+} from "@/misc/cache.js";
 
 export const meta = {
 	tags: ["notes"],
@@ -60,9 +68,34 @@ export default define(meta, paramDef, async (ps, user) => {
 	});
 
 	if (scyllaClient) {
+		let [
+			followingUserIds,
+			mutedUserIds,
+			mutedInstances,
+			blockerIds,
+		]: string[][] = [];
+		if (user) {
+			[followingUserIds, mutedUserIds, mutedInstances, blockerIds] =
+				await Promise.all([
+					LocalFollowingsCache.init(user.id).then((cache) => cache.getAll()),
+					UserMutingsCache.init(user.id).then((cache) => cache.getAll()),
+					InstanceMutingsCache.init(user.id).then((cache) => cache.getAll()),
+					UserBlockedCache.init(user.id).then((cache) => cache.getAll()),
+				]);
+		}
+
 		const filter = async (notes: ScyllaNote[]) => {
 			let filtered = notes.filter((n) => n.renoteId === note.id);
 			filtered = await filterVisibility(filtered, user);
+			if (user) {
+				filtered = await filterMutedUser(
+					filtered,
+					user,
+					mutedUserIds,
+					mutedInstances,
+				);
+				filtered = await filterBlockedUser(filtered, user, blockerIds);
+			}
 			return filtered;
 		};
 
