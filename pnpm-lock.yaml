@@ -157,8 +157,8 @@ importers:
         specifier: 7.0.0
         version: 7.0.0
       cbor:
-        specifier: 9.0.1
-        version: 9.0.1
+        specifier: 8.1.0
+        version: 8.1.0
       chalk:
         specifier: 5.3.0
         version: 5.3.0
@@ -3827,7 +3827,7 @@ packages:
     resolution: {integrity: sha512-mGQ1lbYOwVti5Xlarn1bTeBZqgY0kstsdjnkoEovgohYKdBjGejHyNGXHdMBeqyQazIv32Jjp33+5pBEaSRy2w==}
     deprecated: This is a stub types definition. cbor provides its own type definitions, so you do not need this installed.
     dependencies:
-      cbor: 9.0.1
+      cbor: 8.1.0
     dev: true
 
   /@types/co-body@6.1.0:
@@ -6484,13 +6484,6 @@ packages:
   /cbor@8.1.0:
     resolution: {integrity: sha512-DwGjNW9omn6EwP70aXsn7FQJx5kO12tX0bZkaTjzdVFM6/7nhA4t0EENocKGx6D2Bch9PE2KzCUf5SceBdeijg==}
     engines: {node: '>=12.19'}
-    dependencies:
-      nofilter: 3.1.0
-    dev: true
-
-  /cbor@9.0.1:
-    resolution: {integrity: sha512-/TQOWyamDxvVIv+DY9cOLNuABkoyz8K/F3QE56539pGVYohx0+MEA1f4lChFTX79dBTBS7R1PF6ovH7G+VtBfQ==}
-    engines: {node: '>=16'}
     dependencies:
       nofilter: 3.1.0
 
