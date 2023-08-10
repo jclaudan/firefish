@@ -238,6 +238,8 @@ export interface ScyllaNoteReaction extends NoteReaction {
 	emoji: PopulatedEmoji;
 }
 
+const QUERY_LIMIT = 1000;
+
 export function parseScyllaReaction(row: types.Row): ScyllaNoteReaction {
 	return {
 		id: row.get("id"),
@@ -280,7 +282,7 @@ export function prepareNoteQuery(ps: {
 		queryParts.push(`AND "createdAt" > ?`);
 	}
 
-	queryParts.push("LIMIT 100");
+	queryParts.push(`LIMIT ${QUERY_LIMIT}`);
 
 	const query = queryParts.join(" ");
 
@@ -307,11 +309,11 @@ export async function execNotePaginationQuery(
 
 	let { query, untilDate, sinceDate } = prepareNoteQuery(ps);
 
-	let scannedEmptyPartitions = 0;
+	let scannedPartitions = 0;
 	const foundNotes: ScyllaNote[] = [];
 
 	// Try to get posts of at most <maxDays> in the single request
-	while (foundNotes.length < ps.limit && scannedEmptyPartitions < maxDays) {
+	while (foundNotes.length < ps.limit && scannedPartitions < maxDays) {
 		const params: (Date | string | string[] | number)[] = [];
 		if (ps.noteId) {
 			params.push(ps.noteId, untilDate);
@@ -326,22 +328,20 @@ export async function execNotePaginationQuery(
 			prepare: true,
 		});
 
-		if (result.rowLength === 0) {
+		if (result.rowLength > 0) {
+			const notes = result.rows.map(parseScyllaNote);
+			foundNotes.push(...(filter ? await filter(notes) : notes));
+			untilDate = notes[notes.length - 1].createdAt;
+		}
+
+		if (result.rowLength < QUERY_LIMIT) {
 			// Reached the end of partition. Queries posts created one day before.
-			scannedEmptyPartitions++;
+			scannedPartitions++;
 			const yesterday = new Date(untilDate.getTime() - 86400000);
 			yesterday.setUTCHours(23, 59, 59, 999);
 			untilDate = yesterday;
 			if (sinceDate && untilDate < sinceDate) break;
-
-			continue;
 		}
-
-		scannedEmptyPartitions = 0;
-
-		const notes = result.rows.map(parseScyllaNote);
-		foundNotes.push(...(filter ? await filter(notes) : notes));
-		untilDate = notes[notes.length - 1].createdAt;
 	}
 
 	return foundNotes;
