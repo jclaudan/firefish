@@ -262,8 +262,8 @@ importers:
         specifier: 2.1.0
         version: 2.1.0
       koa-views:
-        specifier: 8.1.0
-        version: 8.1.0(@babel/core@7.22.10)(@types/koa@2.13.8)(pug@3.0.2)
+        specifier: 7.0.2
+        version: 7.0.2(@types/koa@2.13.8)(ejs@3.1.9)(pug@3.0.2)
       megalodon:
         specifier: workspace:*
         version: link:../megalodon
@@ -478,7 +478,7 @@ importers:
         version: 4.1.3
       '@types/koa-views':
         specifier: 7.0.0
-        version: 7.0.0(@babel/core@7.22.10)(@types/koa@2.13.8)(pug@3.0.2)
+        version: 7.0.0(@types/koa@2.13.8)(pug@3.0.2)
       '@types/koa__cors':
         specifier: 4.0.0
         version: 4.0.0
@@ -524,9 +524,6 @@ importers:
       '@types/ratelimiter':
         specifier: 3.4.4
         version: 3.4.4
-      '@types/redis':
-        specifier: 4.0.11
-        version: 4.0.11
       '@types/rename':
         specifier: 1.0.4
         version: 1.0.4
@@ -2703,159 +2700,6 @@ packages:
     resolution: {integrity: sha512-fuscdXJ9G1qb7W8VdHi+IwRqij3lBkosAm4ydQtEmbY58OzHXqQhvlxqEkoz0yssNVn38bcpRWgA9PP+OGoisw==}
     dev: true
 
-  /@ladjs/consolidate@1.0.1(@babel/core@7.22.10)(pug@3.0.2):
-    resolution: {integrity: sha512-LhB1s4u6mggtyetHvi0hCPmxVMR8cF5Rhs/M/AY4afOeFe2W3cWUbnHXEjKx4T2HG7WwpDmMua+RHhyRqYzz4A==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@babel/core': ^7.22.5
-      arc-templates: ^0.5.3
-      atpl: '>=0.7.6'
-      bracket-template: ^1.1.5
-      coffee-script: ^1.12.7
-      dot: ^1.1.3
-      dust: ^0.3.0
-      dustjs-helpers: ^1.7.4
-      dustjs-linkedin: ^2.7.5
-      eco: ^1.1.0-rc-3
-      ect: ^0.5.9
-      ejs: ^3.1.5
-      haml-coffee: ^1.14.1
-      hamlet: ^0.3.3
-      hamljs: ^0.6.2
-      handlebars: ^4.7.6
-      hogan.js: ^3.0.2
-      htmling: ^0.0.8
-      jazz: ^0.0.18
-      jqtpl: ~1.1.0
-      just: ^0.1.8
-      liquid-node: ^3.0.1
-      liquor: ^0.0.5
-      lodash: ^4.17.20
-      mote: ^0.2.0
-      mustache: ^4.0.1
-      nunjucks: ^3.2.2
-      plates: ~0.4.11
-      pug: ^3.0.0
-      qejs: ^3.0.5
-      ractive: ^1.3.12
-      react: ^16.13.1
-      react-dom: ^16.13.1
-      slm: ^2.0.0
-      swig: ^1.4.2
-      swig-templates: ^2.0.3
-      teacup: ^2.0.0
-      templayed: '>=0.2.3'
-      then-pug: '*'
-      tinyliquid: ^0.2.34
-      toffee: ^0.3.6
-      twig: ^1.15.2
-      twing: ^5.0.2
-      underscore: ^1.11.0
-      vash: ^0.13.0
-      velocityjs: ^2.0.1
-      walrus: ^0.10.1
-      whiskers: ^0.4.0
-    peerDependenciesMeta:
-      '@babel/core':
-        optional: true
-      arc-templates:
-        optional: true
-      atpl:
-        optional: true
-      bracket-template:
-        optional: true
-      coffee-script:
-        optional: true
-      dot:
-        optional: true
-      dust:
-        optional: true
-      dustjs-helpers:
-        optional: true
-      dustjs-linkedin:
-        optional: true
-      eco:
-        optional: true
-      ect:
-        optional: true
-      ejs:
-        optional: true
-      haml-coffee:
-        optional: true
-      hamlet:
-        optional: true
-      hamljs:
-        optional: true
-      handlebars:
-        optional: true
-      hogan.js:
-        optional: true
-      htmling:
-        optional: true
-      jazz:
-        optional: true
-      jqtpl:
-        optional: true
-      just:
-        optional: true
-      liquid-node:
-        optional: true
-      liquor:
-        optional: true
-      lodash:
-        optional: true
-      mote:
-        optional: true
-      mustache:
-        optional: true
-      nunjucks:
-        optional: true
-      plates:
-        optional: true
-      pug:
-        optional: true
-      qejs:
-        optional: true
-      ractive:
-        optional: true
-      react:
-        optional: true
-      react-dom:
-        optional: true
-      slm:
-        optional: true
-      swig:
-        optional: true
-      swig-templates:
-        optional: true
-      teacup:
-        optional: true
-      templayed:
-        optional: true
-      then-pug:
-        optional: true
-      tinyliquid:
-        optional: true
-      toffee:
-        optional: true
-      twig:
-        optional: true
-      twing:
-        optional: true
-      underscore:
-        optional: true
-      vash:
-        optional: true
-      velocityjs:
-        optional: true
-      walrus:
-        optional: true
-      whiskers:
-        optional: true
-    dependencies:
-      '@babel/core': 7.22.10
-      pug: 3.0.2
-
   /@mapbox/node-pre-gyp@1.0.11:
     resolution: {integrity: sha512-Yhlar6v9WQgUp/He7BdgzOz8lqMQ8sU+jkCq7Wx8Myc5YFJLbEe7lgui/V7G1qB1DJykHSGwreceSaD60Y0PUQ==}
     hasBin: true
@@ -3123,55 +2967,6 @@ packages:
       open: 9.1.0
       picocolors: 1.0.0
       tslib: 2.6.1
-    dev: true
-
-  /@redis/bloom@1.2.0(@redis/client@1.5.8):
-    resolution: {integrity: sha512-HG2DFjYKbpNmVXsa0keLHp/3leGJz1mjh09f2RLGGLQZzSHpkmZWuwJbAvo3QcRY8p80m5+ZdXZdYOSBLlp7Cg==}
-    peerDependencies:
-      '@redis/client': ^1.0.0
-    dependencies:
-      '@redis/client': 1.5.8
-    dev: true
-
-  /@redis/client@1.5.8:
-    resolution: {integrity: sha512-xzElwHIO6rBAqzPeVnCzgvrnBEcFL1P0w8P65VNLRkdVW8rOE58f52hdj0BDgmsdOm4f1EoXPZtH4Fh7M/qUpw==}
-    engines: {node: '>=14'}
-    dependencies:
-      cluster-key-slot: 1.1.2
-      generic-pool: 3.9.0
-      yallist: 4.0.0
-    dev: true
-
-  /@redis/graph@1.1.0(@redis/client@1.5.8):
-    resolution: {integrity: sha512-16yZWngxyXPd+MJxeSr0dqh2AIOi8j9yXKcKCwVaKDbH3HTuETpDVPcLujhFYVPtYrngSco31BUcSa9TH31Gqg==}
-    peerDependencies:
-      '@redis/client': ^1.0.0
-    dependencies:
-      '@redis/client': 1.5.8
-    dev: true
-
-  /@redis/json@1.0.4(@redis/client@1.5.8):
-    resolution: {integrity: sha512-LUZE2Gdrhg0Rx7AN+cZkb1e6HjoSKaeeW8rYnt89Tly13GBI5eP4CwDVr+MY8BAYfCg4/N15OUrtLoona9uSgw==}
-    peerDependencies:
-      '@redis/client': ^1.0.0
-    dependencies:
-      '@redis/client': 1.5.8
-    dev: true
-
-  /@redis/search@1.1.3(@redis/client@1.5.8):
-    resolution: {integrity: sha512-4Dg1JjvCevdiCBTZqjhKkGoC5/BcB7k9j99kdMnaXFXg8x4eyOIVg9487CMv7/BUVkFLZCaIh8ead9mU15DNng==}
-    peerDependencies:
-      '@redis/client': ^1.0.0
-    dependencies:
-      '@redis/client': 1.5.8
-    dev: true
-
-  /@redis/time-series@1.0.4(@redis/client@1.5.8):
-    resolution: {integrity: sha512-ThUIgo2U/g7cCuZavucQTQzA9g9JbDDY2f64u3AbAoz/8vE2lt2U37LamDUVChhaDA3IRT9R6VvJwqnUfTJzng==}
-    peerDependencies:
-      '@redis/client': ^1.0.0
-    dependencies:
-      '@redis/client': 1.5.8
     dev: true
 
   /@redocly/ajv@8.11.0:
@@ -4235,16 +4030,16 @@ packages:
       '@types/koa': 2.13.8
     dev: true
 
-  /@types/koa-views@7.0.0(@babel/core@7.22.10)(@types/koa@2.13.8)(pug@3.0.2):
+  /@types/koa-views@7.0.0(@types/koa@2.13.8)(pug@3.0.2):
     resolution: {integrity: sha512-AB/NB+oFHcLOZJYFv3bG5Af8YbwYCD9/zK0WcKALsbjI/FRKrcXTUTC64RebDrkyOkBm3bpCgpGndhAH/3YQ2Q==}
     deprecated: This is a stub types definition. koa-views provides its own type definitions, so you do not need this installed.
     dependencies:
-      koa-views: 8.1.0(@babel/core@7.22.10)(@types/koa@2.13.8)(pug@3.0.2)
+      koa-views: 7.0.2(@types/koa@2.13.8)(ejs@3.1.9)(pug@3.0.2)
     transitivePeerDependencies:
-      - '@babel/core'
       - '@types/koa'
       - arc-templates
       - atpl
+      - babel-core
       - bracket-template
       - coffee-script
       - dot
@@ -4260,12 +4055,14 @@ packages:
       - handlebars
       - hogan.js
       - htmling
+      - jade
       - jazz
       - jqtpl
       - just
       - liquid-node
       - liquor
       - lodash
+      - marko
       - mote
       - mustache
       - nunjucks
@@ -4273,14 +4070,17 @@ packages:
       - pug
       - qejs
       - ractive
+      - razor-tmpl
       - react
       - react-dom
       - slm
+      - squirrelly
       - supports-color
       - swig
       - swig-templates
       - teacup
       - templayed
+      - then-jade
       - then-pug
       - tinyliquid
       - toffee
@@ -4461,13 +4261,6 @@ packages:
 
   /@types/ratelimiter@3.4.4:
     resolution: {integrity: sha512-GSMb93iSA8KKFDgVL2Wzs/kqrHMJcU8xhLdwI5omoACcj7K18SacklLtY1C4G02HC5drd6GygtsIaGbfxJSe0g==}
-    dev: true
-
-  /@types/redis@4.0.11:
-    resolution: {integrity: sha512-bI+gth8La8Wg/QCR1+V1fhrL9+LZUSWfcqpOj2Kc80ZQ4ffbdL173vQd5wovmoV9i071FU9oP2g6etLuEwb6Rg==}
-    deprecated: This is a stub types definition. redis provides its own type definitions, so you do not need this installed.
-    dependencies:
-      redis: 4.6.7
     dev: true
 
   /@types/rename@1.0.4:
@@ -6979,6 +6772,7 @@ packages:
   /cluster-key-slot@1.1.2:
     resolution: {integrity: sha512-RMr0FhtfXemyinomL4hrWcYJxmX6deFdCxpJzhDttxgO1+bcCnkk+9drydLVDmAMG7NE6aN/fl4F7ucU/90gAA==}
     engines: {node: '>=0.10.0'}
+    dev: false
 
   /co-body@5.2.0:
     resolution: {integrity: sha512-sX/LQ7LqUhgyaxzbe7IqwPeTr2yfpfUIQ/dgpKo6ZI4y4lpQA0YxAomWIY+7I7rHWcG02PG+OuPREzMW/5tszQ==}
@@ -7396,7 +7190,6 @@ packages:
       bluebird: 3.7.2
       ejs: 3.1.9
       pug: 3.0.2
-    dev: false
 
   /constantinople@4.0.1:
     resolution: {integrity: sha512-vCrqcSIq4//Gx74TXXCGnHpulY1dskqLTFGDmhrGxzeXL8lF8kvXv6mpNWlJj1uD4DW23D4ljAqbY4RRaaUZIw==}
@@ -8268,7 +8061,6 @@ packages:
     hasBin: true
     dependencies:
       jake: 10.8.7
-    dev: false
 
   /electron-to-chromium@1.4.488:
     resolution: {integrity: sha512-Dv4sTjiW7t/UWGL+H8ZkgIjtUAVZDgb/PwGWvMsCT7jipzUV/u5skbLXPFKb6iV0tiddVi/bcS2/kUrczeWgIQ==}
@@ -9769,7 +9561,6 @@ packages:
     resolution: {integrity: sha512-w1cEuf3S+DrLCQL7ET6kz+gmlJdbq9J7yXCSjK/OZCPA+qEN1WyF4ZAf0YYJa4/shHJra2t/d/r8SV4Ji+x+8Q==}
     dependencies:
       minimatch: 5.1.6
-    dev: false
 
   /filename-reserved-regex@3.0.0:
     resolution: {integrity: sha512-hn4cQfU6GOT/7cFHXBqeBg2TbrMBgdD0kcjLhvSQYYwm3s4B6cjvBfb7nBALJLAXqmU5xajSa7X2NnUud/VCdw==}
@@ -10181,11 +9972,6 @@ packages:
       strip-ansi: 6.0.1
       wide-align: 1.1.5
     dev: false
-
-  /generic-pool@3.9.0:
-    resolution: {integrity: sha512-hymDOu5B53XvN4QT9dBmZxPX4CWhBPPLguTZ9MMFeFa/Kg0xWVfylOVNlJji/E7yTZWFd/q9GO5TxDLq156D7g==}
-    engines: {node: '>= 4'}
-    dev: true
 
   /gensync@1.0.0-beta.2:
     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}
@@ -11774,7 +11560,6 @@ packages:
       chalk: 4.1.2
       filelist: 1.0.4
       minimatch: 3.1.2
-    dev: false
 
   /jest-changed-files@27.5.1:
     resolution: {integrity: sha512-buBLMiByfWGCoMsLLzGUUSpAmIAGnbR2KJoMN10ziLhOLvP4e0SlypHnAel8iqQXTrcbmfEY9sSqae5sgUsTvw==}
@@ -13247,75 +13032,6 @@ packages:
       - teacup
       - templayed
       - then-jade
-      - then-pug
-      - tinyliquid
-      - toffee
-      - twig
-      - twing
-      - underscore
-      - vash
-      - velocityjs
-      - walrus
-      - whiskers
-    dev: false
-
-  /koa-views@8.1.0(@babel/core@7.22.10)(@types/koa@2.13.8)(pug@3.0.2):
-    resolution: {integrity: sha512-sIkZeplf7YKg1+OjYuzxU5zQvzbfdwFKzD8XNLKFHRMFZXWBTW+S/WQwQ32fzZiJp1lPxz0QlzNJkkGu0NVIdg==}
-    deprecated: This package is deprecated, please use the new fork @ladjs/koa-views. Maintenance is supported by Forward Email at https://forwardemail.net ; follow/watch https://github.com/ladjs/koa-views for updates and release changelog
-    peerDependencies:
-      '@types/koa': ^2.13.1
-    peerDependenciesMeta:
-      '@types/koa':
-        optional: true
-    dependencies:
-      '@ladjs/consolidate': 1.0.1(@babel/core@7.22.10)(pug@3.0.2)
-      '@types/koa': 2.13.8
-      debug: 4.3.4(supports-color@8.1.1)
-      get-paths: 0.0.7
-      koa-send: 5.0.1
-      mz: 2.7.0
-      pretty: 2.0.0
-      resolve-path: 1.4.0
-    transitivePeerDependencies:
-      - '@babel/core'
-      - arc-templates
-      - atpl
-      - bracket-template
-      - coffee-script
-      - dot
-      - dust
-      - dustjs-helpers
-      - dustjs-linkedin
-      - eco
-      - ect
-      - ejs
-      - haml-coffee
-      - hamlet
-      - hamljs
-      - handlebars
-      - hogan.js
-      - htmling
-      - jazz
-      - jqtpl
-      - just
-      - liquid-node
-      - liquor
-      - lodash
-      - mote
-      - mustache
-      - nunjucks
-      - plates
-      - pug
-      - qejs
-      - ractive
-      - react
-      - react-dom
-      - slm
-      - supports-color
-      - swig
-      - swig-templates
-      - teacup
-      - templayed
       - then-pug
       - tinyliquid
       - toffee
@@ -16252,17 +15968,6 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: false
-
-  /redis@4.6.7:
-    resolution: {integrity: sha512-KrkuNJNpCwRm5vFJh0tteMxW8SaUzkm5fBH7eL5hd/D0fAkzvapxbfGPP/r+4JAXdQuX7nebsBkBqA2RHB7Usw==}
-    dependencies:
-      '@redis/bloom': 1.2.0(@redis/client@1.5.8)
-      '@redis/client': 1.5.8
-      '@redis/graph': 1.1.0(@redis/client@1.5.8)
-      '@redis/json': 1.0.4(@redis/client@1.5.8)
-      '@redis/search': 1.1.3(@redis/client@1.5.8)
-      '@redis/time-series': 1.0.4(@redis/client@1.5.8)
-    dev: true
 
   /reduce-css-calc@1.3.0:
     resolution: {integrity: sha512-0dVfwYVOlf/LBA2ec4OwQ6p3X9mYxn/wOl2xTcLwjnPYrkgEfPx3VI4eGCH3rQLlPISG5v9I9bkZosKsNRTRKA==}
