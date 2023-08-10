@@ -101,6 +101,33 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS note_by_renote_id AS
 	PRIMARY KEY ("renoteId", "createdAt", "createdAtDate", "userId")
 	WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
+CREATE TABLE IF NOT EXISTS home_feed (
+	"userId" ascii,
+	"fedAtDate" date,
+	"fedAt" timestamp,
+	"noteId" ascii,
+	"noteUserId" ascii,
+	"noteUserHost" text,
+	"replyUserId" ascii,
+	"replyUserHost" text,
+	"renoteUserId" ascii,
+	"renoteUserHost" text,
+	PRIMARY KEY (("userId", "fedAtDate"), "fedAt")
+) WITH CLUSTERING ORDER BY ("fedAt" DESC);
+
+CREATE TABLE IF NOT EXISTS local_feed (
+	"fedAtDate" date,
+	"fedAt" timestamp,
+	"noteId" ascii,
+	"noteUserId" ascii,
+	"noteUserHost" text,
+	"replyUserId" ascii,
+	"replyUserHost" text,
+	"renoteUserId" ascii,
+	"renoteUserHost" text,
+	PRIMARY KEY ("fedAtDate", "fedAt")
+) WITH CLUSTERING ORDER BY ("fedAt" DESC);
+
 CREATE TABLE IF NOT EXISTS reaction (
 	"id" text,
 	"noteId" ascii,
