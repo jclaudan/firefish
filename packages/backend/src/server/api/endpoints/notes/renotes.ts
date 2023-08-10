@@ -105,7 +105,7 @@ export default define(meta, paramDef, async (ps, user) => {
 		const foundPacked = [];
 		let untilDate: number | undefined;
 		while (foundPacked.length < ps.limit) {
-			const foundNotes = (await execNotePaginationQuery({...ps, untilDate}, filter)).slice(
+			const foundNotes = (await execNotePaginationQuery({...ps, untilDate}, filter, 1)).slice(
 				0,
 				ps.limit * 1.5,
 			); // Some may filtered out by Notes.packMany, thus we take more than ps.limit.
