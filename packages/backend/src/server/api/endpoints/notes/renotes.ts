@@ -61,27 +61,27 @@ export const paramDef = {
 } as const;
 
 export default define(meta, paramDef, async (ps, user) => {
-	const note = await getNote(ps.noteId, user).catch((err) => {
+	let followingUserIds: string[] = [];
+	if (user) {
+		followingUserIds = await LocalFollowingsCache.init(user.id).then((cache) =>
+			cache.getAll(),
+		);
+	}
+
+	const note = await getNote(ps.noteId, user, followingUserIds).catch((err) => {
 		if (err.id === "9725d0ce-ba28-4dde-95a7-2cbb2c15de24")
 			throw new ApiError(meta.errors.noSuchNote);
 		throw err;
 	});
 
 	if (scyllaClient) {
-		let [
-			followingUserIds,
-			mutedUserIds,
-			mutedInstances,
-			blockerIds,
-		]: string[][] = [];
+		let [mutedUserIds, mutedInstances, blockerIds]: string[][] = [];
 		if (user) {
-			[followingUserIds, mutedUserIds, mutedInstances, blockerIds] =
-				await Promise.all([
-					LocalFollowingsCache.init(user.id).then((cache) => cache.getAll()),
-					UserMutingsCache.init(user.id).then((cache) => cache.getAll()),
-					InstanceMutingsCache.init(user.id).then((cache) => cache.getAll()),
-					UserBlockedCache.init(user.id).then((cache) => cache.getAll()),
-				]);
+			[mutedUserIds, mutedInstances, blockerIds] = await Promise.all([
+				UserMutingsCache.init(user.id).then((cache) => cache.getAll()),
+				InstanceMutingsCache.init(user.id).then((cache) => cache.getAll()),
+				UserBlockedCache.init(user.id).then((cache) => cache.getAll()),
+			]);
 		}
 
 		const filter = async (notes: ScyllaNote[]) => {
@@ -105,10 +105,9 @@ export default define(meta, paramDef, async (ps, user) => {
 		const foundPacked = [];
 		let untilDate: number | undefined;
 		while (foundPacked.length < ps.limit) {
-			const foundNotes = (await execNotePaginationQuery({...ps, untilDate}, filter, 1)).slice(
-				0,
-				ps.limit * 1.5,
-			); // Some may filtered out by Notes.packMany, thus we take more than ps.limit.
+			const foundNotes = (
+				await execNotePaginationQuery({ ...ps, untilDate }, filter, 1)
+			).slice(0, ps.limit * 1.5); // Some may filtered out by Notes.packMany, thus we take more than ps.limit.
 			foundPacked.push(
 				...(await Notes.packMany(foundNotes, user, { scyllaNote: true })),
 			);

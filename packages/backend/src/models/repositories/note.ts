@@ -277,19 +277,18 @@ export const NoteRepository = db.getRepository(Note).extend({
 			emojis: noteEmoji,
 			tags: note.tags.length > 0 ? note.tags : undefined,
 			fileIds: note.fileIds,
-			files:
-				scyllaClient && foundScyllaNote
-					? (note as ScyllaNote).files.map((file) => ({
-							...file,
-							createdAt: file.createdAt.toISOString(),
-							properties: {
-								width: file.width ?? undefined,
-								height: file.height ?? undefined,
-							},
-							userId: null,
-							folderId: null,
-					  }))
-					: DriveFiles.packMany(note.fileIds),
+			files: scyllaClient
+				? (note as ScyllaNote).files.map((file) => ({
+						...file,
+						createdAt: file.createdAt.toISOString(),
+						properties: {
+							width: file.width ?? undefined,
+							height: file.height ?? undefined,
+						},
+						userId: null,
+						folderId: null,
+				  }))
+				: DriveFiles.packMany(note.fileIds),
 			replyId: note.replyId,
 			renoteId: note.renoteId,
 			channelId: note.channelId || undefined,
