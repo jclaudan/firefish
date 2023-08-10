@@ -944,10 +944,10 @@ importers:
         specifier: 1.4.0
         version: 1.4.0
       axios:
-        specifier: 1.4.0
-        version: 1.4.0
+        specifier: 1.2.2
+        version: 1.2.2
       dayjs:
-        specifier: ^1.11.9
+        specifier: ^1.11.7
         version: 1.11.9
       form-data:
         specifier: ^4.0.0
@@ -965,8 +965,8 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0
       socks-proxy-agent:
-        specifier: ^8.0.1
-        version: 8.0.1
+        specifier: ^7.0.0
+        version: 7.0.0
       typescript:
         specifier: 5.1.6
         version: 5.1.6
@@ -981,13 +981,13 @@ importers:
         specifier: 1.4.0
         version: 1.4.0
       '@types/core-js':
-        specifier: ^2.5.5
+        specifier: ^2.5.0
         version: 2.5.5
       '@types/form-data':
         specifier: ^2.5.0
         version: 2.5.0
       '@types/jest':
-        specifier: ^29.5.3
+        specifier: ^29.4.0
         version: 29.5.3
       '@types/node':
         specifier: 20.4.9
@@ -996,7 +996,7 @@ importers:
         specifier: ^0.4.0
         version: 0.4.0
       '@types/parse-link-header':
-        specifier: ^2.0.1
+        specifier: ^2.0.0
         version: 2.0.1
       '@types/uuid':
         specifier: ^9.0.0
@@ -1008,7 +1008,7 @@ importers:
         specifier: ^6.3.0
         version: 6.3.0(eslint@8.46.0)(typescript@5.1.6)
       eslint:
-        specifier: ^8.46.0
+        specifier: ^8.32.0
         version: 8.46.0
       eslint-config-prettier:
         specifier: ^9.0.0
@@ -1017,10 +1017,10 @@ importers:
         specifier: ^17.1.0
         version: 17.1.0(eslint-plugin-import@2.28.0)(eslint-plugin-n@16.0.1)(eslint-plugin-promise@6.1.1)(eslint@8.46.0)
       eslint-plugin-import:
-        specifier: ^2.28.0
+        specifier: ^2.27.5
         version: 2.28.0(@typescript-eslint/parser@6.3.0)(eslint@8.46.0)
       eslint-plugin-node:
-        specifier: ^11.1.0
+        specifier: ^11.0.0
         version: 11.1.0(eslint@8.46.0)
       eslint-plugin-prettier:
         specifier: ^5.0.0
@@ -1032,19 +1032,19 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(eslint@8.46.0)
       jest:
-        specifier: ^29.6.2
+        specifier: ^29.4.0
         version: 29.6.2(@types/node@20.4.9)
       jest-worker:
-        specifier: ^29.6.2
+        specifier: ^29.4.0
         version: 29.6.2
       lodash:
-        specifier: ^4.17.21
+        specifier: ^4.17.14
         version: 4.17.21
       prettier:
         specifier: ^3.0.1
         version: 3.0.1
       ts-jest:
-        specifier: ^29.1.1
+        specifier: ^29.0.5
         version: 29.1.1(@babel/core@7.22.10)(jest@29.6.2)(typescript@5.1.6)
       typedoc:
         specifier: ^0.24.8
@@ -3749,7 +3749,7 @@ packages:
   /@types/graceful-fs@4.1.6:
     resolution: {integrity: sha512-Sig0SNORX9fdW+bQuTEovKj3uHcUL6LQKbCrrqb1X7J6/ReAbhCXRAhc+SMejhLELFj2QcyuxmUooZ4bt5ReSw==}
     dependencies:
-      '@types/node': 20.3.1
+      '@types/node': 20.4.9
     dev: true
 
   /@types/gulp-rename@2.0.2:
@@ -5518,6 +5518,16 @@ packages:
     transitivePeerDependencies:
       - debug
     dev: true
+
+  /axios@1.2.2:
+    resolution: {integrity: sha512-bz/J4gS2S3I7mpN/YZfGFTqhXTYzRho8Ay38w2otuuDR322KzFIWm/4W2K6gIwvWaws5n+mnb7D1lN9uD+QH6Q==}
+    dependencies:
+      follow-redirects: 1.15.2(debug@4.3.4)
+      form-data: 4.0.0
+      proxy-from-env: 1.1.0
+    transitivePeerDependencies:
+      - debug
+    dev: false
 
   /axios@1.4.0:
     resolution: {integrity: sha512-S4XCWMEmzvo64T9GfvQDOXgYRDJ/wsSZc7Jvdgx5u1sd0JwsuPLqb3SYmusag+edF6ziyMensPVqLTSc1PiSEA==}
@@ -12633,7 +12643,7 @@ packages:
       content-disposition: 0.5.4
       content-type: 1.0.5
       cookies: 0.8.0
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.3.3
       delegates: 1.0.0
       depd: 2.0.0
       destroy: 1.2.0
@@ -16271,17 +16281,6 @@ packages:
     engines: {node: '>= 10'}
     dependencies:
       agent-base: 6.0.2
-      debug: 4.3.4(supports-color@8.1.1)
-      socks: 2.7.1
-    transitivePeerDependencies:
-      - supports-color
-    dev: false
-
-  /socks-proxy-agent@8.0.1:
-    resolution: {integrity: sha512-59EjPbbgg8U3x62hhKOFVAmySQUcfRQ4C7Q/D5sEHnZTQRrQlNKINks44DMR1gwXp0p4LaVIeccX2KHTTcHVqQ==}
-    engines: {node: '>= 14'}
-    dependencies:
-      agent-base: 7.1.0
       debug: 4.3.4(supports-color@8.1.1)
       socks: 2.7.1
     transitivePeerDependencies:
