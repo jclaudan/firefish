@@ -280,6 +280,8 @@ export function prepareNoteQuery(ps: {
 		queryParts.push(`AND "createdAt" > ?`);
 	}
 
+	queryParts.push("LIMIT 100");
+
 	const query = queryParts.join(" ");
 
 	return {

@@ -138,10 +138,20 @@ export default define(meta, paramDef, async (ps, user) => {
 			return filtered;
 		};
 
-		const foundNotes = await execNotePaginationQuery(ps, filter);
-		return await Notes.packMany(foundNotes.slice(0, ps.limit), user, {
-			scyllaNote: true,
-		});
+		const foundPacked = [];
+		while (foundPacked.length < ps.limit) {
+			const foundNotes = (await execNotePaginationQuery(ps, filter)).slice(
+				0,
+				ps.limit * 1.5,
+			); // Some may filtered out by Notes.packMany, thus we take more than ps.limit.
+			foundPacked.push(
+				...(await Notes.packMany(foundNotes, user, { scyllaNote: true })),
+			);
+			if (foundNotes.length < ps.limit) break;
+			ps.untilDate = foundNotes[foundNotes.length - 1].createdAt.getTime();
+		}
+
+		return foundPacked.slice(0, ps.limit);
 	}
 
 	//#region Construct query
