@@ -249,7 +249,7 @@ export function parseScyllaReaction(row: types.Row): ScyllaNoteReaction {
 	};
 }
 
-export function prepareTimelineQuery(ps: {
+export function prepareNoteQuery(ps: {
 	untilId?: string;
 	untilDate?: number;
 	sinceId?: string;
@@ -280,7 +280,6 @@ export function prepareTimelineQuery(ps: {
 		queryParts.push(`AND "createdAt" > ?`);
 	}
 
-	queryParts.push("LIMIT ?");
 	const query = queryParts.join(" ");
 
 	return {
@@ -304,7 +303,7 @@ export async function execNotePaginationQuery(
 ): Promise<ScyllaNote[]> {
 	if (!scyllaClient) return [];
 
-	let { query, untilDate, sinceDate } = prepareTimelineQuery(ps);
+	let { query, untilDate, sinceDate } = prepareNoteQuery(ps);
 
 	let scannedEmptyPartitions = 0;
 	const foundNotes: ScyllaNote[] = [];
@@ -313,13 +312,13 @@ export async function execNotePaginationQuery(
 	while (foundNotes.length < ps.limit && scannedEmptyPartitions < maxDays) {
 		const params: (Date | string | string[] | number)[] = [];
 		if (ps.noteId) {
-			params.push(ps.noteId);
+			params.push(ps.noteId, untilDate);
+		} else {
+			params.push(untilDate, untilDate);
 		}
-		params.push(untilDate, untilDate);
 		if (sinceDate) {
 			params.push(sinceDate);
 		}
-		params.push(ps.limit);
 
 		const result = await scyllaClient.execute(query, params, {
 			prepare: true,
