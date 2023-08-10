@@ -238,7 +238,7 @@ export interface ScyllaNoteReaction extends NoteReaction {
 	emoji: PopulatedEmoji;
 }
 
-const QUERY_LIMIT = 1000;
+const QUERY_LIMIT = 1000; // TODO: should this be configurable?
 
 export function parseScyllaReaction(row: types.Row): ScyllaNoteReaction {
 	return {
@@ -303,7 +303,7 @@ export async function execNotePaginationQuery(
 		noteId?: string;
 	},
 	filter?: (_: ScyllaNote[]) => Promise<ScyllaNote[]>,
-	maxPartitions = 30,
+	maxPartitions = config.scylla?.sparseTimelineDays ?? 14,
 ): Promise<ScyllaNote[]> {
 	if (!scyllaClient) return [];
 

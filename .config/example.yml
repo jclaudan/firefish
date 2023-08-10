@@ -64,6 +64,20 @@ db:
 #   keyspace: firefish
 #   replicationFactor: 1
 #   localDataCentre: "datacenter1"
+#
+#   # <sparseTimelineDays> determines how many days ScyllaDB searches posts within
+#   # one pagination when user's timelines are "sparse". As the user follows more
+#   # accounts and more posts appear in the feeds, user's timelines will no longer
+#   # be sparse.  The bigger this value is, the slower the responses of timeline
+#   # APIs would be.
+#   #
+#   # Let's say <sparseTimelineDays> is 14 and a user signed up and only created one
+#   # post. Suppose that this user follows no accounts, and created the second post
+#   # 15 days after signing up. In this case, the user's first post does not
+#   # appear in their home timeline.
+#   #
+#   # (default: 14)
+#   sparseTimelineDays: 14
 
 #   ┌─────────────────────┐
 #───┘ Redis configuration └─────────────────────────────────────

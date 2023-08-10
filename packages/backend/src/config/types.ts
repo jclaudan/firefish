@@ -22,6 +22,7 @@ export type Source = {
 		keyspace: string;
 		replicationFactor: number;
 		localDataCentre: string;
+		sparseTimelineDays?: number;
 	};
 	redis: {
 		host: string;
