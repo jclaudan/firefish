@@ -83,13 +83,22 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS note_by_id AS
 	PRIMARY KEY ("id", "createdAt", "createdAtDate")
 	WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
-CREATE MATERIALIZED VIEW IF NOT EXISTS note_by_userid AS
+CREATE MATERIALIZED VIEW IF NOT EXISTS note_by_user_id AS
 	SELECT * FROM note
 	WHERE "userId" IS NOT NULL
 	AND "createdAt" IS NOT NULL
 	AND "createdAtDate" IS NOT NULL
 	AND "id" IS NOT NULL
 	PRIMARY KEY ("userId", "createdAt", "createdAtDate", "id")
+	WITH CLUSTERING ORDER BY ("createdAt" DESC);
+
+CREATE MATERIALIZED VIEW IF NOT EXISTS note_by_renote_id AS
+	SELECT * FROM note
+	WHERE "renoteId" IS NOT NULL
+	AND "createdAt" IS NOT NULL
+	AND "createdAtDate" IS NOT NULL
+	AND "id" IS NOT NULL
+	PRIMARY KEY ("renoteId", "createdAt", "createdAtDate", "id")
 	WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
 CREATE TABLE IF NOT EXISTS reaction (
@@ -102,7 +111,7 @@ CREATE TABLE IF NOT EXISTS reaction (
 	PRIMARY KEY ("noteId", "userId") -- this key constraints one reaction per user for the same post
 );
 
-CREATE MATERIALIZED VIEW IF NOT EXISTS reaction_by_userid AS
+CREATE MATERIALIZED VIEW IF NOT EXISTS reaction_by_user_id AS
 	SELECT * FROM reaction
 	WHERE "userId" IS NOT NULL
 	AND "createdAt" IS NOT NULL

@@ -112,7 +112,8 @@ export const prepared = {
 			byUri: `SELECT * FROM note WHERE "uri" = ?`,
 			byUrl: `SELECT * FROM note WHERE "url" = ?`,
 			byId: `SELECT * FROM note_by_id WHERE "id" IN ?`,
-			byUserId: `SELECT * FROM note_by_userid WHERE "userId" IN ?`,
+			byUserId: `SELECT * FROM note_by_user_id WHERE "userId" IN ?`,
+			byRenoteId: `SELECT * FROM note_by_renote_id WHERE "renoteId" IN ?`,
 		},
 		delete: `DELETE FROM note WHERE "createdAtDate" = ? AND "createdAt" = ? AND "id" = ?`,
 		update: {
@@ -136,7 +137,7 @@ export const prepared = {
 			VALUES (?, ?, ?, ?, ?, ?)`,
 		select: {
 			byNoteId: `SELECT * FROM reaction_by_id WHERE "noteId" IN ?`,
-			byUserId: `SELECT * FROM reaction_by_userid WHERE "userId" IN ?`,
+			byUserId: `SELECT * FROM reaction_by_user_id WHERE "userId" IN ?`,
 			byNoteAndUser: `SELECT * FROM reaction WHERE "noteId" IN ? AND "userId" IN ?`,
 			byId: `SELECT * FROM reaction WHERE "id" IN ?`,
 		},
@@ -253,8 +254,13 @@ export function prepareTimelineQuery(ps: {
 	untilDate?: number;
 	sinceId?: string;
 	sinceDate?: number;
+	noteId?: string;
 }): { query: string; untilDate: Date; sinceDate: Date | null } {
-	const queryParts = [`${prepared.note.select.byDate} AND "createdAt" < ?`];
+	const queryParts = [
+		`${
+			ps.noteId ? prepared.note.select.byRenoteId : prepared.note.select.byDate
+		} AND "createdAt" < ?`,
+	];
 
 	let until = new Date();
 	if (ps.untilId) {
@@ -284,13 +290,14 @@ export function prepareTimelineQuery(ps: {
 	};
 }
 
-export async function execTimelineQuery(
+export async function execNotePaginationQuery(
 	ps: {
 		limit: number;
 		untilId?: string;
 		untilDate?: number;
 		sinceId?: string;
 		sinceDate?: number;
+		noteId?: string;
 	},
 	filter?: (_: ScyllaNote[]) => Promise<ScyllaNote[]>,
 	maxDays = 30,
@@ -304,11 +311,16 @@ export async function execTimelineQuery(
 
 	// Try to get posts of at most <maxDays> in the single request
 	while (foundNotes.length < ps.limit && scannedEmptyPartitions < maxDays) {
-		const params: (Date | string | string[] | number)[] = [untilDate, untilDate];
+		const params: (Date | string | string[] | number)[] = [];
+		if (ps.noteId) {
+			params.push(ps.noteId);
+		} else {
+			params.push(untilDate, untilDate);
+		}
 		if (sinceDate) {
 			params.push(sinceDate);
 		}
-		params.push(ps.limit)
+		params.push(ps.limit);
 
 		const result = await scyllaClient.execute(query, params, {
 			prepare: true,

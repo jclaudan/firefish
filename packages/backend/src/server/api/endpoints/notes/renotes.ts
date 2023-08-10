@@ -8,7 +8,7 @@ import { makePaginationQuery } from "../../common/make-pagination-query.js";
 import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
 import {
 	ScyllaNote,
-	execTimelineQuery,
+	execNotePaginationQuery,
 	filterBlockedUser,
 	filterMutedUser,
 	filterVisibility,
@@ -85,7 +85,7 @@ export default define(meta, paramDef, async (ps, user) => {
 		}
 
 		const filter = async (notes: ScyllaNote[]) => {
-			let filtered = notes.filter((n) => n.renoteId === note.id);
+			let filtered = notes;
 			if (ps.userId) {
 				filtered = filtered.filter((n) => n.userId === ps.userId);
 			}
@@ -102,7 +102,7 @@ export default define(meta, paramDef, async (ps, user) => {
 			return filtered;
 		};
 
-		const foundNotes = await execTimelineQuery(ps, filter, 1);
+		const foundNotes = await execNotePaginationQuery(ps, filter);
 		return await Notes.packMany(foundNotes.slice(0, ps.limit), user, {
 			scyllaNote: true,
 		});

@@ -11,7 +11,7 @@ import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
 import { generateMutedUserRenotesQueryForNotes } from "../../common/generated-muted-renote-query.js";
 import {
 	ScyllaNote,
-	execTimelineQuery,
+	execNotePaginationQuery,
 	filterBlockedUser,
 	filterMutedNote,
 	filterMutedRenotes,
@@ -138,7 +138,7 @@ export default define(meta, paramDef, async (ps, user) => {
 			return filtered;
 		};
 
-		const foundNotes = await execTimelineQuery(ps, filter);
+		const foundNotes = await execNotePaginationQuery(ps, filter);
 		return await Notes.packMany(foundNotes.slice(0, ps.limit), user, {
 			scyllaNote: true,
 		});
