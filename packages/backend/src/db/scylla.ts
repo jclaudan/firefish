@@ -303,7 +303,7 @@ export async function execNotePaginationQuery(
 		noteId?: string;
 	},
 	filter?: (_: ScyllaNote[]) => Promise<ScyllaNote[]>,
-	maxDays = 30,
+	maxPartitions = 30,
 ): Promise<ScyllaNote[]> {
 	if (!scyllaClient) return [];
 
@@ -312,8 +312,8 @@ export async function execNotePaginationQuery(
 	let scannedPartitions = 0;
 	const foundNotes: ScyllaNote[] = [];
 
-	// Try to get posts of at most <maxDays> in the single request
-	while (foundNotes.length < ps.limit && scannedPartitions < maxDays) {
+	// Try to get posts of at most <maxPartitions> in the single request
+	while (foundNotes.length < ps.limit && scannedPartitions < maxPartitions) {
 		const params: (Date | string | string[] | number)[] = [];
 		if (ps.noteId) {
 			params.push(ps.noteId, untilDate);
