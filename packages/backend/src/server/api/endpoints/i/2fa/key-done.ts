@@ -63,7 +63,7 @@ export default define(meta, paramDef, async (ps, user) => {
 	const clientDataJSONHash = hash(Buffer.from(ps.clientDataJSON, "utf-8"));
 
 	const attestation = decode(Buffer.from(ps.attestationObject, "utf-8"));
-	
+
 	const rpIdHash = attestation.authData.slice(0, 32);
 	if (!rpIdHashReal.equals(rpIdHash)) {
 		throw new Error("rpIdHash mismatch");
