@@ -115,20 +115,20 @@ export const prepared = {
 			byUserId: `SELECT * FROM note_by_user_id WHERE "userId" IN ?`,
 			byRenoteId: `SELECT * FROM note_by_renote_id WHERE "renoteId" = ?`,
 		},
-		delete: `DELETE FROM note WHERE "createdAtDate" = ? AND "createdAt" = ? AND "id" = ?`,
+		delete: `DELETE FROM note WHERE "createdAtDate" = ? AND "createdAt" = ? AND "userId" = ?`,
 		update: {
 			renoteCount: `UPDATE note SET
 				"renoteCount" = ?,
 				"score" = ?
-				WHERE "createdAtDate" = ? AND "createdAt" = ? AND "id" = ? IF EXISTS`,
+				WHERE "createdAtDate" = ? AND "createdAt" = ? AND "userId" = ? IF EXISTS`,
 			repliesCount: `UPDATE note SET
 				"repliesCount" = ?
-				WHERE "createdAtDate" = ? AND "createdAt" = ? AND "id" = ? IF EXISTS`,
+				WHERE "createdAtDate" = ? AND "createdAt" = ? AND "userId" = ? IF EXISTS`,
 			reactions: `UPDATE note SET
 				"emojis" = ?,
 				"reactions" = ?,
 				"score" = ?
-				WHERE "createdAtDate" = ? AND "createdAt" = ? AND "id" = ? IF EXISTS`,
+				WHERE "createdAtDate" = ? AND "createdAt" = ? AND "userId" = ? IF EXISTS`,
 		},
 	},
 	reaction: {
@@ -327,15 +327,9 @@ export async function execNotePaginationQuery(
 		if (result.rowLength === 0) {
 			// Reached the end of partition. Queries posts created one day before.
 			scannedEmptyPartitions++;
-			untilDate = new Date(
-				untilDate.getFullYear(),
-				untilDate.getMonth(),
-				untilDate.getDate() - 1,
-				23,
-				59,
-				59,
-				999,
-			);
+			const yesterday = new Date(untilDate.getTime() - 86400000);
+			yesterday.setUTCHours(23, 59, 59, 999);
+			untilDate = yesterday;
 			if (sinceDate && untilDate < sinceDate) break;
 
 			continue;

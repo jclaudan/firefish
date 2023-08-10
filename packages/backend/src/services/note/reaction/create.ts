@@ -116,7 +116,7 @@ export default async (
 				(note.score ?? 0) + 1,
 				date,
 				date,
-				note.id,
+				note.userId,
 			],
 			{ prepare: true },
 		);

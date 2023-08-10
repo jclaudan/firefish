@@ -67,7 +67,7 @@ export default async (
 				Math.max((note.score ?? 0) - 1, 0),
 				date,
 				date,
-				note.id,
+				note.userId,
 			],
 			{ prepare: true },
 		);

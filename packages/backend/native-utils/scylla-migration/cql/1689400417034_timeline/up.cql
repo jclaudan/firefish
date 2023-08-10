@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS note ( -- Models timeline
 	"reactions" map<text, int>, -- Reactions
 	"noteEdit" set<frozen<note_edit_history>>, -- Edit History
 	"updatedAt" timestamp,
-	PRIMARY KEY ("createdAtDate", "createdAt", "id")
+	PRIMARY KEY ("createdAtDate", "createdAt", "userId")
 ) WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
 CREATE INDEX IF NOT EXISTS note_by_uri ON note ("uri");
@@ -80,7 +80,8 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS note_by_id AS
 	WHERE "id" IS NOT NULL
 	AND "createdAt" IS NOT NULL
 	AND "createdAtDate" IS NOT NULL
-	PRIMARY KEY ("id", "createdAt", "createdAtDate")
+	AND "userId" IS NOT NULL
+	PRIMARY KEY ("id", "createdAt", "createdAtDate", "userId")
 	WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS note_by_user_id AS
@@ -88,8 +89,7 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS note_by_user_id AS
 	WHERE "userId" IS NOT NULL
 	AND "createdAt" IS NOT NULL
 	AND "createdAtDate" IS NOT NULL
-	AND "id" IS NOT NULL
-	PRIMARY KEY ("userId", "createdAt", "createdAtDate", "id")
+	PRIMARY KEY ("userId", "createdAt", "createdAtDate")
 	WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS note_by_renote_id AS
@@ -97,8 +97,8 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS note_by_renote_id AS
 	WHERE "renoteId" IS NOT NULL
 	AND "createdAt" IS NOT NULL
 	AND "createdAtDate" IS NOT NULL
-	AND "id" IS NOT NULL
-	PRIMARY KEY ("renoteId", "createdAt", "createdAtDate", "id")
+	AND "userId" IS NOT NULL
+	PRIMARY KEY ("renoteId", "createdAt", "createdAtDate", "userId")
 	WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
 CREATE TABLE IF NOT EXISTS reaction (
