@@ -121,7 +121,7 @@ export const prepared = {
 				"score" = ?
 				WHERE "createdAtDate" = ? AND "createdAt" = ? AND "id" = ? IF EXISTS`,
 			repliesCount: `UPDATE note SET
-				"repliesCount" = ?,
+				"repliesCount" = ?
 				WHERE "createdAtDate" = ? AND "createdAt" = ? AND "id" = ? IF EXISTS`,
 			reactions: `UPDATE note SET
 				"emojis" = ?,

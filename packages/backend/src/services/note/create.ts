@@ -681,15 +681,11 @@ async function renderNoteOrRenoteActivity(data: Option, note: Note) {
 
 async function incRenoteCount(renote: Note) {
 	if (scyllaClient) {
+		const count = isNaN(renote.renoteCount) ? 0 : renote.renoteCount;
+		const score = isNaN(renote.score) ? 0 : renote.score;
 		await scyllaClient.execute(
 			prepared.note.update.renoteCount,
-			[
-				renote.renoteCount + 1,
-				renote.score + 1,
-				renote.createdAt,
-				renote.createdAt,
-				renote.id,
-			],
+			[count + 1, score + 1, renote.createdAt, renote.createdAt, renote.id],
 			{ prepare: true },
 		);
 	} else {
@@ -1003,9 +999,10 @@ async function createMentionedEvents(
 
 async function saveReply(reply: Note) {
 	if (scyllaClient) {
+		const count = isNaN(reply.repliesCount) ? 0 : reply.repliesCount;
 		await scyllaClient.execute(
 			prepared.note.update.repliesCount,
-			[reply.repliesCount + 1, reply.createdAt, reply.createdAt, reply.id],
+			[count + 1, reply.createdAt, reply.createdAt, reply.id],
 			{ prepare: true },
 		);
 	} else {
