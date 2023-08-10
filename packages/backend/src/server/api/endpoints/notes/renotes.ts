@@ -86,6 +86,9 @@ export default define(meta, paramDef, async (ps, user) => {
 
 		const filter = async (notes: ScyllaNote[]) => {
 			let filtered = notes.filter((n) => n.renoteId === note.id);
+			if (ps.userId) {
+				filtered = notes.filter((n) => n.userId === ps.userId);
+			}
 			filtered = await filterVisibility(filtered, user, followingUserIds);
 			if (user) {
 				filtered = await filterMutedUser(
