@@ -196,7 +196,6 @@ export const NoteRepository = db.getRepository(Note).extend({
 
 		const meId = me ? me.id : null;
 		let note: Note | null = null;
-		let foundScyllaNote = false;
 		const isSrcNote = typeof src === "object";
 
 		// Always lookup from ScyllaDB if enabled
@@ -212,11 +211,8 @@ export const NoteRepository = db.getRepository(Note).extend({
 				);
 				if (result.rowLength > 0) {
 					note = parseScyllaNote(result.first());
-					foundScyllaNote = true;
 				}
-			}
-			if (!foundScyllaNote) {
-				// Fallback to Postgres
+			} else {
 				note = await this.findOneBy({ id: noteId });
 			}
 		}

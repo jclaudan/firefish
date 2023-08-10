@@ -33,10 +33,7 @@ export async function getNote(
 				note = filtered[0];
 			}
 		}
-	}
-
-	// Fallback to Postgres
-	if (!note) {
+	} else {
 		const query = Notes.createQueryBuilder("note").where("note.id = :id", {
 			id: noteId,
 		});
