@@ -113,7 +113,7 @@ export const prepared = {
 			byUrl: `SELECT * FROM note WHERE "url" = ?`,
 			byId: `SELECT * FROM note_by_id WHERE "id" IN ?`,
 			byUserId: `SELECT * FROM note_by_user_id WHERE "userId" IN ?`,
-			byRenoteId: `SELECT * FROM note_by_renote_id WHERE "renoteId" IN ?`,
+			byRenoteId: `SELECT * FROM note_by_renote_id WHERE "renoteId" = ?`,
 		},
 		delete: `DELETE FROM note WHERE "createdAtDate" = ? AND "createdAt" = ? AND "id" = ?`,
 		update: {
@@ -314,9 +314,8 @@ export async function execNotePaginationQuery(
 		const params: (Date | string | string[] | number)[] = [];
 		if (ps.noteId) {
 			params.push(ps.noteId);
-		} else {
-			params.push(untilDate, untilDate);
 		}
+		params.push(untilDate, untilDate);
 		if (sinceDate) {
 			params.push(sinceDate);
 		}
