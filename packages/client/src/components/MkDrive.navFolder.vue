@@ -15,24 +15,24 @@
 
 <script lang="ts" setup>
 import { ref } from "vue";
-import type * as Misskey from "firefish-js";
+import type * as Firefish from "firefish-js";
 import * as os from "@/os";
 import { i18n } from "@/i18n";
 
 const props = defineProps<{
-	folder?: Misskey.entities.DriveFolder;
-	parentFolder: Misskey.entities.DriveFolder | null;
+	folder?: Firefish.entities.DriveFolder;
+	parentFolder: Firefish.entities.DriveFolder | null;
 }>();
 
 const emit = defineEmits<{
-	(ev: "move", v?: Misskey.entities.DriveFolder): void;
+	(ev: "move", v?: Firefish.entities.DriveFolder): void;
 	(
 		ev: "upload",
 		file: File,
-		folder?: Misskey.entities.DriveFolder | null,
+		folder?: Firefish.entities.DriveFolder | null,
 	): void;
-	(ev: "removeFile", v: Misskey.entities.DriveFile["id"]): void;
-	(ev: "removeFolder", v: Misskey.entities.DriveFolder["id"]): void;
+	(ev: "removeFile", v: Firefish.entities.DriveFile["id"]): void;
+	(ev: "removeFolder", v: Firefish.entities.DriveFolder["id"]): void;
 }>();
 
 const hover = ref(false);

@@ -134,14 +134,14 @@
 							<FormLink to="/@aqz@p1.a9z.dev"
 								><Mfm :text="'@aqz@p1.a9z.dev'"
 							/></FormLink>
-							<FormLink to="/@ac@misskey.cloud"
-								><Mfm :text="'@ac@misskey.cloud'"
+							<FormLink to="/@ac@firefish.cloud"
+								><Mfm :text="'@ac@firefish.cloud'"
 							/></FormLink>
 							<FormLink to="/@rinsuki@mstdn.rinsuki.net"
 								><Mfm :text="'@rinsuki@mstdn.rinsuki.net'"
 							/></FormLink>
-							<FormLink to="/@mei23@misskey.m544.net"
-								><Mfm :text="'@mei23@misskey.m544.net'"
+							<FormLink to="/@mei23@firefish.m544.net"
+								><Mfm :text="'@mei23@firefish.m544.net'"
 							/></FormLink>
 							<FormLink to="/@robflop@misskey.io"
 								><Mfm :text="'@robflop@misskey.io'"

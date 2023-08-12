@@ -37,7 +37,7 @@
 
 <script lang="ts" setup>
 import { ref } from "vue";
-import type * as Misskey from "firefish-js";
+import type * as Firefish from "firefish-js";
 import XDrive from "@/components/MkDrive.vue";
 import XModalWindow from "@/components/MkModalWindow.vue";
 import number from "@/filters/number";
@@ -54,13 +54,13 @@ withDefaults(
 );
 
 const emit = defineEmits<{
-	(ev: "done", r?: Misskey.entities.DriveFile[]): void;
+	(ev: "done", r?: Firefish.entities.DriveFile[]): void;
 	(ev: "closed"): void;
 }>();
 
 const dialog = ref<InstanceType<typeof XModalWindow>>();
 
-const selected = ref<Misskey.entities.DriveFile[]>([]);
+const selected = ref<Firefish.entities.DriveFile[]>([]);
 
 function ok() {
 	emit("done", selected.value);
@@ -72,7 +72,7 @@ function cancel() {
 	dialog.value?.close();
 }
 
-function onChangeSelection(files: Misskey.entities.DriveFile[]) {
+function onChangeSelection(files: Firefish.entities.DriveFile[]) {
 	selected.value = files;
 }
 </script>

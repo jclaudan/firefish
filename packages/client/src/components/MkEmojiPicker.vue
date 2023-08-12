@@ -164,7 +164,7 @@
 
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch } from "vue";
-import type * as Misskey from "firefish-js";
+import type * as Firefish from "firefish-js";
 import { FocusTrap } from "focus-trap-vue";
 import XSection from "@/components/MkEmojiPicker.section.vue";
 import type { UnicodeEmojiDef } from "@/scripts/emojilist";
@@ -240,7 +240,7 @@ const height = computed(() =>
 const customEmojiCategories = emojiCategories;
 const customEmojis = instance.emojis;
 const q = ref<string | null>(null);
-const searchResultCustom = ref<Misskey.entities.CustomEmoji[]>([]);
+const searchResultCustom = ref<Firefish.entities.CustomEmoji[]>([]);
 const searchResultUnicode = ref<UnicodeEmojiDef[]>([]);
 const tab = ref<"index" | "custom" | "unicode" | "tags">("index");
 
@@ -258,7 +258,7 @@ watch(q, () => {
 	const searchCustom = () => {
 		const max = 16;
 		const emojis = customEmojis;
-		const matches = new Set<Misskey.entities.CustomEmoji>();
+		const matches = new Set<Firefish.entities.CustomEmoji>();
 
 		const exactMatch = emojis.find((emoji) => emoji.name === newQ);
 		if (exactMatch) matches.add(exactMatch);
@@ -419,7 +419,7 @@ function reset() {
 }
 
 function getKey(
-	emoji: string | Misskey.entities.CustomEmoji | UnicodeEmojiDef,
+	emoji: string | Firefish.entities.CustomEmoji | UnicodeEmojiDef,
 ): string {
 	return typeof emoji === "string" ? emoji : emoji.emoji || `:${emoji.name}:`;
 }

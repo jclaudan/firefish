@@ -56,7 +56,7 @@
 
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch } from "vue";
-import type * as Misskey from "firefish-js";
+import type * as Firefish from "firefish-js";
 import autosize from "autosize";
 // import insertTextAtCursor from 'insert-text-at-cursor';
 import { throttle } from "throttle-debounce";
@@ -70,15 +70,15 @@ import { i18n } from "@/i18n";
 import { uploadFile } from "@/scripts/upload";
 
 const props = defineProps<{
-	user?: Misskey.entities.UserDetailed | null;
-	group?: Misskey.entities.UserGroup | null;
+	user?: Firefish.entities.UserDetailed | null;
+	group?: Firefish.entities.UserGroup | null;
 }>();
 
 const textEl = ref<HTMLTextAreaElement>();
 const fileEl = ref<HTMLInputElement>();
 
 const text = ref<string>("");
-const file = ref<Misskey.entities.DriveFile | null>(null);
+const file = ref<Firefish.entities.DriveFile | null>(null);
 const sending = ref(false);
 const typing = throttle(3000, () => {
 	stream.send(

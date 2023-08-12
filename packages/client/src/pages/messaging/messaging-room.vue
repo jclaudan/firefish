@@ -105,7 +105,7 @@ import {
 	ref,
 	watch,
 } from "vue";
-import type * as Misskey from "firefish-js";
+import type * as Firefish from "firefish-js";
 import * as Acct from "firefish-js/built/acct";
 import XMessage from "./messaging-room.message.vue";
 import XForm from "./messaging-room.form.vue";
@@ -135,11 +135,11 @@ const formEl = ref<InstanceType<typeof XForm>>();
 const pagingComponent = ref<InstanceType<typeof MkPagination>>();
 
 const fetching = ref(true);
-const user: Misskey.entities.UserDetailed | null = ref(null);
-const group: Misskey.entities.UserGroup | null = ref(null);
-const typers: Misskey.entities.User[] = ref([]);
-const connection: Misskey.ChannelConnection<
-	Misskey.Channels["messaging"]
+const user: Firefish.entities.UserDetailed | null = ref(null);
+const group: Firefish.entities.UserGroup | null = ref(null);
+const typers: Firefish.entities.User[] = ref([]);
+const connection: Firefish.ChannelConnection<
+	Firefish.Channels["messaging"]
 > | null = ref(null);
 const showIndicator = ref(false);
 const { animation } = defaultStore.reactiveState;

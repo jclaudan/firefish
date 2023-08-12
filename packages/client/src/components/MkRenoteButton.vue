@@ -22,7 +22,7 @@
 
 <script lang="ts" setup>
 import { computed, ref } from "vue";
-import type * as misskey from "firefish-js";
+import type * as firefish from "firefish-js";
 import Ripple from "@/components/MkRipple.vue";
 import XDetails from "@/components/MkUsersTooltip.vue";
 import { pleaseLogin } from "@/scripts/please-login";
@@ -34,7 +34,7 @@ import { defaultStore } from "@/store";
 import type { MenuItem } from "@/types/menu";
 
 const props = defineProps<{
-	note: misskey.entities.Note;
+	note: firefish.entities.Note;
 	count: number;
 	detailedView?;
 }>();

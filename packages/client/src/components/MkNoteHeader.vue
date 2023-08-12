@@ -49,7 +49,7 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 
-import type * as misskey from "firefish-js";
+import type * as firefish from "firefish-js";
 import { defaultStore } from "@/store";
 import MkVisibility from "@/components/MkVisibility.vue";
 import MkInstanceTicker from "@/components/MkInstanceTicker.vue";
@@ -58,7 +58,7 @@ import { userPage } from "@/filters/user";
 import { i18n } from "@/i18n";
 
 const props = defineProps<{
-	note: misskey.entities.Note;
+	note: firefish.entities.Note;
 	pinned?: boolean;
 }>();
 

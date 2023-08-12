@@ -1,10 +1,10 @@
-import * as Misskey from "firefish-js";
+import * as Firefish from "firefish-js";
 import { markRaw } from "vue";
 import { $i } from "@/account";
 import { url } from "@/config";
 
 export const stream = markRaw(
-	new Misskey.Stream(
+	new Firefish.Stream(
 		url,
 		$i
 			? {

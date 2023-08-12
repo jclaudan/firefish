@@ -8,10 +8,10 @@
 
 <script lang="ts" setup>
 import { ref } from "vue";
-import type * as Misskey from "firefish-js";
+import type * as Firefish from "firefish-js";
 import * as os from "@/os";
 
-const meta = ref<Misskey.entities.DetailedInstanceMetadata>();
+const meta = ref<Firefish.entities.DetailedInstanceMetadata>();
 
 os.api("meta", { detail: true }).then((gotMeta) => {
 	meta.value = gotMeta;
