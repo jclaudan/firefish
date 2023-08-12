@@ -113,7 +113,7 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS global_timeline AS
 	AND "createdAt" IS NOT NULL
 	AND "userId" IS NOT NULL
 	AND "userHost" IS NOT NULL
-	AND "visibility" = "public"
+	AND "visibility" = 'public'
 	PRIMARY KEY ("createdAtDate", "createdAt", "userId", "userHost", "visibility");
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS local_timeline AS
@@ -121,8 +121,8 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS local_timeline AS
 	WHERE "createdAtDate" IS NOT NULL
 	AND "createdAt" IS NOT NULL
 	AND "userId" IS NOT NULL
-	AND "userHost" = "local"
-	AND "visibility" = "public"
+	AND "userHost" = 'local'
+	AND "visibility" = 'public'
 	PRIMARY KEY ("createdAtDate", "createdAt", "userId", "userHost", "visibility");
 
 CREATE TABLE IF NOT EXISTS home_timeline (
