@@ -125,7 +125,7 @@ export default define(meta, paramDef, async (ps, user) => {
 			UserBlockedCache.init(user.id).then((cache) => cache.getAll()),
 			RenoteMutingsCache.init(user.id).then((cache) => cache.getAll()),
 		]);
-		const validUserIds = [user.id].concat(followingUserIds);
+		const validUserIds = [user.id, ...followingUserIds];
 		const optFilter = (n: ScyllaNote) =>
 			!n.renoteId || !!n.text || n.files.length > 0 || n.hasPoll;
 
@@ -167,10 +167,13 @@ export default define(meta, paramDef, async (ps, user) => {
 
 		const foundPacked = [];
 		while (foundPacked.length < ps.limit) {
-			const foundNotes = (await execNotePaginationQuery("global", ps, filter)).slice(
-				0,
-				ps.limit * 1.5,
-			); // Some may filtered out by Notes.packMany, thus we take more than ps.limit.
+			const [homeFoundNotes, localFoundNotes] = await Promise.all([
+				execNotePaginationQuery("home", ps, filter, user.id),
+				execNotePaginationQuery("local", ps, filter),
+			]);
+			const foundNotes = [...homeFoundNotes, ...localFoundNotes]
+				.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+				.slice(0, ps.limit * 1.5); // Some may be filtered out by Notes.packMany, thus we take more than ps.limit.
 			foundPacked.push(
 				...(await Notes.packMany(foundNotes, user, { scyllaNote: true })),
 			);
