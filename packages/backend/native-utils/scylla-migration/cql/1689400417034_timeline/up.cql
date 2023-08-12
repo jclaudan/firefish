@@ -114,7 +114,8 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS global_timeline AS
 	AND "userId" IS NOT NULL
 	AND "userHost" IS NOT NULL
 	AND "visibility" = 'public'
-	PRIMARY KEY ("createdAtDate", "createdAt", "userId", "userHost", "visibility");
+	PRIMARY KEY ("createdAtDate", "createdAt", "userId", "userHost", "visibility")
+	WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS local_timeline AS
 	SELECT * FROM note
@@ -123,7 +124,8 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS local_timeline AS
 	AND "userId" IS NOT NULL
 	AND "userHost" = 'local'
 	AND "visibility" = 'public'
-	PRIMARY KEY ("createdAtDate", "createdAt", "userId", "userHost", "visibility");
+	PRIMARY KEY ("createdAtDate", "createdAt", "userId", "userHost", "visibility")
+	WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
 CREATE TABLE IF NOT EXISTS home_timeline (
 	"feedUserId" ascii, -- For partitioning

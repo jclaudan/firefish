@@ -172,7 +172,7 @@ export default define(meta, paramDef, async (ps, user) => {
 				execNotePaginationQuery("local", ps, filter),
 			]);
 			const foundNotes = [...homeFoundNotes, ...localFoundNotes]
-				.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+				.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()) // Descendent
 				.slice(0, ps.limit * 1.5); // Some may be filtered out by Notes.packMany, thus we take more than ps.limit.
 			foundPacked.push(
 				...(await Notes.packMany(foundNotes, user, { scyllaNote: true })),
