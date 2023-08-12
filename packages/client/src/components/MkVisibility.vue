@@ -26,6 +26,7 @@
 
 <script lang="ts" setup>
 import { ref } from "vue";
+
 import XDetails from "@/components/MkUsersTooltip.vue";
 import * as os from "@/os";
 import { useTooltip } from "@/scripts/use-tooltip";
@@ -39,10 +40,10 @@ const props = defineProps<{
 	};
 }>();
 
-const specified = $ref<HTMLElement>();
+const specified = ref<HTMLElement>();
 
 if (props.note.visibility === "specified") {
-	useTooltip($$(specified), async (showing) => {
+	useTooltip(specified, async (showing) => {
 		const users = await os.api("users/show", {
 			userIds: props.note.visibleUserIds,
 			limit: 10,
@@ -54,7 +55,7 @@ if (props.note.visibility === "specified") {
 				showing,
 				users,
 				count: props.note.visibleUserIds.length,
-				targetElement: specified,
+				targetElement: specified.value,
 			},
 			{},
 			"closed",

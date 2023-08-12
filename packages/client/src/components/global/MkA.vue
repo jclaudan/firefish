@@ -10,11 +10,12 @@
 </template>
 
 <script lang="ts" setup>
-import { inject } from "vue";
+import { computed } from "vue";
+
 import * as os from "@/os";
 import copyToClipboard from "@/scripts/copy-to-clipboard";
 import { url } from "@/config";
-import { popout as popout_ } from "@/scripts/popout";
+// import { popout as popout_ } from "@/scripts/popout";
 import { i18n } from "@/i18n";
 import { useRouter } from "@/router";
 
@@ -32,7 +33,7 @@ const props = withDefaults(
 
 const router = useRouter();
 
-const active = $computed(() => {
+const active = computed(() => {
 	if (props.activeClass == null) return false;
 	const resolved = router.resolve(props.to);
 	if (resolved == null) return false;
@@ -93,9 +94,9 @@ function modalWindow() {
 	os.modalPageWindow(props.to);
 }
 
-function popout() {
-	popout_(props.to);
-}
+// function popout() {
+// 	popout_(props.to);
+// }
 
 function nav(ev: MouseEvent) {
 	if (!ev.ctrlKey && props.behavior !== "browser") {

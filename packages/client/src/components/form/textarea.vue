@@ -43,7 +43,6 @@ import {
 	defineComponent,
 	nextTick,
 	onMounted,
-	onUnmounted,
 	ref,
 	toRefs,
 	watch,
@@ -157,7 +156,7 @@ export default defineComponent({
 			v.value = newValue;
 		});
 
-		watch($$(v), () => {
+		watch(v, () => {
 			if (!props.manualSave) {
 				if (props.debounce) {
 					debouncedUpdated();

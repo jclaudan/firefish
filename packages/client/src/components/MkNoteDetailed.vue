@@ -150,22 +150,12 @@
 </template>
 
 <script lang="ts" setup>
-import {
-	computed,
-	inject,
-	onMounted,
-	onUnmounted,
-	onUpdated,
-	reactive,
-	ref,
-} from "vue";
+import { onMounted, onUnmounted, onUpdated, ref } from "vue";
 import * as misskey from "firefish-js";
 import MkTab from "@/components/MkTab.vue";
 import MkNote from "@/components/MkNote.vue";
 import MkNoteSub from "@/components/MkNoteSub.vue";
-import XStarButton from "@/components/MkStarButton.vue";
 import XRenoteButton from "@/components/MkRenoteButton.vue";
-import MkPagination from "@/components/MkPagination.vue";
 import MkUserCardMini from "@/components/MkUserCardMini.vue";
 import MkReactedUsers from "@/components/MkReactedUsers.vue";
 import { pleaseLogin } from "@/scripts/please-login";
@@ -181,16 +171,15 @@ import { useNoteCapture } from "@/scripts/use-note-capture";
 import { deepClone } from "@/scripts/clone";
 import { stream } from "@/stream";
 import { NoteUpdatedEvent } from "firefish-js/built/streaming.types";
-import appear from "@/directives/appear";
 
 const props = defineProps<{
 	note: misskey.entities.Note;
 	pinned?: boolean;
 }>();
 
-let tab = $ref("replies");
+let tab = ref("replies");
 
-let note = $ref(deepClone(props.note));
+let note = ref(deepClone(props.note));
 
 const softMuteReasonI18nSrc = (what?: string) => {
 	if (what === "note") return i18n.ts.userSaysSomethingReason;
@@ -205,30 +194,32 @@ const softMuteReasonI18nSrc = (what?: string) => {
 // plugin
 if (noteViewInterruptors.length > 0) {
 	onMounted(async () => {
-		let result = deepClone(note);
+		let result = deepClone(note.value);
 		for (const interruptor of noteViewInterruptors) {
 			result = await interruptor.handler(result);
 		}
-		note = result;
+		note.value = result;
 	});
 }
 
 const el = ref<HTMLElement>();
-const noteEl = $ref();
+const noteEl = ref();
 const menuButton = ref<HTMLElement>();
 const renoteButton = ref<InstanceType<typeof XRenoteButton>>();
 const reactButton = ref<HTMLElement>();
 const showContent = ref(false);
 const isDeleted = ref(false);
-const muted = ref(getWordSoftMute(note, $i, defaultStore.state.mutedWords));
+const muted = ref(
+	getWordSoftMute(note.value, $i, defaultStore.state.mutedWords),
+);
 const translation = ref(null);
 const translating = ref(false);
-let conversation = $ref<null | misskey.entities.Note[]>([]);
+let conversation = ref<null | misskey.entities.Note[]>([]);
 const replies = ref<misskey.entities.Note[]>([]);
-let directReplies = $ref<null | misskey.entities.Note[]>([]);
-let directQuotes = $ref<null | misskey.entities.Note[]>([]);
-let clips = $ref();
-let renotes = $ref();
+let directReplies = ref<null | misskey.entities.Note[]>([]);
+let directQuotes = ref<null | misskey.entities.Note[]>([]);
+let clips = ref();
+let renotes = ref();
 let isScrolling;
 
 const reactionsCount = Object.values(props.note.reactions).reduce(
@@ -247,14 +238,14 @@ const keymap = {
 
 useNoteCapture({
 	rootEl: el,
-	note: $$(note),
+	note: note,
 	isDeletedRef: isDeleted,
 });
 
 function reply(viaKeyboard = false): void {
 	pleaseLogin();
 	os.post({
-		reply: note,
+		reply: note.value,
 		animation: !viaKeyboard,
 	}).then(() => {
 		focus();
@@ -268,7 +259,7 @@ function react(viaKeyboard = false): void {
 		reactButton.value,
 		(reaction) => {
 			os.api("notes/reactions/create", {
-				noteId: note.id,
+				noteId: note.value.id,
 				reaction: reaction,
 			});
 		},
@@ -302,7 +293,7 @@ function onContextmenu(ev: MouseEvent): void {
 	} else {
 		os.contextMenu(
 			getNoteMenu({
-				note: note,
+				note: note.value,
 				translating,
 				translation,
 				menuButton,
@@ -316,7 +307,7 @@ function onContextmenu(ev: MouseEvent): void {
 function menu(viaKeyboard = false): void {
 	os.popupMenu(
 		getNoteMenu({
-			note: note,
+			note: note.value,
 			translating,
 			translation,
 			menuButton,
@@ -330,48 +321,50 @@ function menu(viaKeyboard = false): void {
 }
 
 function focus() {
-	noteEl.focus();
+	noteEl.value.focus();
 }
 
 function blur() {
-	noteEl.blur();
+	noteEl.value.blur();
 }
 
-directReplies = null;
+directReplies.value = null;
 os.api("notes/children", {
-	noteId: note.id,
+	noteId: note.value.id,
 	limit: 30,
 	depth: 12,
 }).then((res) => {
 	res = res.reduce((acc, resNote) => {
-		if (resNote.userId == note.userId) {
+		if (resNote.userId == note.value.userId) {
 			return [...acc, resNote];
 		}
 		return [resNote, ...acc];
 	}, []);
 	replies.value = res;
-	directReplies = res
-		.filter((resNote) => resNote.replyId === note.id)
+	directReplies.value = res
+		.filter((resNote) => resNote.replyId === note.value.id)
 		.reverse();
-	directQuotes = res.filter((resNote) => resNote.renoteId === note.id);
+	directQuotes.value = res.filter(
+		(resNote) => resNote.renoteId === note.value.id,
+	);
 });
 
-conversation = null;
-if (note.replyId) {
+conversation.value = null;
+if (note.value.replyId) {
 	os.api("notes/conversation", {
-		noteId: note.replyId,
+		noteId: note.value.replyId,
 		limit: 30,
 	}).then((res) => {
-		conversation = res.reverse();
+		conversation.value = res.reverse();
 		focus();
 	});
 }
 
-clips = null;
+clips.value = null;
 os.api("notes/clips", {
-	noteId: note.id,
+	noteId: note.value.id,
 }).then((res) => {
-	clips = res;
+	clips.value = res;
 });
 
 // const pagination = {
@@ -382,14 +375,14 @@ os.api("notes/clips", {
 
 // const pagingComponent = $ref<InstanceType<typeof MkPagination>>();
 
-renotes = null;
+renotes.value = null;
 function loadTab() {
-	if (tab === "renotes" && !renotes) {
+	if (tab.value === "renotes" && !renotes.value) {
 		os.api("notes/renotes", {
-			noteId: note.id,
+			noteId: note.value.id,
 			limit: 100,
 		}).then((res) => {
-			renotes = res;
+			renotes.value = res;
 		});
 	}
 }
@@ -398,7 +391,7 @@ async function onNoteUpdated(noteData: NoteUpdatedEvent): Promise<void> {
 	const { type, id, body } = noteData;
 
 	let found = -1;
-	if (id === note.id) {
+	if (id === note.value.id) {
 		found = 0;
 	} else {
 		for (let i = 0; i < replies.value.length; i++) {
@@ -423,7 +416,7 @@ async function onNoteUpdated(noteData: NoteUpdatedEvent): Promise<void> {
 
 			replies.value.splice(found, 0, replyNote);
 			if (found === 0) {
-				directReplies.push(replyNote);
+				directReplies.value.push(replyNote);
 			}
 			break;
 
@@ -444,12 +437,12 @@ document.addEventListener("wheel", () => {
 onMounted(() => {
 	stream.on("noteUpdated", onNoteUpdated);
 	isScrolling = false;
-	noteEl.scrollIntoView();
+	noteEl.value.scrollIntoView();
 });
 
 onUpdated(() => {
 	if (!isScrolling) {
-		noteEl.scrollIntoView();
+		noteEl.value.scrollIntoView();
 		if (location.hash) {
 			location.replace(location.hash); // Jump to highlighted reply
 		}
