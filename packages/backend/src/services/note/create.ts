@@ -685,7 +685,15 @@ async function incRenoteCount(renote: Note) {
 		const score = isNaN(renote.score) ? 0 : renote.score;
 		await scyllaClient.execute(
 			prepared.note.update.renoteCount,
-			[count + 1, score + 1, renote.createdAt, renote.createdAt, renote.userId],
+			[
+				count + 1,
+				score + 1,
+				renote.createdAt,
+				renote.createdAt,
+				renote.userId,
+				renote.userHost ?? "local",
+				renote.visibility,
+			],
 			{ prepare: true },
 		);
 	} else {
@@ -852,9 +860,13 @@ async function insertNote(
 			// Do not issue BATCH because different queries of inserting post to home timelines involve different partitions
 			for (const follower of localFollowers) {
 				// no need to wait
-				scyllaClient.execute(prepared.homeTimeline.insert, [follower, ...params], {
-					prepare: true,
-				});
+				scyllaClient.execute(
+					prepared.homeTimeline.insert,
+					[follower, ...params],
+					{
+						prepare: true,
+					},
+				);
 			}
 		}
 		if (insert.hasPoll) {
@@ -1025,7 +1037,14 @@ async function saveReply(reply: Note) {
 		const count = isNaN(reply.repliesCount) ? 0 : reply.repliesCount;
 		await scyllaClient.execute(
 			prepared.note.update.repliesCount,
-			[count + 1, reply.createdAt, reply.createdAt, reply.userId],
+			[
+				count + 1,
+				reply.createdAt,
+				reply.createdAt,
+				reply.userId,
+				reply.userHost ?? "local",
+				reply.visibility,
+			],
 			{ prepare: true },
 		);
 	} else {

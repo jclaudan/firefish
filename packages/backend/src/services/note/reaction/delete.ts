@@ -68,6 +68,8 @@ export default async (
 				date,
 				date,
 				note.userId,
+				note.userHost ?? "local",
+				note.visibility,
 			],
 			{ prepare: true },
 		);

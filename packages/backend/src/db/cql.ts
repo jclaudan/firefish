@@ -54,15 +54,15 @@ export const scyllaQueries = {
 			renoteCount: `UPDATE note SET
 				"renoteCount" = ?,
 				"score" = ?
-				WHERE "createdAtDate" = ? AND "createdAt" = ? AND "userId" = ? IF EXISTS`,
+				WHERE "createdAtDate" = ? AND "createdAt" = ? AND "userId" = ? AND "userHost" = ? AND "visibility" = ? IF EXISTS`,
 			repliesCount: `UPDATE note SET
 				"repliesCount" = ?
-				WHERE "createdAtDate" = ? AND "createdAt" = ? AND "userId" = ? IF EXISTS`,
+				WHERE "createdAtDate" = ? AND "createdAt" = ? AND "userId" = ? AND "userHost" = ? AND "visibility" = ? IF EXISTS`,
 			reactions: `UPDATE note SET
 				"emojis" = ?,
 				"reactions" = ?,
 				"score" = ?
-				WHERE "createdAtDate" = ? AND "createdAt" = ? AND "userId" = ? IF EXISTS`,
+				WHERE "createdAtDate" = ? AND "createdAt" = ? AND "userId" = ? AND "userHost" = ? AND "visibility" = ? IF EXISTS`,
 		},
 	},
 	homeTimeline: {
