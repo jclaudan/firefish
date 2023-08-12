@@ -6,6 +6,7 @@ import { ApiError } from "../../error.js";
 import { SECOND, HOUR } from "@/const.js";
 import type { Note } from "@/models/entities/note.js";
 import { parseScyllaNote, prepared, scyllaClient } from "@/db/scylla.js";
+import { userByIdCache } from "@/services/user-cache.js";
 
 export const meta = {
 	tags: ["notes"],
@@ -59,6 +60,12 @@ export default define(meta, paramDef, async (ps, user) => {
 	}
 
 	for (const note of renotes) {
-		deleteNote(await Users.findOneByOrFail({ id: user.id }), note);
+		deleteNote(
+			await userByIdCache.fetch(
+				user.id,
+				() => Users.findOneByOrFail({ id: user.id }),
+			),
+			note,
+		);
 	}
 });

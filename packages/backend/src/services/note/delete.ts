@@ -22,7 +22,12 @@ import { countSameRenotes } from "@/misc/count-same-renotes.js";
 import { registerOrFetchInstanceDoc } from "../register-or-fetch-instance-doc.js";
 import { deliverToRelays } from "../relay.js";
 import meilisearch from "@/db/meilisearch.js";
-import { parseHomeTimeline, prepared, scyllaClient } from "@/db/scylla.js";
+import {
+	parseHomeTimeline,
+	parseScyllaNote,
+	prepared,
+	scyllaClient,
+} from "@/db/scylla.js";
 
 /**
  * 投稿を削除します。
@@ -41,12 +46,101 @@ export default async function (
 		note.renoteId &&
 		(await countSameRenotes(user.id, note.renoteId, note.id)) === 0
 	) {
-		Notes.decrement({ id: note.renoteId }, "renoteCount", 1);
-		Notes.decrement({ id: note.renoteId }, "score", 1);
+		if (scyllaClient) {
+			const result = await scyllaClient.execute(
+				prepared.note.select.byId,
+				[note.renoteId],
+				{ prepare: true },
+			);
+			if (result.rowLength > 0) {
+				const renote = parseScyllaNote(result.first());
+				const count = isNaN(renote.renoteCount) ? 0 : renote.renoteCount;
+				const score = isNaN(renote.score) ? 0 : renote.score;
+				await scyllaClient.execute(
+					prepared.note.update.renoteCount,
+					[
+						Math.max(count - 1, 0),
+						Math.max(score - 1, 0),
+						renote.createdAt,
+						renote.createdAt,
+						renote.userId,
+						renote.userHost ?? "local",
+						renote.visibility,
+					],
+					{ prepare: true },
+				);
+				const homeTimelines = await scyllaClient
+					.execute(prepared.homeTimeline.select.byId, [renote.id], {
+						prepare: true,
+					})
+					.then((result) => result.rows.map(parseHomeTimeline));
+				// Do not issue BATCH because different home timelines involve different partitions
+				for (const timeline of homeTimelines) {
+					scyllaClient.execute(
+						prepared.homeTimeline.update.renoteCount,
+						[
+							Math.max(count - 1, 0),
+							Math.max(score - 1, 0),
+							timeline.feedUserId,
+							timeline.createdAtDate,
+							timeline.createdAt,
+							timeline.userId,
+						],
+						{ prepare: true },
+					);
+				}
+			}
+		} else {
+			Notes.decrement({ id: note.renoteId }, "renoteCount", 1);
+			Notes.decrement({ id: note.renoteId }, "score", 1);
+		}
 	}
 
 	if (note.replyId) {
-		await Notes.decrement({ id: note.replyId }, "repliesCount", 1);
+		if (scyllaClient) {
+			const result = await scyllaClient.execute(
+				prepared.note.select.byId,
+				[note.replyId],
+				{ prepare: true },
+			);
+			if (result.rowLength > 0) {
+				const reply = parseScyllaNote(result.first());
+				const count = isNaN(reply.repliesCount) ? 0 : reply.repliesCount;
+				await scyllaClient.execute(
+					prepared.note.update.repliesCount,
+					[
+						Math.max(count - 1, 0),
+						reply.createdAt,
+						reply.createdAt,
+						reply.userId,
+						reply.userHost ?? "local",
+						reply.visibility,
+					],
+					{ prepare: true },
+				);
+				const homeTimelines = await scyllaClient
+					.execute(prepared.homeTimeline.select.byId, [reply.id], {
+						prepare: true,
+					})
+					.then((result) => result.rows.map(parseHomeTimeline));
+				// Do not issue BATCH because different home timelines involve different partitions
+				for (const timeline of homeTimelines) {
+					scyllaClient.execute(
+						prepared.homeTimeline.update.repliesCount,
+						[
+							Math.max(count - 1, 0),
+							timeline.feedUserId,
+							timeline.createdAtDate,
+							timeline.createdAt,
+							timeline.userId,
+						],
+						{ prepare: true },
+					);
+				}
+			}
+		} else {
+			await Notes.decrement({ id: note.replyId }, "repliesCount", 1);
+		}
 	}
 
 	if (!quiet) {
