@@ -45,7 +45,7 @@ export const scyllaQueries = {
 			byDate: `SELECT * FROM note WHERE "createdAtDate" = ?`,
 			byUri: `SELECT * FROM note WHERE "uri" = ?`,
 			byUrl: `SELECT * FROM note WHERE "url" = ?`,
-			byId: `SELECT * FROM note_by_id WHERE "id" IN ?`,
+			byId: `SELECT * FROM note WHERE "id" = ?`,
 			byUserId: `SELECT * FROM note_by_user_id WHERE "userId" IN ?`,
 			byRenoteId: `SELECT * FROM note_by_renote_id WHERE "renoteId" = ?`,
 		},
@@ -110,7 +110,9 @@ export const scyllaQueries = {
 			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		select: {
 			byUserAndDate: `SELECT * FROM home_timeline WHERE "feedUserId" = ? AND "createdAtDate" = ?`,
+			byId: `SELECT * FROM home_timeline WHERE "id" = ?`,
 		},
+		delete: `DELETE FROM home_timeline WHERE "feedUserId" = ? AND "createdAtDate" = ? AND "createdAt" = ? AND "userId" = ?`,
 	},
 	localTimeline: {
 		select: {
@@ -121,10 +123,6 @@ export const scyllaQueries = {
 		select: {
 			byDate: `SELECT * FROM global_timeline WHERE "createdAtDate" = ?`,
 		},
-	},
-	deletedNote: {
-		insert: `INSERT INTO deleted_note ("noteId", "deletedAt") VALUES (?, ?)`,
-		select: `SELECT "noteId" FROM deleted_note`,
 	},
 	reaction: {
 		insert: `INSERT INTO reaction

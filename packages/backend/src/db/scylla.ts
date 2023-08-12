@@ -155,15 +155,14 @@ export function parseScyllaNote(row: types.Row): ScyllaNote {
 	};
 }
 
-export interface DeletedNote {
-	noteId: string;
-	deletedAt: string;
-}
+export function parseHomeTimeline(
+	row: types.Row,
+): { feedUserId: string } & ScyllaNote {
+	const note = parseScyllaNote(row);
 
-export function parseDeletedNote(row: types.Row): DeletedNote {
 	return {
-		noteId: row.get("noteId"),
-		deletedAt: row.get("deletedAt"),
+		feedUserId: row.get("feedUserId"),
+		...note,
 	};
 }
 
@@ -301,18 +300,7 @@ export async function execNotePaginationQuery(
 
 		if (result.rowLength > 0) {
 			const notes = result.rows.map(parseScyllaNote);
-			const candidates = filter ? await filter(notes) : notes;
-			// foundNotes.push(...(filter ? await filter(notes) : notes));
-			const deletedNotes = await scyllaClient
-				.execute(`${prepared.deletedNote.select} WHERE "noteId" IN ?`, [
-					candidates.map(({ id }) => id),
-				])
-				.then((result) =>
-					result.rows.map((row) => parseDeletedNote(row).noteId),
-				);
-			foundNotes.push(
-				...candidates.filter((note) => !deletedNotes.includes(note.id)),
-			);
+			foundNotes.push(...(filter ? await filter(notes) : notes));
 			untilDate = notes[notes.length - 1].createdAt;
 		}
 

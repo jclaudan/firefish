@@ -23,7 +23,7 @@ export async function getNote(
 	if (scyllaClient) {
 		const result = await scyllaClient.execute(
 			prepared.note.select.byId,
-			[[noteId]],
+			[noteId],
 			{ prepare: true },
 		);
 		if (result.rowLength > 0) {

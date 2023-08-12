@@ -905,7 +905,7 @@ async function insertNote(
 		if (scyllaClient) {
 			const result = await scyllaClient.execute(
 				prepared.note.select.byId,
-				[[insert.id]],
+				[insert.id],
 				{ prepare: true },
 			);
 			if (result.rowLength > 0) {

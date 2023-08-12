@@ -22,7 +22,7 @@ import { countSameRenotes } from "@/misc/count-same-renotes.js";
 import { registerOrFetchInstanceDoc } from "../register-or-fetch-instance-doc.js";
 import { deliverToRelays } from "../relay.js";
 import meilisearch from "@/db/meilisearch.js";
-import { prepared, scyllaClient } from "@/db/scylla.js";
+import { parseHomeTimeline, prepared, scyllaClient } from "@/db/scylla.js";
 
 /**
  * 投稿を削除します。
@@ -126,10 +126,19 @@ export default async function (
 				prepare: true,
 			},
 		);
-		await scyllaClient.execute(prepared.deletedNote.insert, [
-			note.id,
-			new Date(),
-		]);
+
+		const homeTimelines = await scyllaClient
+			.execute(prepared.homeTimeline.select.byId, [note.id], { prepare: true })
+			.then((result) => result.rows.map(parseHomeTimeline));
+		for (const timeline of homeTimelines) {
+			// No need to wait
+			scyllaClient.execute(prepared.homeTimeline.delete, [
+				timeline.feedUserId,
+				timeline.createdAtDate,
+				timeline.createdAt,
+				timeline.userId,
+			]);
+		}
 	}
 
 	await Notes.delete({

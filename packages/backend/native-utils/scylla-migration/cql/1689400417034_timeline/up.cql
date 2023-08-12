@@ -74,17 +74,7 @@ CREATE TABLE IF NOT EXISTS note ( -- Store all posts
 
 CREATE INDEX IF NOT EXISTS note_by_uri ON note ("uri");
 CREATE INDEX IF NOT EXISTS note_by_url ON note ("url");
-
-CREATE MATERIALIZED VIEW IF NOT EXISTS note_by_id AS
-	SELECT * FROM note
-	WHERE "id" IS NOT NULL
-	AND "createdAt" IS NOT NULL
-	AND "createdAtDate" IS NOT NULL
-	AND "userId" IS NOT NULL
-	AND "userHost" IS NOT NULL
-	AND "visibility" IS NOT NULL
-	PRIMARY KEY ("id", "createdAt", "createdAtDate", "userId", "userHost", "visibility")
-	WITH CLUSTERING ORDER BY ("createdAt" DESC);
+CREATE INDEX IF NOT EXISTS note_by_id ON note ("id");
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS note_by_user_id AS
 	SELECT * FROM note
@@ -171,11 +161,7 @@ CREATE TABLE IF NOT EXISTS home_timeline (
 	PRIMARY KEY (("feedUserId", "createdAtDate"), "createdAt", "userId")
 ) WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
-CREATE TABLE IF NOT EXISTS deleted_note (
-	"noteId" ascii,
-	"deletedAt" timestamp,
-	PRIMARY KEY ("noteId", "deletedAt")
-);
+CREATE INDEX IF NOT EXISTS home_by_id ON home_timeline ("id");
 
 CREATE TABLE IF NOT EXISTS reaction (
 	"id" text,
