@@ -64,24 +64,10 @@ const { widgetProps, configure, save } = useWidgetPropsManager(
 	props,
 	emit,
 );
-let list = ref(),
-	users = ref([]),
-	fetching = ref(true);
-async function chooseList() {
-	const lists = await os.api("users/lists/list");
-	const { canceled, result: list } = await os.select({
-		title: i18n.ts.selectList,
-		items: lists.map((x) => ({
-			value: x,
-			text: x.name,
-		})),
-		default: widgetProps.listId,
-	});
-	if (canceled) return;
-	widgetProps.listId = list.id;
-	save();
-	fetch();
-}
+const list = ref();
+const users = ref([]);
+const fetching = ref(true);
+
 const fetch = () => {
 	if (widgetProps.listId == null) {
 		fetching.value = false;
@@ -99,6 +85,23 @@ const fetch = () => {
 		});
 	});
 };
+
+async function chooseList() {
+	const lists = await os.api("users/lists/list");
+	const { canceled, result: list } = await os.select({
+		title: i18n.ts.selectList,
+		items: lists.map((x) => ({
+			value: x,
+			text: x.name,
+		})),
+		default: widgetProps.listId,
+	});
+	if (canceled) return;
+	widgetProps.listId = list.id;
+	save();
+	fetch();
+}
+
 useInterval(fetch, 1000 * 60, {
 	immediate: true,
 	afterMounted: true,

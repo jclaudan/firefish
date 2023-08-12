@@ -114,7 +114,7 @@ function regenerateToken() {
 	}).then(({ canceled, result: password }) => {
 		if (canceled) return;
 		os.api("i/regenerate-token", {
-			password: password,
+			password,
 		});
 	});
 }

@@ -13,7 +13,7 @@ import { instanceName } from "@/config";
 import * as os from "@/os";
 import { definePageMetadata } from "@/scripts/page-metadata";
 
-let meta = ref(null);
+const meta = ref(null);
 
 os.api("meta", { detail: true }).then((res) => {
 	meta.value = res;

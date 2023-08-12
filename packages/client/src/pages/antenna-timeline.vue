@@ -24,7 +24,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, watch, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import XTimeline from "@/components/MkTimeline.vue";
 import * as os from "@/os";
 import { useRouter } from "@/router";
@@ -37,9 +37,9 @@ const props = defineProps<{
 	antennaId: string;
 }>();
 
-let antenna = ref(null);
-let rootEl = ref<HTMLElement>();
-let tlEl = ref<InstanceType<typeof XTimeline>>();
+const antenna = ref(null);
+const rootEl = ref<HTMLElement>();
+const tlEl = ref<InstanceType<typeof XTimeline>>();
 const keymap = computed(() => ({
 	t: focus,
 }));

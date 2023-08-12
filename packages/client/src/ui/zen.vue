@@ -12,13 +12,10 @@ import { provide, ref } from "vue";
 import XCommon from "./_common_/common.vue";
 import { mainRouter } from "@/router";
 import type { PageMetadata } from "@/scripts/page-metadata";
-import {
-	provideMetadataReceiver,
-	setPageMetadata,
-} from "@/scripts/page-metadata";
+import { provideMetadataReceiver } from "@/scripts/page-metadata";
 import { instanceName } from "@/config";
 
-let pageMetadata = ref<null | ComputedRef<PageMetadata>>();
+const pageMetadata = ref<null | ComputedRef<PageMetadata>>();
 
 provide("router", mainRouter);
 provideMetadataReceiver((info) => {

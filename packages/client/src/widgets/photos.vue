@@ -26,13 +26,9 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted, reactive, ref } from "vue";
+import { onUnmounted, ref } from "vue";
 import type { Widget, WidgetComponentExpose } from "./widget";
-import {
-	WidgetComponentEmits,
-	WidgetComponentProps,
-	useWidgetPropsManager,
-} from "./widget";
+import { useWidgetPropsManager } from "./widget";
 import type { GetFormResultType } from "@/scripts/form";
 import { stream } from "@/stream";
 import { getStaticImageUrl } from "@/scripts/get-static-image-url";

@@ -44,13 +44,9 @@
 </template>
 
 <script lang="ts" setup>
-import { onUnmounted, ref } from "vue";
+import { ref } from "vue";
 import type { Widget, WidgetComponentExpose } from "./widget";
-import {
-	WidgetComponentEmits,
-	WidgetComponentProps,
-	useWidgetPropsManager,
-} from "./widget";
+import { useWidgetPropsManager } from "./widget";
 import type { GetFormResultType } from "@/scripts/form";
 import { i18n } from "@/i18n";
 import { useInterval } from "@/scripts/use-interval";
@@ -128,7 +124,7 @@ const tick = () => {
 
 	if (hasBirthday) {
 		const [bdayYear, bdayMonth, bdayDay] = $i.birthday.split("-");
-		if (month.value === +bdayMonth && day.value == +bdayDay) {
+		if (month.value === +bdayMonth && day.value === +bdayDay) {
 			isBirthday.value = true;
 		}
 	}

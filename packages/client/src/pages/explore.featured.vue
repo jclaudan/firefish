@@ -45,5 +45,5 @@ const paginationForRemote = {
 // 	offsetMode: true,
 // };
 
-let tab = ref("local");
+const tab = ref("local");
 </script>

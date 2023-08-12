@@ -38,9 +38,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from "vue";
+import { computed, ref } from "vue";
 
-import {} from "vue";
 import XGithub from "./integrations.github.vue";
 import XDiscord from "./integrations.discord.vue";
 import FormSuspense from "@/components/form/suspense.vue";
@@ -49,9 +48,9 @@ import * as os from "@/os";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
 
-let enableTwitterIntegration: boolean = ref(false);
-let enableGithubIntegration: boolean = ref(false);
-let enableDiscordIntegration: boolean = ref(false);
+const enableTwitterIntegration: boolean = ref(false);
+const enableGithubIntegration: boolean = ref(false);
+const enableDiscordIntegration: boolean = ref(false);
 
 async function init() {
 	const meta = await os.api("admin/meta");

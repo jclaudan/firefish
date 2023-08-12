@@ -183,10 +183,7 @@ import { navbarItemDef } from "@/navbar";
 import { i18n } from "@/i18n";
 import { $i } from "@/account";
 import { mainRouter } from "@/router";
-import {
-	provideMetadataReceiver,
-	setPageMetadata,
-} from "@/scripts/page-metadata";
+import { provideMetadataReceiver } from "@/scripts/page-metadata";
 import { deviceKind } from "@/scripts/device-kind";
 
 const XWidgets = defineAsyncComponent(() => import("./universal.widgets.vue"));
@@ -210,7 +207,7 @@ window.addEventListener("resize", () => {
 const buttonAnimIndex = ref(0);
 const drawerMenuShowing = ref(false);
 
-let pageMetadata = ref<null | ComputedRef<PageMetadata>>();
+const pageMetadata = ref<null | ComputedRef<PageMetadata>>();
 const widgetsEl = ref<HTMLElement>();
 const postButton = ref<HTMLElement>();
 const widgetsShowing = ref(false);

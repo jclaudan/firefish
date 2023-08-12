@@ -2,10 +2,12 @@ import * as fs from "fs";
 import pluginVue from "@vitejs/plugin-vue";
 import { defineConfig } from "vite";
 
+import viteCompression from "vite-plugin-compression";
+import AutoImport from "unplugin-auto-import/vite";
+import Components from "unplugin-vue-components/vite";
 import locales from "../../locales";
 import meta from "../../package.json";
 import pluginJson5 from "./vite.json5";
-import viteCompression from "vite-plugin-compression";
 
 const extensions = [
 	".ts",
@@ -36,6 +38,22 @@ export default defineConfig(({ command, mode }) => {
 		plugins: [
 			pluginVue({
 				reactivityTransform: true,
+			}),
+			AutoImport({
+				include: [
+					/\.[tj]sx?$/, // .ts, .tsx, .js, .jsx
+					/\.vue$/,
+					/\.vue\?vue/, // .vue
+				],
+				imports: ["vue"],
+				vueTemplate: true,
+				dts: true,
+				eslintrc: {
+					enabled: true,
+				},
+			}),
+			Components({
+				dts: true,
 			}),
 			pluginJson5(),
 			viteCompression({

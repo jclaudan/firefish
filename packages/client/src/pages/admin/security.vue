@@ -255,14 +255,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from "vue";
+import { computed, ref } from "vue";
 
-import {} from "vue";
 import XBotProtection from "./bot-protection.vue";
 import FormFolder from "@/components/form/folder.vue";
 import FormRadios from "@/components/form/radios.vue";
 import FormSwitch from "@/components/form/switch.vue";
-import FormInfo from "@/components/MkInfo.vue";
 import FormSuspense from "@/components/form/suspense.vue";
 import FormRange from "@/components/form/range.vue";
 import FormInput from "@/components/form/input.vue";
@@ -273,19 +271,19 @@ import { fetchInstance } from "@/instance";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
 
-let summalyProxy: string = ref("");
-let enableHcaptcha: boolean = ref(false);
-let enableRecaptcha: boolean = ref(false);
-let sensitiveMediaDetection: string = ref("none");
-let sensitiveMediaDetectionSensitivity: number = ref(0);
-let setSensitiveFlagAutomatically: boolean = ref(false);
-let enableSensitiveMediaDetectionForVideos: boolean = ref(false);
-let enableIpLogging: boolean = ref(false);
-let enableActiveEmailValidation: boolean = ref(false);
+const summalyProxy: string = ref("");
+const enableHcaptcha: boolean = ref(false);
+const enableRecaptcha: boolean = ref(false);
+const sensitiveMediaDetection: string = ref("none");
+const sensitiveMediaDetectionSensitivity: number = ref(0);
+const setSensitiveFlagAutomatically: boolean = ref(false);
+const enableSensitiveMediaDetectionForVideos: boolean = ref(false);
+const enableIpLogging: boolean = ref(false);
+const enableActiveEmailValidation: boolean = ref(false);
 
-let secureMode: boolean = ref(false);
-let privateMode: boolean = ref(false);
-let allowedHosts: string = ref("");
+const secureMode: boolean = ref(false);
+const privateMode: boolean = ref(false);
+const allowedHosts: string = ref("");
 
 async function init() {
 	const meta = await os.api("admin/meta");

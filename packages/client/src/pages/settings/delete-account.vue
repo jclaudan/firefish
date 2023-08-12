@@ -45,7 +45,7 @@ async function deleteAccount() {
 	if (canceled) return;
 
 	await os.apiWithDialog("i/delete-account", {
-		password: password,
+		password,
 	});
 
 	await os.alert({

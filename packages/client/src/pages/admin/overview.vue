@@ -60,7 +60,15 @@
 </template>
 
 <script lang="ts" setup>
-import { markRaw, version as vueVersion, onMounted, onBeforeUnmount, nextTick, shallowRef, ref, computed } from 'vue';
+import {
+	computed,
+	markRaw,
+	nextTick,
+	onBeforeUnmount,
+	onMounted,
+	ref,
+	shallowRef,
+} from "vue";
 import XFederation from "./overview.federation.vue";
 import XInstances from "./overview.instances.vue";
 import XQueue from "./overview.queue.vue";
@@ -71,26 +79,22 @@ import XStats from "./overview.stats.vue";
 import XModerators from "./overview.moderators.vue";
 import XHeatmap from "./overview.heatmap.vue";
 // import XMetrics from "./overview.metrics.vue";
-import MkTagCloud from "@/components/MkTagCloud.vue";
-import { version, url } from "@/config";
 import * as os from "@/os";
 import { stream } from "@/stream";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
-import { defaultStore } from "@/store";
-import MkFileListForAdmin from "@/components/MkFileListForAdmin.vue";
 import MkFolder from "@/components/MkFolder.vue";
 
 const rootEl = shallowRef<HTMLElement>();
-let serverInfo: any = ref(null);
-let topSubInstancesForPie: any = ref(null);
-let topPubInstancesForPie: any = ref(null);
-let federationPubActive = ref<number | null>(null);
-let federationPubActiveDiff = ref<number | null>(null);
-let federationSubActive = ref<number | null>(null);
-let federationSubActiveDiff = ref<number | null>(null);
-let newUsers = ref(null);
-let activeInstances = shallowRef(null);
+const serverInfo: any = ref(null);
+const topSubInstancesForPie: any = ref(null);
+const topPubInstancesForPie: any = ref(null);
+const federationPubActive = ref<number | null>(null);
+const federationPubActiveDiff = ref<number | null>(null);
+const federationSubActive = ref<number | null>(null);
+const federationSubActiveDiff = ref<number | null>(null);
+const newUsers = ref(null);
+const activeInstances = shallowRef(null);
 const queueStatsConnection = markRaw(stream.useChannel("queueStats"));
 const now = new Date();
 const filesPagination = {

@@ -16,7 +16,7 @@ import { useRouter } from "@/router";
 
 const router = useRouter();
 
-let draft = ref({
+const draft = ref({
 	name: "",
 	src: "all",
 	userListId: null,

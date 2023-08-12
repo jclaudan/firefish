@@ -37,13 +37,9 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted, reactive, ref, watch } from "vue";
+import { ref } from "vue";
 import type { Widget, WidgetComponentExpose } from "./widget";
-import {
-	WidgetComponentEmits,
-	WidgetComponentProps,
-	useWidgetPropsManager,
-} from "./widget";
+import { useWidgetPropsManager } from "./widget";
 import XCalendar from "./activity.calendar.vue";
 import XChart from "./activity.chart.vue";
 import MkHeatmap from "@/components/MkHeatmap.vue";

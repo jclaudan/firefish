@@ -48,13 +48,8 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
-import {} from "vue";
 import type { Widget, WidgetComponentExpose } from "./widget";
-import {
-	WidgetComponentEmits,
-	WidgetComponentProps,
-	useWidgetPropsManager,
-} from "./widget";
+import { useWidgetPropsManager } from "./widget";
 import type { GetFormResultType } from "@/scripts/form";
 import MkContainer from "@/components/MkContainer.vue";
 import MkAnalogClock from "@/components/MkAnalogClock.vue";

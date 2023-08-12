@@ -22,12 +22,7 @@
 <script lang="ts" setup>
 import { ref, shallowRef } from "vue";
 
-import {} from "vue";
-import {
-	WidgetComponentEmits,
-	WidgetComponentProps,
-	useWidgetPropsManager,
-} from "./widget";
+import { useWidgetPropsManager } from "./widget";
 import type { Widget, WidgetComponentExpose } from "./widget";
 import type { GetFormResultType } from "@/scripts/form";
 import MkContainer from "@/components/MkContainer.vue";
@@ -61,7 +56,7 @@ const { widgetProps, configure } = useWidgetPropsManager(
 );
 
 const cloud = ref<InstanceType<typeof MkTagCloud> | null>();
-let activeInstances = shallowRef(null);
+const activeInstances = shallowRef(null);
 
 function onInstanceClick(i) {
 	os.pageWindow(`/instance-info/${i.host}`);

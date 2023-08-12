@@ -37,16 +37,11 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted, ref, watch } from "vue";
+import { ref, watch } from "vue";
 import type { Widget, WidgetComponentExpose } from "./widget";
-import {
-	WidgetComponentEmits,
-	WidgetComponentProps,
-	useWidgetPropsManager,
-} from "./widget";
+import { useWidgetPropsManager } from "./widget";
 import MarqueeText from "@/components/MkMarquee.vue";
 import type { GetFormResultType } from "@/scripts/form";
-import * as os from "@/os";
 import MkContainer from "@/components/MkContainer.vue";
 import { useInterval } from "@/scripts/use-interval";
 import { shuffle } from "@/scripts/shuffle";
@@ -104,7 +99,7 @@ const { widgetProps, configure } = useWidgetPropsManager(
 
 const items = ref([]);
 const fetching = ref(true);
-let key = ref(0);
+const key = ref(0);
 
 const tick = () => {
 	fetch(`/api/fetch-rss?url=${widgetProps.url}`, {}).then((res) => {

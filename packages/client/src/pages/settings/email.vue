@@ -61,7 +61,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, watch, computed } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import FormSection from "@/components/form/section.vue";
 import FormInput from "@/components/form/input.vue";
 import FormSwitch from "@/components/form/switch.vue";
@@ -85,7 +85,7 @@ const saveEmailAddress = () => {
 	}).then(({ canceled, result: password }) => {
 		if (canceled) return;
 		os.apiWithDialog("i/update-email", {
-			password: password,
+			password,
 			email: emailAddress.value,
 		});
 	});

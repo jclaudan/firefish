@@ -13,7 +13,6 @@ import MkSparkle from "@/components/MkSparkle.vue";
 import MkA from "@/components/global/MkA.vue";
 import { host } from "@/config";
 import { reducedMotion } from "@/scripts/reduced-motion";
-import { defaultStore } from "@/store";
 
 export default defineComponent({
 	props: {
@@ -498,7 +497,7 @@ export default defineComponent({
 							// (see the issue #9816 on Codeberg)
 							if (token.props.content.slice(-6).toLowerCase() === "search") {
 								const sentinel = "#";
-								let ast2 = (isPlain ? mfm.parseSimple : mfm.parse)(
+								const ast2 = (isPlain ? mfm.parseSimple : mfm.parse)(
 									token.props.content.slice(0, -6) + sentinel,
 								);
 								if (

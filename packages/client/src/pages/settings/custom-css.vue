@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, computed } from "vue";
+import { computed, ref, watch } from "vue";
 import FormTextarea from "@/components/form/textarea.vue";
 import FormInfo from "@/components/MkInfo.vue";
 import * as os from "@/os";

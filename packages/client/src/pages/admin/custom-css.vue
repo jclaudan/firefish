@@ -17,11 +17,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, computed } from "vue";
+import { computed, ref } from "vue";
 import FormTextarea from "@/components/form/textarea.vue";
 import FormInfo from "@/components/MkInfo.vue";
-import * as os from "@/os";
-import { unisonReload } from "@/scripts/unison-reload";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
 

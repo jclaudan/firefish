@@ -23,15 +23,10 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted, reactive, ref, watch } from "vue";
+import { ref, watch } from "vue";
 import type { Widget, WidgetComponentExpose } from "./widget";
-import {
-	WidgetComponentEmits,
-	WidgetComponentProps,
-	useWidgetPropsManager,
-} from "./widget";
+import { useWidgetPropsManager } from "./widget";
 import type { GetFormResultType } from "@/scripts/form";
-import * as os from "@/os";
 import MkContainer from "@/components/MkContainer.vue";
 import { defaultStore } from "@/store";
 import { i18n } from "@/i18n";

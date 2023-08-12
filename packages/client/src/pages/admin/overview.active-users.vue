@@ -8,15 +8,13 @@
 </template>
 
 <script lang="ts" setup>
-import { markRaw, version as vueVersion, onMounted, onBeforeUnmount, nextTick, shallowRef, ref } from 'vue';
+import { onMounted, ref, shallowRef } from "vue";
 import { Chart } from "chart.js";
-import tinycolor from "tinycolor2";
 import gradient from "chartjs-plugin-gradient";
 import * as os from "@/os";
 import { defaultStore } from "@/store";
 import { useChartTooltip } from "@/scripts/use-chart-tooltip";
 import { chartVLine } from "@/scripts/chart-vline";
-import { alpha } from "@/scripts/color";
 import { initChart } from "@/scripts/init-chart";
 
 initChart();
@@ -25,7 +23,7 @@ const chartEl = shallowRef<HTMLCanvasElement>(null);
 const now = new Date();
 let chartInstance: Chart = null;
 const chartLimit = 7;
-let fetching = ref(true);
+const fetching = ref(true);
 
 const { handler: externalTooltipHandler } = useChartTooltip();
 
@@ -134,7 +132,7 @@ async function renderChart() {
 					},
 					ticks: {
 						display: true,
-						//mirror: true,
+						// mirror: true,
 					},
 				},
 			},

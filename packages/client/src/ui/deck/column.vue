@@ -56,18 +56,9 @@
 </template>
 
 <script lang="ts" setup>
-import {
-	Ref,
-	onBeforeUnmount,
-	onMounted,
-	provide,
-	watch,
-	ref,
-	computed,
-} from "vue";
+import { computed, onBeforeUnmount, onMounted, provide, ref, watch } from "vue";
 import type { Column } from "./deck-store";
 import {
-	deckStore,
 	popRightColumn,
 	removeColumn,
 	stackLeftColumn,
@@ -109,13 +100,13 @@ const emit = defineEmits<{
 
 const body = ref<HTMLDivElement>();
 
-let dragging = ref(false);
+const dragging = ref(false);
 watch(dragging, (v) =>
 	os.deckGlobalEvents.emit(v ? "column.dragStart" : "column.dragEnd"),
 );
 
-let draghover = ref(false),
-	dropready = ref(false);
+const draghover = ref(false);
+const dropready = ref(false);
 
 const isMainColumn = computed(() => props.column.type === "main");
 const active = computed(() => props.column.active !== false);

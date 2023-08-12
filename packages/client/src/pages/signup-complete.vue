@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, computed } from "vue";
+import { computed, onMounted } from "vue";
 import * as os from "@/os";
 import { login } from "@/account";
 import { i18n } from "@/i18n";

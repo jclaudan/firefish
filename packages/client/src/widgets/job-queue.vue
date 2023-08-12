@@ -123,18 +123,13 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted, reactive, ref } from "vue";
+import { onUnmounted, reactive } from "vue";
 import type { Widget, WidgetComponentExpose } from "./widget";
-import {
-	WidgetComponentEmits,
-	WidgetComponentProps,
-	useWidgetPropsManager,
-} from "./widget";
+import { useWidgetPropsManager } from "./widget";
 import type { GetFormResultType } from "@/scripts/form";
 import { stream } from "@/stream";
 import number from "@/filters/number";
 import * as sound from "@/scripts/sound";
-import * as os from "@/os";
 import { deepClone } from "@/scripts/clone";
 
 const name = "jobQueue";

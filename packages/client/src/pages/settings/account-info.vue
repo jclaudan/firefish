@@ -173,7 +173,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, computed } from "vue";
+import { computed, onMounted, ref } from "vue";
 import FormSection from "@/components/form/section.vue";
 import MkKeyValue from "@/components/MkKeyValue.vue";
 import * as os from "@/os";

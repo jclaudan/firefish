@@ -182,14 +182,7 @@
 </template>
 
 <script lang="ts" setup>
-import {
-	computed,
-	defineAsyncComponent,
-	onMounted,
-	provide,
-	ref,
-	watch,
-} from "vue";
+import { computed, defineAsyncComponent, ref, watch } from "vue";
 import { v4 as uuid } from "uuid";
 import XCommon from "./_common_/common.vue";
 import {
@@ -204,7 +197,6 @@ import DeckColumnCore from "@/ui/deck/column-core.vue";
 import XSidebar from "@/ui/_common_/navbar.vue";
 import XDrawerMenu from "@/ui/_common_/navbar-for-mobile.vue";
 import MkButton from "@/components/MkButton.vue";
-import { getScrollContainer } from "@/scripts/scroll";
 import * as os from "@/os";
 import { navbarItemDef } from "@/navbar";
 import { $i } from "@/account";
