@@ -155,13 +155,30 @@ export function parseScyllaNote(row: types.Row): ScyllaNote {
 	};
 }
 
+export interface DeletedNote {
+	noteId: string;
+	deletedAt: string;
+}
+
+export function parseDeletedNote(row: types.Row): DeletedNote {
+	return {
+		noteId: row.get("noteId"),
+		deletedAt: row.get("deletedAt"),
+	};
+}
+
 export interface ScyllaNoteReaction extends NoteReaction {
 	emoji: PopulatedEmoji;
 }
 
 const QUERY_LIMIT = 1000; // TODO: should this be configurable?
 
-export type TimelineKind = "home" | "local" | "recommended" | "global" | "renotes";
+export type TimelineKind =
+	| "home"
+	| "local"
+	| "recommended"
+	| "global"
+	| "renotes";
 
 export function parseScyllaReaction(row: types.Row): ScyllaNoteReaction {
 	return {
@@ -177,16 +194,17 @@ export function parseScyllaReaction(row: types.Row): ScyllaNoteReaction {
 export function prepareNoteQuery(
 	kind: TimelineKind,
 	ps: {
-	untilId?: string;
-	untilDate?: number;
-	sinceId?: string;
-	sinceDate?: number;
-}): { query: string; untilDate: Date; sinceDate: Date | null } {
+		untilId?: string;
+		untilDate?: number;
+		sinceId?: string;
+		sinceDate?: number;
+	},
+): { query: string; untilDate: Date; sinceDate: Date | null } {
 	const queryParts: string[] = [];
 
 	switch (kind) {
 		case "home":
-			queryParts.push(prepared.homeTimeline.select.byUserAndDate)
+			queryParts.push(prepared.homeTimeline.select.byUserAndDate);
 			break;
 		case "local":
 			queryParts.push(prepared.localTimeline.select.byDate);
@@ -283,7 +301,18 @@ export async function execNotePaginationQuery(
 
 		if (result.rowLength > 0) {
 			const notes = result.rows.map(parseScyllaNote);
-			foundNotes.push(...(filter ? await filter(notes) : notes));
+			const candidates = filter ? await filter(notes) : notes;
+			// foundNotes.push(...(filter ? await filter(notes) : notes));
+			const deletedNotes = await scyllaClient
+				.execute(`${prepared.deletedNote.select} WHERE "noteId" IN ?`, [
+					candidates.map(({ id }) => id),
+				])
+				.then((result) =>
+					result.rows.map((row) => parseDeletedNote(row).noteId),
+				);
+			foundNotes.push(
+				...candidates.filter((note) => !deletedNotes.includes(note.id)),
+			);
 			untilDate = notes[notes.length - 1].createdAt;
 		}
 

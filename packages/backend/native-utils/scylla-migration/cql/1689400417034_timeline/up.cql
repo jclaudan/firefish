@@ -168,8 +168,14 @@ CREATE TABLE IF NOT EXISTS home_timeline (
 	"reactions" map<text, int>, -- Reactions
 	"noteEdit" set<frozen<note_edit_history>>, -- Edit History
 	"updatedAt" timestamp,
-	PRIMARY KEY (("feedUserId", "createdAtDate"), "createdAt")
+	PRIMARY KEY (("feedUserId", "createdAtDate"), "createdAt", "userId")
 ) WITH CLUSTERING ORDER BY ("createdAt" DESC);
+
+CREATE TABLE IF NOT EXISTS deleted_note (
+	"noteId" ascii,
+	"deletedAt" timestamp,
+	PRIMARY KEY ("noteId", "deletedAt")
+);
 
 CREATE TABLE IF NOT EXISTS reaction (
 	"id" text,

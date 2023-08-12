@@ -119,9 +119,17 @@ export default async function (
 
 	if (scyllaClient) {
 		const date = new Date(note.createdAt.getTime());
-		await scyllaClient.execute(prepared.note.delete, [date, date, note.userId], {
-			prepare: true,
-		});
+		await scyllaClient.execute(
+			prepared.note.delete,
+			[date, date, note.userId, note.userHost ?? "local", note.visibility],
+			{
+				prepare: true,
+			},
+		);
+		await scyllaClient.execute(prepared.deletedNote.insert, [
+			note.id,
+			new Date(),
+		]);
 	}
 
 	await Notes.delete({
