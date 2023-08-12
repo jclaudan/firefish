@@ -19,6 +19,7 @@ import Logger from "@/services/logger.js";
 import { UserProfiles } from "@/models/index.js";
 import { getWordHardMute } from "@/misc/check-word-mute.js";
 import type { UserProfile } from "@/models/entities/user-profile.js";
+import { scyllaQueries } from "./cql";
 
 function newClient(): Client | null {
 	if (!config.scylla) {
@@ -62,88 +63,7 @@ function newClient(): Client | null {
 
 export const scyllaClient = newClient();
 
-export const prepared = {
-	note: {
-		insert: `INSERT INTO note (
-				"createdAtDate",
-				"createdAt",
-				"id",
-				"visibility",
-				"content",
-				"name",
-				"cw",
-				"localOnly",
-				"renoteCount",
-				"repliesCount",
-				"uri",
-				"url",
-				"score",
-				"files",
-				"visibleUserIds",
-				"mentions",
-				"mentionedRemoteUsers",
-				"emojis",
-				"tags",
-				"hasPoll",
-				"threadId",
-				"channelId",
-				"userId",
-				"userHost",
-				"replyId",
-				"replyUserId",
-				"replyUserHost",
-				"replyContent",
-				"replyCw",
-				"replyFiles",
-				"renoteId",
-				"renoteUserId",
-				"renoteUserHost",
-				"renoteContent",
-				"renoteCw",
-				"renoteFiles",
-				"reactions",
-				"noteEdit",
-				"updatedAt"
-			)
-			VALUES
-			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		select: {
-			byDate: `SELECT * FROM note WHERE "createdAtDate" = ?`,
-			byUri: `SELECT * FROM note WHERE "uri" = ?`,
-			byUrl: `SELECT * FROM note WHERE "url" = ?`,
-			byId: `SELECT * FROM note_by_id WHERE "id" IN ?`,
-			byUserId: `SELECT * FROM note_by_user_id WHERE "userId" IN ?`,
-			byRenoteId: `SELECT * FROM note_by_renote_id WHERE "renoteId" = ?`,
-		},
-		delete: `DELETE FROM note WHERE "createdAtDate" = ? AND "createdAt" = ? AND "userId" = ?`,
-		update: {
-			renoteCount: `UPDATE note SET
-				"renoteCount" = ?,
-				"score" = ?
-				WHERE "createdAtDate" = ? AND "createdAt" = ? AND "userId" = ? IF EXISTS`,
-			repliesCount: `UPDATE note SET
-				"repliesCount" = ?
-				WHERE "createdAtDate" = ? AND "createdAt" = ? AND "userId" = ? IF EXISTS`,
-			reactions: `UPDATE note SET
-				"emojis" = ?,
-				"reactions" = ?,
-				"score" = ?
-				WHERE "createdAtDate" = ? AND "createdAt" = ? AND "userId" = ? IF EXISTS`,
-		},
-	},
-	reaction: {
-		insert: `INSERT INTO reaction
-			("id", "noteId", "userId", "reaction", "emoji", "createdAt")
-			VALUES (?, ?, ?, ?, ?, ?)`,
-		select: {
-			byNoteId: `SELECT * FROM reaction_by_id WHERE "noteId" IN ?`,
-			byUserId: `SELECT * FROM reaction_by_user_id WHERE "userId" IN ?`,
-			byNoteAndUser: `SELECT * FROM reaction WHERE "noteId" IN ? AND "userId" IN ?`,
-			byId: `SELECT * FROM reaction WHERE "id" IN ?`,
-		},
-		delete: `DELETE FROM reaction WHERE "noteId" = ? AND "userId" = ?`,
-	},
-};
+export const prepared = scyllaQueries;
 
 export interface ScyllaDriveFile {
 	id: string;
@@ -183,6 +103,7 @@ export type ScyllaNote = Note & {
 
 export function parseScyllaNote(row: types.Row): ScyllaNote {
 	const files: ScyllaDriveFile[] = row.get("files") ?? [];
+	const userHost = row.get("userHost");
 
 	return {
 		createdAtDate: row.get("createdAtDate"),
@@ -209,7 +130,7 @@ export function parseScyllaNote(row: types.Row): ScyllaNote {
 		threadId: row.get("threadId") ?? null,
 		channelId: row.get("channelId") ?? null,
 		userId: row.get("userId"),
-		userHost: row.get("userHost") ?? null,
+		userHost: userHost !== "local" ? userHost : null,
 		replyId: row.get("replyId") ?? null,
 		replyUserId: row.get("replyUserId") ?? null,
 		replyUserHost: row.get("replyUserHost") ?? null,
@@ -240,6 +161,8 @@ export interface ScyllaNoteReaction extends NoteReaction {
 
 const QUERY_LIMIT = 1000; // TODO: should this be configurable?
 
+export type TimelineKind = "home" | "local" | "recommended" | "global" | "renotes";
+
 export function parseScyllaReaction(row: types.Row): ScyllaNoteReaction {
 	return {
 		id: row.get("id"),
@@ -251,18 +174,35 @@ export function parseScyllaReaction(row: types.Row): ScyllaNoteReaction {
 	};
 }
 
-export function prepareNoteQuery(ps: {
+export function prepareNoteQuery(
+	kind: TimelineKind,
+	ps: {
 	untilId?: string;
 	untilDate?: number;
 	sinceId?: string;
 	sinceDate?: number;
-	noteId?: string;
 }): { query: string; untilDate: Date; sinceDate: Date | null } {
-	const queryParts = [
-		`${
-			ps.noteId ? prepared.note.select.byRenoteId : prepared.note.select.byDate
-		} AND "createdAt" < ?`,
-	];
+	const queryParts: string[] = [];
+
+	switch (kind) {
+		case "home":
+			queryParts.push(prepared.homeTimeline.select.byUserAndDate)
+			break;
+		case "local":
+			queryParts.push(prepared.localTimeline.select.byDate);
+			break;
+		case "recommended":
+		case "global":
+			queryParts.push(prepared.globalTimeline.select.byDate);
+			break;
+		case "renotes":
+			queryParts.push(prepared.note.select.byRenoteId);
+			break;
+		default:
+			queryParts.push(prepared.note.select.byDate);
+	}
+
+	queryParts.push(`AND "createdAt" < ?`);
 
 	let until = new Date();
 	if (ps.untilId) {
@@ -294,6 +234,7 @@ export function prepareNoteQuery(ps: {
 }
 
 export async function execNotePaginationQuery(
+	kind: TimelineKind,
 	ps: {
 		limit: number;
 		untilId?: string;
@@ -303,11 +244,19 @@ export async function execNotePaginationQuery(
 		noteId?: string;
 	},
 	filter?: (_: ScyllaNote[]) => Promise<ScyllaNote[]>,
+	userId: User["id"] | null = null,
 	maxPartitions = config.scylla?.sparseTimelineDays ?? 14,
 ): Promise<ScyllaNote[]> {
 	if (!scyllaClient) return [];
 
-	let { query, untilDate, sinceDate } = prepareNoteQuery(ps);
+	if (kind === "home" && !userId) {
+		throw new Error("Query of home timeline needs userId");
+	}
+	if (kind === "renotes" && !ps.noteId) {
+		throw new Error("Query of renotes needs noteId");
+	}
+
+	let { query, untilDate, sinceDate } = prepareNoteQuery(kind, ps);
 
 	let scannedPartitions = 0;
 	const foundNotes: ScyllaNote[] = [];
@@ -315,7 +264,11 @@ export async function execNotePaginationQuery(
 	// Try to get posts of at most <maxPartitions> in the single request
 	while (foundNotes.length < ps.limit && scannedPartitions < maxPartitions) {
 		const params: (Date | string | string[] | number)[] = [];
-		if (ps.noteId) {
+		if (kind === "home" && userId) {
+			params.push(userId);
+		}
+
+		if (kind === "renotes" && ps.noteId) {
 			params.push(ps.noteId, untilDate);
 		} else {
 			params.push(untilDate, untilDate);

@@ -177,7 +177,7 @@ export default define(meta, paramDef, async (ps, user) => {
 			return filtered;
 		};
 
-		const foundNotes = await execNotePaginationQuery(ps, filter);
+		const foundNotes = await execNotePaginationQuery("recommended", ps, filter);
 		return await Notes.packMany(foundNotes.slice(0, ps.limit), user, {
 			scyllaNote: true,
 		});

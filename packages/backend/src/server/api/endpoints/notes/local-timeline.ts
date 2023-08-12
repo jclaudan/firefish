@@ -146,10 +146,7 @@ export default define(meta, paramDef, async (ps, user) => {
 		}
 
 		const filter = async (notes: ScyllaNote[]) => {
-			let filtered = notes.filter(
-				(n) => n.visibility === "public" && !n.userHost,
-			);
-			filtered = await filterChannel(filtered, user, followingChannelIds);
+			let filtered = await filterChannel(notes, user, followingChannelIds);
 			filtered = await filterReply(filtered, ps.withReplies, user);
 			filtered = await filterVisibility(filtered, user, followingUserIds);
 			if (user) {
@@ -182,7 +179,7 @@ export default define(meta, paramDef, async (ps, user) => {
 
 		const foundPacked = [];
 		while (foundPacked.length < ps.limit) {
-			const foundNotes = (await execNotePaginationQuery(ps, filter)).slice(
+			const foundNotes = (await execNotePaginationQuery("local", ps, filter)).slice(
 				0,
 				ps.limit * 1.5,
 			); // Some may filtered out by Notes.packMany, thus we take more than ps.limit.

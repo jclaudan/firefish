@@ -13,7 +13,7 @@ import {
 	perUserFollowingChart,
 } from "@/services/chart/index.js";
 import { getActiveWebhooks } from "@/misc/webhook-cache.js";
-import { LocalFollowingsCache } from "@/misc/cache.js";
+import { LocalFollowersCache, LocalFollowingsCache } from "@/misc/cache.js";
 
 const logger = new Logger("following/delete");
 
@@ -47,8 +47,10 @@ export default async function (
 	await Followings.delete(following.id);
 
 	if (Users.isLocalUser(follower)) {
-		const cache = await LocalFollowingsCache.init(follower.id);
-		await cache.delete(followee.id);
+		const followCache = await LocalFollowingsCache.init(follower.id);
+		const followerCache = await LocalFollowersCache.init(followee.id);
+		await followCache.delete(followee.id);
+		await followerCache.delete(follower.id);
 	}
 
 	decrementFollowing(follower, followee);

@@ -28,7 +28,7 @@ import type { Packed } from "@/misc/schema.js";
 import { getActiveWebhooks } from "@/misc/webhook-cache.js";
 import { webhookDeliver } from "@/queue/index.js";
 import { shouldSilenceInstance } from "@/misc/should-block-instance.js";
-import { LocalFollowingsCache } from "@/misc/cache.js";
+import { LocalFollowersCache, LocalFollowingsCache } from "@/misc/cache.js";
 
 const logger = new Logger("following/create");
 
@@ -83,9 +83,11 @@ export async function insertFollowingDoc(
 	});
 
 	if (Users.isLocalUser(follower)) {
-		// Cache following ID set
-		const cache = await LocalFollowingsCache.init(follower.id);
-		await cache.add(followee.id);
+		// Cache relationship
+		const followCache = await LocalFollowingsCache.init(follower.id);
+		const followerCache = await LocalFollowersCache.init(followee.id);
+		await followCache.add(followee.id);
+		await followerCache.add(follower.id);
 	}
 
 	const req = await FollowRequests.findOneBy({

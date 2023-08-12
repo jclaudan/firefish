@@ -60,7 +60,7 @@ import { normalizeForSearch } from "@/misc/normalize-for-search.js";
 import { getAntennas } from "@/misc/antenna-cache.js";
 import { endedPollNotificationQueue } from "@/queue/queues.js";
 import { webhookDeliver } from "@/queue/index.js";
-import { Cache } from "@/misc/cache.js";
+import { Cache, LocalFollowersCache } from "@/misc/cache.js";
 import type { UserProfile } from "@/models/entities/user-profile.js";
 import { db } from "@/db/postgre.js";
 import { getActiveWebhooks } from "@/misc/webhook-cache.js";
@@ -779,60 +779,79 @@ async function insertNote(
 				width: file.properties.width ?? null,
 				height: file.properties.height ?? null,
 			});
+			const replyText = data.reply?.text ?? null;
+			const replyCw = data.reply?.cw ?? null;
+			// TODO: move drive files to scylla or cache in redis/dragonfly
+			const replyFiles = data.reply?.fileIds
+				? await DriveFiles.findBy({ id: In(data.reply.fileIds) }).then(
+						(files) => files.map(fileMapper),
+				  )
+				: null;
+			const renoteText = data.renote?.text ?? null;
+			const renoteCw = data.renote?.text ?? null;
+			const renoteFiles = data.renote?.fileIds
+				? await DriveFiles.findBy({ id: In(data.renote.fileIds) }).then(
+						(files) => files.map(fileMapper),
+				  )
+				: null;
 
-			await scyllaClient.execute(
-				prepared.note.insert,
-				[
-					insert.createdAt,
-					insert.createdAt,
-					insert.id,
-					insert.visibility,
-					insert.text,
-					insert.name,
-					insert.cw,
-					insert.localOnly,
-					insert.renoteCount ?? 0,
-					insert.repliesCount ?? 0,
-					insert.uri,
-					insert.url,
-					insert.score ?? 0,
-					data.files?.map(fileMapper),
-					insert.visibleUserIds,
-					insert.mentions,
-					insert.mentionedRemoteUsers,
-					insert.emojis,
-					insert.tags,
-					insert.hasPoll,
-					insert.threadId,
-					insert.channelId,
-					insert.userId,
-					insert.userHost,
-					insert.replyId,
-					insert.replyUserId,
-					insert.replyUserHost,
-					data.reply?.text ?? null,
-					data.reply?.cw ?? null,
-					data.reply?.fileIds
-						? await DriveFiles.findBy({ id: In(data.reply.fileIds) }).then(
-								(files) => files.map(fileMapper),
-						  )
-						: null,
-					insert.renoteId,
-					insert.renoteUserId,
-					insert.renoteUserHost,
-					data.renote?.text ?? null,
-					data.renote?.cw ?? null,
-					data.renote?.fileIds
-						? await DriveFiles.findBy({ id: In(data.renote.fileIds) }).then(
-								(files) => files.map(fileMapper),
-						  )
-						: null,
-					null,
-					null,
-					null,
-				],
-				{ prepare: true },
+			const params = [
+				insert.createdAt,
+				insert.createdAt,
+				insert.id,
+				insert.visibility,
+				insert.text,
+				insert.name,
+				insert.cw,
+				insert.localOnly,
+				insert.renoteCount ?? 0,
+				insert.repliesCount ?? 0,
+				insert.uri,
+				insert.url,
+				insert.score ?? 0,
+				data.files?.map(fileMapper),
+				insert.visibleUserIds,
+				insert.mentions,
+				insert.mentionedRemoteUsers,
+				insert.emojis,
+				insert.tags,
+				insert.hasPoll,
+				insert.threadId,
+				insert.channelId,
+				insert.userId,
+				insert.userHost ?? "local",
+				insert.replyId,
+				insert.replyUserId,
+				insert.replyUserHost,
+				replyText,
+				replyCw,
+				replyFiles,
+				insert.renoteId,
+				insert.renoteUserId,
+				insert.renoteUserHost,
+				renoteText,
+				renoteCw,
+				renoteFiles,
+				null,
+				null,
+				null,
+			];
+
+			await scyllaClient.execute(prepared.note.insert, params, {
+				prepare: true,
+			});
+
+			// Insert to home timelines
+			const localFollowers = await LocalFollowersCache.init(user.id).then(
+				(cache) => cache.getAll(),
 			);
+			// Do not issue BATCH because different queries of inserting post to home timelines involve different partitions
+			for (const follower of localFollowers) {
+				// no need to wait
+				scyllaClient.execute(prepared.homeTimeline.insert, [follower, ...params], {
+					prepare: true,
+				});
+			}
 		}
 		if (insert.hasPoll) {
 			// Start transaction

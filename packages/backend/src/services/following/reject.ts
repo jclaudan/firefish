@@ -8,7 +8,7 @@ import { User } from "@/models/entities/user.js";
 import { Users, FollowRequests, Followings } from "@/models/index.js";
 import { decrementFollowing } from "./delete.js";
 import { getActiveWebhooks } from "@/misc/webhook-cache.js";
-import { LocalFollowingsCache } from "@/misc/cache.js";
+import { LocalFollowersCache, LocalFollowingsCache } from "@/misc/cache.js";
 
 type Local =
 	| ILocalUser
@@ -93,8 +93,10 @@ async function removeFollow(followee: Both, follower: Both) {
 
 	await Followings.delete(following.id);
 	if (Users.isLocalUser(follower)) {
-		const cache = await LocalFollowingsCache.init(follower.id);
-		await cache.delete(followee.id);
+		const followCache = await LocalFollowingsCache.init(follower.id);
+		const followerCache = await LocalFollowersCache.init(followee.id);
+		await followCache.delete(followee.id);
+		await followerCache.delete(follower.id);
 	}
 	decrementFollowing(follower, followee);
 }

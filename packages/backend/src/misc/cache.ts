@@ -5,7 +5,6 @@ import {
 	Blockings,
 	ChannelFollowings,
 	Followings,
-	MutedNotes,
 	Mutings,
 	RenoteMutings,
 	UserProfiles,
@@ -283,6 +282,25 @@ export class LocalFollowingsCache extends SetCache {
 
 	public static async init(userId: string): Promise<LocalFollowingsCache> {
 		const cache = new LocalFollowingsCache(userId);
+		await cache.fetch();
+
+		return cache;
+	}
+}
+
+export class LocalFollowersCache extends SetCache {
+	private constructor(userId: string) {
+		const fetcher = () =>
+			Followings.find({
+				select: ["followerId"],
+				where: { followeeId: userId, followerHost: IsNull() },
+			}).then((followers) => followers.map(({ followerId }) => followerId));
+
+		super("follower", userId, fetcher);
+	}
+
+	public static async init(userId: string): Promise<LocalFollowersCache> {
+		const cache = new LocalFollowersCache(userId);
 		await cache.fetch();
 
 		return cache;
