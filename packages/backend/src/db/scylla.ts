@@ -19,7 +19,7 @@ import Logger from "@/services/logger.js";
 import { UserProfiles } from "@/models/index.js";
 import { getWordHardMute } from "@/misc/check-word-mute.js";
 import type { UserProfile } from "@/models/entities/user-profile.js";
-import { scyllaQueries } from "./cql";
+import { scyllaQueries } from "@/db/cql.js";
 
 function newClient(): Client | null {
 	if (!config.scylla) {
