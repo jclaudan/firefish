@@ -106,7 +106,13 @@ export default define(meta, paramDef, async (ps, user) => {
 		let untilDate: number | undefined;
 		while (foundPacked.length < ps.limit) {
 			const foundNotes = (
-				await execNotePaginationQuery({ ...ps, untilDate }, filter, 1)
+				await execNotePaginationQuery(
+					"renotes",
+					{ ...ps, untilDate },
+					filter,
+					user?.id,
+					1,
+				)
 			).slice(0, ps.limit * 1.5); // Some may filtered out by Notes.packMany, thus we take more than ps.limit.
 			foundPacked.push(
 				...(await Notes.packMany(foundNotes, user, { scyllaNote: true })),
