@@ -113,6 +113,20 @@ export const scyllaQueries = {
 			byId: `SELECT * FROM home_timeline WHERE "id" = ?`,
 		},
 		delete: `DELETE FROM home_timeline WHERE "feedUserId" = ? AND "createdAtDate" = ? AND "createdAt" = ? AND "userId" = ?`,
+		update: {
+			renoteCount: `UPDATE home_timeline SET
+				"renoteCount" = ?,
+				"score" = ?
+				WHERE "feedUserId" = ? AND "createdAtDate" = ? AND "createdAt" = ? AND "userId" = ? IF EXISTS`,
+			repliesCount: `UPDATE home_timeline SET
+				"repliesCount" = ?
+				WHERE "feedUserId" = ? AND "createdAtDate" = ? AND "createdAt" = ? AND "userId" = ? IF EXISTS`,
+			reactions: `UPDATE home_timeline SET
+				"emojis" = ?,
+				"reactions" = ?,
+				"score" = ?
+				WHERE "feedUserId" = ? AND "createdAtDate" = ? AND "createdAt" = ? AND "userId" = ? IF EXISTS`,
+		}
 	},
 	localTimeline: {
 		select: {

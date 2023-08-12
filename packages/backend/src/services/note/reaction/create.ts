@@ -21,7 +21,7 @@ import deleteReaction from "./delete.js";
 import { isDuplicateKeyValueError } from "@/misc/is-duplicate-key-value-error.js";
 import type { NoteReaction } from "@/models/entities/note-reaction.js";
 import { IdentifiableError } from "@/misc/identifiable-error.js";
-import { prepared, scyllaClient } from "@/db/scylla.js";
+import { parseHomeTimeline, prepared, scyllaClient } from "@/db/scylla.js";
 import { EmojiCache } from "@/misc/populate-emojis.js";
 
 export default async (
@@ -108,12 +108,13 @@ export default async (
 		note.reactions[_reaction] = current + 1;
 		const emojiName = decodeReaction(_reaction).reaction.replaceAll(":", "");
 		const date = new Date(note.createdAt.getTime());
+		const score = isNaN(note.score) ? 0 : note.score;
 		await scyllaClient.execute(
 			prepared.note.update.reactions,
 			[
 				note.emojis.concat(emojiName),
 				note.reactions,
-				(note.score ?? 0) + 1,
+				score + 1,
 				date,
 				date,
 				note.userId,
@@ -122,6 +123,27 @@ export default async (
 			],
 			{ prepare: true },
 		);
+		const homeTimelines = await scyllaClient
+			.execute(prepared.homeTimeline.select.byId, [note.id], {
+				prepare: true,
+			})
+			.then((result) => result.rows.map(parseHomeTimeline));
+		// Do not issue BATCH because different home timelines involve different partitions
+		for (const timeline of homeTimelines) {
+			scyllaClient.execute(
+				prepared.homeTimeline.update.reactions,
+				[
+					note.emojis.concat(emojiName),
+					note.reactions,
+					score + 1,
+					timeline.feedUserId,
+					timeline.createdAtDate,
+					timeline.createdAt,
+					timeline.userId,
+				],
+				{ prepare: true },
+			);
+		}
 	} else {
 		const sql = `jsonb_set("reactions", '{${_reaction}}', (COALESCE("reactions"->>'${_reaction}', '0')::int + 1)::text::jsonb)`;
 		await Notes.createQueryBuilder()

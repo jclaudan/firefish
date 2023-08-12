@@ -125,17 +125,17 @@ export default define(meta, paramDef, async (ps, user) => {
 			UserBlockedCache.init(user.id).then((cache) => cache.getAll()),
 			RenoteMutingsCache.init(user.id).then((cache) => cache.getAll()),
 		]);
-		const validUserIds = [user.id, ...followingUserIds];
+		const homeUserIds = [user.id, ...followingUserIds];
 		const optFilter = (n: ScyllaNote) =>
 			!n.renoteId || !!n.text || n.files.length > 0 || n.hasPoll;
 
-		const filter = async (notes: ScyllaNote[]) => {
-			let filtered = notes.filter(
-				(n) =>
-					validUserIds.includes(n.userId) ||
-					(n.visibility === "public" && !n.userHost),
-			);
-			filtered = await filterChannel(filtered, user, followingChannelIds);
+		const homeFilter = (notes: ScyllaNote[]) =>
+			notes.filter((n) => homeUserIds.includes(n.userId));
+		const localFilter = (notes: ScyllaNote[]) =>
+			notes.filter((n) => !homeUserIds.includes(n.userId));
+
+		const commonFilter = async (notes: ScyllaNote[]) => {
+			let filtered = await filterChannel(notes, user, followingChannelIds);
 			filtered = await filterReply(filtered, ps.withReplies, user);
 			filtered = await filterVisibility(filtered, user, followingUserIds);
 			filtered = await filterMutedUser(
@@ -168,8 +168,15 @@ export default define(meta, paramDef, async (ps, user) => {
 		const foundPacked = [];
 		while (foundPacked.length < ps.limit) {
 			const [homeFoundNotes, localFoundNotes] = await Promise.all([
-				execNotePaginationQuery("home", ps, filter, user.id),
-				execNotePaginationQuery("local", ps, filter),
+				execNotePaginationQuery(
+					"home",
+					ps,
+					(notes) => commonFilter(homeFilter(notes)),
+					user.id,
+				),
+				execNotePaginationQuery("local", ps, (notes) =>
+					commonFilter(localFilter(notes)),
+				),
 			]);
 			const foundNotes = [...homeFoundNotes, ...localFoundNotes]
 				.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()) // Descendent

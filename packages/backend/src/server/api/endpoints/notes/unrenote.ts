@@ -4,6 +4,8 @@ import define from "../../define.js";
 import { getNote } from "../../common/getters.js";
 import { ApiError } from "../../error.js";
 import { SECOND, HOUR } from "@/const.js";
+import type { Note } from "@/models/entities/note.js";
+import { parseScyllaNote, prepared, scyllaClient } from "@/db/scylla.js";
 
 export const meta = {
 	tags: ["notes"],
@@ -42,10 +44,19 @@ export default define(meta, paramDef, async (ps, user) => {
 		throw err;
 	});
 
-	const renotes = await Notes.findBy({
-		userId: user.id,
-		renoteId: note.id,
-	});
+	let renotes: Note[] = [];
+
+	if (scyllaClient) {
+		const notes = await scyllaClient
+			.execute(prepared.note.select.byRenoteId, [note.id], { prepare: true })
+			.then((result) => result.rows.map(parseScyllaNote));
+		renotes = notes.filter((n) => n.userId === user.id);
+	} else {
+		renotes = await Notes.findBy({
+			userId: user.id,
+			renoteId: note.id,
+		});
+	}
 
 	for (const note of renotes) {
 		deleteNote(await Users.findOneByOrFail({ id: user.id }), note);

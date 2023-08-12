@@ -8,7 +8,12 @@ import type { User, IRemoteUser } from "@/models/entities/user.js";
 import type { Note } from "@/models/entities/note.js";
 import { NoteReactions, Users, Notes } from "@/models/index.js";
 import { decodeReaction } from "@/misc/reaction-lib.js";
-import { parseScyllaReaction, prepared, scyllaClient } from "@/db/scylla.js";
+import {
+	parseHomeTimeline,
+	parseScyllaReaction,
+	prepared,
+	scyllaClient,
+} from "@/db/scylla.js";
 import type { NoteReaction } from "@/models/entities/note-reaction.js";
 
 export default async (
@@ -19,7 +24,7 @@ export default async (
 	if (scyllaClient) {
 		const result = await scyllaClient.execute(
 			prepared.reaction.select.byNoteAndUser,
-			[note.id, user.id],
+			[[note.id], [user.id]],
 			{ prepare: true },
 		);
 		reaction =
@@ -58,13 +63,14 @@ export default async (
 		const date = new Date(note.createdAt.getTime());
 		const emojiName = reaction.reaction.replaceAll(":", "");
 		const emojiIndex = note.emojis.indexOf(emojiName);
+		const score = isNaN(note.score) ? 0 : note.score;
 		if (emojiIndex >= 0 && count === 0) note.emojis.splice(emojiIndex, 1);
 		await scyllaClient.execute(
 			prepared.note.update.reactions,
 			[
 				note.emojis,
 				note.reactions,
-				Math.max((note.score ?? 0) - 1, 0),
+				Math.max(score - 1, 0),
 				date,
 				date,
 				note.userId,
@@ -73,6 +79,27 @@ export default async (
 			],
 			{ prepare: true },
 		);
+		const homeTimelines = await scyllaClient
+			.execute(prepared.homeTimeline.select.byId, [note.id], {
+				prepare: true,
+			})
+			.then((result) => result.rows.map(parseHomeTimeline));
+		// Do not issue BATCH because different home timelines involve different partitions
+		for (const timeline of homeTimelines) {
+			scyllaClient.execute(
+				prepared.homeTimeline.update.reactions,
+				[
+					note.emojis.concat(emojiName),
+					note.reactions,
+					Math.max(score - 1, 0),
+					timeline.feedUserId,
+					timeline.createdAtDate,
+					timeline.createdAt,
+					timeline.userId,
+				],
+				{ prepare: true },
+			);
+		}
 	} else {
 		const sql = `jsonb_set("reactions", '{${reaction.reaction}}', (COALESCE("reactions"->>'${reaction.reaction}', '0')::int - 1)::text::jsonb)`;
 		await Notes.createQueryBuilder()

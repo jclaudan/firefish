@@ -68,7 +68,12 @@ import { shouldSilenceInstance } from "@/misc/should-block-instance.js";
 import meilisearch from "../../db/meilisearch.js";
 import { redisClient } from "@/db/redis.js";
 import { Mutex } from "redis-semaphore";
-import { parseScyllaNote, prepared, scyllaClient } from "@/db/scylla.js";
+import {
+	parseHomeTimeline,
+	parseScyllaNote,
+	prepared,
+	scyllaClient,
+} from "@/db/scylla.js";
 
 export const mutedWordsCache = new Cache<
 	{ userId: UserProfile["userId"]; mutedWords: UserProfile["mutedWords"] }[]
@@ -696,6 +701,26 @@ async function incRenoteCount(renote: Note) {
 			],
 			{ prepare: true },
 		);
+		const homeTimelines = await scyllaClient
+			.execute(prepared.homeTimeline.select.byId, [renote.id], {
+				prepare: true,
+			})
+			.then((result) => result.rows.map(parseHomeTimeline));
+		// Do not issue BATCH because different home timelines involve different partitions
+		for (const timeline of homeTimelines) {
+			scyllaClient.execute(
+				prepared.homeTimeline.update.renoteCount,
+				[
+					count + 1,
+					score + 1,
+					timeline.feedUserId,
+					timeline.createdAtDate,
+					timeline.createdAt,
+					timeline.userId,
+				],
+				{ prepare: true },
+			);
+		}
 	} else {
 		Notes.createQueryBuilder()
 			.update()
@@ -857,7 +882,7 @@ async function insertNote(
 				// Include the local user itself
 				localFollowers.push(user.id);
 			}
-			// Do not issue BATCH because different queries of inserting post to home timelines involve different partitions
+			// Do not issue BATCH because different home timelines involve different partitions
 			for (const follower of localFollowers) {
 				// no need to wait
 				scyllaClient.execute(
@@ -1047,6 +1072,25 @@ async function saveReply(reply: Note) {
 			],
 			{ prepare: true },
 		);
+		const homeTimelines = await scyllaClient
+			.execute(prepared.homeTimeline.select.byId, [reply.id], {
+				prepare: true,
+			})
+			.then((result) => result.rows.map(parseHomeTimeline));
+		// Do not issue BATCH because different home timelines involve different partitions
+		for (const timeline of homeTimelines) {
+			scyllaClient.execute(
+				prepared.homeTimeline.update.repliesCount,
+				[
+					count + 1,
+					timeline.feedUserId,
+					timeline.createdAtDate,
+					timeline.createdAt,
+					timeline.userId,
+				],
+				{ prepare: true },
+			);
+		}
 	} else {
 		await Notes.increment({ id: reply.id }, "repliesCount", 1);
 	}
