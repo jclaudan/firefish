@@ -30,9 +30,9 @@ import {
 } from "@/db/scylla.js";
 
 /**
- * 投稿を削除します。
- * @param user 投稿者
- * @param note 投稿
+ * Delete a post
+ * @param user Poster
+ * @param note Post
  */
 export default async function (
 	user: { id: User["id"]; uri: User["uri"]; host: User["host"] },
@@ -41,7 +41,7 @@ export default async function (
 ) {
 	const deletedAt = new Date();
 
-	// この投稿を除く指定したユーザーによる指定したノートのリノートが存在しないとき
+	// If no other boosts exists except this (potentially boost) post
 	if (
 		note.renoteId &&
 		(await countSameRenotes(user.id, note.renoteId, note.id)) === 0

@@ -1,4 +1,4 @@
-import { prepared, scyllaClient } from "@/db/scylla";
+import { scyllaClient } from "@/db/scylla.js";
 import { Notes } from "@/models/index.js";
 
 /**
