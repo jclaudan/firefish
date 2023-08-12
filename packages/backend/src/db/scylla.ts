@@ -261,7 +261,7 @@ export async function execNotePaginationQuery(
 		noteId?: string;
 	},
 	filter?: (_: ScyllaNote[]) => Promise<ScyllaNote[]>,
-	userId: User["id"] | null = null,
+	userId?: User["id"],
 	maxPartitions = config.scylla?.sparseTimelineDays ?? 14,
 ): Promise<ScyllaNote[]> {
 	if (!scyllaClient) return [];
