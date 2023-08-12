@@ -10,6 +10,7 @@
 		"unused-imports",
 		"eslint-plugin-unused-imports"
 	],
+	"ignorePatterns": ["**/*.json5"],
 	"rules": {
 		"file-progress/activate": 1,
 		"no-unused-vars": "off",

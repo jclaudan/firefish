@@ -75,3 +75,6 @@ yarn*
 # Cargo cache for Docker
 /.cargo-cache
 /.cargo-target
+
+# ESLint cache
+.eslintcache
