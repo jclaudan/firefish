@@ -845,6 +845,10 @@ async function insertNote(
 			const localFollowers = await LocalFollowersCache.init(user.id).then(
 				(cache) => cache.getAll(),
 			);
+			if (Users.isLocalUser(user)) {
+				// Include the local user itself
+				localFollowers.push(user.id);
+			}
 			// Do not issue BATCH because different queries of inserting post to home timelines involve different partitions
 			for (const follower of localFollowers) {
 				// no need to wait
