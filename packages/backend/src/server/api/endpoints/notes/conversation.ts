@@ -3,6 +3,7 @@ import { Notes } from "@/models/index.js";
 import define from "../../define.js";
 import { ApiError } from "../../error.js";
 import { getNote } from "../../common/getters.js";
+import { LocalFollowingsCache } from "@/misc/cache.js";
 
 export const meta = {
 	tags: ["notes"],
@@ -47,7 +48,12 @@ export const paramDef = {
 } as const;
 
 export default define(meta, paramDef, async (ps, user) => {
-	const note = await getNote(ps.noteId, user).catch((err) => {
+	let followingIds: string[] = [];
+	if (user) {
+		followingIds = await LocalFollowingsCache.init(user.id).then(cache => cache.getAll());
+	}
+
+	const note = await getNote(ps.noteId, user, followingIds).catch((err) => {
 		if (err.id === "9725d0ce-ba28-4dde-95a7-2cbb2c15de24")
 			throw new ApiError(meta.errors.noSuchNote);
 		throw err;
@@ -58,7 +64,7 @@ export default define(meta, paramDef, async (ps, user) => {
 
 	async function get(id: string) {
 		i++;
-		const p = await getNote(id, user).catch((e) => {
+		const p = await getNote(id, user, followingIds).catch((e) => {
 			if (e.id === "9725d0ce-ba28-4dde-95a7-2cbb2c15de24") return null;
 			throw e;
 		});

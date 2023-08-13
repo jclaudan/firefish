@@ -1,12 +1,27 @@
-import { Notes } from "@/models/index.js";
+import { Notes, UserProfiles } from "@/models/index.js";
 import define from "../../define.js";
 import { makePaginationQuery } from "../../common/make-pagination-query.js";
 import { generateVisibilityQuery } from "../../common/generate-visibility-query.js";
 import { generateMutedUserQuery } from "../../common/generate-muted-user-query.js";
 import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
-import { parseScyllaNote, prepared, scyllaClient } from "@/db/scylla.js";
+import {
+	filterBlockedUser,
+	filterMutedNote,
+	filterMutedUser,
+	filterVisibility,
+	parseScyllaNote,
+	prepared,
+	scyllaClient,
+} from "@/db/scylla.js";
 import { getNote } from "@/server/api/common/getters.js";
 import type { Note } from "@/models/entities/note.js";
+import {
+	InstanceMutingsCache,
+	LocalFollowingsCache,
+	UserBlockedCache,
+	UserMutingsCache,
+	userWordMuteCache,
+} from "@/misc/cache.js";
 
 export const meta = {
 	tags: ["notes"],
@@ -42,7 +57,34 @@ export const paramDef = {
 
 export default define(meta, paramDef, async (ps, user) => {
 	if (scyllaClient) {
-		const root = await getNote(ps.noteId, user).catch(() => null);
+		let [
+			followingUserIds,
+			mutedUserIds,
+			mutedInstances,
+			blockerIds,
+		]: string[][] = [];
+		let mutedWords: string[][] = [];
+		if (user) {
+			[followingUserIds, mutedUserIds, mutedInstances, mutedWords, blockerIds] =
+				await Promise.all([
+					LocalFollowingsCache.init(user.id).then((cache) => cache.getAll()),
+					UserMutingsCache.init(user.id).then((cache) => cache.getAll()),
+					InstanceMutingsCache.init(user.id).then((cache) => cache.getAll()),
+					userWordMuteCache
+						.fetchMaybe(user.id, () =>
+							UserProfiles.findOne({
+								select: ["mutedWords"],
+								where: { userId: user.id },
+							}).then((profile) => profile?.mutedWords),
+						)
+						.then((words) => words ?? []),
+					UserBlockedCache.init(user.id).then((cache) => cache.getAll()),
+				]);
+		}
+
+		const root = await getNote(ps.noteId, user, followingUserIds).catch(
+			() => null,
+		);
 		if (!root) {
 			return await Notes.packMany([]);
 		}
@@ -65,7 +107,18 @@ export default define(meta, paramDef, async (ps, user) => {
 					{ prepare: true },
 				);
 				if (result.rowLength > 0) {
-					const replies = result.rows.map(parseScyllaNote);
+					let replies = result.rows.map(parseScyllaNote);
+					replies = await filterVisibility(replies, user, followingUserIds);
+					if (user) {
+						replies = await filterMutedUser(
+							replies,
+							user,
+							mutedUserIds,
+							mutedInstances,
+						);
+						replies = await filterMutedNote(replies, user, mutedWords);
+						replies = await filterBlockedUser(replies, user, blockerIds);
+					}
 					foundReplies.push(...replies);
 					queue.push(...replies);
 					depth++;
@@ -73,7 +126,7 @@ export default define(meta, paramDef, async (ps, user) => {
 			}
 		}
 
-		return await Notes.packMany(foundReplies.slice(0, ps.limit), user, {
+		return await Notes.packMany(foundReplies, user, {
 			detail: false,
 			scyllaNote: true,
 		});
