@@ -33,6 +33,7 @@ import {
 	prepared,
 	scyllaClient,
 	parseScyllaReaction,
+	getScyllaDrivePublicUrl,
 } from "@/db/scylla.js";
 import { LocalFollowingsCache } from "@/misc/cache.js";
 import { userByIdCache } from "@/services/user-cache.js";
@@ -280,6 +281,7 @@ export const NoteRepository = db.getRepository(Note).extend({
 			files: scyllaClient
 				? (note as ScyllaNote).files.map((file) => ({
 						...file,
+						thumbnailUrl: getScyllaDrivePublicUrl(file, true),
 						createdAt: file.createdAt.toISOString(),
 						properties: {
 							width: file.width ?? undefined,

@@ -10,6 +10,7 @@ import { Meta } from "@/models/entities/meta.js";
 import { fetchMeta } from "@/misc/fetch-meta.js";
 import { Users, DriveFolders } from "../index.js";
 import { deepClone } from "@/misc/clone.js";
+import { ScyllaDriveFile } from "@/db/scylla.js";
 
 type PackOptions = {
 	detail?: boolean;

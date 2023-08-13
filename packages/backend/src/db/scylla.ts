@@ -82,6 +82,24 @@ export interface ScyllaDriveFile {
 	height: number | null;
 }
 
+export function getScyllaDrivePublicUrl(file: ScyllaDriveFile, thumbnail = false): string | null {
+	const isImage =
+		file.type &&
+		[
+			"image/png",
+			"image/apng",
+			"image/gif",
+			"image/jpeg",
+			"image/webp",
+			"image/svg+xml",
+			"image/avif",
+		].includes(file.type);
+
+	return thumbnail
+		? file.thumbnailUrl || (isImage ? file.url : null)
+		: file.url;
+}
+
 export interface ScyllaNoteEditHistory {
 	content: string;
 	cw: string;

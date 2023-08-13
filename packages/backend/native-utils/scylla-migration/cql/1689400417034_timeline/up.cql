@@ -75,6 +75,7 @@ CREATE TABLE IF NOT EXISTS note ( -- Store all posts
 CREATE INDEX IF NOT EXISTS note_by_uri ON note ("uri");
 CREATE INDEX IF NOT EXISTS note_by_url ON note ("url");
 CREATE INDEX IF NOT EXISTS note_by_id ON note ("id");
+CREATE INDEX IF NOT EXISTS note_by_reply_id ON note ("replyId");
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS note_by_user_id AS
 	SELECT * FROM note

@@ -148,7 +148,7 @@ export default async function (
 			deletedAt: deletedAt,
 		});
 
-		//#region ローカルの投稿なら削除アクティビティを配送
+		//#region Deliver Delete activity if it's from a local account
 		if (Users.isLocalUser(user) && !note.localOnly) {
 			let renote: Note | null = null;
 
@@ -159,9 +159,18 @@ export default async function (
 				!note.hasPoll &&
 				(note.fileIds == null || note.fileIds.length === 0)
 			) {
-				renote = await Notes.findOneBy({
-					id: note.renoteId,
-				});
+				if (scyllaClient) {
+					const result = await scyllaClient.execute(
+						prepared.note.select.byId,
+						[note.renoteId],
+						{ prepare: true },
+					);
+					if (result.rowLength > 0) renote = parseScyllaNote(result.first());
+				} else {
+					renote = await Notes.findOneBy({
+						id: note.renoteId,
+					});
+				}
 			}
 
 			const content = renderActivity(
@@ -249,18 +258,42 @@ async function findCascadingNotes(note: Note) {
 	const cascadingNotes: Note[] = [];
 
 	const recursive = async (noteId: string) => {
-		const query = Notes.createQueryBuilder("note")
-			.where("note.replyId = :noteId", { noteId })
-			.orWhere(
-				new Brackets((q) => {
-					q.where("note.renoteId = :noteId", { noteId }).andWhere(
-						"note.text IS NOT NULL",
-					);
-				}),
-			)
-			.leftJoinAndSelect("note.user", "user");
-		const replies = await query.getMany();
-		for (const reply of replies) {
+		let notes: Note[] = [];
+
+		if (scyllaClient) {
+			const replies = await scyllaClient.execute(
+				prepared.note.select.byReplyId,
+				[noteId],
+				{ prepare: true },
+			);
+			if (replies.rowLength > 0) {
+				notes.push(...replies.rows.map(parseScyllaNote));
+			}
+			const renotes = await scyllaClient.execute(
+				prepared.note.select.byRenoteId,
+				[noteId],
+				{ prepare: true },
+			);
+			if (renotes.rowLength > 0) {
+				notes.push(
+					...renotes.rows.map(parseScyllaNote).filter((note) => !!note.text),
+				);
+			}
+		} else {
+			const query = Notes.createQueryBuilder("note")
+				.where("note.replyId = :noteId", { noteId })
+				.orWhere(
+					new Brackets((q) => {
+						q.where("note.renoteId = :noteId", { noteId }).andWhere(
+							"note.text IS NOT NULL",
+						);
+					}),
+				)
+				.leftJoinAndSelect("note.user", "user");
+			notes = await query.getMany();
+		}
+
+		for (const reply of notes) {
 			cascadingNotes.push(reply);
 			await recursive(reply.id);
 		}

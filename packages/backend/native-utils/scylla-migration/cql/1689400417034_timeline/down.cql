@@ -9,6 +9,7 @@ DROP MATERIALIZED VIEW IF EXISTS global_timeline;
 DROP MATERIALIZED VIEW IF EXISTS note_by_renote_id_and_user_id;
 DROP MATERIALIZED VIEW IF EXISTS note_by_renote_id;
 DROP MATERIALIZED VIEW IF EXISTS note_by_user_id;
+DROP INDEX IF EXISTS note_by_reply_id;
 DROP INDEX IF EXISTS note_by_id;
 DROP INDEX IF EXISTS note_by_uri;
 DROP INDEX IF EXISTS note_by_url;
