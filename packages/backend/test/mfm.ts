@@ -1,5 +1,5 @@
 import * as assert from "assert";
-import * as mfm from "mfm-js";
+import * as mfm from "ffm-js";
 
 import { toHtml } from "../src/mfm/to-html.js";
 import { fromHtml } from "../src/mfm/from-html.js";

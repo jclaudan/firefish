@@ -135,7 +135,7 @@ const embedId = `embed${Math.random().toString().replace(/\D/, "")}`;
 let tweetHeight = ref(150);
 
 const requestUrl = new URL(props.url);
-if (!["http:", "https:"].includes(requestUrl.protocol))
+if (!["http:", "https:", "gopher:", "gemini:", "matrix:"].includes(requestUrl.protocol))
 	throw new Error("invalid url");
 
 if (

@@ -1,5 +1,5 @@
 import promiseLimit from "promise-limit";
-import * as mfm from "mfm-js";
+import * as mfm from "ffm-js";
 import config from "@/config/index.js";
 import Resolver from "../resolver.js";
 import post from "@/services/note/create.js";

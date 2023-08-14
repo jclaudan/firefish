@@ -1,4 +1,4 @@
-import * as mfm from "mfm-js";
+import * as mfm from "ffm-js";
 import es from "../../db/elasticsearch.js";
 import sonic from "../../db/sonic.js";
 import {

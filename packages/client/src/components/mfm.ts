@@ -1,5 +1,5 @@
 import { defineComponent, h } from "vue";
-import * as mfm from "mfm-js";
+import * as mfm from "ffm-js";
 import type { VNode } from "vue";
 import MkUrl from "@/components/global/MkUrl.vue";
 import MkLink from "@/components/MkLink.vue";

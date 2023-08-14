@@ -178,7 +178,7 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import * as misskey from "firefish-js";
-import * as mfm from "mfm-js";
+import * as mfm from "ffm-js";
 import * as os from "@/os";
 import XNoteSimple from "@/components/MkNoteSimple.vue";
 import XMediaList from "@/components/MkMediaList.vue";

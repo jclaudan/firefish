@@ -1,4 +1,4 @@
-import * as mfm from "mfm-js";
+import * as mfm from "ffm-js";
 import { unique } from "@/prelude/array.js";
 
 export function extractCustomEmojisFromMfm(nodes: mfm.MfmNode[]): string[] {

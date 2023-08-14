@@ -11,14 +11,14 @@
 		@click.stop
 	>
 		<template v-if="!self">
-			<span class="schema">{{ schema }}//</span>
-			<span class="hostname">{{ hostname }}</span>
+			<span class="schema">{{ schema }}{{ hostname.trim() != '' ? '//' : '' }}</span>
+			<span class="hostname">{{ hostname.trim() != '' ? hostname.trim() : pathname }}</span>
 			<span v-if="port != ''" class="port">:{{ port }}</span>
 		</template>
 		<template v-if="pathname === '/' && self">
 			<span class="self">{{ hostname }}</span>
 		</template>
-		<span v-if="pathname != ''" class="pathname">{{
+		<span v-if="pathname != '' && !!hostname" class="pathname">{{
 			self ? pathname.substring(1) : pathname
 		}}</span>
 		<span class="query">{{ query }}</span>
@@ -45,7 +45,7 @@ const props = defineProps<{
 
 const self = props.url.startsWith(local);
 const url = new URL(props.url);
-if (!["http:", "https:"].includes(url.protocol)) throw new Error("invalid url");
+if (!["http:", "https:", "gopher:", "gemini:", "matrix:"].includes(url.protocol)) throw new Error("invalid url");
 const el = ref();
 
 useTooltip(el, (showing) => {

@@ -912,6 +912,14 @@ hoge`;
 			assert.deepStrictEqual(mfm.parse(input), output);
 		});
 
+		test('gopher', () => {
+			const input = 'gopher://misskey.io/@ai';
+			const output = [
+				N_URL('gopher://misskey.io/@ai'),
+			];
+			assert.deepStrictEqual(mfm.parse(input), output);
+		});
+
 		test('with other texts', () => {
 			const input = 'official instance: https://misskey.io/@ai.';
 			const output = [

@@ -1,5 +1,5 @@
 import { In } from "typeorm";
-import * as mfm from "mfm-js";
+import * as mfm from "ffm-js";
 import { Note } from "@/models/entities/note.js";
 import type { User } from "@/models/entities/user.js";
 import {

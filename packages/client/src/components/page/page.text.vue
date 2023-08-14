@@ -9,7 +9,7 @@
 import { TextBlock } from "@/scripts/hpml/block";
 import { Hpml } from "@/scripts/hpml/evaluator";
 import { defineAsyncComponent, defineComponent, PropType } from "vue";
-import * as mfm from "mfm-js";
+import * as mfm from "ffm-js";
 import { extractUrlFromMfm } from "@/scripts/extract-url-from-mfm";
 export default defineComponent({
 	components: {

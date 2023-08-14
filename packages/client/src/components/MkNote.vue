@@ -256,7 +256,7 @@
 
 <script lang="ts" setup>
 import { computed, inject, onMounted, ref } from "vue";
-import * as mfm from "mfm-js";
+import * as mfm from "ffm-js";
 import type { Ref } from "vue";
 import type * as misskey from "firefish-js";
 import MkNoteSub from "@/components/MkNoteSub.vue";

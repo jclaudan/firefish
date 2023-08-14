@@ -1,5 +1,5 @@
 import { URL } from "node:url";
-import * as mfm from "mfm-js";
+import * as mfm from "ffm-js";
 import config from "@/config/index.js";
 import type { ILocalUser } from "@/models/entities/user.js";
 import { DriveFiles, UserProfiles } from "@/models/index.js";

@@ -21,7 +21,7 @@ import define from "../../define.js";
 import { HOUR } from "@/const.js";
 import { getNote } from "../../common/getters.js";
 import { Poll } from "@/models/entities/poll.js";
-import * as mfm from "mfm-js";
+import * as mfm from "ffm-js";
 import { concat } from "@/prelude/array.js";
 import { extractHashtags } from "@/misc/extract-hashtags.js";
 import { extractCustomEmojisFromMfm } from "@/misc/extract-custom-emojis-from-mfm.js";

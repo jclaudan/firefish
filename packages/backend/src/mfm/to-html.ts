@@ -1,5 +1,6 @@
 import { JSDOM } from "jsdom";
-import type * as mfm from "mfm-js";
+// import type * as mfm from "mfm-js";
+import type * as mfm from "ffm-js";
 import config from "@/config/index.js";
 import { intersperse } from "@/prelude/array.js";
 import type { IMentionedRemoteUsers } from "@/models/entities/note.js";

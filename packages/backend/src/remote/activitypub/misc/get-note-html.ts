@@ -1,4 +1,4 @@
-import * as mfm from "mfm-js";
+import * as mfm from "ffm-js";
 import type { Note } from "@/models/entities/note.js";
 import { toHtml } from "../../../mfm/to-html.js";
 

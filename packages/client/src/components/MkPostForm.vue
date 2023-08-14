@@ -242,7 +242,7 @@ import {
 	ref,
 	computed,
 } from "vue";
-import * as mfm from "mfm-js";
+import * as mfm from "ffm-js";
 import * as misskey from "firefish-js";
 import autosize from "autosize";
 import insertTextAtCursor from "insert-text-at-cursor";

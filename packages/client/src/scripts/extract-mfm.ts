@@ -1,4 +1,4 @@
-import * as mfm from "mfm-js";
+import * as mfm from "ffm-js";
 
 const animatedMfm = [
 	"tada",
