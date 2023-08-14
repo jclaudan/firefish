@@ -236,17 +236,17 @@ export default async function (
 		});
 
 		const noteUserIds = new Set(notesToDelete.map((n) => n.userId));
-		const followers: string[] = [];
+		const meAndFollowers: string[] = [note.userId];
 		for (const id of noteUserIds) {
 			const list = await LocalFollowersCache.init(id).then((cache) =>
 				cache.getAll(),
 			);
-			followers.push(...list);
+			meAndFollowers.push(...list);
 		}
-		const localFollowers = new Set(followers);
+		const feedUserIds = new Set(meAndFollowers);
 		const homeDeleteParams = notesToDelete.map((n) => {
 			const tuples: [string, Date, Date, string][] = [];
-			for (const feedUserId of localFollowers) {
+			for (const feedUserId of feedUserIds) {
 				tuples.push([feedUserId, n.createdAt, n.createdAt, n.userId]);
 			}
 			return tuples;
