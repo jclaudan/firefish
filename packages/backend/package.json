@@ -91,6 +91,7 @@
 		"megalodon": "workspace:*",
 		"meilisearch": "0.33.0",
 		"mfm-js": "0.23.3",
+		"ffm-js": "workspace:*",
 		"mime-types": "2.1.35",
 		"msgpackr": "1.9.6",
 		"multer": "1.4.4-lts.1",

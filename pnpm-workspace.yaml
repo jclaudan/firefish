@@ -5,3 +5,4 @@ packages:
  - 'packages/sw'
  - 'packages/firefish-js'
  - 'packages/megalodon'
+ - 'packages/ffm-js'

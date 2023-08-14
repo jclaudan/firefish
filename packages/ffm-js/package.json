@@ -1,5 +1,5 @@
 {
-  "name": "mfm-js",
+  "name": "ffm-js",
   "version": "0.23.3",
   "description": "An MFM parser implementation with TypeScript",
   "main": "./built/index.js",
