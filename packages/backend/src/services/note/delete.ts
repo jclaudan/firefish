@@ -1,4 +1,4 @@
-import { Brackets, In } from "typeorm";
+import { Brackets, In, IsNull } from "typeorm";
 import { publishNoteStream } from "@/services/stream.js";
 import renderDelete from "@/remote/activitypub/renderer/delete.js";
 import renderAnnounce from "@/remote/activitypub/renderer/announce.js";
@@ -227,33 +227,46 @@ export default async function (
 	if (scyllaClient) {
 		const notesToDelete = [note, ...cascadingNotes];
 
-		const noteDeleteParams = notesToDelete.map((n) => {
-			const date = new Date(n.createdAt.getTime());
-			return [date, date, n.userId, n.userHost ?? "local", n.visibility];
-		});
-		await scyllaClient.execute(prepared.note.delete, noteDeleteParams, {
-			prepare: true,
-		});
-
-		const noteUserIds = new Set(notesToDelete.map((n) => n.userId));
-		const meAndFollowers: string[] = [note.userId];
-		for (const id of noteUserIds) {
-			const list = await LocalFollowersCache.init(id).then((cache) =>
-				cache.getAll(),
-			);
-			meAndFollowers.push(...list);
+		// Delete from note table
+		const noteDeleteParams = notesToDelete.map(
+			(n) =>
+				[
+					n.createdAt,
+					n.createdAt,
+					n.userId,
+					n.userHost ?? "local",
+					n.visibility,
+				] as [Date, Date, string, string, string],
+		);
+		for (const param of noteDeleteParams) {
+			scyllaClient.execute(prepared.note.delete, param, {
+				prepare: true,
+			});
 		}
-		const feedUserIds = new Set(meAndFollowers);
-		const homeDeleteParams = notesToDelete.map((n) => {
-			const tuples: [string, Date, Date, string][] = [];
-			for (const feedUserId of feedUserIds) {
-				tuples.push([feedUserId, n.createdAt, n.createdAt, n.userId]);
-			}
-			return tuples;
-		});
-		await scyllaClient.execute(prepared.homeTimeline.delete, homeDeleteParams, {
-			prepare: true,
-		});
+
+		// Delete from home timelines
+		const localUserIds = await Users.find({
+			select: ["id"],
+			where: {
+				host: IsNull(),
+			},
+		}).then((users) => users.map(({ id }) => id)); // TODO: cache?
+		const homeDeleteParams = localUserIds.flatMap((feedUserId) =>
+			notesToDelete.map(
+				(n) =>
+					[feedUserId, n.createdAt, n.createdAt, n.userId] as [
+						string,
+						Date,
+						Date,
+						string,
+					],
+			),
+		);
+		for (const param of homeDeleteParams) {
+			scyllaClient.execute(prepared.homeTimeline.delete, param, {
+				prepare: true,
+			});
+		}
 	} else {
 		await Notes.delete({
 			id: note.id,

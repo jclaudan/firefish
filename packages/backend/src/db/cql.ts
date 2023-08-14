@@ -49,9 +49,9 @@ export const scyllaQueries = {
 			byIds: `SELECT * FROM note_by_id WHERE "id" IN ?`,
 			byUserId: `SELECT * FROM note_by_user_id WHERE "userId" = ?`,
 			byRenoteId: `SELECT * FROM note_by_renote_id WHERE "renoteId" = ?`,
-			byReplyId: `SELECT * FROM note WHERE "replyId" = ?`
+			byReplyId: `SELECT * FROM note WHERE "replyId" = ?`,
 		},
-		delete: `DELETE FROM note WHERE ("createdAtDate", "createdAt", "userId", "userHost", "visibility") IN ?`,
+		delete: `DELETE FROM note WHERE "createdAtDate" = ? AND "createdAt" = ? AND "userId" = ? AND "userHost" = ? AND "visibility" = ?`,
 		update: {
 			renoteCount: `UPDATE note SET
 				"renoteCount" = ?,
@@ -114,7 +114,7 @@ export const scyllaQueries = {
 			byUserAndDate: `SELECT * FROM home_timeline WHERE "feedUserId" = ? AND "createdAtDate" = ?`,
 			byId: `SELECT * FROM home_timeline WHERE "id" = ?`,
 		},
-		delete: `DELETE FROM home_timeline WHERE ("feedUserId", "createdAtDate", "createdAt", "userId") IN ?`,
+		delete: `DELETE FROM home_timeline WHERE "feedUserId" = ? AND "createdAtDate" = ? AND "createdAt" = ? AND "userId" = ?`,
 		update: {
 			renoteCount: `UPDATE home_timeline SET
 				"renoteCount" = ?,
@@ -128,7 +128,7 @@ export const scyllaQueries = {
 				"reactions" = ?,
 				"score" = ?
 				WHERE "feedUserId" = ? AND "createdAtDate" = ? AND "createdAt" = ? AND "userId" = ? IF EXISTS`,
-		}
+		},
 	},
 	localTimeline: {
 		select: {
