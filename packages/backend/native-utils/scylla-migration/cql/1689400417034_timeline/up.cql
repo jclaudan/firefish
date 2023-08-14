@@ -74,8 +74,18 @@ CREATE TABLE IF NOT EXISTS note ( -- Store all posts
 
 CREATE INDEX IF NOT EXISTS note_by_uri ON note ("uri");
 CREATE INDEX IF NOT EXISTS note_by_url ON note ("url");
-CREATE INDEX IF NOT EXISTS note_by_id ON note ("id");
 CREATE INDEX IF NOT EXISTS note_by_reply_id ON note ("replyId");
+
+CREATE MATERIALIZED VIEW IF NOT EXISTS note_by_id AS
+	SELECT * FROM note
+	WHERE "id" IS NOT NULL
+	AND "createdAt" IS NOT NULL
+	AND "createdAtDate" IS NOT NULL
+	AND "userId" IS NOT NULL
+	AND "userHost" IS NOT NULL
+	AND "visibility" IS NOT NULL
+	PRIMARY KEY ("id", "createdAt", "createdAtDate", "userId", "userHost", "visibility")
+	WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS note_by_user_id AS
 	SELECT * FROM note

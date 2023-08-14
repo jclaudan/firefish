@@ -28,6 +28,7 @@ import {
 	prepared,
 	scyllaClient,
 } from "@/db/scylla.js";
+import { LocalFollowersCache } from "@/misc/cache.js";
 
 /**
  * Delete a post
@@ -143,6 +144,9 @@ export default async function (
 		}
 	}
 
+	const cascadingNotes =
+		scyllaClient || !quiet ? await findCascadingNotes(note) : [];
+
 	if (!quiet) {
 		publishNoteStream(note.id, "deleted", {
 			deletedAt: deletedAt,
@@ -192,10 +196,10 @@ export default async function (
 		}
 
 		// also deliever delete activity to cascaded notes
-		const cascadingNotes = (await findCascadingNotes(note)).filter(
-			(note) => !note.localOnly,
+		const cascadingLocalNotes = cascadingNotes.filter(
+			(note) => note.userHost === null && !note.localOnly,
 		); // filter out local-only notes
-		for (const cascadingNote of cascadingNotes) {
+		for (const cascadingNote of cascadingLocalNotes) {
 			if (!cascadingNote.user) continue;
 			if (!Users.isLocalUser(cascadingNote.user)) continue;
 			const content = renderActivity(
@@ -221,33 +225,41 @@ export default async function (
 	}
 
 	if (scyllaClient) {
-		const date = new Date(note.createdAt.getTime());
-		await scyllaClient.execute(
-			prepared.note.delete,
-			[date, date, note.userId, note.userHost ?? "local", note.visibility],
-			{
-				prepare: true,
-			},
-		);
+		const notesToDelete = [note, ...cascadingNotes];
 
-		const homeTimelines = await scyllaClient
-			.execute(prepared.homeTimeline.select.byId, [note.id], { prepare: true })
-			.then((result) => result.rows.map(parseHomeTimeline));
-		for (const timeline of homeTimelines) {
-			// No need to wait
-			scyllaClient.execute(prepared.homeTimeline.delete, [
-				timeline.feedUserId,
-				timeline.createdAtDate,
-				timeline.createdAt,
-				timeline.userId,
-			]);
+		const noteDeleteParams = notesToDelete.map((n) => {
+			const date = new Date(n.createdAt.getTime());
+			return [date, date, n.userId, n.userHost ?? "local", n.visibility];
+		});
+		await scyllaClient.execute(prepared.note.delete, noteDeleteParams, {
+			prepare: true,
+		});
+
+		const noteUserIds = new Set(notesToDelete.map((n) => n.userId));
+		const followers: string[] = [];
+		for (const id of noteUserIds) {
+			const list = await LocalFollowersCache.init(id).then((cache) =>
+				cache.getAll(),
+			);
+			followers.push(...list);
 		}
+		const localFollowers = new Set(followers);
+		const homeDeleteParams = notesToDelete.map((n) => {
+			const tuples: [string, Date, Date, string][] = [];
+			for (const feedUserId of localFollowers) {
+				tuples.push([feedUserId, n.createdAt, n.createdAt, n.userId]);
+			}
+			return tuples;
+		});
+		await scyllaClient.execute(prepared.homeTimeline.delete, homeDeleteParams, {
+			prepare: true,
+		});
+	} else {
+		await Notes.delete({
+			id: note.id,
+			userId: user.id,
+		});
 	}
-
-	await Notes.delete({
-		id: note.id,
-		userId: user.id,
-	});
 
 	if (meilisearch) {
 		await meilisearch.deleteNotes(note.id);
@@ -293,14 +305,14 @@ async function findCascadingNotes(note: Note) {
 			notes = await query.getMany();
 		}
 
-		for (const reply of notes) {
-			cascadingNotes.push(reply);
-			await recursive(reply.id);
+		for (const note of notes) {
+			cascadingNotes.push(note);
+			await recursive(note.id);
 		}
 	};
 	await recursive(note.id);
 
-	return cascadingNotes.filter((note) => note.userHost === null); // filter out non-local users
+	return cascadingNotes;
 }
 
 async function getMentionedRemoteUsers(note: Note) {

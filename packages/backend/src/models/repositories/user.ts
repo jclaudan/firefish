@@ -38,6 +38,9 @@ import {
 } from "../index.js";
 import type { Instance } from "../entities/instance.js";
 import { userDenormalizedCache } from "@/services/user-cache.js";
+import { parseScyllaNote, prepared, scyllaClient } from "@/db/scylla.js";
+import type { UserNotePining } from "@/models/entities/user-note-pining.js";
+import type { Note } from "@/models/entities/note.js";
 
 const userInstanceCache = new Cache<Instance | null>(
 	"userInstance",
@@ -404,13 +407,29 @@ export const UserRepository = db.getRepository(User).extend({
 			meId && !isMe && opts.detail
 				? await this.getRelation(meId, user.id)
 				: null;
-		const pins = opts.detail
-			? await UserNotePinings.createQueryBuilder("pin")
-					.where("pin.userId = :userId", { userId: user.id })
-					.innerJoinAndSelect("pin.note", "note")
-					.orderBy("pin.id", "DESC")
-					.getMany()
-			: [];
+
+		let pinnedNoteIds: UserNotePining["noteId"][] = [];
+		let pinnedNotes: Note[] = [];
+		if (opts.detail) {
+			pinnedNoteIds = await UserNotePinings.find({
+				select: ["noteId"],
+				where: {
+					userId: user.id,
+				},
+			}).then((notes) => notes.map(({ noteId }) => noteId));
+
+			if (scyllaClient) {
+				const result = await scyllaClient.execute(
+					prepared.note.select.byIds,
+					[pinnedNoteIds],
+					{ prepare: true },
+				);
+				pinnedNotes = result.rows.map(parseScyllaNote);
+			} else {
+				pinnedNotes = await Notes.findBy({ id: In(pinnedNoteIds) });
+			}
+		}
+
 		const profile = opts.detail
 			? await UserProfiles.findOneByOrFail({ userId: user.id })
 			: null;
@@ -506,14 +525,11 @@ export const UserRepository = db.getRepository(User).extend({
 						followersCount: followersCount || 0,
 						followingCount: followingCount || 0,
 						notesCount: user.notesCount,
-						pinnedNoteIds: pins.map((pin) => pin.noteId),
-						pinnedNotes: Notes.packMany(
-							pins.map((pin) => pin.note!),
-							me,
-							{
-								detail: true,
-							},
-						),
+						pinnedNoteIds,
+						pinnedNotes: Notes.packMany(pinnedNotes, me, {
+							detail: true,
+							scyllaNote: !!scyllaClient,
+						}),
 						pinnedPageId: profile!.pinnedPageId,
 						pinnedPage: profile!.pinnedPageId
 							? Pages.pack(profile!.pinnedPageId, me)

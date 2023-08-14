@@ -4,6 +4,7 @@ import define from "../../define.js";
 import { getNote } from "../../common/getters.js";
 import { ApiError } from "../../error.js";
 import { SECOND, HOUR } from "@/const.js";
+import { userByIdCache } from "@/services/user-cache.js";
 
 export const meta = {
 	tags: ["notes"],
@@ -52,6 +53,10 @@ export default define(meta, paramDef, async (ps, user) => {
 		throw new ApiError(meta.errors.accessDenied);
 	}
 
-	// この操作を行うのが投稿者とは限らない(例えばモデレーター)ため
-	await deleteNote(await Users.findOneByOrFail({ id: note.userId }), note);
+	await deleteNote(
+		await userByIdCache.fetch(note.userId, () =>
+			Users.findOneByOrFail({ id: note.userId }),
+		),
+		note,
+	);
 });
