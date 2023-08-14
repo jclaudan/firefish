@@ -82,7 +82,10 @@ export interface ScyllaDriveFile {
 	height: number | null;
 }
 
-export function getScyllaDrivePublicUrl(file: ScyllaDriveFile, thumbnail = false): string | null {
+export function getScyllaDrivePublicUrl(
+	file: ScyllaDriveFile,
+	thumbnail = false,
+): string | null {
 	const isImage =
 		file.type &&
 		[
@@ -190,12 +193,13 @@ export interface ScyllaNoteReaction extends NoteReaction {
 
 const QUERY_LIMIT = 1000; // TODO: should this be configurable?
 
-export type TimelineKind =
+export type FeedType =
 	| "home"
 	| "local"
 	| "recommended"
 	| "global"
-	| "renotes";
+	| "renotes"
+	| "user";
 
 export function parseScyllaReaction(row: types.Row): ScyllaNoteReaction {
 	return {
@@ -209,7 +213,7 @@ export function parseScyllaReaction(row: types.Row): ScyllaNoteReaction {
 }
 
 export function prepareNoteQuery(
-	kind: TimelineKind,
+	kind: FeedType,
 	ps: {
 		untilId?: string;
 		untilDate?: number;
@@ -232,6 +236,9 @@ export function prepareNoteQuery(
 			break;
 		case "renotes":
 			queryParts.push(prepared.note.select.byRenoteId);
+			break;
+		case "user":
+			queryParts.push(prepared.note.select.byUserId);
 			break;
 		default:
 			queryParts.push(prepared.note.select.byDate);
@@ -269,7 +276,7 @@ export function prepareNoteQuery(
 }
 
 export async function execNotePaginationQuery(
-	kind: TimelineKind,
+	kind: FeedType,
 	ps: {
 		limit: number;
 		untilId?: string;
@@ -284,11 +291,15 @@ export async function execNotePaginationQuery(
 ): Promise<ScyllaNote[]> {
 	if (!scyllaClient) return [];
 
-	if (kind === "home" && !userId) {
-		throw new Error("Query of home timeline needs userId");
-	}
-	if (kind === "renotes" && !ps.noteId) {
-		throw new Error("Query of renotes needs noteId");
+	switch (kind) {
+		case "home":
+		case "user":
+			if (!userId)
+				throw new Error("Query of home and user timelines needs userId");
+			break;
+		case "renotes":
+			if (!ps.noteId) throw new Error("Query of renotes needs noteId");
+			break;
 	}
 
 	let { query, untilDate, sinceDate } = prepareNoteQuery(kind, ps);
@@ -300,14 +311,15 @@ export async function execNotePaginationQuery(
 	while (foundNotes.length < ps.limit && scannedPartitions < maxPartitions) {
 		const params: (Date | string | string[] | number)[] = [];
 		if (kind === "home" && userId) {
-			params.push(userId);
-		}
-
-		if (kind === "renotes" && ps.noteId) {
+			params.push(userId, untilDate, untilDate);
+		} else if (kind === "user" && userId) {
+			params.push(userId, untilDate);
+		} else if (kind === "renotes" && ps.noteId) {
 			params.push(ps.noteId, untilDate);
 		} else {
 			params.push(untilDate, untilDate);
 		}
+
 		if (sinceDate) {
 			params.push(sinceDate);
 		}

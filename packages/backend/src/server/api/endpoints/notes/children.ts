@@ -5,6 +5,7 @@ import { generateVisibilityQuery } from "../../common/generate-visibility-query.
 import { generateMutedUserQuery } from "../../common/generate-muted-user-query.js";
 import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
 import {
+	ScyllaNote,
 	filterBlockedUser,
 	filterMutedNote,
 	filterMutedUser,
@@ -89,44 +90,54 @@ export default define(meta, paramDef, async (ps, user) => {
 			return await Notes.packMany([]);
 		}
 
-		// Find replies in BFS manner
-		const queue = [root];
-		const foundReplies: Note[] = [];
-		let depth = 0;
+		const filter = async (notes: ScyllaNote[]) => {
+			let filtered = await filterVisibility(notes, user, followingUserIds);
+			if (user) {
+				filtered = await filterMutedUser(
+					filtered,
+					user,
+					mutedUserIds,
+					mutedInstances,
+				);
+				filtered = await filterMutedNote(filtered, user, mutedWords);
+				filtered = await filterBlockedUser(filtered, user, blockerIds);
+			}
+			return filtered;
+		};
 
-		while (
-			queue.length > 0 &&
-			foundReplies.length < ps.limit &&
-			depth < ps.depth
-		) {
+		// Find quotes first
+		const renoteResult = await scyllaClient.execute(
+			prepared.note.select.byRenoteId,
+			[root.id],
+			{ prepare: true },
+		);
+		const foundNotes = await filter(
+			renoteResult.rows.map(parseScyllaNote).filter((note) => !!note.text),
+		);
+
+		// Then find replies in BFS manner
+		const queue = [root];
+		let depth = 0;
+		const limit = ps.limit + foundNotes.length;
+
+		while (queue.length > 0 && foundNotes.length < limit && depth < ps.depth) {
 			const note = queue.shift();
 			if (note) {
-				const result = await scyllaClient.execute(
+				const replyResult = await scyllaClient.execute(
 					prepared.note.select.byReplyId,
 					[note.id],
 					{ prepare: true },
 				);
-				if (result.rowLength > 0) {
-					let replies = result.rows.map(parseScyllaNote);
-					replies = await filterVisibility(replies, user, followingUserIds);
-					if (user) {
-						replies = await filterMutedUser(
-							replies,
-							user,
-							mutedUserIds,
-							mutedInstances,
-						);
-						replies = await filterMutedNote(replies, user, mutedWords);
-						replies = await filterBlockedUser(replies, user, blockerIds);
-					}
-					foundReplies.push(...replies);
+				const replies = await filter(replyResult.rows.map(parseScyllaNote));
+				if (replies.length > 0) {
+					foundNotes.push(...replies);
 					queue.push(...replies);
 					depth++;
 				}
 			}
 		}
 
-		return await Notes.packMany(foundReplies, user, {
+		return await Notes.packMany(foundNotes, user, {
 			detail: false,
 			scyllaNote: true,
 		});

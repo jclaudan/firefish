@@ -46,7 +46,7 @@ export const scyllaQueries = {
 			byUri: `SELECT * FROM note WHERE "uri" = ?`,
 			byUrl: `SELECT * FROM note WHERE "url" = ?`,
 			byId: `SELECT * FROM note WHERE "id" = ?`,
-			byUserId: `SELECT * FROM note_by_user_id WHERE "userId" IN ?`,
+			byUserId: `SELECT * FROM note_by_user_id WHERE "userId" = ?`,
 			byRenoteId: `SELECT * FROM note_by_renote_id WHERE "renoteId" = ?`,
 			byReplyId: `SELECT * FROM note WHERE "replyId" = ?`
 		},

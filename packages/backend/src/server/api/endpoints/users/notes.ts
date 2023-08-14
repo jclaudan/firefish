@@ -1,5 +1,5 @@
 import { Brackets } from "typeorm";
-import { Notes } from "@/models/index.js";
+import { Notes, UserProfiles } from "@/models/index.js";
 import define from "../../define.js";
 import { ApiError } from "../../error.js";
 import { getUser } from "../../common/getters.js";
@@ -7,6 +7,22 @@ import { makePaginationQuery } from "../../common/make-pagination-query.js";
 import { generateVisibilityQuery } from "../../common/generate-visibility-query.js";
 import { generateMutedUserQuery } from "../../common/generate-muted-user-query.js";
 import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
+import {
+	ScyllaNote,
+	execNotePaginationQuery,
+	filterBlockedUser,
+	filterMutedNote,
+	filterMutedUser,
+	filterVisibility,
+	scyllaClient,
+} from "@/db/scylla.js";
+import {
+	InstanceMutingsCache,
+	LocalFollowingsCache,
+	UserBlockedCache,
+	UserMutingsCache,
+	userWordMuteCache,
+} from "@/misc/cache.js";
 
 export const meta = {
 	tags: ["users", "notes"],
@@ -66,6 +82,91 @@ export default define(meta, paramDef, async (ps, me) => {
 		throw e;
 	});
 
+	if (scyllaClient) {
+		const [
+			followingUserIds,
+			mutedUserIds,
+			mutedInstances,
+			mutedWords,
+			blockerIds,
+		] = await Promise.all([
+			LocalFollowingsCache.init(user.id).then((cache) => cache.getAll()),
+			UserMutingsCache.init(user.id).then((cache) => cache.getAll()),
+			InstanceMutingsCache.init(user.id).then((cache) => cache.getAll()),
+			userWordMuteCache
+				.fetchMaybe(user.id, () =>
+					UserProfiles.findOne({
+						select: ["mutedWords"],
+						where: { userId: user.id },
+					}).then((profile) => profile?.mutedWords),
+				)
+				.then((words) => words ?? []),
+			UserBlockedCache.init(user.id).then((cache) => cache.getAll()),
+		]);
+
+		if (
+			mutedUserIds.includes(user.id) ||
+			blockerIds.includes(user.id) ||
+			(user.host && mutedInstances.includes(user.host))
+		) {
+			return Notes.packMany([]);
+		}
+
+		const filter = async (notes: ScyllaNote[]) => {
+			let filtered = notes.filter((n) => n.userId === ps.userId);
+			filtered = await filterVisibility(filtered, user, followingUserIds);
+			filtered = await filterMutedUser(
+				filtered,
+				user,
+				mutedUserIds,
+				mutedInstances,
+			);
+			filtered = await filterMutedNote(filtered, user, mutedWords);
+			filtered = await filterBlockedUser(filtered, user, blockerIds);
+			if (ps.withFiles) {
+				filtered = filtered.filter((n) => n.files.length > 0);
+			}
+			if (ps.fileType) {
+				filtered = filtered.filter((n) =>
+					n.files.some((f) => ps.fileType?.includes(f.type)),
+				);
+			}
+			if (ps.excludeNsfw) {
+				filtered = filtered.filter(
+					(n) => !n.cw && n.files.every((f) => !f.isSensitive),
+				);
+			}
+			if (!ps.includeMyRenotes) {
+				filtered = filtered.filter(
+					(n) =>
+						n.userId !== user.id ||
+						!n.renoteId ||
+						!!n.text ||
+						n.files.length > 0 ||
+						n.hasPoll,
+				);
+			}
+			if (!ps.includeReplies) {
+				filtered = filtered.filter((n) => !n.replyId);
+			}
+			return filtered;
+		};
+
+		const foundPacked = [];
+		while (foundPacked.length < ps.limit) {
+			const foundNotes = (
+				await execNotePaginationQuery("user", ps, filter, user.id)
+			).slice(0, ps.limit * 1.5); // Some may filtered out by Notes.packMany, thus we take more than ps.limit.
+			foundPacked.push(
+				...(await Notes.packMany(foundNotes, user, { scyllaNote: true })),
+			);
+			if (foundNotes.length < ps.limit) break;
+			ps.untilDate = foundNotes[foundNotes.length - 1].createdAt.getTime();
+		}
+
+		return foundPacked.slice(0, ps.limit);
+	}
+
 	//#region Construct query
 	const query = makePaginationQuery(
 		Notes.createQueryBuilder("note"),
@@ -73,19 +174,7 @@ export default define(meta, paramDef, async (ps, me) => {
 		ps.untilId,
 		ps.sinceDate,
 		ps.untilDate,
-	)
-		.andWhere("note.userId = :userId", { userId: user.id })
-		.innerJoinAndSelect("note.user", "user")
-		.leftJoinAndSelect("user.avatar", "avatar")
-		.leftJoinAndSelect("user.banner", "banner")
-		.leftJoinAndSelect("note.reply", "reply")
-		.leftJoinAndSelect("note.renote", "renote")
-		.leftJoinAndSelect("reply.user", "replyUser")
-		.leftJoinAndSelect("replyUser.avatar", "replyUserAvatar")
-		.leftJoinAndSelect("replyUser.banner", "replyUserBanner")
-		.leftJoinAndSelect("renote.user", "renoteUser")
-		.leftJoinAndSelect("renoteUser.avatar", "renoteUserAvatar")
-		.leftJoinAndSelect("renoteUser.banner", "renoteUserBanner");
+	).andWhere("note.userId = :userId", { userId: user.id });
 
 	generateVisibilityQuery(query, me);
 	if (me) {
