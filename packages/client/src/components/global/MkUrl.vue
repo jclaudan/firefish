@@ -13,7 +13,7 @@
 		<template v-if="!self">
 			<span class="schema">{{ schema }}{{ hostname.trim() != '' ? '//' : '' }}</span>
 			<span class="hostname">{{ hostname.trim() != '' ? hostname.trim() : pathname }}</span>
-			<span v-if="port != ''" class="port">:{{ port }}</span>
+			<!-- <span v-if="port != ''" class="port">:{{ port }}</span> -->
 		</template>
 		<template v-if="pathname === '/' && self">
 			<span class="self">{{ hostname }}</span>
@@ -37,6 +37,7 @@ import { url as local } from "@/config";
 import * as os from "@/os";
 import { useTooltip } from "@/scripts/use-tooltip";
 import { safeURIDecode } from "@/scripts/safe-uri-decode";
+import { parseUri } from "@/scripts/parse-uri"
 
 const props = defineProps<{
 	url: string;
@@ -44,8 +45,8 @@ const props = defineProps<{
 }>();
 
 const self = props.url.startsWith(local);
-const url = new URL(props.url);
-if (!["http:", "https:", "gopher:", "gemini:", "matrix:", "ipfs:", "ipns:"].includes(url.protocol)) throw new Error("invalid url");
+const url = parseUri(props.url);
+if (!["http", "https", "gopher", "gemini", "matrix", "ipfs", "ipns"].includes(url.scheme)) throw new Error("invalid url");
 const el = ref();
 
 useTooltip(el, (showing) => {
@@ -63,12 +64,12 @@ useTooltip(el, (showing) => {
 	);
 });
 
-const schema = url.protocol;
-const hostname = decodePunycode(url.hostname);
-const port = url.port;
-const pathname = safeURIDecode(url.pathname);
-const query = safeURIDecode(url.search);
-const hash = safeURIDecode(url.hash);
+const schema = url.scheme;
+const hostname = decodePunycode(url.authority ?? "");
+// const port = url.port;
+const pathname = safeURIDecode(url.path ?? "");
+const query = safeURIDecode(url.query ?? "");
+const hash = safeURIDecode(url.fragment ?? "");
 const attr = self ? "to" : "href";
 const target = self ? null : "_blank";
 </script>
