@@ -46,7 +46,7 @@ const props = defineProps<{
 
 const self = props.url.startsWith(local);
 const url = parseUri(props.url);
-if (!["http", "https", "gopher", "gemini", "matrix", "ipfs", "ipns"].includes(url.scheme)) throw new Error("invalid url");
+if (!["http", "https", "gopher", "gemini", "matrix", "ipfs", "ipns", "finger"].includes(url.scheme)) throw new Error("invalid url");
 const el = ref();
 
 useTooltip(el, (showing) => {
