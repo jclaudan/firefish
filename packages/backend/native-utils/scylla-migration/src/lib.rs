@@ -5,3 +5,4 @@ pub mod config;
 pub mod error;
 
 pub(crate) mod migrator;
+pub(crate) mod setup;

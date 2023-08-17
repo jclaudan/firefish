@@ -23,16 +23,16 @@ pub async fn run_cli() -> Result<(), Error> {
     let yml = fs::File::open(cli.config.expect("Path to 'default.yml' not specified"))
         .expect("Failed to open 'default.yml'");
     let config: Config = serde_yaml::from_reader(yml).expect("Failed to parse yaml");
-    let config = config
+    let scylla_conf = config
         .scylla
         .expect("ScyllaDB config not found in 'default.yml'");
 
     match cli.subcommand {
         MigrationCommand::Up { num } => {
-            Migrator::new(migration_dir, &config).await?.up(num).await?
+            Migrator::new(migration_dir, &scylla_conf).await?.up(num).await?
         }
         MigrationCommand::Down { num } => {
-            Migrator::new(migration_dir, &config)
+            Migrator::new(migration_dir, &scylla_conf)
                 .await?
                 .down(num)
                 .await?
@@ -106,4 +106,6 @@ pub(crate) enum MigrationCommand {
         )]
         num: u32,
     },
+    #[clap(about = "Set up PostgreSQL and ScyllaDB", display_order = 40)]
+    Setup,
 }

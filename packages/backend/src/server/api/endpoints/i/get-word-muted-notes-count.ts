@@ -1,3 +1,4 @@
+import { scyllaClient } from "@/db/scylla.js";
 import define from "../../define.js";
 import { MutedNotes } from "@/models/index.js";
 
@@ -29,6 +30,10 @@ export const paramDef = {
 } as const;
 
 export default define(meta, paramDef, async (ps, user) => {
+	if (scyllaClient) {
+		return { count: -1 };
+	}
+
 	return {
 		count: await MutedNotes.countBy({
 			userId: user.id,

@@ -20,4 +20,6 @@ pub enum Error {
     Row(#[from] SingleRowTypedError),
     #[error("File error: {0}")]
     File(#[from] io::Error),
+    #[error("PostgreSQL error: {0}")]
+    Postgres(#[from] sqlx::Error),
 }
