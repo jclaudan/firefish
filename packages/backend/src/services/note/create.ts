@@ -393,12 +393,14 @@ export default async (
 		}
 
 		// Antenna
-		for (const antenna of await getAntennas()) {
-			checkHitAntenna(antenna, note, user).then((hit) => {
-				if (hit) {
-					addNoteToAntenna(antenna, note, user);
-				}
-			});
+		if (!scyllaClient) {
+			for (const antenna of await getAntennas()) {
+				checkHitAntenna(antenna, note, user).then((hit) => {
+					if (hit) {
+						addNoteToAntenna(antenna, note, user);
+					}
+				});
+			}
 		}
 
 		// Channel
