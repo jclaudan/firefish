@@ -29,6 +29,12 @@ CREATE TYPE IF NOT EXISTS emoji (
 	"height" int,
 );
 
+CREATE TYPE IF NOT EXISTS poll (
+	"expiresAt" timestamp,
+	"multiple" boolean,
+	"choices" map<int, text>,
+);
+
 CREATE TABLE IF NOT EXISTS note ( -- Store all posts
 	"createdAtDate" date, -- For partitioning
 	"createdAt" timestamp,
@@ -50,6 +56,7 @@ CREATE TABLE IF NOT EXISTS note ( -- Store all posts
 	"emojis" set<text>,
 	"tags" set<text>,
 	"hasPoll" boolean,
+	"poll" poll,
 	"threadId" ascii,
 	"channelId" ascii, -- Channel
 	"userId" ascii, -- User
@@ -172,6 +179,7 @@ CREATE TABLE IF NOT EXISTS home_timeline (
 	"emojis" set<text>,
 	"tags" set<text>,
 	"hasPoll" boolean,
+	"poll" poll,
 	"threadId" ascii,
 	"channelId" ascii, -- Channel
 	"userId" ascii, -- User
@@ -220,3 +228,11 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS reaction_by_id AS
 	AND "reaction" IS NOT NULL
 	AND "userId" IS NOT NULL
 	PRIMARY KEY ("noteId", "reaction", "userId");
+
+CREATE TABLE IF NOT EXISTS poll_vote (
+	"noteId" ascii,
+	"userId" ascii,
+	"choice" set<int>,
+	"createdAt" timestamp,
+	PRIMARY KEY ("noteId", "userId")
+);

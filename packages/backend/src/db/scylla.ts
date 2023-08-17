@@ -111,6 +111,28 @@ export interface ScyllaNoteEditHistory {
 	updatedAt: Date;
 }
 
+export interface ScyllaPoll {
+	expiresAt: Date | null;
+	multiple: boolean;
+	choices: Map<number, string>,
+}
+
+export interface ScyllaPollVote {
+	noteId: string,
+	userId: string,
+	choice: Set<number>,
+	createdAt: Date,
+}
+
+export function parseScyllaPollVote(row: types.Row): ScyllaPollVote {
+	return {
+		noteId: row.get("noteId"),
+		userId: row.get("userId"),
+		choice: row.get("choice"),
+		createdAt: row.get("createdAt"),
+	}
+}
+
 export type ScyllaNote = Note & {
 	createdAtDate: Date;
 	files: ScyllaDriveFile[];
@@ -121,6 +143,7 @@ export type ScyllaNote = Note & {
 	renoteText: string | null;
 	renoteCw: string | null;
 	renoteFiles: ScyllaDriveFile[];
+	poll: ScyllaPoll | null;
 };
 
 export function parseScyllaNote(row: types.Row): ScyllaNote {
@@ -149,6 +172,7 @@ export function parseScyllaNote(row: types.Row): ScyllaNote {
 		emojis: row.get("emojis") ?? [],
 		tags: row.get("tags") ?? [],
 		hasPoll: row.get("hasPoll") ?? false,
+		poll: row.get("poll") ?? null,
 		threadId: row.get("threadId") ?? null,
 		channelId: row.get("channelId") ?? null,
 		userId: row.get("userId"),

@@ -79,27 +79,31 @@ export default async (
 			],
 			{ prepare: true },
 		);
-		const homeTimelines = await scyllaClient
-			.execute(prepared.homeTimeline.select.byId, [note.id], {
+		scyllaClient.eachRow(
+			prepared.homeTimeline.select.byId,
+			[note.id],
+			{
 				prepare: true,
-			})
-			.then((result) => result.rows.map(parseHomeTimeline));
-		// Do not issue BATCH because different home timelines involve different partitions
-		for (const timeline of homeTimelines) {
-			scyllaClient.execute(
-				prepared.homeTimeline.update.reactions,
-				[
-					note.emojis.concat(emojiName),
-					note.reactions,
-					Math.max(score - 1, 0),
-					timeline.feedUserId,
-					timeline.createdAtDate,
-					timeline.createdAt,
-					timeline.userId,
-				],
-				{ prepare: true },
-			);
-		}
+			},
+			(_, row) => {
+				if (scyllaClient) {
+					const timeline = parseHomeTimeline(row);
+					scyllaClient.execute(
+						prepared.homeTimeline.update.reactions,
+						[
+							note.emojis.concat(emojiName),
+							note.reactions,
+							Math.max(score - 1, 0),
+							timeline.feedUserId,
+							timeline.createdAtDate,
+							timeline.createdAt,
+							timeline.userId,
+						],
+						{ prepare: true },
+					);
+				}
+			},
+		);
 	} else {
 		const sql = `jsonb_set("reactions", '{${reaction.reaction}}', (COALESCE("reactions"->>'${reaction.reaction}', '0')::int - 1)::text::jsonb)`;
 		await Notes.createQueryBuilder()

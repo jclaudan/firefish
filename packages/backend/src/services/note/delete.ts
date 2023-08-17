@@ -70,26 +70,30 @@ export default async function (
 					],
 					{ prepare: true },
 				);
-				const homeTimelines = await scyllaClient
-					.execute(prepared.homeTimeline.select.byId, [renote.id], {
+				scyllaClient.eachRow(
+					prepared.homeTimeline.select.byId,
+					[renote.id],
+					{
 						prepare: true,
-					})
-					.then((result) => result.rows.map(parseHomeTimeline));
-				// Do not issue BATCH because different home timelines involve different partitions
-				for (const timeline of homeTimelines) {
-					scyllaClient.execute(
-						prepared.homeTimeline.update.renoteCount,
-						[
-							Math.max(count - 1, 0),
-							Math.max(score - 1, 0),
-							timeline.feedUserId,
-							timeline.createdAtDate,
-							timeline.createdAt,
-							timeline.userId,
-						],
-						{ prepare: true },
-					);
-				}
+					},
+					(_, row) => {
+						if (scyllaClient) {
+							const timeline = parseHomeTimeline(row);
+							scyllaClient.execute(
+								prepared.homeTimeline.update.renoteCount,
+								[
+									Math.max(count - 1, 0),
+									Math.max(score - 1, 0),
+									timeline.feedUserId,
+									timeline.createdAtDate,
+									timeline.createdAt,
+									timeline.userId,
+								],
+								{ prepare: true },
+							);
+						}
+					},
+				);
 			}
 		} else {
 			Notes.decrement({ id: note.renoteId }, "renoteCount", 1);
@@ -119,25 +123,29 @@ export default async function (
 					],
 					{ prepare: true },
 				);
-				const homeTimelines = await scyllaClient
-					.execute(prepared.homeTimeline.select.byId, [reply.id], {
+				scyllaClient.eachRow(
+					prepared.homeTimeline.select.byId,
+					[reply.id],
+					{
 						prepare: true,
-					})
-					.then((result) => result.rows.map(parseHomeTimeline));
-				// Do not issue BATCH because different home timelines involve different partitions
-				for (const timeline of homeTimelines) {
-					scyllaClient.execute(
-						prepared.homeTimeline.update.repliesCount,
-						[
-							Math.max(count - 1, 0),
-							timeline.feedUserId,
-							timeline.createdAtDate,
-							timeline.createdAt,
-							timeline.userId,
-						],
-						{ prepare: true },
-					);
-				}
+					},
+					(_, row) => {
+						if (scyllaClient) {
+							const timeline = parseHomeTimeline(row);
+							scyllaClient.execute(
+								prepared.homeTimeline.update.repliesCount,
+								[
+									Math.max(count - 1, 0),
+									timeline.feedUserId,
+									timeline.createdAtDate,
+									timeline.createdAt,
+									timeline.userId,
+								],
+								{ prepare: true },
+							);
+						}
+					},
+				);
 			}
 		} else {
 			await Notes.decrement({ id: note.replyId }, "repliesCount", 1);

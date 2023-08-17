@@ -73,6 +73,7 @@ import {
 	parseScyllaNote,
 	prepared,
 	scyllaClient,
+	ScyllaPoll,
 } from "@/db/scylla.js";
 
 export const mutedWordsCache = new Cache<
@@ -703,26 +704,28 @@ async function incRenoteCount(renote: Note) {
 			],
 			{ prepare: true },
 		);
-		const homeTimelines = await scyllaClient
-			.execute(prepared.homeTimeline.select.byId, [renote.id], {
-				prepare: true,
-			})
-			.then((result) => result.rows.map(parseHomeTimeline));
-		// Do not issue BATCH because different home timelines involve different partitions
-		for (const timeline of homeTimelines) {
-			scyllaClient.execute(
-				prepared.homeTimeline.update.renoteCount,
-				[
-					count + 1,
-					score + 1,
-					timeline.feedUserId,
-					timeline.createdAtDate,
-					timeline.createdAt,
-					timeline.userId,
-				],
-				{ prepare: true },
-			);
-		}
+		scyllaClient.eachRow(
+			prepared.homeTimeline.select.byId,
+			[renote.id],
+			{ prepare: true },
+			(_, row) => {
+				if (scyllaClient) {
+					const timeline = parseHomeTimeline(row);
+					scyllaClient.execute(
+						prepared.homeTimeline.update.renoteCount,
+						[
+							count + 1,
+							score + 1,
+							timeline.feedUserId,
+							timeline.createdAtDate,
+							timeline.createdAt,
+							timeline.userId,
+						],
+						{ prepare: true },
+					);
+				}
+			},
+		);
 	} else {
 		Notes.createQueryBuilder()
 			.update()
@@ -806,7 +809,7 @@ async function insertNote(
 		);
 	}
 
-	// 投稿を作成
+	// Insert post to DB
 	try {
 		if (scyllaClient) {
 			const fileMapper = (file: DriveFile) => ({
@@ -830,6 +833,24 @@ async function insertNote(
 				  )
 				: null;
 
+			let poll: ScyllaPoll | null = null;
+
+			if (data.poll) {
+				insert.hasPoll = true;
+				let expiresAt: Date | null;
+				if (!data.poll.expiresAt || isNaN(data.poll.expiresAt.getTime())) {
+					expiresAt = null;
+				} else {
+					expiresAt = data.poll.expiresAt;
+				}
+
+				poll = {
+					expiresAt,
+					choices: new Map(data.poll.choices.map((v, i) => [i, v] as [number, string])),
+					multiple: data.poll.multiple,
+				};
+			}
+
 			const params = [
 				insert.createdAt,
 				insert.createdAt,
@@ -851,6 +872,7 @@ async function insertNote(
 				insert.emojis,
 				insert.tags,
 				insert.hasPoll,
+				poll,
 				insert.threadId,
 				insert.channelId,
 				insert.userId,
@@ -895,38 +917,37 @@ async function insertNote(
 					},
 				);
 			}
-		}
-		if (insert.hasPoll) {
-			// Start transaction
-			await db.transaction(async (transactionalEntityManager) => {
-				if (!data.poll) throw new Error("Empty poll data");
+		} else {
+			if (insert.hasPoll) {
+				// Start transaction
+				await db.transaction(async (transactionalEntityManager) => {
+					if (!data.poll) throw new Error("Empty poll data");
 
-				if (!scyllaClient) {
 					await transactionalEntityManager.insert(Note, insert);
-				}
 
-				let expiresAt: Date | null;
-				if (!data.poll.expiresAt || isNaN(data.poll.expiresAt.getTime())) {
-					expiresAt = null;
-				} else {
-					expiresAt = data.poll.expiresAt;
-				}
+					let expiresAt: Date | null;
+					if (!data.poll.expiresAt || isNaN(data.poll.expiresAt.getTime())) {
+						expiresAt = null;
+					} else {
+						expiresAt = data.poll.expiresAt;
+					}
 
-				const poll = new Poll({
-					noteId: insert.id,
-					choices: data.poll.choices,
-					expiresAt,
-					multiple: data.poll.multiple,
-					votes: new Array(data.poll.choices.length).fill(0),
-					noteVisibility: insert.visibility,
-					userId: user.id,
-					userHost: user.host,
+					const poll = new Poll({
+						noteId: insert.id,
+						choices: data.poll.choices,
+						expiresAt,
+						multiple: data.poll.multiple,
+						votes: new Array(data.poll.choices.length).fill(0),
+						noteVisibility: insert.visibility,
+						userId: user.id,
+						userHost: user.host,
+					});
+
+					await transactionalEntityManager.insert(Poll, poll);
 				});
-
-				await transactionalEntityManager.insert(Poll, poll);
-			});
-		} else if (!scyllaClient) {
-			await Notes.insert(insert);
+			} else {
+				await Notes.insert(insert);
+			}
 		}
 
 		if (scyllaClient) {
@@ -1074,25 +1095,27 @@ async function saveReply(reply: Note) {
 			],
 			{ prepare: true },
 		);
-		const homeTimelines = await scyllaClient
-			.execute(prepared.homeTimeline.select.byId, [reply.id], {
-				prepare: true,
-			})
-			.then((result) => result.rows.map(parseHomeTimeline));
-		// Do not issue BATCH because different home timelines involve different partitions
-		for (const timeline of homeTimelines) {
-			scyllaClient.execute(
-				prepared.homeTimeline.update.repliesCount,
-				[
-					count + 1,
-					timeline.feedUserId,
-					timeline.createdAtDate,
-					timeline.createdAt,
-					timeline.userId,
-				],
-				{ prepare: true },
-			);
-		}
+		scyllaClient.eachRow(
+			prepared.homeTimeline.select.byId,
+			[reply.id],
+			{ prepare: true },
+			(_, row) => {
+				if (scyllaClient) {
+					const timeline = parseHomeTimeline(row);
+					scyllaClient.execute(
+						prepared.homeTimeline.update.repliesCount,
+						[
+							count + 1,
+							timeline.feedUserId,
+							timeline.createdAtDate,
+							timeline.createdAt,
+							timeline.userId,
+						],
+						{ prepare: true },
+					);
+				}
+			},
+		);
 	} else {
 		await Notes.increment({ id: reply.id }, "repliesCount", 1);
 	}

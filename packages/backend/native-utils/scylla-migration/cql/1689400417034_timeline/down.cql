@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS poll_vote;
 DROP MATERIALIZED VIEW IF EXISTS reaction_by_id;
 DROP MATERIALIZED VIEW IF EXISTS reaction_by_user_id;
 DROP INDEX IF EXISTS reaction_by_id;
@@ -15,6 +16,7 @@ DROP INDEX IF EXISTS note_by_reply_id;
 DROP INDEX IF EXISTS note_by_uri;
 DROP INDEX IF EXISTS note_by_url;
 DROP TABLE IF EXISTS note;
+DROP TYPE IF EXISTS poll;
 DROP TYPE IF EXISTS emoji;
 DROP TYPE IF EXISTS note_edit_history;
 DROP TYPE IF EXISTS drive_file;

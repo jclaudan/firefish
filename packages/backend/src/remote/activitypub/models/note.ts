@@ -53,6 +53,7 @@ import { DB_MAX_IMAGE_COMMENT_LENGTH } from "@/misc/hard-limits.js";
 import { truncate } from "@/misc/truncate.js";
 import { type Size, getEmojiSize } from "@/misc/emoji-meta.js";
 import { fetchMeta } from "@/misc/fetch-meta.js";
+import { parseScyllaNote, prepared, scyllaClient } from "@/db/scylla.js";
 
 const logger = apLogger;
 
@@ -317,7 +318,37 @@ export async function createNote(
 	}
 
 	// vote
-	if (reply?.hasPoll) {
+	if (reply?.hasPoll && note.name) {
+		if (scyllaClient) {
+			const result = await scyllaClient.execute(
+				prepared.note.select.byId,
+				[reply.id],
+				{ prepare: true },
+			);
+			if (result.rowLength === 0) {
+				throw new Error("reply target note not found");
+			}
+			const scyllaNote = parseScyllaNote(result.first());
+			if (!scyllaNote.hasPoll || !scyllaNote.poll) {
+				throw new Error("reply target does not have poll");
+			}
+			if (scyllaNote.poll.expiresAt && scyllaNote.poll.expiresAt < new Date()) {
+				logger.warn(
+					`vote to expired poll from AP: actor=${actor.username}@${actor.host}, note=${scyllaNote.id}, choice=${note.name}`,
+				);
+				return null;
+			}
+
+			const entry = Array.from(scyllaNote.poll.choices.entries()).find(
+				([_, v]) => v === note.name,
+			);
+			if (entry) {
+				await vote(actor, scyllaNote, entry[0]);
+			}
+
+			return null;
+		}
+
 		const poll = await Polls.findOneByOrFail({ noteId: reply.id });
 
 		const tryCreateVote = async (
@@ -337,12 +368,10 @@ export async function createNote(
 			return null;
 		};
 
-		if (note.name) {
-			return await tryCreateVote(
-				note.name,
-				poll.choices.findIndex((x) => x === note.name),
-			);
-		}
+		return await tryCreateVote(
+			note.name,
+			poll.choices.findIndex((x) => x === note.name),
+		);
 	}
 
 	const emojis = await extractEmojis(note.tag || [], actor.host).catch((e) => {
