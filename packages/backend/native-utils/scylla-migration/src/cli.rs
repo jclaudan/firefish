@@ -4,6 +4,7 @@ use std::{fs, path::PathBuf};
 use crate::config::Config;
 use crate::error::Error;
 use crate::migrator::Migrator;
+use crate::setup::Initializer;
 
 pub async fn run_cli() -> Result<(), Error> {
     let cli = Cli::parse();
@@ -29,13 +30,20 @@ pub async fn run_cli() -> Result<(), Error> {
 
     match cli.subcommand {
         MigrationCommand::Up { num } => {
-            Migrator::new(migration_dir, &scylla_conf).await?.up(num).await?
+            Migrator::new(migration_dir, &scylla_conf)
+                .await?
+                .up(num)
+                .await?
         }
         MigrationCommand::Down { num } => {
             Migrator::new(migration_dir, &scylla_conf)
                 .await?
                 .down(num)
                 .await?
+        }
+        MigrationCommand::Setup => {
+            let initializer = Initializer::new(&scylla_conf, &config.db).await?;
+            initializer.setup().await?;
         }
         _ => {}
     };
