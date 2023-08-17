@@ -19,7 +19,7 @@ import { perUserFollowingChart } from "@/services/chart/index.js";
 import { genId } from "@/misc/gen-id.js";
 import { getActiveWebhooks } from "@/misc/webhook-cache.js";
 import { webhookDeliver } from "@/queue/index.js";
-import { UserBlockedCache } from "@/misc/cache.js";
+import { UserBlockedCache, UserBlockingCache } from "@/misc/cache.js";
 
 export default async function (blocker: User, blockee: User) {
 	await Promise.all([
@@ -41,8 +41,12 @@ export default async function (blocker: User, blockee: User) {
 
 	await Blockings.insert(blocking);
 
-	const cache = await UserBlockedCache.init(blockee.id);
-	await cache.add(blocker.id);
+	await UserBlockedCache.init(blockee.id).then((cache) =>
+		cache.add(blocker.id),
+	);
+	await UserBlockingCache.init(blocker.id).then((cache) =>
+		cache.add(blockee.id),
+	);
 
 	if (Users.isLocalUser(blocker) && Users.isRemoteUser(blockee)) {
 		const content = renderActivity(renderBlock(blocking));

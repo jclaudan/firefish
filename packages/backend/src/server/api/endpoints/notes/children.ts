@@ -6,7 +6,7 @@ import { generateMutedUserQuery } from "../../common/generate-muted-user-query.j
 import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
 import {
 	ScyllaNote,
-	filterBlockedUser,
+	filterBlockUser,
 	filterMutedNote,
 	filterMutedUser,
 	filterVisibility,
@@ -20,6 +20,7 @@ import {
 	InstanceMutingsCache,
 	LocalFollowingsCache,
 	UserBlockedCache,
+	UserBlockingCache,
 	UserMutingsCache,
 	userWordMuteCache,
 } from "@/misc/cache.js";
@@ -63,24 +64,32 @@ export default define(meta, paramDef, async (ps, user) => {
 			mutedUserIds,
 			mutedInstances,
 			blockerIds,
+			blockingIds,
 		]: string[][] = [];
 		let mutedWords: string[][] = [];
 		if (user) {
-			[followingUserIds, mutedUserIds, mutedInstances, mutedWords, blockerIds] =
-				await Promise.all([
-					LocalFollowingsCache.init(user.id).then((cache) => cache.getAll()),
-					UserMutingsCache.init(user.id).then((cache) => cache.getAll()),
-					InstanceMutingsCache.init(user.id).then((cache) => cache.getAll()),
-					userWordMuteCache
-						.fetchMaybe(user.id, () =>
-							UserProfiles.findOne({
-								select: ["mutedWords"],
-								where: { userId: user.id },
-							}).then((profile) => profile?.mutedWords),
-						)
-						.then((words) => words ?? []),
-					UserBlockedCache.init(user.id).then((cache) => cache.getAll()),
-				]);
+			[
+				followingUserIds,
+				mutedUserIds,
+				mutedInstances,
+				mutedWords,
+				blockerIds,
+				blockingIds,
+			] = await Promise.all([
+				LocalFollowingsCache.init(user.id).then((cache) => cache.getAll()),
+				UserMutingsCache.init(user.id).then((cache) => cache.getAll()),
+				InstanceMutingsCache.init(user.id).then((cache) => cache.getAll()),
+				userWordMuteCache
+					.fetchMaybe(user.id, () =>
+						UserProfiles.findOne({
+							select: ["mutedWords"],
+							where: { userId: user.id },
+						}).then((profile) => profile?.mutedWords),
+					)
+					.then((words) => words ?? []),
+				UserBlockedCache.init(user.id).then((cache) => cache.getAll()),
+				UserBlockingCache.init(user.id).then((cache) => cache.getAll()),
+			]);
 		}
 
 		const root = await getNote(ps.noteId, user, followingUserIds).catch(
@@ -100,7 +109,10 @@ export default define(meta, paramDef, async (ps, user) => {
 					mutedInstances,
 				);
 				filtered = await filterMutedNote(filtered, user, mutedWords);
-				filtered = await filterBlockedUser(filtered, user, blockerIds);
+				filtered = await filterBlockUser(filtered, user, [
+					...blockerIds,
+					...blockingIds,
+				]);
 			}
 			return filtered;
 		};

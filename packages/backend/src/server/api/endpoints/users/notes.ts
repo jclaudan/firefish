@@ -10,7 +10,7 @@ import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
 import {
 	ScyllaNote,
 	execNotePaginationQuery,
-	filterBlockedUser,
+	filterBlockUser,
 	filterMutedNote,
 	filterMutedUser,
 	filterVisibility,
@@ -20,6 +20,7 @@ import {
 	InstanceMutingsCache,
 	LocalFollowingsCache,
 	UserBlockedCache,
+	UserBlockingCache,
 	UserMutingsCache,
 	userWordMuteCache,
 } from "@/misc/cache.js";
@@ -89,6 +90,7 @@ export default define(meta, paramDef, async (ps, me) => {
 			mutedInstances,
 			mutedWords,
 			blockerIds,
+			blockingIds,
 		] = await Promise.all([
 			LocalFollowingsCache.init(user.id).then((cache) => cache.getAll()),
 			UserMutingsCache.init(user.id).then((cache) => cache.getAll()),
@@ -102,6 +104,7 @@ export default define(meta, paramDef, async (ps, me) => {
 				)
 				.then((words) => words ?? []),
 			UserBlockedCache.init(user.id).then((cache) => cache.getAll()),
+			UserBlockingCache.init(user.id).then((cache) => cache.getAll()),
 		]);
 
 		if (
@@ -122,7 +125,10 @@ export default define(meta, paramDef, async (ps, me) => {
 				mutedInstances,
 			);
 			filtered = await filterMutedNote(filtered, user, mutedWords);
-			filtered = await filterBlockedUser(filtered, user, blockerIds);
+			filtered = await filterBlockUser(filtered, user, [
+				...blockerIds,
+				...blockingIds,
+			]);
 			if (ps.withFiles) {
 				filtered = filtered.filter((n) => n.files.length > 0);
 			}

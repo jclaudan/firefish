@@ -4,7 +4,7 @@ import { ApiError } from "../../error.js";
 import { getUser } from "../../common/getters.js";
 import { NoteWatchings, Users } from "@/models/index.js";
 import { HOUR } from "@/const.js";
-import { UserBlockedCache } from "@/misc/cache.js";
+import { UserBlockingCache } from "@/misc/cache.js";
 
 export const meta = {
 	tags: ["account"],
@@ -70,8 +70,9 @@ export default define(meta, paramDef, async (ps, user) => {
 	});
 
 	// Check if already blocking
-	const cache = await UserBlockedCache.init(blockee.id);
-	const exist = await cache.has(blocker.id);
+	const exist = await UserBlockingCache.init(blocker.id).then((cache) =>
+		cache.has(blockee.id),
+	);
 
 	if (exist) {
 		throw new ApiError(meta.errors.alreadyBlocking);

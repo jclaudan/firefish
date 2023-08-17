@@ -11,6 +11,7 @@ import {
 	LocalFollowingsCache,
 	RenoteMutingsCache,
 	UserBlockedCache,
+	UserBlockingCache,
 	UserMutingsCache,
 	userWordMuteCache,
 } from "@/misc/cache.js";
@@ -499,17 +500,23 @@ export async function filterMutedNote(
 	return notes;
 }
 
-export async function filterBlockedUser(
+export async function filterBlockUser(
 	notes: ScyllaNote[],
 	user: { id: User["id"] },
-	blockerIds?: User["id"][],
+	blockIds?: User["id"][],
 ): Promise<ScyllaNote[]> {
 	let ids: User["id"][];
 
-	if (blockerIds) {
-		ids = blockerIds;
+	if (blockIds) {
+		ids = blockIds;
 	} else {
-		ids = await UserBlockedCache.init(user.id).then((cache) => cache.getAll());
+		const blocked = await UserBlockedCache.init(user.id).then((cache) =>
+			cache.getAll(),
+		);
+		const blocking = await UserBlockingCache.init(user.id).then((cache) =>
+			cache.getAll(),
+		);
+		ids = [...blocked, ...blocking];
 	}
 
 	return notes.filter(

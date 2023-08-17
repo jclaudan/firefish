@@ -12,7 +12,7 @@ import { generateMutedUserRenotesQueryForNotes } from "../../common/generated-mu
 import {
 	ScyllaNote,
 	execNotePaginationQuery,
-	filterBlockedUser,
+	filterBlockUser,
 	filterMutedNote,
 	filterMutedRenotes,
 	filterMutedUser,
@@ -23,6 +23,7 @@ import {
 	InstanceMutingsCache,
 	RenoteMutingsCache,
 	UserBlockedCache,
+	UserBlockingCache,
 	UserMutingsCache,
 	userWordMuteCache,
 } from "@/misc/cache.js";
@@ -94,25 +95,37 @@ export default define(meta, paramDef, async (ps, user) => {
 	});
 
 	if (scyllaClient) {
-		let [mutedUserIds, mutedInstances, blockerIds, renoteMutedIds]: string[][] =
-			[];
+		let [
+			mutedUserIds,
+			mutedInstances,
+			blockerIds,
+			blockingIds,
+			renoteMutedIds,
+		]: string[][] = [];
 		let mutedWords: string[][];
 		if (user) {
-			[mutedUserIds, mutedInstances, mutedWords, blockerIds, renoteMutedIds] =
-				await Promise.all([
-					UserMutingsCache.init(user.id).then((cache) => cache.getAll()),
-					InstanceMutingsCache.init(user.id).then((cache) => cache.getAll()),
-					userWordMuteCache
-						.fetchMaybe(user.id, () =>
-							UserProfiles.findOne({
-								select: ["mutedWords"],
-								where: { userId: user.id },
-							}).then((profile) => profile?.mutedWords),
-						)
-						.then((words) => words ?? []),
-					UserBlockedCache.init(user.id).then((cache) => cache.getAll()),
-					RenoteMutingsCache.init(user.id).then((cache) => cache.getAll()),
-				]);
+			[
+				mutedUserIds,
+				mutedInstances,
+				mutedWords,
+				blockerIds,
+				blockingIds,
+				renoteMutedIds,
+			] = await Promise.all([
+				UserMutingsCache.init(user.id).then((cache) => cache.getAll()),
+				InstanceMutingsCache.init(user.id).then((cache) => cache.getAll()),
+				userWordMuteCache
+					.fetchMaybe(user.id, () =>
+						UserProfiles.findOne({
+							select: ["mutedWords"],
+							where: { userId: user.id },
+						}).then((profile) => profile?.mutedWords),
+					)
+					.then((words) => words ?? []),
+				UserBlockedCache.init(user.id).then((cache) => cache.getAll()),
+				UserBlockingCache.init(user.id).then((cache) => cache.getAll()),
+				RenoteMutingsCache.init(user.id).then((cache) => cache.getAll()),
+			]);
 		}
 
 		const filter = async (notes: ScyllaNote[]) => {
@@ -128,7 +141,10 @@ export default define(meta, paramDef, async (ps, user) => {
 					mutedInstances,
 				);
 				filtered = await filterMutedNote(filtered, user, mutedWords);
-				filtered = await filterBlockedUser(filtered, user, blockerIds);
+				filtered = await filterBlockUser(filtered, user, [
+					...blockerIds,
+					...blockingIds,
+				]);
 				filtered = await filterMutedRenotes(filtered, user, renoteMutedIds);
 			}
 			if (ps.withFiles) {
@@ -140,10 +156,9 @@ export default define(meta, paramDef, async (ps, user) => {
 
 		const foundPacked = [];
 		while (foundPacked.length < ps.limit) {
-			const foundNotes = (await execNotePaginationQuery("global", ps, filter)).slice(
-				0,
-				ps.limit * 1.5,
-			); // Some may filtered out by Notes.packMany, thus we take more than ps.limit.
+			const foundNotes = (
+				await execNotePaginationQuery("global", ps, filter)
+			).slice(0, ps.limit * 1.5); // Some may filtered out by Notes.packMany, thus we take more than ps.limit.
 			foundPacked.push(
 				...(await Notes.packMany(foundNotes, user, { scyllaNote: true })),
 			);

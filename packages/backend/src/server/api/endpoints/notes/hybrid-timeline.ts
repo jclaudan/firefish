@@ -15,7 +15,7 @@ import { generateMutedUserRenotesQueryForNotes } from "../../common/generated-mu
 import {
 	ScyllaNote,
 	execNotePaginationQuery,
-	filterBlockedUser,
+	filterBlockUser,
 	filterChannel,
 	filterMutedNote,
 	filterMutedRenotes,
@@ -30,6 +30,7 @@ import {
 	LocalFollowingsCache,
 	RenoteMutingsCache,
 	UserBlockedCache,
+	UserBlockingCache,
 	UserMutingsCache,
 	userWordMuteCache,
 } from "@/misc/cache.js";
@@ -108,6 +109,7 @@ export default define(meta, paramDef, async (ps, user) => {
 			mutedInstances,
 			mutedWords,
 			blockerIds,
+			blockingIds,
 			renoteMutedIds,
 		] = await Promise.all([
 			ChannelFollowingsCache.init(user.id).then((cache) => cache.getAll()),
@@ -123,6 +125,7 @@ export default define(meta, paramDef, async (ps, user) => {
 				)
 				.then((words) => words ?? []),
 			UserBlockedCache.init(user.id).then((cache) => cache.getAll()),
+			UserBlockingCache.init(user.id).then((cache) => cache.getAll()),
 			RenoteMutingsCache.init(user.id).then((cache) => cache.getAll()),
 		]);
 		const homeUserIds = [user.id, ...followingUserIds];
@@ -145,7 +148,10 @@ export default define(meta, paramDef, async (ps, user) => {
 				mutedInstances,
 			);
 			filtered = await filterMutedNote(filtered, user, mutedWords);
-			filtered = await filterBlockedUser(filtered, user, blockerIds);
+			filtered = await filterBlockUser(filtered, user, [
+				...blockerIds,
+				...blockingIds,
+			]);
 			filtered = await filterMutedRenotes(filtered, user, renoteMutedIds);
 			if (!ps.includeMyRenotes) {
 				filtered = filtered.filter((n) => n.userId !== user.id || optFilter(n));

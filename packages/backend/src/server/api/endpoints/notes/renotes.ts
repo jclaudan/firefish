@@ -9,7 +9,7 @@ import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
 import {
 	ScyllaNote,
 	execNotePaginationQuery,
-	filterBlockedUser,
+	filterBlockUser,
 	filterMutedUser,
 	filterVisibility,
 	scyllaClient,
@@ -18,6 +18,7 @@ import {
 	InstanceMutingsCache,
 	LocalFollowingsCache,
 	UserBlockedCache,
+	UserBlockingCache,
 	UserMutingsCache,
 } from "@/misc/cache.js";
 
@@ -75,13 +76,16 @@ export default define(meta, paramDef, async (ps, user) => {
 	});
 
 	if (scyllaClient) {
-		let [mutedUserIds, mutedInstances, blockerIds]: string[][] = [];
+		let [mutedUserIds, mutedInstances, blockerIds, blockingIds]: string[][] =
+			[];
 		if (user) {
-			[mutedUserIds, mutedInstances, blockerIds] = await Promise.all([
-				UserMutingsCache.init(user.id).then((cache) => cache.getAll()),
-				InstanceMutingsCache.init(user.id).then((cache) => cache.getAll()),
-				UserBlockedCache.init(user.id).then((cache) => cache.getAll()),
-			]);
+			[mutedUserIds, mutedInstances, blockerIds, blockingIds] =
+				await Promise.all([
+					UserMutingsCache.init(user.id).then((cache) => cache.getAll()),
+					InstanceMutingsCache.init(user.id).then((cache) => cache.getAll()),
+					UserBlockedCache.init(user.id).then((cache) => cache.getAll()),
+					UserBlockingCache.init(user.id).then((cache) => cache.getAll()),
+				]);
 		}
 
 		const filter = async (notes: ScyllaNote[]) => {
@@ -97,7 +101,10 @@ export default define(meta, paramDef, async (ps, user) => {
 					mutedUserIds,
 					mutedInstances,
 				);
-				filtered = await filterBlockedUser(filtered, user, blockerIds);
+				filtered = await filterBlockUser(filtered, user, [
+					...blockerIds,
+					...blockingIds,
+				]);
 			}
 			return filtered;
 		};

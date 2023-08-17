@@ -414,6 +414,25 @@ export class InstanceMutingsCache extends SetCache {
 	}
 }
 
+export class UserBlockingCache extends SetCache {
+	private constructor(userId: string) {
+		const fetcher = () =>
+			Blockings.find({
+				select: ["blockeeId"],
+				where: { blockerId: userId },
+			}).then((blocks) => blocks.map(({ blockeeId }) => blockeeId));
+
+		super("blocking", userId, fetcher);
+	}
+
+	public static async init(userId: string): Promise<UserBlockingCache> {
+		const cache = new UserBlockingCache(userId);
+		await cache.fetch();
+
+		return cache;
+	}
+}
+
 export class UserBlockedCache extends SetCache {
 	private constructor(userId: string) {
 		const fetcher = () =>
