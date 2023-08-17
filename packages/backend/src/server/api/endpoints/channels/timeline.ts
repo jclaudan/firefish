@@ -1,8 +1,23 @@
 import define from "../../define.js";
 import { ApiError } from "../../error.js";
-import { Notes, Channels } from "@/models/index.js";
+import { Notes, Channels, UserProfiles } from "@/models/index.js";
 import { makePaginationQuery } from "../../common/make-pagination-query.js";
 import { activeUsersChart } from "@/services/chart/index.js";
+import {
+	ScyllaNote,
+	execNotePaginationQuery,
+	filterBlockUser,
+	filterMutedNote,
+	filterMutedUser,
+	filterVisibility,
+	scyllaClient,
+} from "@/db/scylla.js";
+import {
+	UserBlockedCache,
+	UserBlockingCache,
+	UserMutingsCache,
+	userWordMuteCache,
+} from "@/misc/cache.js";
 
 export const meta = {
 	tags: ["notes", "channels"],
@@ -49,8 +64,55 @@ export default define(meta, paramDef, async (ps, user) => {
 		id: ps.channelId,
 	});
 
-	if (channel == null) {
+	if (!channel) {
 		throw new ApiError(meta.errors.noSuchChannel);
+	}
+
+	if (user) activeUsersChart.read(user);
+
+	if (scyllaClient) {
+		let [mutedUserIds, blockerIds, blockingIds]: string[][] = [];
+		let mutedWords: string[][];
+		if (user) {
+			[mutedUserIds, mutedWords, blockerIds, blockingIds] = await Promise.all([
+				UserMutingsCache.init(user.id).then((cache) => cache.getAll()),
+				userWordMuteCache
+					.fetchMaybe(user.id, () =>
+						UserProfiles.findOne({
+							select: ["mutedWords"],
+							where: { userId: user.id },
+						}).then((profile) => profile?.mutedWords),
+					)
+					.then((words) => words ?? []),
+				UserBlockedCache.init(user.id).then((cache) => cache.getAll()),
+				UserBlockingCache.init(user.id).then((cache) => cache.getAll()),
+			]);
+		}
+
+		const filter = async (notes: ScyllaNote[]) => {
+			if (!user) return notes;
+			let filtered = await filterMutedUser(notes, user, mutedUserIds, []);
+			filtered = await filterMutedNote(filtered, user, mutedWords);
+			filtered = await filterBlockUser(filtered, user, [
+				...blockerIds,
+				...blockingIds,
+			]);
+			return filtered;
+		};
+
+		const foundPacked = [];
+		while (foundPacked.length < ps.limit) {
+			const foundNotes = (
+				await execNotePaginationQuery("channel", ps, filter)
+			).slice(0, ps.limit * 1.5); // Some may filtered out by Notes.packMany, thus we take more than ps.limit.
+			foundPacked.push(
+				...(await Notes.packMany(foundNotes, user, { scyllaNote: true })),
+			);
+			if (foundNotes.length < ps.limit) break;
+			ps.untilDate = foundNotes[foundNotes.length - 1].createdAt.getTime();
+		}
+
+		return foundPacked.slice(0, ps.limit);
 	}
 
 	//#region Construct query
@@ -63,22 +125,10 @@ export default define(meta, paramDef, async (ps, user) => {
 	)
 		.andWhere("note.channelId = :channelId", { channelId: channel.id })
 		.innerJoinAndSelect("note.user", "user")
-		.leftJoinAndSelect("user.avatar", "avatar")
-		.leftJoinAndSelect("user.banner", "banner")
-		.leftJoinAndSelect("note.reply", "reply")
-		.leftJoinAndSelect("note.renote", "renote")
-		.leftJoinAndSelect("reply.user", "replyUser")
-		.leftJoinAndSelect("replyUser.avatar", "replyUserAvatar")
-		.leftJoinAndSelect("replyUser.banner", "replyUserBanner")
-		.leftJoinAndSelect("renote.user", "renoteUser")
-		.leftJoinAndSelect("renoteUser.avatar", "renoteUserAvatar")
-		.leftJoinAndSelect("renoteUser.banner", "renoteUserBanner")
 		.leftJoinAndSelect("note.channel", "channel");
 	//#endregion
 
 	const timeline = await query.take(ps.limit).getMany();
-
-	if (user) activeUsersChart.read(user);
 
 	return await Notes.packMany(timeline, user);
 });

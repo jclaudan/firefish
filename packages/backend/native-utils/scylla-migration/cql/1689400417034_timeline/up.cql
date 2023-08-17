@@ -119,6 +119,17 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS note_by_renote_id_and_user_id AS
 	PRIMARY KEY (("renoteId", "userId"), "createdAt", "createdAtDate", "userHost", "visibility")
 	WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
+CREATE MATERIALIZED VIEW IF NOT EXISTS note_by_channel_id AS
+	SELECT * FROM note
+	WHERE "channelId" IS NOT NULL
+	AND "createdAt" IS NOT NULL
+	AND "createdAtDate" IS NOT NULL
+	AND "userId" IS NOT NULL
+	AND "userHost" IS NOT NULL
+	AND "visibility" IS NOT NULL
+	PRIMARY KEY ("channelId", "createdAt", "createdAtDate", "userId", "userHost", "visibility")
+	WITH CLUSTERING ORDER BY ("createdAt" DESC);
+
 CREATE MATERIALIZED VIEW IF NOT EXISTS global_timeline AS
 	SELECT * FROM note
 	WHERE "createdAtDate" IS NOT NULL

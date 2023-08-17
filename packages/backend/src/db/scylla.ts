@@ -200,7 +200,8 @@ export type FeedType =
 	| "recommended"
 	| "global"
 	| "renotes"
-	| "user";
+	| "user"
+	| "channel";
 
 export function parseScyllaReaction(row: types.Row): ScyllaNoteReaction {
 	return {
@@ -240,6 +241,9 @@ export function prepareNoteQuery(
 			break;
 		case "user":
 			queryParts.push(prepared.note.select.byUserId);
+			break;
+		case "channel":
+			queryParts.push(prepared.note.select.byChannelId);
 			break;
 		default:
 			queryParts.push(prepared.note.select.byDate);
@@ -285,6 +289,7 @@ export async function execNotePaginationQuery(
 		sinceId?: string;
 		sinceDate?: number;
 		noteId?: string;
+		channelId?: string;
 	},
 	filter?: (_: ScyllaNote[]) => Promise<ScyllaNote[]>,
 	userId?: User["id"],
@@ -300,6 +305,10 @@ export async function execNotePaginationQuery(
 			break;
 		case "renotes":
 			if (!ps.noteId) throw new Error("Query of renotes needs noteId");
+			break;
+		case "channel":
+			if (!ps.channelId)
+				throw new Error("Query of channel timeline needs channelId");
 			break;
 	}
 
@@ -317,6 +326,8 @@ export async function execNotePaginationQuery(
 			params.push(userId, untilDate);
 		} else if (kind === "renotes" && ps.noteId) {
 			params.push(ps.noteId, untilDate);
+		} else if (kind === "channel" && ps.channelId) {
+			params.push(ps.channelId, untilDate);
 		} else {
 			params.push(untilDate, untilDate);
 		}

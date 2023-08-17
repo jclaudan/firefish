@@ -50,6 +50,7 @@ export const scyllaQueries = {
 			byUserId: `SELECT * FROM note_by_user_id WHERE "userId" = ?`,
 			byRenoteId: `SELECT * FROM note_by_renote_id WHERE "renoteId" = ?`,
 			byReplyId: `SELECT * FROM note WHERE "replyId" = ?`,
+			byChannelId: `SELECT * FROM note_by_channel_id WHERE "channelId" = ?`,
 		},
 		delete: `DELETE FROM note WHERE "createdAtDate" = ? AND "createdAt" = ? AND "userId" = ? AND "userHost" = ? AND "visibility" = ?`,
 		update: {
