@@ -34,11 +34,59 @@ import {
 	scyllaClient,
 	parseScyllaReaction,
 	getScyllaDrivePublicUrl,
+	parseScyllaPollVote,
 } from "@/db/scylla.js";
 import { LocalFollowingsCache } from "@/misc/cache.js";
 import { userByIdCache } from "@/services/user-cache.js";
 
-export async function populatePoll(note: Note, meId: User["id"] | null) {
+export async function populatePoll(
+	note: Note | ScyllaNote,
+	meId: User["id"] | null,
+) {
+	if (scyllaClient) {
+		const sNote = note as ScyllaNote;
+
+		if (sNote.poll) {
+			const votes = await scyllaClient
+				.execute(prepared.poll.select, [note.id], { prepare: true })
+				.then((result) => result.rows.map(parseScyllaPollVote));
+			const options = new Map<number, number>(
+				Array.from(sNote.poll.choices.keys()).map(
+					(key) => [key, 0] as [number, number],
+				),
+			);
+
+			for (const vote of votes) {
+				for (const choice of vote.choice) {
+					const count = options.get(choice);
+					if (count) {
+						options.set(choice, count + 1);
+					}
+				}
+			}
+
+			const choices: { text: string; votes: number; isVoted: boolean }[] = [];
+			for (const [index, text] of sNote.poll.choices.entries()) {
+				const count = options.get(index);
+				if (count) {
+					choices.push({
+						text,
+						votes: count,
+						isVoted: votes.some(
+							(v) => v.noteId === meId && v.choice.has(index),
+						),
+					});
+				}
+			}
+
+			return {
+				multiple: sNote.poll.multiple,
+				expiresAt: sNote.poll.expiresAt,
+				choices,
+			};
+		}
+	}
+
 	const poll = await Polls.findOneByOrFail({ noteId: note.id });
 	const choices = poll.choices.map((c) => ({
 		text: c,

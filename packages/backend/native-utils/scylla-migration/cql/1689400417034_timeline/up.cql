@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS note ( -- Store all posts
 	"emojis" set<text>,
 	"tags" set<text>,
 	"hasPoll" boolean,
-	"poll" poll,
+	"poll" frozen<poll>,
 	"threadId" ascii,
 	"channelId" ascii, -- Channel
 	"userId" ascii, -- User
@@ -179,7 +179,7 @@ CREATE TABLE IF NOT EXISTS home_timeline (
 	"emojis" set<text>,
 	"tags" set<text>,
 	"hasPoll" boolean,
-	"poll" poll,
+	"poll" frozen<poll>,
 	"threadId" ascii,
 	"channelId" ascii, -- Channel
 	"userId" ascii, -- User

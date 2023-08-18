@@ -38,8 +38,6 @@ impl Initializer {
     }
 
     pub(crate) async fn setup(&self) -> Result<(), Error> {
-        const DROP_CONSTRAINT: &str = "ALTER TABLE ? DROP CONSTRAINT ?";
-
         let pairs = vec![
             ("channel_note_pining", "FK_10b19ef67d297ea9de325cd4502"),
             ("clip_note", "FK_a012eaf5c87c65da1deb5fdbfa3"),
@@ -47,16 +45,18 @@ impl Initializer {
             ("note_edit", "FK_702ad5ae993a672e4fbffbcd38c"),
             ("note_favorite", "FK_0e00498f180193423c992bc4370"),
             ("note_unread", "FK_e637cba4dc4410218c4251260e4"),
-            ("note_wathing", "FK_03e7028ab8388a3f5e3ce2a8619"),
+            ("note_watching", "FK_03e7028ab8388a3f5e3ce2a8619"),
             ("promo_note", "FK_e263909ca4fe5d57f8d4230dd5c"),
             ("promo_read", "FK_a46a1a603ecee695d7db26da5f4"),
-            ("user_note_pining", "FK_68881008f7c3588ad7ecae471cf")
+            ("user_note_pining", "FK_68881008f7c3588ad7ecae471cf"),
         ];
 
         let mut conn = PgConnection::connect(&self.postgres_url).await?;
 
         for (table, fk) in pairs {
-            sqlx::query(DROP_CONSTRAINT).bind(table).bind(fk).execute(&mut conn).await?;
+            sqlx::query(&format!("ALTER TABLE {} DROP CONSTRAINT \"{}\"", table, fk))
+                .execute(&mut conn)
+                .await?;
         }
 
         Ok(())
