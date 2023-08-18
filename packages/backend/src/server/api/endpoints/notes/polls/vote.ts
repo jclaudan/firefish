@@ -3,7 +3,9 @@ import { publishNoteStream } from "@/services/stream.js";
 import { createNotification } from "@/services/create-notification.js";
 import { deliver } from "@/queue/index.js";
 import { renderActivity } from "@/remote/activitypub/renderer/index.js";
-import renderVote from "@/remote/activitypub/renderer/vote.js";
+import renderVote, {
+	renderScyllaPollVote,
+} from "@/remote/activitypub/renderer/vote.js";
 import {
 	PollVotes,
 	NoteWatchings,
@@ -16,6 +18,9 @@ import { genId } from "@/misc/gen-id.js";
 import { getNote } from "../../../common/getters.js";
 import { ApiError } from "../../../error.js";
 import define from "../../../define.js";
+import createVote from "@/services/note/polls/vote.js";
+import { type ScyllaNote, scyllaClient } from "@/db/scylla.js";
+import { userByIdCache } from "@/services/user-cache.js";
 
 export const meta = {
 	tags: ["notes"],
@@ -74,8 +79,6 @@ export const paramDef = {
 } as const;
 
 export default define(meta, paramDef, async (ps, user) => {
-	const createdAt = new Date();
-
 	// Get votee
 	const note = await getNote(ps.noteId, user).catch((err) => {
 		if (err.id === "9725d0ce-ba28-4dde-95a7-2cbb2c15de24")
@@ -85,6 +88,57 @@ export default define(meta, paramDef, async (ps, user) => {
 
 	if (!note.hasPoll) {
 		throw new ApiError(meta.errors.noPoll);
+	}
+
+	if (scyllaClient) {
+		const scyllaNote = note as ScyllaNote;
+		if (!scyllaNote.poll) {
+			throw new ApiError(meta.errors.noPoll);
+		}
+		if (scyllaNote.poll.expiresAt && scyllaNote.poll.expiresAt < new Date()) {
+			throw new ApiError(meta.errors.alreadyExpired);
+		}
+		await createVote(user, scyllaNote, ps.choice);
+
+		if (scyllaNote.userHost) {
+			const pollOwner = (await userByIdCache.fetch(scyllaNote.userId, () =>
+				Users.findOneByOrFail({
+					id: scyllaNote.userId,
+				}),
+			)) as IRemoteUser;
+
+			deliver(
+				user,
+				renderActivity(
+					await renderScyllaPollVote(user, scyllaNote, ps.choice, pollOwner),
+				),
+				pollOwner.inbox,
+			);
+		}
+
+		publishNoteStream(scyllaNote.id, "pollVoted", {
+			choice: ps.choice,
+			userId: user.id,
+		});
+		createNotification(scyllaNote.userId, "pollVote", {
+			notifierId: user.id,
+			noteId: scyllaNote.id,
+			choice: ps.choice,
+		});
+		NoteWatchings.findBy({
+			noteId: scyllaNote.id,
+			userId: Not(user.id),
+		}).then((watchers) => {
+			for (const watcher of watchers) {
+				createNotification(watcher.userId, "pollVote", {
+					notifierId: user.id,
+					noteId: scyllaNote.id,
+					choice: ps.choice,
+				});
+			}
+		});
+
+		return;
 	}
 
 	// Check blocking
@@ -99,6 +153,8 @@ export default define(meta, paramDef, async (ps, user) => {
 	}
 
 	const poll = await Polls.findOneByOrFail({ noteId: note.id });
+
+	const createdAt = new Date();
 
 	if (poll.expiresAt && poll.expiresAt < createdAt) {
 		throw new ApiError(meta.errors.alreadyExpired);

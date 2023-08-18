@@ -2,7 +2,6 @@ import { publishMainStream } from "@/services/stream.js";
 import { pushNotification } from "@/services/push-notification.js";
 import {
 	Notifications,
-	Mutings,
 	NoteThreadMutings,
 	UserProfiles,
 	Users,
@@ -13,6 +12,8 @@ import type { User } from "@/models/entities/user.js";
 import type { Notification } from "@/models/entities/notification.js";
 import { sendEmailNotification } from "./send-email-notification.js";
 import { shouldSilenceInstance } from "@/misc/should-block-instance.js";
+import { UserMutingsCache } from "@/misc/cache.js";
+import { userByIdCache } from "./user-cache.js";
 
 export async function createNotification(
 	notifieeId: User["id"],
@@ -47,10 +48,12 @@ export async function createNotification(
 
 	const isMuted = profile?.mutingNotificationTypes.includes(type);
 
-	if (data.note != null) {
-		const threadMute = await NoteThreadMutings.findOneBy({
-			userId: notifieeId,
-			threadId: data.note.threadId || data.note.id,
+	if (data.note) {
+		const threadMute = await NoteThreadMutings.exist({
+			where: {
+				userId: notifieeId,
+				threadId: data.note.threadId || data.note.id,
+			},
 		});
 
 		if (threadMute) {
@@ -64,7 +67,7 @@ export async function createNotification(
 		createdAt: new Date(),
 		notifieeId: notifieeId,
 		type: type,
-		// 相手がこの通知をミュートしているようなら、既読を予めつけておく
+		// Make this notification read if muted
 		isRead: isMuted,
 		...data,
 	} as Partial<Notification>).then((x) =>
@@ -76,38 +79,38 @@ export async function createNotification(
 	// Publish notification event
 	publishMainStream(notifieeId, "notification", packed);
 
-	// 2秒経っても(今回作成した)通知が既読にならなかったら「未読の通知がありますよ」イベントを発行する
+	// Fire "new notification" event if not yet read after two seconds
 	setTimeout(async () => {
 		const fresh = await Notifications.findOneBy({ id: notification.id });
-		if (fresh == null) return; // 既に削除されているかもしれない
+		if (!fresh) return;
 		// We execute this before, because the server side "read" check doesnt work well with push notifications, the app and service worker will decide themself
 		// when it is best to show push notifications
 		pushNotification(notifieeId, "notification", packed);
 		if (fresh.isRead) return;
 
-		//#region ただしミュートしているユーザーからの通知なら無視
-		const mutings = await Mutings.findBy({
-			muterId: notifieeId,
-		});
-		if (
-			data.notifierId &&
-			mutings.map((m) => m.muteeId).includes(data.notifierId)
-		) {
-			return;
+		// Ignore if the issuer is muted.
+		if (data.notifierId) {
+			const cache = await UserMutingsCache.init(notifieeId);
+			if (await cache.isMuting(data.notifierId)) {
+				return;
+			}
 		}
-		//#endregion
 
 		publishMainStream(notifieeId, "unreadNotification", packed);
 
-		if (type === "follow")
+		if (type === "follow" && data.notifierId)
 			sendEmailNotification.follow(
 				notifieeId,
-				await Users.findOneByOrFail({ id: data.notifierId! }),
+				await userByIdCache.fetch(data.notifierId, () =>
+					Users.findOneByOrFail({ id: data.notifierId }),
+				),
 			);
-		if (type === "receiveFollowRequest")
+		if (type === "receiveFollowRequest" && data.notifierId)
 			sendEmailNotification.receiveFollowRequest(
 				notifieeId,
-				await Users.findOneByOrFail({ id: data.notifierId! }),
+				await userByIdCache.fetch(data.notifierId, () =>
+					Users.findOneByOrFail({ id: data.notifierId }),
+				),
 			);
 	}, 2000);
 
