@@ -846,7 +846,9 @@ async function insertNote(
 
 				poll = {
 					expiresAt,
-					choices: new Map(data.poll.choices.map((v, i) => [i, v] as [number, string])),
+					choices: Object.fromEntries(
+						data.poll.choices.map((v, i) => [i, v] as [number, string]),
+					),
 					multiple: data.poll.multiple,
 				};
 			}

@@ -49,7 +49,7 @@ export async function renderScyllaPollVote(
 			attributedTo: `${config.url}/users/${user.id}`,
 			to: [pollOwner.uri],
 			inReplyTo: note.uri,
-			name: note.poll.choices.get(choice),
+			name: note.poll.choices[choice],
 		},
 	};
 }

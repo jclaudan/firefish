@@ -114,7 +114,7 @@ export interface ScyllaNoteEditHistory {
 export interface ScyllaPoll {
 	expiresAt: Date | null;
 	multiple: boolean;
-	choices: Map<number, string>,
+	choices: Record<number, string>,
 }
 
 export interface ScyllaPollVote {
@@ -128,7 +128,7 @@ export function parseScyllaPollVote(row: types.Row): ScyllaPollVote {
 	return {
 		noteId: row.get("noteId"),
 		userId: row.get("userId"),
-		choice: row.get("choice"),
+		choice: new Set(row.get("choice") ?? []),
 		createdAt: row.get("createdAt"),
 	}
 }

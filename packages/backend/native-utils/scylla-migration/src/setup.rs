@@ -49,6 +49,7 @@ impl Initializer {
             ("promo_note", "FK_e263909ca4fe5d57f8d4230dd5c"),
             ("promo_read", "FK_a46a1a603ecee695d7db26da5f4"),
             ("user_note_pining", "FK_68881008f7c3588ad7ecae471cf"),
+            ("notification", "FK_769cb6b73a1efe22ddf733ac453"),
         ];
 
         let mut conn = PgConnection::connect(&self.postgres_url).await?;

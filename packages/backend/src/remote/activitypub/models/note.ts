@@ -339,11 +339,11 @@ export async function createNote(
 				return null;
 			}
 
-			const entry = Array.from(scyllaNote.poll.choices.entries()).find(
+			const entry = Object.entries(scyllaNote.poll.choices).find(
 				([_, v]) => v === note.name,
 			);
 			if (entry) {
-				await vote(actor, scyllaNote, entry[0]);
+				await vote(actor, scyllaNote, parseInt(entry[0]));
 			}
 
 			return null;

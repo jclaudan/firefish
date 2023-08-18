@@ -25,7 +25,7 @@ export default async function (
 			throw new Error("poll not found");
 		}
 
-		if (!Array.from(scyllaNote.poll.choices.keys()).includes(choice)) {
+		if (!Object.keys(scyllaNote.poll.choices).includes(choice.toString())) {
 			throw new Error("invalid choice param");
 		}
 
@@ -57,7 +57,7 @@ export default async function (
 
 		await scyllaClient.execute(
 			prepared.poll.insert,
-			[scyllaNote.id, user.id, newChoice, new Date()],
+			[scyllaNote.id, user.id, Array.from(newChoice), new Date()],
 			{ prepare: true },
 		);
 	} else {

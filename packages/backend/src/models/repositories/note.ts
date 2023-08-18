@@ -50,30 +50,29 @@ export async function populatePoll(
 			const votes = await scyllaClient
 				.execute(prepared.poll.select, [note.id], { prepare: true })
 				.then((result) => result.rows.map(parseScyllaPollVote));
-			const options = new Map<number, number>(
-				Array.from(sNote.poll.choices.keys()).map(
-					(key) => [key, 0] as [number, number],
-				),
+
+			const counts = new Map<string, number>(
+				Object.keys(sNote.poll.choices).map((i) => [i, 0] as [string, number]),
 			);
 
 			for (const vote of votes) {
 				for (const choice of vote.choice) {
-					const count = options.get(choice);
-					if (count) {
-						options.set(choice, count + 1);
+					const count = counts.get(choice.toString());
+					if (count !== undefined) {
+						counts.set(choice.toString(), count + 1);
 					}
 				}
 			}
 
 			const choices: { text: string; votes: number; isVoted: boolean }[] = [];
-			for (const [index, text] of sNote.poll.choices.entries()) {
-				const count = options.get(index);
-				if (count) {
+			for (const [index, text] of Object.entries(sNote.poll.choices)) {
+				const count = counts.get(index);
+				if (count !== undefined) {
 					choices.push({
 						text,
 						votes: count,
 						isVoted: votes.some(
-							(v) => v.noteId === meId && v.choice.has(index),
+							(v) => v.userId === meId && v.choice.has(parseInt(index)),
 						),
 					});
 				}
@@ -85,6 +84,8 @@ export async function populatePoll(
 				choices,
 			};
 		}
+
+		throw new Error("poll not found");
 	}
 
 	const poll = await Polls.findOneByOrFail({ noteId: note.id });
