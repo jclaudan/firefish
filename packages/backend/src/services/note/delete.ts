@@ -8,7 +8,20 @@ import renderTombstone from "@/remote/activitypub/renderer/tombstone.js";
 import config from "@/config/index.js";
 import type { User, ILocalUser, IRemoteUser } from "@/models/entities/user.js";
 import type { Note, IMentionedRemoteUsers } from "@/models/entities/note.js";
-import { Notes, Users, Instances } from "@/models/index.js";
+import {
+	Notes,
+	Users,
+	Instances,
+	UserNotePinings,
+	ClipNotes,
+	NoteFavorites,
+	ChannelNotePinings,
+	MutedNotes,
+	NoteWatchings,
+	PromoNotes,
+	NoteUnreads,
+	PromoReads,
+} from "@/models/index.js";
 import {
 	notesChart,
 	perUserNotesChart,
@@ -28,7 +41,6 @@ import {
 	prepared,
 	scyllaClient,
 } from "@/db/scylla.js";
-import { LocalFollowersCache } from "@/misc/cache.js";
 
 /**
  * Delete a post
@@ -275,6 +287,37 @@ export default async function (
 				prepare: true,
 			});
 		}
+
+		const noteIdsToDelete = notesToDelete.map(({ id }) => id);
+		await Promise.all([
+			ChannelNotePinings.delete({
+				noteId: In(noteIdsToDelete),
+			}),
+			ClipNotes.delete({
+				noteId: In(noteIdsToDelete),
+			}),
+			MutedNotes.delete({
+				noteId: In(noteIdsToDelete),
+			}),
+			NoteFavorites.delete({
+				noteId: In(noteIdsToDelete),
+			}),
+			NoteUnreads.delete({
+				noteId: In(noteIdsToDelete),
+			}),
+			NoteWatchings.delete({
+				noteId: In(noteIdsToDelete),
+			}),
+			PromoNotes.delete({
+				noteId: In(noteIdsToDelete),
+			}),
+			PromoReads.delete({
+				noteId: In(noteIdsToDelete),
+			}),
+			UserNotePinings.delete({
+				noteId: In(noteIdsToDelete),
+			}),
+		]);
 	} else {
 		await Notes.delete({
 			id: note.id,
