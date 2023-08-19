@@ -13,8 +13,8 @@ import { generateChannelQuery } from "../../common/generate-channel-query.js";
 import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
 import { generateMutedUserRenotesQueryForNotes } from "../../common/generated-muted-renote-query.js";
 import {
-	ScyllaNote,
-	execNotePaginationQuery,
+	type ScyllaNote,
+	execPaginationQuery,
 	filterBlockUser,
 	filterChannel,
 	filterMutedNote,
@@ -174,22 +174,23 @@ export default define(meta, paramDef, async (ps, user) => {
 		const foundPacked = [];
 		while (foundPacked.length < ps.limit) {
 			const [homeFoundNotes, localFoundNotes] = await Promise.all([
-				execNotePaginationQuery(
+				execPaginationQuery(
 					"home",
 					ps,
-					(notes) => commonFilter(homeFilter(notes)),
+					{ note: (notes) => commonFilter(homeFilter(notes)) },
 					user.id,
 				),
-				execNotePaginationQuery("local", ps, (notes) =>
-					commonFilter(localFilter(notes)),
-				),
+				execPaginationQuery("local", ps, {
+					note: (notes) => commonFilter(localFilter(notes)),
+				}),
 			]);
-			const foundNotes = [...homeFoundNotes, ...localFoundNotes]
+			const foundNotes = [
+				...(homeFoundNotes as ScyllaNote[]),
+				...(localFoundNotes as ScyllaNote[]),
+			]
 				.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()) // Descendent
 				.slice(0, ps.limit * 1.5); // Some may be filtered out by Notes.packMany, thus we take more than ps.limit.
-			foundPacked.push(
-				...(await Notes.packMany(foundNotes, user, { scyllaNote: true })),
-			);
+			foundPacked.push(...(await Notes.packMany(foundNotes, user)));
 			if (foundNotes.length < ps.limit) break;
 			ps.untilDate = foundNotes[foundNotes.length - 1].createdAt.getTime();
 		}

@@ -10,8 +10,9 @@ import { Note } from "./note.js";
 import { User } from "./user.js";
 import { id } from "../id.js";
 
+@Entity()
 @Index(["userId", "noteId"], { unique: true })
-class UserNotePiningBase {
+export class UserNotePining {
 	@PrimaryColumn(id())
 	public id: string;
 
@@ -32,16 +33,10 @@ class UserNotePiningBase {
 
 	@Column(id())
 	public noteId: Note["id"];
-}
 
-@Entity()
-export class UserNotePining extends UserNotePiningBase {
 	@ManyToOne((type) => Note, {
 		onDelete: "CASCADE",
 	})
 	@JoinColumn()
 	public note: Note | null;
 }
-
-@Entity({ name: "user_note_pining" })
-export class UserNotePiningScylla extends UserNotePiningBase {}

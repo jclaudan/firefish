@@ -159,4 +159,13 @@ export const scyllaQueries = {
 		select: `SELECT * FROM poll_vote WHERE "noteId" = ?`,
 		insert: `INSERT INTO poll_vote ("noteId", "userId", "choice", "createdAt") VALUES (?, ?, ?, ?)`,
 	},
+	notification: {
+		insert: `INSERT INTO notification
+			("targetId", "createdAtDate", "createdAt", "id", "notifierId", "notifierHost", "type", "entityId", "reaction", "choice", "customBody", "customHeader", "customIcon")
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		select: {
+			byTargetId: `SELECT * FROM notification WHERE "targetId" = ? AND "createdAtDate" = ?`,
+			byId: `SELECT * FROM notification WHERE "id" = ?`,
+		},
+	},
 };

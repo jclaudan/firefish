@@ -7,8 +7,8 @@ import { generateMutedUserQuery } from "../../common/generate-muted-user-query.j
 import { makePaginationQuery } from "../../common/make-pagination-query.js";
 import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
 import {
-	ScyllaNote,
-	execNotePaginationQuery,
+	type ScyllaNote,
+	execPaginationQuery,
 	filterBlockUser,
 	filterMutedUser,
 	filterVisibility,
@@ -113,17 +113,15 @@ export default define(meta, paramDef, async (ps, user) => {
 		let untilDate: number | undefined;
 		while (foundPacked.length < ps.limit) {
 			const foundNotes = (
-				await execNotePaginationQuery(
+				(await execPaginationQuery(
 					"renotes",
 					{ ...ps, untilDate },
-					filter,
+					{ note: filter },
 					user?.id,
 					1,
-				)
+				)) as ScyllaNote[]
 			).slice(0, ps.limit * 1.5); // Some may filtered out by Notes.packMany, thus we take more than ps.limit.
-			foundPacked.push(
-				...(await Notes.packMany(foundNotes, user, { scyllaNote: true })),
-			);
+			foundPacked.push(...(await Notes.packMany(foundNotes, user)));
 			if (foundNotes.length < ps.limit) break;
 			untilDate = foundNotes[foundNotes.length - 1].createdAt.getTime();
 		}

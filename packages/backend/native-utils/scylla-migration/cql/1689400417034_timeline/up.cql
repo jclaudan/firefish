@@ -1,4 +1,4 @@
-CREATE TYPE IF NOT EXISTS drive_file (
+CREATE TYPE drive_file (
 	"id" ascii,
 	"type" ascii,
 	"createdAt" timestamp,
@@ -15,27 +15,27 @@ CREATE TYPE IF NOT EXISTS drive_file (
 	"height" int,
 );
 
-CREATE TYPE IF NOT EXISTS note_edit_history (
+CREATE TYPE note_edit_history (
 	"content" text,
 	"cw" text,
 	"files" set<frozen<drive_file>>,
 	"updatedAt" timestamp,
 );
 
-CREATE TYPE IF NOT EXISTS emoji (
+CREATE TYPE emoji (
 	"name" text,
 	"url" text,
 	"width" int,
 	"height" int,
 );
 
-CREATE TYPE IF NOT EXISTS poll (
+CREATE TYPE poll (
 	"expiresAt" timestamp,
 	"multiple" boolean,
 	"choices" map<int, text>,
 );
 
-CREATE TABLE IF NOT EXISTS note ( -- Store all posts
+CREATE TABLE note ( -- Store all posts
 	"createdAtDate" date, -- For partitioning
 	"createdAt" timestamp,
 	"id" ascii, -- Post
@@ -79,11 +79,11 @@ CREATE TABLE IF NOT EXISTS note ( -- Store all posts
 	PRIMARY KEY ("createdAtDate", "createdAt", "userId", "userHost", "visibility")
 ) WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
-CREATE INDEX IF NOT EXISTS note_by_uri ON note ("uri");
-CREATE INDEX IF NOT EXISTS note_by_url ON note ("url");
-CREATE INDEX IF NOT EXISTS note_by_reply_id ON note ("replyId");
+CREATE INDEX note_by_uri ON note ("uri");
+CREATE INDEX note_by_url ON note ("url");
+CREATE INDEX note_by_reply_id ON note ("replyId");
 
-CREATE MATERIALIZED VIEW IF NOT EXISTS note_by_id AS
+CREATE MATERIALIZED VIEW note_by_id AS
 	SELECT * FROM note
 	WHERE "id" IS NOT NULL
 	AND "createdAt" IS NOT NULL
@@ -94,7 +94,7 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS note_by_id AS
 	PRIMARY KEY ("id", "createdAt", "createdAtDate", "userId", "userHost", "visibility")
 	WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
-CREATE MATERIALIZED VIEW IF NOT EXISTS note_by_user_id AS
+CREATE MATERIALIZED VIEW note_by_user_id AS
 	SELECT * FROM note
 	WHERE "userId" IS NOT NULL
 	AND "createdAt" IS NOT NULL
@@ -104,7 +104,7 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS note_by_user_id AS
 	PRIMARY KEY ("userId", "createdAt", "createdAtDate", "userHost", "visibility")
 	WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
-CREATE MATERIALIZED VIEW IF NOT EXISTS note_by_renote_id AS
+CREATE MATERIALIZED VIEW note_by_renote_id AS
 	SELECT * FROM note
 	WHERE "renoteId" IS NOT NULL
 	AND "createdAt" IS NOT NULL
@@ -115,7 +115,7 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS note_by_renote_id AS
 	PRIMARY KEY ("renoteId", "createdAt", "createdAtDate", "userId", "userHost", "visibility")
 	WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
-CREATE MATERIALIZED VIEW IF NOT EXISTS note_by_renote_id_and_user_id AS
+CREATE MATERIALIZED VIEW note_by_renote_id_and_user_id AS
 	SELECT "renoteId", "userId", "createdAt", "createdAtDate", "userHost", "visibility", "id" FROM note
 	WHERE "renoteId" IS NOT NULL
 	AND "createdAt" IS NOT NULL
@@ -126,7 +126,7 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS note_by_renote_id_and_user_id AS
 	PRIMARY KEY (("renoteId", "userId"), "createdAt", "createdAtDate", "userHost", "visibility")
 	WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
-CREATE MATERIALIZED VIEW IF NOT EXISTS note_by_channel_id AS
+CREATE MATERIALIZED VIEW note_by_channel_id AS
 	SELECT * FROM note
 	WHERE "channelId" IS NOT NULL
 	AND "createdAt" IS NOT NULL
@@ -137,7 +137,7 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS note_by_channel_id AS
 	PRIMARY KEY ("channelId", "createdAt", "createdAtDate", "userId", "userHost", "visibility")
 	WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
-CREATE MATERIALIZED VIEW IF NOT EXISTS global_timeline AS
+CREATE MATERIALIZED VIEW global_timeline AS
 	SELECT * FROM note
 	WHERE "createdAtDate" IS NOT NULL
 	AND "createdAt" IS NOT NULL
@@ -147,7 +147,7 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS global_timeline AS
 	PRIMARY KEY ("createdAtDate", "createdAt", "userId", "userHost", "visibility")
 	WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
-CREATE MATERIALIZED VIEW IF NOT EXISTS local_timeline AS
+CREATE MATERIALIZED VIEW local_timeline AS
 	SELECT * FROM note
 	WHERE "createdAtDate" IS NOT NULL
 	AND "createdAt" IS NOT NULL
@@ -157,7 +157,7 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS local_timeline AS
 	PRIMARY KEY ("createdAtDate", "createdAt", "userId", "userHost", "visibility")
 	WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
-CREATE TABLE IF NOT EXISTS home_timeline (
+CREATE TABLE home_timeline (
 	"feedUserId" ascii, -- For partitioning
 	"createdAtDate" date, -- For partitioning
 	"createdAt" timestamp,
@@ -202,9 +202,9 @@ CREATE TABLE IF NOT EXISTS home_timeline (
 	PRIMARY KEY (("feedUserId", "createdAtDate"), "createdAt", "userId")
 ) WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
-CREATE INDEX IF NOT EXISTS home_by_id ON home_timeline ("id");
+CREATE INDEX home_by_id ON home_timeline ("id");
 
-CREATE TABLE IF NOT EXISTS reaction (
+CREATE TABLE reaction (
 	"id" text,
 	"noteId" ascii,
 	"userId" ascii,
@@ -214,7 +214,7 @@ CREATE TABLE IF NOT EXISTS reaction (
 	PRIMARY KEY ("noteId", "userId") -- this key constraints one reaction per user for the same post
 );
 
-CREATE MATERIALIZED VIEW IF NOT EXISTS reaction_by_user_id AS
+CREATE MATERIALIZED VIEW reaction_by_user_id AS
 	SELECT * FROM reaction
 	WHERE "userId" IS NOT NULL
 	AND "createdAt" IS NOT NULL
@@ -222,14 +222,14 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS reaction_by_user_id AS
 	PRIMARY KEY ("userId", "createdAt", "noteId")
 	WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
-CREATE MATERIALIZED VIEW IF NOT EXISTS reaction_by_id AS
+CREATE MATERIALIZED VIEW reaction_by_id AS
 	SELECT * FROM reaction
 	WHERE "noteId" IS NOT NULL
 	AND "reaction" IS NOT NULL
 	AND "userId" IS NOT NULL
 	PRIMARY KEY ("noteId", "reaction", "userId");
 
-CREATE TABLE IF NOT EXISTS poll_vote (
+CREATE TABLE poll_vote (
 	"noteId" ascii,
 	"userId" ascii,
 	"choice" set<int>,

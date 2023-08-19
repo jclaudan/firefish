@@ -231,7 +231,6 @@ export const NoteRepository = db.getRepository(Note).extend({
 		me?: { id: User["id"] } | null | undefined,
 		options?: {
 			detail?: boolean;
-			scyllaNote?: boolean;
 			_hint_?: {
 				myReactions: Map<Note["id"], NoteReaction | null>;
 			};
@@ -246,24 +245,21 @@ export const NoteRepository = db.getRepository(Note).extend({
 
 		const meId = me ? me.id : null;
 		let note: Note | null = null;
-		const isSrcNote = typeof src === "object";
 
-		// Always lookup from ScyllaDB if enabled
-		if (isSrcNote && (!scyllaClient || options?.scyllaNote)) {
+		if (typeof src === "object") {
 			note = src;
 		} else {
-			const noteId = isSrcNote ? src.id : src;
 			if (scyllaClient) {
 				const result = await scyllaClient.execute(
 					prepared.note.select.byId,
-					[noteId],
+					[src],
 					{ prepare: true },
 				);
 				if (result.rowLength > 0) {
 					note = parseScyllaNote(result.first());
 				}
 			} else {
-				note = await this.findOneBy({ id: noteId });
+				note = await this.findOneBy({ id: src });
 			}
 		}
 
@@ -405,7 +401,6 @@ export const NoteRepository = db.getRepository(Note).extend({
 		me?: { id: User["id"] } | null | undefined,
 		options?: {
 			detail?: boolean;
-			scyllaNote?: boolean;
 		},
 	) {
 		if (notes.length === 0) return [];

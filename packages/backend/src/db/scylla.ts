@@ -21,6 +21,7 @@ import { UserProfiles } from "@/models/index.js";
 import { getWordHardMute } from "@/misc/check-word-mute.js";
 import type { UserProfile } from "@/models/entities/user-profile.js";
 import { scyllaQueries } from "@/db/cql.js";
+import { notificationTypes } from "@/types.js";
 
 function newClient(): Client | null {
 	if (!config.scylla) {
@@ -65,6 +66,40 @@ function newClient(): Client | null {
 export const scyllaClient = newClient();
 
 export const prepared = scyllaQueries;
+
+export interface ScyllaNotification {
+	targetId: string;
+	createdAtDate: Date;
+	createdAt: Date;
+	id: string;
+	notifierId: string | null;
+	notifierHost: string | null;
+	type: typeof notificationTypes[number];
+	entityId: string | null;
+	reaction: string | null;
+	choice: number | null;
+	customBody: string | null;
+	customHeader: string | null;
+	customIcon: string | null;
+}
+
+export function parseScyllaNotification(row: types.Row): ScyllaNotification {
+	return {
+		targetId: row.get("targetId"),
+		createdAtDate: row.get("createdAt"),
+		createdAt: row.get("createdAt"),
+		id: row.get("id"),
+		type: row.get("type"),
+		notifierId: row.get("notifierId") ?? null,
+		notifierHost: row.get("notifierHost") ?? null,
+		entityId: row.get("entityId") ?? null,
+		reaction: row.get("reaction") ?? null,
+		choice: row.get("choice") ?? null,
+		customBody: row.get("customBody") ?? null,
+		customHeader: row.get("customHeader") ?? null,
+		customIcon: row.get("customIcon") ?? null,
+	};
+}
 
 export interface ScyllaDriveFile {
 	id: string;
@@ -114,14 +149,14 @@ export interface ScyllaNoteEditHistory {
 export interface ScyllaPoll {
 	expiresAt: Date | null;
 	multiple: boolean;
-	choices: Record<number, string>,
+	choices: Record<number, string>;
 }
 
 export interface ScyllaPollVote {
-	noteId: string,
-	userId: string,
-	choice: Set<number>,
-	createdAt: Date,
+	noteId: string;
+	userId: string;
+	choice: Set<number>;
+	createdAt: Date;
 }
 
 export function parseScyllaPollVote(row: types.Row): ScyllaPollVote {
@@ -130,7 +165,7 @@ export function parseScyllaPollVote(row: types.Row): ScyllaPollVote {
 		userId: row.get("userId"),
 		choice: new Set(row.get("choice") ?? []),
 		createdAt: row.get("createdAt"),
-	}
+	};
 }
 
 export type ScyllaNote = Note & {
@@ -151,7 +186,7 @@ export function parseScyllaNote(row: types.Row): ScyllaNote {
 	const userHost = row.get("userHost");
 
 	return {
-		createdAtDate: row.get("createdAtDate"),
+		createdAtDate: row.get("createdAt"),
 		createdAt: row.get("createdAt"),
 		id: row.get("id"),
 		visibility: row.get("visibility"),
@@ -216,8 +251,6 @@ export interface ScyllaNoteReaction extends NoteReaction {
 	emoji: PopulatedEmoji;
 }
 
-const QUERY_LIMIT = 1000; // TODO: should this be configurable?
-
 export type FeedType =
 	| "home"
 	| "local"
@@ -225,7 +258,8 @@ export type FeedType =
 	| "global"
 	| "renotes"
 	| "user"
-	| "channel";
+	| "channel"
+	| "notification";
 
 export function parseScyllaReaction(row: types.Row): ScyllaNoteReaction {
 	return {
@@ -238,7 +272,7 @@ export function parseScyllaReaction(row: types.Row): ScyllaNoteReaction {
 	};
 }
 
-export function prepareNoteQuery(
+export function preparePaginationQuery(
 	kind: FeedType,
 	ps: {
 		untilId?: string;
@@ -269,6 +303,9 @@ export function prepareNoteQuery(
 		case "channel":
 			queryParts.push(prepared.note.select.byChannelId);
 			break;
+		case "notification":
+			queryParts.push(prepared.notification.select.byTargetId);
+			break;
 		default:
 			queryParts.push(prepared.note.select.byDate);
 	}
@@ -293,7 +330,8 @@ export function prepareNoteQuery(
 		queryParts.push(`AND "createdAt" > ?`);
 	}
 
-	queryParts.push(`LIMIT ${QUERY_LIMIT}`);
+	const queryLimit = config.scylla?.queryLimit ?? 1000;
+	queryParts.push(`LIMIT ${queryLimit}`);
 
 	const query = queryParts.join(" ");
 
@@ -304,7 +342,7 @@ export function prepareNoteQuery(
 	};
 }
 
-export async function execNotePaginationQuery(
+export async function execPaginationQuery(
 	kind: FeedType,
 	ps: {
 		limit: number;
@@ -315,34 +353,37 @@ export async function execNotePaginationQuery(
 		noteId?: string;
 		channelId?: string;
 	},
-	filter?: (_: ScyllaNote[]) => Promise<ScyllaNote[]>,
+	filter?: {
+		note?: (_: ScyllaNote[]) => Promise<ScyllaNote[]>;
+		notification?: (_: ScyllaNotification[]) => ScyllaNotification[];
+	},
 	userId?: User["id"],
 	maxPartitions = config.scylla?.sparseTimelineDays ?? 14,
-): Promise<ScyllaNote[]> {
+): Promise<ScyllaNote[] | ScyllaNotification[]> {
 	if (!scyllaClient) return [];
 
 	switch (kind) {
 		case "home":
 		case "user":
-			if (!userId)
-				throw new Error("Query of home and user timelines needs userId");
+		case "notification":
+			if (!userId) throw new Error(`Feed ${kind} needs userId`);
 			break;
 		case "renotes":
-			if (!ps.noteId) throw new Error("Query of renotes needs noteId");
+			if (!ps.noteId) throw new Error(`Feed ${kind} needs noteId`);
 			break;
 		case "channel":
-			if (!ps.channelId)
-				throw new Error("Query of channel timeline needs channelId");
+			if (!ps.channelId) throw new Error(`Feed ${kind} needs channelId`);
 			break;
 	}
 
-	let { query, untilDate, sinceDate } = prepareNoteQuery(kind, ps);
+	let { query, untilDate, sinceDate } = preparePaginationQuery(kind, ps);
 
 	let scannedPartitions = 0;
-	const foundNotes: ScyllaNote[] = [];
+	const found: (ScyllaNote | ScyllaNotification)[] = [];
+	const queryLimit = config.scylla?.queryLimit ?? 1000;
 
 	// Try to get posts of at most <maxPartitions> in the single request
-	while (foundNotes.length < ps.limit && scannedPartitions < maxPartitions) {
+	while (found.length < ps.limit && scannedPartitions < maxPartitions) {
 		const params: (Date | string | string[] | number)[] = [];
 		if (kind === "home" && userId) {
 			params.push(userId, untilDate, untilDate);
@@ -352,6 +393,8 @@ export async function execNotePaginationQuery(
 			params.push(ps.noteId, untilDate);
 		} else if (kind === "channel" && ps.channelId) {
 			params.push(ps.channelId, untilDate);
+		} else if (kind === "notification" && userId) {
+			params.push(userId, untilDate, untilDate);
 		} else {
 			params.push(untilDate, untilDate);
 		}
@@ -365,12 +408,22 @@ export async function execNotePaginationQuery(
 		});
 
 		if (result.rowLength > 0) {
-			const notes = result.rows.map(parseScyllaNote);
-			foundNotes.push(...(filter ? await filter(notes) : notes));
-			untilDate = notes[notes.length - 1].createdAt;
+			if (kind === "notification") {
+				const notifications = result.rows.map(parseScyllaNotification);
+				found.push(
+					...(filter?.notification
+						? filter.notification(notifications)
+						: notifications),
+				);
+				untilDate = notifications[notifications.length - 1].createdAt;
+			} else {
+				const notes = result.rows.map(parseScyllaNote);
+				found.push(...(filter?.note ? await filter.note(notes) : notes));
+				untilDate = notes[notes.length - 1].createdAt;
+			}
 		}
 
-		if (result.rowLength < QUERY_LIMIT) {
+		if (result.rowLength < queryLimit) {
 			// Reached the end of partition. Queries posts created one day before.
 			scannedPartitions++;
 			const yesterday = new Date(untilDate.getTime() - 86400000);
@@ -380,7 +433,11 @@ export async function execNotePaginationQuery(
 		}
 	}
 
-	return foundNotes;
+	if (kind === "notification") {
+		return found as ScyllaNotification[];
+	}
+
+	return found as ScyllaNote[];
 }
 
 export async function filterVisibility(

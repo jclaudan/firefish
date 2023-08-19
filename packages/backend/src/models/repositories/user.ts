@@ -528,7 +528,6 @@ export const UserRepository = db.getRepository(User).extend({
 						pinnedNoteIds,
 						pinnedNotes: Notes.packMany(pinnedNotes, me, {
 							detail: true,
-							scyllaNote: !!scyllaClient,
 						}),
 						pinnedPageId: profile!.pinnedPageId,
 						pinnedPage: profile!.pinnedPageId

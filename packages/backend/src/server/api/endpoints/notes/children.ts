@@ -151,7 +151,6 @@ export default define(meta, paramDef, async (ps, user) => {
 
 		return await Notes.packMany(foundNotes, user, {
 			detail: false,
-			scyllaNote: true,
 		});
 	}
 

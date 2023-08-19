@@ -13,8 +13,8 @@ import { generateChannelQuery } from "../../common/generate-channel-query.js";
 import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
 import { generateMutedUserRenotesQueryForNotes } from "../../common/generated-muted-renote-query.js";
 import {
-	ScyllaNote,
-	execNotePaginationQuery,
+	type ScyllaNote,
+	execPaginationQuery,
 	filterBlockUser,
 	filterMutedNote,
 	filterMutedRenotes,
@@ -184,10 +184,10 @@ export default define(meta, paramDef, async (ps, user) => {
 			return filtered;
 		};
 
-		const foundNotes = await execNotePaginationQuery("recommended", ps, filter);
-		return await Notes.packMany(foundNotes.slice(0, ps.limit), user, {
-			scyllaNote: true,
-		});
+		const foundNotes = (await execPaginationQuery("recommended", ps, {
+			note: filter,
+		})) as ScyllaNote[];
+		return await Notes.packMany(foundNotes.slice(0, ps.limit), user);
 	}
 
 	//#region Construct query

@@ -76,8 +76,12 @@ db:
 #   # 15 days after signing up. In this case, the user's first post does not
 #   # appear in their home timeline.
 #   #
-#   # (default: 14)
+#   # (default 14)
 #   sparseTimelineDays: 14
+#
+#   # <queryLimit> determines the number of maximum rows read within one pagination.
+#   # (default 1000, max 5000, min 1)
+#   queryLimit: 1000
 
 #   ┌─────────────────────┐
 #───┘ Redis configuration └─────────────────────────────────────

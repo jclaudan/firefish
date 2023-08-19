@@ -23,6 +23,7 @@ export type Source = {
 		replicationFactor: number;
 		localDataCentre: string;
 		sparseTimelineDays?: number;
+		queryLimit?: number;
 	};
 	redis: {
 		host: string;

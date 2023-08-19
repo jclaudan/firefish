@@ -15,18 +15,99 @@ import {
 	AccessTokens,
 	NoteReactions,
 } from "../index.js";
+import {
+	parseScyllaNote,
+	parseScyllaNotification,
+	parseScyllaReaction,
+	prepared,
+	scyllaClient,
+	type ScyllaNotification,
+} from "@/db/scylla.js";
 
 export const NotificationRepository = db.getRepository(Notification).extend({
 	async pack(
-		src: Notification["id"] | Notification,
+		src: Notification["id"] | Notification | ScyllaNotification,
 		options: {
 			_hintForEachNotes_?: {
 				myReactions: Map<Note["id"], NoteReaction | null>;
 			};
 		},
 	): Promise<Packed<"Notification">> {
+		if (scyllaClient) {
+			let notification: ScyllaNotification;
+			if (typeof src === "object") {
+				notification = src as ScyllaNotification;
+			} else {
+				const result = await scyllaClient.execute(
+					prepared.notification.select.byId,
+					[src],
+					{ prepare: true },
+				);
+				if (result.rowLength === 0) {
+					throw new Error("notification not found");
+				}
+				notification = parseScyllaNotification(result.first());
+			}
+			const token =
+				notification.type === "app" && notification.entityId
+					? await AccessTokens.findOneByOrFail({
+							id: notification.entityId,
+					  })
+					: null;
+
+			let data = null;
+
+			if (notification.entityId) {
+				switch (notification.type) {
+					case "mention":
+					case "reply":
+					case "renote":
+					case "quote":
+					case "reaction":
+					case "pollVote":
+					case "pollEnded":
+						data = {
+							note: Notes.pack(
+								notification.entityId,
+								{ id: notification.targetId },
+								{ detail: true, _hint_: options._hintForEachNotes_ },
+							),
+							reaction: notification.reaction,
+							choice: notification.choice,
+						};
+						break;
+					case "groupInvited":
+						data = {
+							invitation: UserGroupInvitations.pack(notification.entityId),
+						};
+						break;
+					case "app":
+						data = {
+							body: notification.customBody,
+							header: notification.customHeader || token?.name,
+							icon: notification.customIcon || token?.iconUrl,
+						};
+						break;
+				}
+			}
+
+			return await awaitAll({
+				id: notification.id,
+				createdAt: notification.createdAt.toISOString(),
+				type: notification.type,
+				isRead: true, // FIXME: Implement read checker on DragonflyDB
+				userId: notification.notifierId,
+				user: notification.notifierId
+					? Users.pack(notification.notifierId)
+					: null,
+				...data,
+			});
+		}
+
 		const notification =
-			typeof src === "object" ? src : await this.findOneByOrFail({ id: src });
+			typeof src === "object"
+				? (src as Notification)
+				: await this.findOneByOrFail({ id: src });
 		const token = notification.appAccessTokenId
 			? await AccessTokens.findOneByOrFail({
 					id: notification.appAccessTokenId,
@@ -145,22 +226,52 @@ export const NotificationRepository = db.getRepository(Notification).extend({
 		});
 	},
 
-	async packMany(notifications: Notification[], meId: User["id"]) {
+	async packMany(
+		notifications: Notification[] | ScyllaNotification[],
+		meId: User["id"],
+	) {
 		if (notifications.length === 0) return [];
 
-		const notes = notifications
-			.filter((x) => x.note != null)
-			.map((x) => x.note!);
-		const noteIds = notes.map((n) => n.id);
+		let notes: Note[] = [];
+		let noteIds: Note["id"][] = [];
+		let renoteIds: Note["id"][] = [];
 		const myReactionsMap = new Map<Note["id"], NoteReaction | null>();
-		const renoteIds = notes
-			.filter((n) => n.renoteId != null)
-			.map((n) => n.renoteId!);
+
+		if (scyllaClient) {
+			noteIds = (notifications as ScyllaNotification[])
+				.filter((n) => !["groupInvited", "app"].includes(n.type) && n.entityId)
+				.map(({ entityId }) => entityId as string);
+			notes = await scyllaClient
+				.execute(prepared.note.select.byIds, [noteIds], { prepare: true })
+				.then((result) => result.rows.map(parseScyllaNote));
+			renoteIds = notes
+				.filter((note) => !!note.renoteId)
+				.map(({ renoteId }) => renoteId as string);
+		} else {
+			const notes = (notifications as Notification[])
+				.filter((x) => !!x.note)
+				.map((x) => x.note as Note);
+			noteIds = notes.map((n) => n.id);
+			renoteIds = notes
+				.filter((n) => !!n.renoteId)
+				.map((n) => n.renoteId as string);
+		}
+
 		const targets = [...noteIds, ...renoteIds];
-		const myReactions = await NoteReactions.findBy({
-			userId: meId,
-			noteId: In(targets),
-		});
+		let myReactions: NoteReaction[] = [];
+		if (scyllaClient) {
+			const result = await scyllaClient.execute(
+				prepared.reaction.select.byNoteAndUser,
+				[targets, [meId]],
+				{ prepare: true },
+			);
+			myReactions = result.rows.map(parseScyllaReaction);
+		} else {
+			myReactions = await NoteReactions.findBy({
+				userId: meId,
+				noteId: In(targets),
+			});
+		}
 
 		for (const target of targets) {
 			myReactionsMap.set(
@@ -177,7 +288,7 @@ export const NotificationRepository = db.getRepository(Notification).extend({
 					_hintForEachNotes_: {
 						myReactions: myReactionsMap,
 					},
-				}).catch((e) => null),
+				}).catch((_) => null),
 			),
 		);
 		return results.filter((x) => x != null);

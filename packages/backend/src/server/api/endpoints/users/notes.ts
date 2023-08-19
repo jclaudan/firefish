@@ -8,8 +8,8 @@ import { generateVisibilityQuery } from "../../common/generate-visibility-query.
 import { generateMutedUserQuery } from "../../common/generate-muted-user-query.js";
 import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
 import {
-	ScyllaNote,
-	execNotePaginationQuery,
+	type ScyllaNote,
+	execPaginationQuery,
 	filterBlockUser,
 	filterMutedNote,
 	filterMutedUser,
@@ -158,19 +158,15 @@ export default define(meta, paramDef, async (ps, me) => {
 			return filtered;
 		};
 
-		const foundPacked = [];
-		while (foundPacked.length < ps.limit) {
-			const foundNotes = (
-				await execNotePaginationQuery("user", ps, filter, user.id)
-			).slice(0, ps.limit * 1.5); // Some may filtered out by Notes.packMany, thus we take more than ps.limit.
-			foundPacked.push(
-				...(await Notes.packMany(foundNotes, user, { scyllaNote: true })),
-			);
-			if (foundNotes.length < ps.limit) break;
-			ps.untilDate = foundNotes[foundNotes.length - 1].createdAt.getTime();
-		}
-
-		return foundPacked.slice(0, ps.limit);
+		const foundNotes = (
+			(await execPaginationQuery(
+				"user",
+				ps,
+				{ note: filter },
+				user.id,
+			)) as ScyllaNote[]
+		).slice(0, ps.limit);
+		return await Notes.packMany(foundNotes, user);
 	}
 
 	//#region Construct query

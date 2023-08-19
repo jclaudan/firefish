@@ -11,6 +11,20 @@ import read from "@/services/note/read.js";
 import { readNotification } from "../../common/read-notification.js";
 import define from "../../define.js";
 import { makePaginationQuery } from "../../common/make-pagination-query.js";
+import {
+	ScyllaNotification,
+	execPaginationQuery,
+	filterMutedUser,
+	scyllaClient,
+} from "@/db/scylla.js";
+import {
+	InstanceMutingsCache,
+	LocalFollowingsCache,
+	UserBlockedCache,
+	UserBlockingCache,
+	UserMutingsCache,
+	userWordMuteCache,
+} from "@/misc/cache.js";
 
 export const meta = {
 	tags: ["account", "notifications"],
@@ -66,13 +80,75 @@ export const paramDef = {
 
 export default define(meta, paramDef, async (ps, user) => {
 	// includeTypes が空の場合はクエリしない
-	if (ps.includeTypes && ps.includeTypes.length === 0) {
-		return [];
-	}
 	// excludeTypes に全指定されている場合はクエリしない
-	if (notificationTypes.every((type) => ps.excludeTypes?.includes(type))) {
-		return [];
+	if (
+		(ps.includeTypes && ps.includeTypes.length === 0) ||
+		notificationTypes.every((type) => ps.excludeTypes?.includes(type))
+	) {
+		return await Notifications.packMany([], user.id);
 	}
+
+	if (scyllaClient) {
+		const [
+			followingUserIds,
+			mutedUserIds,
+			mutedInstances,
+			blockerIds,
+			blockingIds,
+		] = await Promise.all([
+			LocalFollowingsCache.init(user.id).then((cache) => cache.getAll()),
+			UserMutingsCache.init(user.id).then((cache) => cache.getAll()),
+			InstanceMutingsCache.init(user.id).then((cache) => cache.getAll()),
+			UserBlockedCache.init(user.id).then((cache) => cache.getAll()),
+			UserBlockingCache.init(user.id).then((cache) => cache.getAll()),
+		]);
+		const validUserIds = [user.id, ...followingUserIds];
+
+		const filter = (notifications: ScyllaNotification[]) => {
+			let filtered = notifications;
+			if (ps.unreadOnly) {
+				// FIXME: isRead is always true at the moment
+				filtered = [];
+			}
+			if (ps.following) {
+				filtered = filtered.filter(
+					(n) => n.notifierId && validUserIds.includes(n.notifierId),
+				);
+			}
+			if (ps.includeTypes && ps.includeTypes.length > 0) {
+				filtered = filtered.filter((n) => ps.includeTypes?.includes(n.type));
+			} else if (ps.excludeTypes && ps.excludeTypes.length > 0) {
+				filtered = filtered.filter(
+					(n) => ps.excludeTypes && !ps.excludeTypes.includes(n.type),
+				);
+			}
+			filtered = filtered.filter(
+				(n) => !(n.notifierHost && mutedInstances.includes(n.notifierHost)),
+			);
+			filtered = filtered.filter(
+				(n) =>
+					!(
+						n.notifierId &&
+						(mutedUserIds.includes(n.notifierId) ||
+							blockingIds.includes(n.notifierId) ||
+							blockerIds.includes(n.notifierId))
+					),
+			);
+			return filtered;
+		};
+
+		const foundNotifications = (
+			(await execPaginationQuery(
+				"notification",
+				ps,
+				{ notification: filter },
+				user.id,
+				30,
+			)) as ScyllaNotification[]
+		).slice(0, ps.limit);
+		return await Notifications.packMany(foundNotifications, user.id);
+	}
+
 	const followingQuery = Followings.createQueryBuilder("following")
 		.select("following.followeeId")
 		.where("following.followerId = :followerId", { followerId: user.id });
@@ -97,19 +173,11 @@ export default define(meta, paramDef, async (ps, user) => {
 		.andWhere("notification.notifieeId = :meId", { meId: user.id })
 		.leftJoinAndSelect("notification.notifier", "notifier")
 		.leftJoinAndSelect("notification.note", "note")
-		.leftJoinAndSelect("notifier.avatar", "notifierAvatar")
-		.leftJoinAndSelect("notifier.banner", "notifierBanner")
 		.leftJoinAndSelect("note.user", "user")
-		.leftJoinAndSelect("user.avatar", "avatar")
-		.leftJoinAndSelect("user.banner", "banner")
 		.leftJoinAndSelect("note.reply", "reply")
 		.leftJoinAndSelect("note.renote", "renote")
 		.leftJoinAndSelect("reply.user", "replyUser")
-		.leftJoinAndSelect("replyUser.avatar", "replyUserAvatar")
-		.leftJoinAndSelect("replyUser.banner", "replyUserBanner")
-		.leftJoinAndSelect("renote.user", "renoteUser")
-		.leftJoinAndSelect("renoteUser.avatar", "renoteUserAvatar")
-		.leftJoinAndSelect("renoteUser.banner", "renoteUserBanner");
+		.leftJoinAndSelect("renote.user", "renoteUser");
 
 	// muted users
 	query.andWhere(

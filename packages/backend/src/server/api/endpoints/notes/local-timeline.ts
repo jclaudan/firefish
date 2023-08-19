@@ -13,8 +13,8 @@ import { generateChannelQuery } from "../../common/generate-channel-query.js";
 import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
 import { generateMutedUserRenotesQueryForNotes } from "../../common/generated-muted-renote-query.js";
 import {
-	ScyllaNote,
-	execNotePaginationQuery,
+	type ScyllaNote,
+	execPaginationQuery,
 	filterBlockUser,
 	filterChannel,
 	filterMutedNote,
@@ -187,11 +187,11 @@ export default define(meta, paramDef, async (ps, user) => {
 		const foundPacked = [];
 		while (foundPacked.length < ps.limit) {
 			const foundNotes = (
-				await execNotePaginationQuery("local", ps, filter)
+				(await execPaginationQuery("local", ps, {
+					note: filter,
+				})) as ScyllaNote[]
 			).slice(0, ps.limit * 1.5); // Some may filtered out by Notes.packMany, thus we take more than ps.limit.
-			foundPacked.push(
-				...(await Notes.packMany(foundNotes, user, { scyllaNote: true })),
-			);
+			foundPacked.push(...(await Notes.packMany(foundNotes, user)));
 			if (foundNotes.length < ps.limit) break;
 			ps.untilDate = foundNotes[foundNotes.length - 1].createdAt.getTime();
 		}

@@ -12,8 +12,13 @@ import type { User } from "@/models/entities/user.js";
 import type { Notification } from "@/models/entities/notification.js";
 import { sendEmailNotification } from "./send-email-notification.js";
 import { shouldSilenceInstance } from "@/misc/should-block-instance.js";
-import { UserMutingsCache } from "@/misc/cache.js";
+import { LocalFollowingsCache, UserMutingsCache } from "@/misc/cache.js";
 import { userByIdCache } from "./user-cache.js";
+import {
+	type ScyllaNotification,
+	prepared,
+	scyllaClient,
+} from "@/db/scylla.js";
 
 export async function createNotification(
 	notifieeId: User["id"],
@@ -24,22 +29,31 @@ export async function createNotification(
 		return null;
 	}
 
+	let notifierHost: string | null = null;
+
 	if (
 		data.notifierId &&
 		["mention", "reply", "renote", "quote", "reaction"].includes(type)
 	) {
-		const notifier = await Users.findOneBy({ id: data.notifierId });
+		const notifier = await userByIdCache.fetchMaybe(data.notifierId, () =>
+			Users.findOneBy({ id: data.notifierId ?? "" }).then(
+				(user) => user ?? undefined,
+			),
+		);
 		// suppress if the notifier does not exist or is silenced.
 		if (!notifier) return null;
 
-		// suppress if the notifier is silenced or in a silenced instance, and not followed by the notifiee.
+		notifierHost = notifier.host;
+
+		// suppress if the notifier is silenced, suspended, or in a silenced instance, and not followed by the notifiee.
 		if (
 			(notifier.isSilenced ||
+				notifier.isSuspended ||
 				(Users.isRemoteUser(notifier) &&
 					(await shouldSilenceInstance(notifier.host)))) &&
-			!(await Followings.exist({
-				where: { followerId: notifieeId, followeeId: data.notifierId },
-			}))
+			!(await LocalFollowingsCache.init(notifieeId).then((cache) =>
+				cache.has(notifier.id),
+			))
 		)
 			return null;
 	}
@@ -62,17 +76,62 @@ export async function createNotification(
 	}
 
 	// Create notification
-	const notification = await Notifications.insert({
-		id: genId(),
-		createdAt: new Date(),
-		notifieeId: notifieeId,
-		type: type,
-		// Make this notification read if muted
-		isRead: isMuted,
-		...data,
-	} as Partial<Notification>).then((x) =>
-		Notifications.findOneByOrFail(x.identifiers[0]),
-	);
+	let notification: Notification | ScyllaNotification;
+	if (scyllaClient) {
+		const entityId =
+			data.noteId ||
+			data.followRequestId ||
+			data.userGroupInvitationId ||
+			data.appAccessTokenId ||
+			null;
+		const now = new Date();
+		notification = {
+			id: genId(),
+			createdAtDate: now,
+			createdAt: now,
+			targetId: notifieeId,
+			notifierId: data.notifierId ?? null,
+			notifierHost,
+			entityId,
+			type,
+			choice: data.choice ?? null,
+			customBody: data.customBody ?? null,
+			customHeader: data.customHeader ?? null,
+			customIcon: data.customIcon ?? null,
+			reaction: data.reaction ?? null,
+		};
+		await scyllaClient.execute(
+			prepared.notification.insert,
+			[
+				notification.targetId,
+				notification.createdAtDate,
+				notification.createdAt,
+				notification.id,
+				notification.notifierId,
+				notification.notifierHost,
+				notification.type,
+				notification.entityId,
+				notification.reaction,
+				notification.choice,
+				notification.customBody,
+				notification.customHeader,
+				notification.customIcon,
+			],
+			{ prepare: true },
+		);
+	} else {
+		notification = await Notifications.insert({
+			id: genId(),
+			createdAt: new Date(),
+			notifieeId: notifieeId,
+			type: type,
+			// Make this notification read if muted
+			isRead: isMuted,
+			...data,
+		} as Partial<Notification>).then((x) =>
+			Notifications.findOneByOrFail(x.identifiers[0]),
+		);
+	}
 
 	const packed = await Notifications.pack(notification, {});
 

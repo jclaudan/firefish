@@ -4,12 +4,11 @@ import { Notes, Channels, UserProfiles } from "@/models/index.js";
 import { makePaginationQuery } from "../../common/make-pagination-query.js";
 import { activeUsersChart } from "@/services/chart/index.js";
 import {
-	ScyllaNote,
-	execNotePaginationQuery,
+	type ScyllaNote,
+	execPaginationQuery,
 	filterBlockUser,
 	filterMutedNote,
 	filterMutedUser,
-	filterVisibility,
 	scyllaClient,
 } from "@/db/scylla.js";
 import {
@@ -103,11 +102,11 @@ export default define(meta, paramDef, async (ps, user) => {
 		const foundPacked = [];
 		while (foundPacked.length < ps.limit) {
 			const foundNotes = (
-				await execNotePaginationQuery("channel", ps, filter)
+				(await execPaginationQuery("channel", ps, {
+					note: filter,
+				})) as ScyllaNote[]
 			).slice(0, ps.limit * 1.5); // Some may filtered out by Notes.packMany, thus we take more than ps.limit.
-			foundPacked.push(
-				...(await Notes.packMany(foundNotes, user, { scyllaNote: true })),
-			);
+			foundPacked.push(...(await Notes.packMany(foundNotes, user)));
 			if (foundNotes.length < ps.limit) break;
 			ps.untilDate = foundNotes[foundNotes.length - 1].createdAt.getTime();
 		}
