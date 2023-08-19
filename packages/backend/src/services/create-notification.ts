@@ -140,6 +140,11 @@ export async function createNotification(
 
 	// Fire "new notification" event if not yet read after two seconds
 	setTimeout(async () => {
+		if (scyllaClient) {
+			pushNotification(notifieeId, "notification", packed);
+			return;
+		}
+
 		const fresh = await Notifications.findOneBy({ id: notification.id });
 		if (!fresh) return;
 		// We execute this before, because the server side "read" check doesnt work well with push notifications, the app and service worker will decide themself

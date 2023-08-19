@@ -1,6 +1,12 @@
 import { Notes } from "@/models/index.js";
 import define from "../define.js";
 import { makePaginationQuery } from "../common/make-pagination-query.js";
+import {
+	type ScyllaNote,
+	scyllaClient,
+	execPaginationQuery,
+	FeedType,
+} from "@/db/scylla.js";
 
 export const meta = {
 	tags: ["notes"],
@@ -35,6 +41,43 @@ export const paramDef = {
 } as const;
 
 export default define(meta, paramDef, async (ps) => {
+	if (scyllaClient) {
+		const filter = async (notes: ScyllaNote[]) => {
+			let filtered = notes.filter((note) => !note.localOnly);
+			if (ps.reply === undefined) {
+				filtered = filtered.filter(
+					(note) => !!note.replyId === (ps.reply as boolean),
+				);
+			}
+			if (ps.renote === undefined) {
+				filtered = filtered.filter(
+					(note) => !!note.renoteId === (ps.renote as boolean),
+				);
+			}
+			if (ps.withFiles === undefined) {
+				filtered = filtered.filter((note) =>
+					ps.withFiles ? note.files.length > 0 : note.files.length === 0,
+				);
+			}
+			if (ps.poll === undefined) {
+				filtered = filtered.filter(
+					(note) => note.hasPoll === (ps.poll as boolean),
+				);
+			}
+
+			return filtered;
+		};
+
+		const foundNotes = (await execPaginationQuery(
+			ps.local ? "global" : "local",
+			ps,
+			{
+				note: filter,
+			},
+		)) as ScyllaNote[];
+		return await Notes.packMany(foundNotes);
+	}
+
 	const query = makePaginationQuery(
 		Notes.createQueryBuilder("note"),
 		ps.sinceId,

@@ -10,6 +10,16 @@ import renderEmoji from "./emoji.js";
 import renderMention from "./mention.js";
 import renderHashtag from "./hashtag.js";
 import renderDocument from "./document.js";
+import {
+	type ScyllaPoll,
+	type ScyllaNote,
+	parseScyllaNote,
+	prepared,
+	scyllaClient,
+	parseScyllaPollVote,
+} from "@/db/scylla.js";
+import { userByIdCache } from "@/services/user-cache.js";
+import { EmojiCache } from "@/misc/populate-emojis.js";
 
 export default async function renderNote(
 	note: Note,
@@ -25,15 +35,32 @@ export default async function renderNote(
 	};
 
 	let inReplyTo;
-	let inReplyToNote: Note | null;
+	let inReplyToNote: Note | null = null;
 
 	if (note.replyId) {
-		inReplyToNote = await Notes.findOneBy({ id: note.replyId });
+		if (scyllaClient) {
+			const result = await scyllaClient.execute(
+				prepared.note.select.byId,
+				[note.replyId],
+				{ prepare: true },
+			);
+			if (result.rowLength > 0) {
+				inReplyToNote = parseScyllaNote(result.first());
+			}
+		} else {
+			inReplyToNote = await Notes.findOneBy({ id: note.replyId });
+		}
 
-		if (inReplyToNote != null) {
-			const inReplyToUser = await Users.findOneBy({ id: inReplyToNote.userId });
+		if (inReplyToNote) {
+			const inReplyToUser = await userByIdCache.fetchMaybe(
+				inReplyToNote.userId,
+				() =>
+					Users.findOneBy({ id: (inReplyToNote as Note).userId }).then(
+						(user) => user ?? undefined,
+					),
+			);
 
-			if (inReplyToUser != null) {
+			if (!inReplyToUser) {
 				if (inReplyToNote.uri) {
 					inReplyTo = inReplyToNote.uri;
 				} else {
@@ -52,7 +79,19 @@ export default async function renderNote(
 	let quote;
 
 	if (note.renoteId) {
-		const renote = await Notes.findOneBy({ id: note.renoteId });
+		let renote: Note | null = null;
+		if (scyllaClient) {
+			const result = await scyllaClient.execute(
+				prepared.note.select.byId,
+				[note.renoteId],
+				{ prepare: true },
+			);
+			if (result.rowLength > 0) {
+				renote = parseScyllaNote(result.first());
+			}
+		} else {
+			renote = await Notes.findOneBy({ id: note.renoteId });
+		}
 
 		if (renote) {
 			quote = renote.uri ? renote.uri : `${config.url}/notes/${renote.id}`;
@@ -94,10 +133,14 @@ export default async function renderNote(
 	const files = await getPromisedFiles(note.fileIds);
 
 	const text = note.text ?? "";
-	let poll: Poll | null = null;
+	let poll: Poll | ScyllaPoll | null = null;
 
 	if (note.hasPoll) {
-		poll = await Polls.findOneBy({ noteId: note.id });
+		if (scyllaClient) {
+			poll = (note as ScyllaNote).poll;
+		} else {
+			poll = await Polls.findOneBy({ noteId: note.id });
+		}
 	}
 
 	let apText = text;
@@ -119,6 +162,39 @@ export default async function renderNote(
 
 	const tag = [...hashtagTags, ...mentionTags, ...apemojis];
 
+	let choices: {
+		type: "Note";
+		name: string;
+		replies: { type: "Collection"; totalItems: number };
+	}[] = [];
+	if (poll) {
+		if (scyllaClient) {
+			const votes = await scyllaClient
+				.execute(prepared.poll.select, [note.id], { prepare: true })
+				.then((result) => result.rows.map(parseScyllaPollVote));
+			choices = Object.entries((poll as ScyllaPoll).choices).map(
+				([index, text]) => ({
+					type: "Note",
+					name: text,
+					replies: {
+						type: "Collection",
+						totalItems: votes.filter((vote) => vote.choice.has(parseInt(index)))
+							.length,
+					},
+				}),
+			);
+		} else {
+			choices = (poll as Poll).choices.map((text, i) => ({
+				type: "Note",
+				name: text,
+				replies: {
+					type: "Collection",
+					totalItems: (poll as Poll).votes[i],
+				},
+			}));
+		}
+	}
+
 	const asPoll = poll
 		? {
 				type: "Question",
@@ -129,14 +205,7 @@ export default async function renderNote(
 				),
 				[poll.expiresAt && poll.expiresAt < new Date() ? "closed" : "endTime"]:
 					poll.expiresAt,
-				[poll.multiple ? "anyOf" : "oneOf"]: poll.choices.map((text, i) => ({
-					type: "Note",
-					name: text,
-					replies: {
-						type: "Collection",
-						totalItems: poll!.votes[i],
-					},
-				})),
+				[poll.multiple ? "anyOf" : "oneOf"]: choices,
 		  }
 		: {};
 
@@ -177,12 +246,14 @@ export async function getEmojis(names: string[]): Promise<Emoji[]> {
 
 	const emojis = await Promise.all(
 		names.map((name) =>
-			Emojis.findOneBy({
-				name,
-				host: IsNull(),
-			}),
+			EmojiCache.fetch(`${name} null`, () =>
+				Emojis.findOneBy({
+					name,
+					host: IsNull(),
+				}),
+			),
 		),
 	);
 
-	return emojis.filter((emoji) => emoji != null) as Emoji[];
+	return emojis.filter((emoji) => !!emoji) as Emoji[];
 }

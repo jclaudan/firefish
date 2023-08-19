@@ -35,6 +35,9 @@ import { urlPreviewHandler } from "./url-preview.js";
 import { manifestHandler } from "./manifest.js";
 import packFeed from "./feed.js";
 import { MINUTE, DAY } from "@/const.js";
+import { parseScyllaNote, prepared, scyllaClient } from "@/db/scylla.js";
+import { userByIdCache } from "@/services/user-cache.js";
+import type { Note } from "@/models/entities/note.js";
 
 const _filename = fileURLToPath(import.meta.url);
 const _dirname = dirname(_filename);
@@ -465,10 +468,25 @@ router.get("/users/:user", async (ctx) => {
 
 // Note
 router.get("/notes/:note", async (ctx, next) => {
-	const note = await Notes.findOneBy({
-		id: ctx.params.note,
-		visibility: In(["public", "home"]),
-	});
+	let note: Note | null = null;
+	if (scyllaClient) {
+		const result = await scyllaClient.execute(
+			prepared.note.select.byId,
+			[ctx.params.note],
+			{ prepare: true },
+		);
+		if (result.rowLength > 0) {
+			const candidate = parseScyllaNote(result.first());
+			if (["public", "home"].includes(candidate.visibility)) {
+				note = candidate;
+			}
+		}
+	} else {
+		note = await Notes.findOneBy({
+			id: ctx.params.note,
+			visibility: In(["public", "home"]),
+		});
+	}
 
 	try {
 		if (note) {
@@ -483,7 +501,9 @@ router.get("/notes/:note", async (ctx, next) => {
 				note: _note,
 				profile,
 				avatarUrl: await Users.getAvatarUrl(
-					await Users.findOneByOrFail({ id: note.userId }),
+					await userByIdCache.fetch(note.userId, () =>
+						Users.findOneByOrFail({ id: (note as Note).userId }),
+					),
 				),
 				// TODO: Let locale changeable by instance setting
 				summary: getNoteSummary(_note),
@@ -503,10 +523,25 @@ router.get("/notes/:note", async (ctx, next) => {
 });
 
 router.get("/posts/:note", async (ctx, next) => {
-	const note = await Notes.findOneBy({
-		id: ctx.params.note,
-		visibility: In(["public", "home"]),
-	});
+	let note: Note | null = null;
+	if (scyllaClient) {
+		const result = await scyllaClient.execute(
+			prepared.note.select.byId,
+			[ctx.params.note],
+			{ prepare: true },
+		);
+		if (result.rowLength > 0) {
+			const candidate = parseScyllaNote(result.first());
+			if (["public", "home"].includes(candidate.visibility)) {
+				note = candidate;
+			}
+		}
+	} else {
+		note = await Notes.findOneBy({
+			id: ctx.params.note,
+			visibility: In(["public", "home"]),
+		});
+	}
 
 	if (note) {
 		const _note = await Notes.pack(note);
@@ -517,7 +552,9 @@ router.get("/posts/:note", async (ctx, next) => {
 			note: _note,
 			profile,
 			avatarUrl: await Users.getAvatarUrl(
-				await Users.findOneByOrFail({ id: note.userId }),
+				await userByIdCache.fetch(note.userId, () =>
+					Users.findOneByOrFail({ id: (note as Note).userId }),
+				),
 			),
 			// TODO: Let locale changeable by instance setting
 			summary: getNoteSummary(_note),

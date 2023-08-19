@@ -116,28 +116,6 @@ export default define(meta, paramDef, async (ps, user) => {
 			);
 		}
 
-		publishNoteStream(scyllaNote.id, "pollVoted", {
-			choice: ps.choice,
-			userId: user.id,
-		});
-		createNotification(scyllaNote.userId, "pollVote", {
-			notifierId: user.id,
-			noteId: scyllaNote.id,
-			choice: ps.choice,
-		});
-		NoteWatchings.findBy({
-			noteId: scyllaNote.id,
-			userId: Not(user.id),
-		}).then((watchers) => {
-			for (const watcher of watchers) {
-				createNotification(watcher.userId, "pollVote", {
-					notifierId: user.id,
-					noteId: scyllaNote.id,
-					choice: ps.choice,
-				});
-			}
-		});
-
 		return;
 	}
 
