@@ -2,7 +2,6 @@ import { Notes } from "@/models/index.js";
 import define from "../../define.js";
 import { getNote } from "../../common/getters.js";
 import { ApiError } from "../../error.js";
-import { scyllaClient } from "@/db/scylla.js";
 
 export const meta = {
 	tags: ["notes"],

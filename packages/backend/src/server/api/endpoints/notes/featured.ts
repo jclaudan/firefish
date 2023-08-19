@@ -46,17 +46,6 @@ export default define(meta, paramDef, async (ps, user) => {
 		.andWhere("note.score > 0")
 		.andWhere("note.createdAt > :date", { date: new Date(Date.now() - day) })
 		.andWhere("note.visibility = 'public'")
-		.innerJoinAndSelect("note.user", "user")
-		.leftJoinAndSelect("user.avatar", "avatar")
-		.leftJoinAndSelect("user.banner", "banner")
-		.leftJoinAndSelect("note.reply", "reply")
-		.leftJoinAndSelect("note.renote", "renote")
-		.leftJoinAndSelect("reply.user", "replyUser")
-		.leftJoinAndSelect("replyUser.avatar", "replyUserAvatar")
-		.leftJoinAndSelect("replyUser.banner", "replyUserBanner")
-		.leftJoinAndSelect("renote.user", "renoteUser")
-		.leftJoinAndSelect("renoteUser.avatar", "renoteUserAvatar")
-		.leftJoinAndSelect("renoteUser.banner", "renoteUserBanner");
 
 	switch (ps.origin) {
 		case "local":

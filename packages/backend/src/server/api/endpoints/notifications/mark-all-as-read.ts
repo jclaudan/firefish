@@ -2,6 +2,7 @@ import { publishMainStream } from "@/services/stream.js";
 import { pushNotification } from "@/services/push-notification.js";
 import { Notifications } from "@/models/index.js";
 import define from "../../define.js";
+import { scyllaClient } from "@/db/scylla.js";
 
 export const meta = {
 	tags: ["notifications", "account"],
@@ -18,16 +19,18 @@ export const paramDef = {
 } as const;
 
 export default define(meta, paramDef, async (ps, user) => {
-	// Update documents
-	await Notifications.update(
-		{
-			notifieeId: user.id,
-			isRead: false,
-		},
-		{
-			isRead: true,
-		},
-	);
+	if (!scyllaClient) {
+		// Update documents
+		await Notifications.update(
+			{
+				notifieeId: user.id,
+				isRead: false,
+			},
+			{
+				isRead: true,
+			},
+		);
+	}
 
 	// 全ての通知を読みましたよというイベントを発行
 	publishMainStream(user.id, "readAllNotifications");

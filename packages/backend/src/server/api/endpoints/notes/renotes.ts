@@ -133,7 +133,10 @@ export default define(meta, paramDef, async (ps, user) => {
 		Notes.createQueryBuilder("note"),
 		ps.sinceId,
 		ps.untilId,
-	).andWhere("note.renoteId = :renoteId", { renoteId: note.id });
+	)
+		.andWhere("note.renoteId = :renoteId", { renoteId: note.id })
+		.leftJoinAndSelect("note.reply", "reply")
+		.leftJoinAndSelect("note.renote", "renote");
 
 	if (ps.userId) {
 		query.andWhere("note.userId = :userId", { userId: ps.userId });

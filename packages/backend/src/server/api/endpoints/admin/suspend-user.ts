@@ -5,6 +5,7 @@ import type { User } from "@/models/entities/user.js";
 import { insertModerationLog } from "@/services/insert-moderation-log.js";
 import { doPostSuspend } from "@/services/suspend-user.js";
 import { publishUserEvent } from "@/services/stream.js";
+import { scyllaClient } from "@/db/scylla.js";
 
 export const meta = {
 	tags: ["admin"],
@@ -75,6 +76,11 @@ async function unFollowAll(follower: User) {
 }
 
 async function readAllNotify(notifier: User) {
+	if (scyllaClient) {
+		// FIXME: all notifications are automatically read at the moment
+		return;
+	}
+
 	await Notifications.update(
 		{
 			notifierId: notifier.id,

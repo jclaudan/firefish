@@ -41,7 +41,9 @@ export default define(meta, paramDef, async (ps) => {
 		ps.untilId,
 	)
 		.andWhere("note.visibility = 'public'")
-		.andWhere("note.localOnly = FALSE");
+		.andWhere("note.localOnly = FALSE")
+		.leftJoinAndSelect("note.reply", "reply")
+		.leftJoinAndSelect("note.renote", "renote");
 
 	if (ps.local) {
 		query.andWhere("note.userHost IS NULL");

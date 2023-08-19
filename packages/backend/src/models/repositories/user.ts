@@ -7,7 +7,6 @@ import type { Packed } from "@/misc/schema.js";
 import type { Promiseable } from "@/prelude/await-all.js";
 import { awaitAll } from "@/prelude/await-all.js";
 import { populateEmojis } from "@/misc/populate-emojis.js";
-import { getAntennas } from "@/misc/antenna-cache.js";
 import { USER_ACTIVE_THRESHOLD, USER_ONLINE_THRESHOLD } from "@/const.js";
 import { Cache } from "@/misc/cache.js";
 import { db } from "@/db/postgre.js";
@@ -296,6 +295,11 @@ export const UserRepository = db.getRepository(User).extend({
 	},
 
 	async getHasUnreadNotification(userId: User["id"]): Promise<boolean> {
+		if (scyllaClient) {
+			// FIXME: all notifications are automatically read at the moment
+			return false;
+		}
+
 		const mute = await Mutings.findBy({
 			muterId: userId,
 		});

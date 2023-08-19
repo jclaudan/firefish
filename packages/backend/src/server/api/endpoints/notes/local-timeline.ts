@@ -206,7 +206,10 @@ export default define(meta, paramDef, async (ps, user) => {
 		ps.untilId,
 		ps.sinceDate,
 		ps.untilDate,
-	).andWhere("(note.visibility = 'public') AND (note.userHost IS NULL)");
+	)
+		.andWhere("(note.visibility = 'public') AND (note.userHost IS NULL)")
+		.leftJoinAndSelect("note.reply", "reply")
+		.leftJoinAndSelect("note.renote", "renote");
 
 	generateChannelQuery(query, user);
 	generateRepliesQuery(query, ps.withReplies, user);

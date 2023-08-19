@@ -6,6 +6,7 @@ import { Not, IsNull, In } from "typeorm";
 import type { Channel } from "@/models/entities/channel.js";
 import { readNotificationByQuery } from "@/server/api/common/read-notification.js";
 import type { Packed } from "@/misc/schema.js";
+import { scyllaClient } from "@/db/scylla.js";
 
 /**
  * Mark notes as read
@@ -18,6 +19,11 @@ export default async function (
 		followingChannels: Set<Channel["id"]>;
 	},
 ) {
+	if (scyllaClient) {
+		// FIXME: all notes are automatically read at the moment
+		return;
+	}
+
 	const followingChannels = info?.followingChannels
 		? info.followingChannels
 		: new Set<string>(

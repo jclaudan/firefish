@@ -197,6 +197,8 @@ export default define(meta, paramDef, async (ps, user) => {
 					qb.orWhere(`note.userId IN (${followingQuery.getQuery()})`);
 			}),
 		)
+		.leftJoinAndSelect("note.reply", "reply")
+		.leftJoinAndSelect("note.renote", "renote")
 		.setParameters(followingQuery.getParameters());
 
 	generateChannelQuery(query, user);

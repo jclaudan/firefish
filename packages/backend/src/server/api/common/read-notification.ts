@@ -4,12 +4,14 @@ import { pushNotification } from "@/services/push-notification.js";
 import type { User } from "@/models/entities/user.js";
 import type { Notification } from "@/models/entities/notification.js";
 import { Notifications, Users } from "@/models/index.js";
+import { scyllaClient } from "@/db/scylla.js";
 
 export async function readNotification(
 	userId: User["id"],
 	notificationIds: Notification["id"][],
 ) {
-	if (notificationIds.length === 0) return;
+	// FIXME: all notifications are automatically read at the moment
+	if (notificationIds.length === 0 || scyllaClient) return;
 
 	// Update documents
 	const result = await Notifications.update(
@@ -34,6 +36,11 @@ export async function readNotificationByQuery(
 	userId: User["id"],
 	query: Record<string, any>,
 ) {
+	if (scyllaClient) {
+		// FIXME: all notifications are automatically read at the moment
+		return;
+	}
+
 	const notificationIds = await Notifications.findBy({
 		...query,
 		notifieeId: userId,

@@ -176,7 +176,10 @@ export default define(meta, paramDef, async (ps, me) => {
 		ps.untilId,
 		ps.sinceDate,
 		ps.untilDate,
-	).andWhere("note.userId = :userId", { userId: user.id });
+	)
+		.andWhere("note.userId = :userId", { userId: user.id })
+		.leftJoinAndSelect("note.reply", "reply")
+		.leftJoinAndSelect("note.renote", "renote");
 
 	generateVisibilityQuery(query, me);
 	if (me) {

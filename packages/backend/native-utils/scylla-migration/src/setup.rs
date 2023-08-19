@@ -57,7 +57,7 @@ impl Initializer {
                 .await?;
         }
 
-        let tables = vec!["note", "note_edit", "poll", "poll_vote", "notification"];
+        let tables = vec!["note_reaction", "note_edit", "poll", "poll_vote", "notification", "note"];
         for table in tables {
             sqlx::query(&format!("DROP TABLE {}", table))
                 .execute(&mut conn)
