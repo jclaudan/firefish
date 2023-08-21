@@ -920,6 +920,14 @@ hoge`;
 			assert.deepStrictEqual(mfm.parse(input), output);
 		});
 
+		test('finger', () => {
+			const input = 'finger://misskey.io/@ai';
+			const output = [
+				N_URL('finger://misskey.io/@ai'),
+			];
+			assert.deepStrictEqual(mfm.parse(input), output);
+		});
+
 		test('with other texts', () => {
 			const input = 'official instance: https://misskey.io/@ai.';
 			const output = [
