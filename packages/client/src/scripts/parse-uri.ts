@@ -6,7 +6,7 @@ export function parseUri(uri: string): {
 	fragment: string | null;
 } {
 	const urlParts = uri.match(
-		/^(\w+):(\/\/)?([^/?#]*)(\/([^?#]*))?(\?([^#]*))?(#(.*))?$/,
+		/^([\w+]+):(\/\/)?([^/?#]*)(\/([^?#]*))?(\?([^#]*))?(#(.*))?$/,
 	);
 
 	if (!urlParts) {
