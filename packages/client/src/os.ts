@@ -9,6 +9,7 @@ import MkPostFormDialog from "@/components/MkPostFormDialog.vue";
 import MkWaitingDialog from "@/components/MkWaitingDialog.vue";
 import MkToast from "@/components/MkToast.vue";
 import MkDialog from "@/components/MkDialog.vue";
+import FfQrCode from "@/components/FfQrCode.vue";
 import { MenuItem } from "@/types/menu";
 import { $i } from "@/account";
 import { i18n } from "./i18n";
@@ -924,6 +925,19 @@ export function post(props: Record<string, any> = {}) {
 			dispose = res.dispose;
 		});
 	});
+}
+
+export async function displayQrCode(qrCode: string) {
+	(await new Promise<(() => void) | undefined>((resolve) => {
+		let dispose: (() => void) | undefined;
+		popup(FfQrCode, { qrCode }, {
+			closed: () => {
+				resolve(dispose);
+			}
+		}).then((res) => {
+			dispose = res.dispose
+		})
+	}))?.();
 }
 
 export const deckGlobalEvents = new EventEmitter();

@@ -280,6 +280,13 @@ export function getUserMenu(user, router: Router = mainRouter) {
 				os.post({ specified: user });
 			},
 		},
+		{
+			icon: "ph-qr-code ph-bold ph-lg",
+			text: i18n.ts.getQrCode,
+			action: () => {
+				os.displayQrCode(window.location.href)
+			}
+		},
 		meId !== user.id
 			? {
 					type: "link",
