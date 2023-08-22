@@ -4,14 +4,29 @@ import { hashtagChart } from "@/services/chart/index.js";
 import { genId } from "@/misc/gen-id.js";
 import type { Hashtag } from "@/models/entities/hashtag.js";
 import { normalizeForSearch } from "@/misc/normalize-for-search.js";
+import { redisClient } from "@/db/redis.js";
 
 export async function updateHashtags(
 	user: { id: User["id"]; host: User["host"] },
 	tags: string[],
 ) {
+	const pipe = redisClient.multi();
 	for (const tag of tags) {
+		const normalizedTag = normalizeForSearch(tag);
+		pipe.xadd(
+			"trendtag",
+			"MINID",
+			"~",
+			Date.now() - 60 * 60 * 1000,
+			"*",
+			"tag",
+			normalizedTag,
+			"user",
+			user.id,
+		);
 		await updateHashtag(user, tag);
 	}
+	await pipe.exec();
 }
 
 export async function updateUsertags(user: User, tags: string[]) {
@@ -28,23 +43,23 @@ export async function updateHashtag(
 	user: { id: User["id"]; host: User["host"] },
 	tag: string,
 	isUserAttached = false,
-	inc = true,
+	increment = true,
 ) {
-	tag = normalizeForSearch(tag);
+	const normalizedTag = normalizeForSearch(tag);
 
-	const index = await Hashtags.findOneBy({ name: tag });
+	const index = await Hashtags.findOneBy({ name: normalizedTag });
 
-	if (index == null && !inc) return;
+	if (index == null && !increment) return;
 
 	if (index != null) {
 		const q = Hashtags.createQueryBuilder("tag")
 			.update()
-			.where("name = :name", { name: tag });
+			.where("name = :name", { name: normalizedTag });
 
 		const set = {} as any;
 
 		if (isUserAttached) {
-			if (inc) {
+			if (increment) {
 				// 自分が初めてこのタグを使ったなら
 				if (!index.attachedUserIds.some((id) => id === user.id)) {
 					set.attachedUserIds = () =>
@@ -118,7 +133,7 @@ export async function updateHashtag(
 		if (isUserAttached) {
 			Hashtags.insert({
 				id: genId(),
-				name: tag,
+				name: normalizedTag,
 				mentionedUserIds: [],
 				mentionedUsersCount: 0,
 				mentionedLocalUserIds: [],
@@ -135,7 +150,7 @@ export async function updateHashtag(
 		} else {
 			Hashtags.insert({
 				id: genId(),
-				name: tag,
+				name: normalizedTag,
 				mentionedUserIds: [user.id],
 				mentionedUsersCount: 1,
 				mentionedLocalUserIds: Users.isLocalUser(user) ? [user.id] : [],
@@ -153,6 +168,6 @@ export async function updateHashtag(
 	}
 
 	if (!isUserAttached) {
-		hashtagChart.update(tag, user);
+		hashtagChart.update(normalizedTag, user);
 	}
 }

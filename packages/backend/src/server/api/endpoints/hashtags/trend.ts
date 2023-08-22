@@ -1,10 +1,11 @@
-import { Brackets } from "typeorm";
 import define from "../../define.js";
 import { fetchMeta } from "@/misc/fetch-meta.js";
 import { Notes } from "@/models/index.js";
 import type { Note } from "@/models/entities/note.js";
 import { safeForSql } from "@/misc/safe-for-sql.js";
 import { normalizeForSearch } from "@/misc/normalize-for-search.js";
+import { redisClient } from "@/db/redis.js";
+import { scyllaClient } from "@/db/scylla.js";
 
 /*
 トレンドに載るためには「『直近a分間のユニーク投稿数が今からa分前～今からb分前の間のユニーク投稿数のn倍以上』のハッシュタグの上位5位以内に入る」ことが必要
@@ -73,19 +74,7 @@ export default define(meta, paramDef, async () => {
 	const now = new Date(); // 5分単位で丸めた現在日時
 	now.setMinutes(Math.round(now.getMinutes() / 5) * 5, 0, 0);
 
-	const tagNotes = await Notes.createQueryBuilder("note")
-		.where("note.createdAt > :date", { date: new Date(now.getTime() - rangeA) })
-		.andWhere(
-			new Brackets((qb) => {
-				qb.where(`note.visibility = 'public'`).orWhere(
-					`note.visibility = 'home'`,
-				);
-			}),
-		)
-		.andWhere(`note.tags != '{}'`)
-		.select(["note.tags", "note.userId"])
-		.cache(60000) // 1 min
-		.getMany();
+	const tagNotes = await redisClient.xrange("trendtag", "-", "+");
 
 	if (tagNotes.length === 0) {
 		return [];
@@ -96,29 +85,34 @@ export default define(meta, paramDef, async () => {
 		users: Note["userId"][];
 	}[] = [];
 
-	for (const note of tagNotes) {
-		for (const tag of note.tags) {
-			if (hiddenTags.includes(tag)) continue;
+	for (const [_, fields] of tagNotes) {
+		const name = fields[1];
+		const userId = fields[3];
+		if (hiddenTags.includes(name)) continue;
 
-			const x = tags.find((x) => x.name === tag);
-			if (x) {
-				if (!x.users.includes(note.userId)) {
-					x.users.push(note.userId);
-				}
-			} else {
-				tags.push({
-					name: tag,
-					users: [note.userId],
-				});
-			}
+		const index = tags.findIndex((tag) => tag.name === name);
+		if (index >= 0 && !tags[index].users.includes(userId)) {
+			tags[index].users.push(userId);
+		} else if (index < 0) {
+			tags.push({ name, users: [userId] });
 		}
 	}
 
-	// タグを人気順に並べ替え
+	// Sort tags by their popularity
 	const hots = tags
 		.sort((a, b) => b.users.length - a.users.length)
 		.map((tag) => tag.name)
 		.slice(0, max);
+
+	if (scyllaClient) {
+		const stats = hots.map((tag, i) => ({
+			tag,
+			chart: [], // Really needed?
+			usersCount: tags[i].users.length,
+		}));
+
+		return stats;
+	}
 
 	//#region 2(または3)で話題と判定されたタグそれぞれについて過去の投稿数グラフを取得する
 	const countPromises: Promise<number[]>[] = [];

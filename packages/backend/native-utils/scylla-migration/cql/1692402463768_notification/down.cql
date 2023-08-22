@@ -1,2 +1,2 @@
-DROP INDEX notification_by_id;
-DROP TABLE notification;
+DROP INDEX IF EXISTS notification_by_id;
+DROP TABLE IF EXISTS notification;
