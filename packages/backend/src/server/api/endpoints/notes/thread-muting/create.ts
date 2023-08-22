@@ -4,6 +4,7 @@ import readNote from "@/services/note/read.js";
 import define from "../../../define.js";
 import { getNote } from "../../../common/getters.js";
 import { ApiError } from "../../../error.js";
+import { scyllaClient } from "@/db/scylla.js";
 
 export const meta = {
 	tags: ["notes"],
@@ -36,18 +37,20 @@ export default define(meta, paramDef, async (ps, user) => {
 		throw err;
 	});
 
-	const mutedNotes = await Notes.find({
-		where: [
-			{
-				id: note.threadId || note.id,
-			},
-			{
-				threadId: note.threadId || note.id,
-			},
-		],
-	});
+	if (!scyllaClient) {
+		const mutedNotes = await Notes.find({
+			where: [
+				{
+					id: note.threadId || note.id,
+				},
+				{
+					threadId: note.threadId || note.id,
+				},
+			],
+		});
 
-	await readNote(user.id, mutedNotes);
+		await readNote(user.id, mutedNotes);
+	}
 
 	await NoteThreadMutings.insert({
 		id: genId(),
