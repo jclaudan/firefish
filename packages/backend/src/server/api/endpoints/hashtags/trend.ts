@@ -71,8 +71,8 @@ export default define(meta, paramDef, async () => {
 	const instance = await fetchMeta(true);
 	const hiddenTags = instance.hiddenTags.map((t) => normalizeForSearch(t));
 
-	const now = new Date(); // 5分単位で丸めた現在日時
-	now.setMinutes(Math.round(now.getMinutes() / 5) * 5, 0, 0);
+	const now = new Date();
+	now.setMinutes(Math.round(now.getMinutes() / 5) * 5, 0, 0); // Rounding to the nearest 5 minutes
 
 	const tagNotes = await redisClient.xrange("trendtag", "-", "+");
 
@@ -107,19 +107,17 @@ export default define(meta, paramDef, async () => {
 	if (scyllaClient) {
 		const stats = hots.map((tag, i) => ({
 			tag,
-			chart: [], // Really needed?
+			chart: [], // FIXME: generate chart
 			usersCount: tags[i].users.length,
 		}));
 
 		return stats;
 	}
 
-	//#region 2(または3)で話題と判定されたタグそれぞれについて過去の投稿数グラフを取得する
+	//#region Prepare charts of the number of posts having tags in hots
 	const countPromises: Promise<number[]>[] = [];
 
 	const range = 20;
-
-	// 10分
 	const interval = 1000 * 60 * 10;
 
 	for (let i = 0; i < range; i++) {
