@@ -82,7 +82,7 @@ export default define(meta, paramDef, async () => {
 
 	const tags: {
 		name: string;
-		users: Note["userId"][];
+		users: Set<Note["userId"]>;
 	}[] = [];
 
 	for (const [_, fields] of tagNotes) {
@@ -91,16 +91,16 @@ export default define(meta, paramDef, async () => {
 		if (hiddenTags.includes(name)) continue;
 
 		const index = tags.findIndex((tag) => tag.name === name);
-		if (index >= 0 && !tags[index].users.includes(userId)) {
-			tags[index].users.push(userId);
-		} else if (index < 0) {
-			tags.push({ name, users: [userId] });
+		if (index >= 0) {
+			tags[index].users.add(userId);
+		} else {
+			tags.push({ name, users: new Set([userId]) });
 		}
 	}
 
 	// Sort tags by their popularity
 	const hots = tags
-		.sort((a, b) => b.users.length - a.users.length)
+		.sort((a, b) => b.users.size - a.users.size)
 		.map((tag) => tag.name)
 		.slice(0, max);
 
@@ -108,7 +108,7 @@ export default define(meta, paramDef, async () => {
 		const stats = hots.map((tag, i) => ({
 			tag,
 			chart: [], // FIXME: generate chart
-			usersCount: tags[i].users.length,
+			usersCount: tags[i].users.size,
 		}));
 
 		return stats;
