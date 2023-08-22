@@ -11,7 +11,7 @@
 		@click.stop
 	>
 		<template v-if="!self">
-			<span class="schema">{{ schema }}{{ hostname.trim() != '' ? '//' : '' }}</span>
+			<span class="schema">{{ schema }}{{ hostname.trim() != '' ? '://' : '' }}</span>
 			<span class="hostname">{{ hostname.trim() != '' ? hostname.trim() : pathname }}</span>
 			<!-- <span v-if="port != ''" class="port">:{{ port }}</span> -->
 		</template>
@@ -38,6 +38,7 @@ import * as os from "@/os";
 import { useTooltip } from "@/scripts/use-tooltip";
 import { safeURIDecode } from "@/scripts/safe-uri-decode";
 import { parseUri } from "@/scripts/parse-uri"
+import { SCHEMA_BROWSERSAFE } from "../../const";
 
 const props = defineProps<{
 	url: string;
@@ -46,7 +47,10 @@ const props = defineProps<{
 
 const self = props.url.startsWith(local);
 const url = parseUri(props.url);
-if (!["http", "https", "gopher", "gemini", "matrix", "ipfs", "ipns", "finger"].includes(url.scheme) && !url.scheme.startsWith("web+"))
+console.log(url);
+console.log(props.url);
+console.log(url.scheme);
+if (!SCHEMA_BROWSERSAFE.includes(url.scheme))
 	throw new Error("invalid url");
 
 const el = ref();

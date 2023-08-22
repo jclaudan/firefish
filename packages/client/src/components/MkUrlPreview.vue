@@ -103,6 +103,8 @@ import { onUnmounted, ref } from "vue";
 import { url as local, lang } from "@/config";
 import { i18n } from "@/i18n";
 import { defaultStore } from "@/store";
+import { parseUri, parsedUriToString } from '@/scripts/parse-uri'
+import { SCHEMA_BROWSERSAFE } from "../const";
 
 const props = withDefaults(
 	defineProps<{
@@ -134,30 +136,30 @@ let tweetExpanded = ref(props.detail);
 const embedId = `embed${Math.random().toString().replace(/\D/, "")}`;
 let tweetHeight = ref(150);
 
-const requestUrl = new URL(props.url);
-if (!["http:", "https:", "gopher:", "gemini:", "matrix:", "ipfs:", "ipns:", "finger:"].includes(requestUrl.protocol) && !requestUrl.protocol.startsWith("web+"))
+const requestUrl = parseUri(props.url);
+if (!SCHEMA_BROWSERSAFE.includes(requestUrl.scheme))
 	throw new Error("invalid url");
 
 if (
-	["twitter.com", "mobile.twitter.com", "x.com"].includes(requestUrl.hostname)
+	["twitter.com", "mobile.twitter.com", "x.com"].includes(requestUrl.authority ?? "")
 ) {
-	const m = requestUrl.pathname.match(/^\/.+\/status(?:es)?\/(\d+)/);
+	const m = (requestUrl.path ?? "").match(/^\/.+\/status(?:es)?\/(\d+)/);
 	if (m) tweetId.value = m[1];
 }
 
 if (
-	requestUrl.hostname === "music.youtube.com" &&
-	requestUrl.pathname.match("^/(?:watch|channel)")
+	requestUrl.authority === "music.youtube.com" &&
+	(requestUrl.path ?? "").match("^/(?:watch|channel)")
 ) {
-	requestUrl.hostname = "www.youtube.com";
+	requestUrl.authority = "www.youtube.com";
 }
 
 const requestLang = (lang || "ja-JP").replace("ja-KS", "ja-JP");
 
-requestUrl.hash = "";
+requestUrl.fragment = "";
 
 fetch(
-	`/url?url=${encodeURIComponent(requestUrl.href)}&lang=${requestLang}`,
+	`/url?url=${encodeURIComponent(parsedUriToString(requestUrl))}&lang=${requestLang}`,
 ).then((res) => {
 	res.json().then((info) => {
 		if (info.url == null) return;

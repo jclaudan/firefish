@@ -674,7 +674,7 @@ export const language = P.createLanguage({
 		]));
 		const parser = P.seq([
 			notLinkLabel,
-			P.regexp(/((https?)|(gemini)|(gopher)|(matrix)|(ipns)|(ipfs)|(finger)|(web\+\w+)):\/\//),
+			P.regexp(/(?:https?|gemini|gopher|matrix|ipns|ipfs|icmp|finger|cool|web\+\w+):\/\//),
 			innerItem.many(1).text(),
 		]);
 		return new P.Parser<M.MfmUrl | string>((input, index, state) => {
@@ -706,7 +706,7 @@ export const language = P.createLanguage({
 		const parser = P.seq([
 			notLinkLabel,
 			open,
-			P.regexp(/((https?)|(gemini)|(gopher)|(matrix)|(ipns)|(ipfs)|(finger)|(web\+\w+)):\/\//),
+			P.regexp(/(?:https?|gemini|gopher|matrix|ipns|ipfs|finger|cool|web\+\w+):\/\//),
 			P.seq([P.notMatch(P.alt([close, space])), P.char], 1).many(1),
 			close,
 		]).text();

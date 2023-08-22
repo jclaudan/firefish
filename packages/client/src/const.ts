@@ -38,6 +38,19 @@ export const FILE_TYPE_BROWSERSAFE = [
 	"audio/x-flac",
 	"audio/vnd.wave",
 ];
+
+export const SCHEMA_BROWSERSAFE = [
+	"http",
+	"https",
+	"gopher",
+	"gemini",
+	"matrix",
+	"ipfs",
+	"ipns",
+	"icmp",
+	"finger"
+];
+
 /*
 https://github.com/sindresorhus/file-type/blob/main/supported.js
 https://github.com/sindresorhus/file-type/blob/main/core.js
