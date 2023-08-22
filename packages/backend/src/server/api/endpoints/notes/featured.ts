@@ -1,7 +1,23 @@
-import { Notes } from "@/models/index.js";
+import { Notes, UserProfiles } from "@/models/index.js";
 import define from "../../define.js";
 import { generateMutedUserQuery } from "../../common/generate-muted-user-query.js";
 import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
+import {
+	type ScyllaNote,
+	scyllaClient,
+	prepared,
+	parseScyllaNote,
+	filterMutedNote,
+	filterMutedUser,
+	filterBlockUser,
+} from "@/db/scylla.js";
+import {
+	InstanceMutingsCache,
+	UserBlockedCache,
+	UserBlockingCache,
+	UserMutingsCache,
+	userWordMuteCache,
+} from "@/misc/cache.js";
 
 export const meta = {
 	tags: ["notes"],
@@ -37,15 +53,61 @@ export const paramDef = {
 	required: [],
 } as const;
 
+const ONEDAY = 1000 * 60 * 60 * 24;
+
 export default define(meta, paramDef, async (ps, user) => {
 	const max = 30;
-	const day = 1000 * 60 * 60 * 24 * ps.days;
+	const day = ONEDAY * ps.days;
+
+	if (scyllaClient) {
+		let [mutedUserIds, mutedInstances, blockerIds, blockingIds]: string[][] =
+			[];
+		let mutedWords: string[][] = [];
+
+		const foundNotes: ScyllaNote[] = [];
+		let searchedDays = 0;
+		let targetDay = new Date();
+
+		if (user) {
+			[mutedUserIds, mutedInstances, mutedWords, blockerIds, blockingIds] =
+				await Promise.all([
+					UserMutingsCache.init(user.id).then((cache) => cache.getAll()),
+					InstanceMutingsCache.init(user.id).then((cache) => cache.getAll()),
+					userWordMuteCache
+						.fetchMaybe(user.id, () =>
+							UserProfiles.findOne({
+								select: ["mutedWords"],
+								where: { userId: user.id },
+							}).then((profile) => profile?.mutedWords),
+						)
+						.then((words) => words ?? []),
+					UserBlockedCache.init(user.id).then((cache) => cache.getAll()),
+					UserBlockingCache.init(user.id).then((cache) => cache.getAll()),
+				]);
+		}
+
+		while (foundNotes.length < max && searchedDays < ps.days) {
+			searchedDays++;
+			let notes = await scyllaClient
+				.execute(prepared.scoreFeed.select, [targetDay], { prepare: true })
+				.then((result) => result.rows.map(parseScyllaNote));
+
+			if (user) {
+				notes = await filterMutedUser(notes, user, mutedUserIds, mutedInstances);
+				notes = await filterMutedNote(notes, user, mutedWords);
+				notes = await filterBlockUser(notes, user, [...blockerIds, ...blockingIds]);
+			}
+
+			foundNotes.push(...notes);
+			targetDay = new Date(targetDay.getTime() - ONEDAY);
+		}
+	}
 
 	const query = Notes.createQueryBuilder("note")
 		.addSelect("note.score")
 		.andWhere("note.score > 0")
 		.andWhere("note.createdAt > :date", { date: new Date(Date.now() - day) })
-		.andWhere("note.visibility = 'public'")
+		.andWhere("note.visibility = 'public'");
 
 	switch (ps.origin) {
 		case "local":

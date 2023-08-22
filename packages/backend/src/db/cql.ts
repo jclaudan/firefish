@@ -143,6 +143,9 @@ export const scyllaQueries = {
 			byDate: `SELECT * FROM global_timeline WHERE "createdAtDate" = ?`,
 		},
 	},
+	scoreFeed: {
+		select: `SELECT * FROM score_feed WHERE "createdAtDate" = ?`,
+	},
 	reaction: {
 		insert: `INSERT INTO reaction
 			("id", "noteId", "userId", "reaction", "emoji", "createdAt")
