@@ -173,7 +173,7 @@ CREATE MATERIALIZED VIEW score_feed AS
 	AND "score" IS NOT NULL
 	AND "visibility" = 'public'
 	AND "score" > 0
-	PRIMARY KEY ("createdAtDate", "score", "userHost", "createdAt", "userId" "visibility")
+	PRIMARY KEY ("createdAtDate", "score", "userHost", "createdAt", "userId", "visibility")
 	WITH CLUSTERING ORDER BY ("score" DESC, "createdAt" DESC);
 
 CREATE TABLE home_timeline (
