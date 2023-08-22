@@ -144,7 +144,7 @@ export const scyllaQueries = {
 		},
 	},
 	scoreFeed: {
-		select: `SELECT * FROM score_feed WHERE "createdAtDate" = ?`,
+		select: `SELECT * FROM score_feed WHERE "createdAtDate" = ? AND "score" > 0`,
 	},
 	reaction: {
 		insert: `INSERT INTO reaction

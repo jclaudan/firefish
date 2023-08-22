@@ -76,7 +76,7 @@ CREATE TABLE note ( -- Store all posts
 	"reactions" map<text, int>, -- Reactions
 	"noteEdit" set<frozen<note_edit_history>>, -- Edit History
 	"updatedAt" timestamp,
-	PRIMARY KEY ("createdAtDate", "createdAt", "userId", "userHost", "visibility", "score")
+	PRIMARY KEY ("createdAtDate", "createdAt", "userId", "userHost", "visibility")
 ) WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
 CREATE INDEX note_by_uri ON note ("uri");
@@ -91,8 +91,7 @@ CREATE MATERIALIZED VIEW note_by_id AS
 	AND "userId" IS NOT NULL
 	AND "userHost" IS NOT NULL
 	AND "visibility" IS NOT NULL
-	AND "score" IS NOT NULL
-	PRIMARY KEY ("id", "createdAt", "createdAtDate", "userId", "userHost", "visibility", "score")
+	PRIMARY KEY ("id", "createdAt", "createdAtDate", "userId", "userHost", "visibility")
 	WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
 CREATE MATERIALIZED VIEW note_by_user_id AS
@@ -102,8 +101,7 @@ CREATE MATERIALIZED VIEW note_by_user_id AS
 	AND "createdAtDate" IS NOT NULL
 	AND "userHost" IS NOT NULL
 	AND "visibility" IS NOT NULL
-	AND "score" IS NOT NULL
-	PRIMARY KEY ("userId", "createdAt", "createdAtDate", "userHost", "visibility", "score")
+	PRIMARY KEY ("userId", "createdAt", "createdAtDate", "userHost", "visibility")
 	WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
 CREATE MATERIALIZED VIEW note_by_renote_id AS
@@ -114,8 +112,7 @@ CREATE MATERIALIZED VIEW note_by_renote_id AS
 	AND "userId" IS NOT NULL
 	AND "userHost" IS NOT NULL
 	AND "visibility" IS NOT NULL
-	AND "score" IS NOT NULL
-	PRIMARY KEY ("renoteId", "createdAt", "createdAtDate", "userId", "userHost", "visibility", "score")
+	PRIMARY KEY ("renoteId", "createdAt", "createdAtDate", "userId", "userHost", "visibility")
 	WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
 CREATE MATERIALIZED VIEW note_by_renote_id_and_user_id AS
@@ -126,8 +123,7 @@ CREATE MATERIALIZED VIEW note_by_renote_id_and_user_id AS
 	AND "userId" IS NOT NULL
 	AND "userHost" IS NOT NULL
 	AND "visibility" IS NOT NULL
-	AND "score" IS NOT NULL
-	PRIMARY KEY (("renoteId", "userId"), "createdAt", "createdAtDate", "userHost", "visibility", "score")
+	PRIMARY KEY (("renoteId", "userId"), "createdAt", "createdAtDate", "userHost", "visibility")
 	WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
 CREATE MATERIALIZED VIEW note_by_channel_id AS
@@ -138,8 +134,7 @@ CREATE MATERIALIZED VIEW note_by_channel_id AS
 	AND "userId" IS NOT NULL
 	AND "userHost" IS NOT NULL
 	AND "visibility" IS NOT NULL
-	AND "score" IS NOT NULL
-	PRIMARY KEY ("channelId", "createdAt", "createdAtDate", "userId", "userHost", "visibility", "score")
+	PRIMARY KEY ("channelId", "createdAt", "createdAtDate", "userId", "userHost", "visibility")
 	WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
 CREATE MATERIALIZED VIEW global_timeline AS
@@ -148,9 +143,8 @@ CREATE MATERIALIZED VIEW global_timeline AS
 	AND "createdAt" IS NOT NULL
 	AND "userId" IS NOT NULL
 	AND "userHost" IS NOT NULL
-	AND "score" IS NOT NULL
 	AND "visibility" = 'public'
-	PRIMARY KEY ("createdAtDate", "createdAt", "userId", "userHost", "visibility", "score")
+	PRIMARY KEY ("createdAtDate", "createdAt", "userId", "userHost", "visibility")
 	WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
 CREATE MATERIALIZED VIEW local_timeline AS
@@ -160,8 +154,7 @@ CREATE MATERIALIZED VIEW local_timeline AS
 	AND "userId" IS NOT NULL
 	AND "userHost" = 'local'
 	AND "visibility" = 'public'
-	AND "score" IS NOT NULL
-	PRIMARY KEY ("createdAtDate", "createdAt", "userId", "userHost", "visibility", "score")
+	PRIMARY KEY ("createdAtDate", "createdAt", "userId", "userHost", "visibility")
 	WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
 CREATE MATERIALIZED VIEW score_feed AS
@@ -172,8 +165,8 @@ CREATE MATERIALIZED VIEW score_feed AS
 	AND "userHost" IS NOT NULL
 	AND "score" IS NOT NULL
 	AND "visibility" = 'public'
-	AND "score" > 0
-	PRIMARY KEY ("createdAtDate", "score", "userHost", "createdAt", "userId", "visibility")
+	AND "score" IS NOT NULL
+	PRIMARY KEY ("createdAtDate", "score", "createdAt", "userHost", "userId", "visibility")
 	WITH CLUSTERING ORDER BY ("score" DESC, "createdAt" DESC);
 
 CREATE TABLE home_timeline (

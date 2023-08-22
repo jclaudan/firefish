@@ -92,15 +92,39 @@ export default define(meta, paramDef, async (ps, user) => {
 				.execute(prepared.scoreFeed.select, [targetDay], { prepare: true })
 				.then((result) => result.rows.map(parseScyllaNote));
 
+			switch (ps.origin) {
+				case "local":
+					notes = notes.filter((note) => !note.userHost);
+					break;
+				case "remote":
+					notes = notes.filter((note) => !!note.userHost);
+					break;
+			}
+
 			if (user) {
-				notes = await filterMutedUser(notes, user, mutedUserIds, mutedInstances);
+				notes = await filterMutedUser(
+					notes,
+					user,
+					mutedUserIds,
+					mutedInstances,
+				);
 				notes = await filterMutedNote(notes, user, mutedWords);
-				notes = await filterBlockUser(notes, user, [...blockerIds, ...blockingIds]);
+				notes = await filterBlockUser(notes, user, [
+					...blockerIds,
+					...blockingIds,
+				]);
 			}
 
 			foundNotes.push(...notes);
 			targetDay = new Date(targetDay.getTime() - ONEDAY);
 		}
+
+		return Notes.packMany(
+			foundNotes
+				.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+				.slice(ps.offset, ps.offset + ps.limit),
+			user,
+		);
 	}
 
 	const query = Notes.createQueryBuilder("note")
