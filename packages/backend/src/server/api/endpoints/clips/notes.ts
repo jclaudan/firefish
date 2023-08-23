@@ -1,10 +1,30 @@
 import define from "../../define.js";
-import { ClipNotes, Clips, Notes } from "@/models/index.js";
+import { ClipNotes, Clips, Notes, UserProfiles } from "@/models/index.js";
 import { makePaginationQuery } from "../../common/make-pagination-query.js";
 import { generateVisibilityQuery } from "../../common/generate-visibility-query.js";
 import { generateMutedUserQuery } from "../../common/generate-muted-user-query.js";
 import { ApiError } from "../../error.js";
 import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
+import {
+	type ScyllaNote,
+	scyllaClient,
+	filterVisibility,
+	filterMutedUser,
+	filterMutedNote,
+	filterBlockUser,
+	prepared,
+	parseScyllaNote,
+} from "@/db/scylla.js";
+import {
+	InstanceMutingsCache,
+	LocalFollowingsCache,
+	UserBlockedCache,
+	UserBlockingCache,
+	UserMutingsCache,
+	userWordMuteCache,
+} from "@/misc/cache.js";
+import { Between, MoreThan, LessThan, FindOptionsWhere } from "typeorm";
+import type { ClipNote } from "@/models/entities/clip-note.js";
 
 export const meta = {
 	tags: ["account", "notes", "clips"],
@@ -51,12 +71,92 @@ export default define(meta, paramDef, async (ps, user) => {
 		id: ps.clipId,
 	});
 
-	if (clip == null) {
+	if (!clip) {
 		throw new ApiError(meta.errors.noSuchClip);
 	}
 
 	if (!clip.isPublic && (user == null || clip.userId !== user.id)) {
 		throw new ApiError(meta.errors.noSuchClip);
+	}
+
+	if (scyllaClient) {
+		let whereOpt: FindOptionsWhere<ClipNote> = { clipId: clip.id };
+		if (ps.sinceId && ps.untilId) {
+			whereOpt = { ...whereOpt, noteId: Between(ps.sinceId, ps.untilId) };
+		} else if (ps.sinceId) {
+			whereOpt = { ...whereOpt, noteId: MoreThan(ps.sinceId) };
+		} else if (ps.untilId) {
+			whereOpt = { ...whereOpt, noteId: LessThan(ps.untilId) };
+		}
+
+		const noteIds = await ClipNotes.find({
+			select: ["noteId"],
+			where: whereOpt,
+			order: { noteId: "DESC" },
+			take: ps.limit,
+		});
+
+		if (noteIds.length === 0) {
+			throw new ApiError(meta.errors.noSuchClip);
+		}
+
+		let [
+			followingUserIds,
+			mutedUserIds,
+			mutedInstances,
+			blockerIds,
+			blockingIds,
+		]: string[][] = [];
+		let mutedWords: string[][];
+		if (user) {
+			[
+				followingUserIds,
+				mutedUserIds,
+				mutedInstances,
+				mutedWords,
+				blockerIds,
+				blockingIds,
+			] = await Promise.all([
+				LocalFollowingsCache.init(user.id).then((cache) => cache.getAll()),
+				UserMutingsCache.init(user.id).then((cache) => cache.getAll()),
+				InstanceMutingsCache.init(user.id).then((cache) => cache.getAll()),
+				userWordMuteCache
+					.fetchMaybe(user.id, () =>
+						UserProfiles.findOne({
+							select: ["mutedWords"],
+							where: { userId: user.id },
+						}).then((profile) => profile?.mutedWords),
+					)
+					.then((words) => words ?? []),
+				UserBlockedCache.init(user.id).then((cache) => cache.getAll()),
+				UserBlockingCache.init(user.id).then((cache) => cache.getAll()),
+			]);
+		}
+
+		const filter = async (notes: ScyllaNote[]) => {
+			let filtered = notes;
+			if (user) {
+				filtered = await filterVisibility(filtered, user, followingUserIds);
+				filtered = await filterMutedUser(
+					filtered,
+					user,
+					mutedUserIds,
+					mutedInstances,
+				);
+				filtered = await filterMutedNote(filtered, user, mutedWords);
+				filtered = await filterBlockUser(filtered, user, [
+					...blockerIds,
+					...blockingIds,
+				]);
+			}
+			return filtered;
+		};
+
+		const foundNotes = await scyllaClient
+			.execute(prepared.note.select.byIds, [noteIds], { prepare: true })
+			.then((result) => result.rows.map(parseScyllaNote));
+
+		return Notes.packMany(await filter(foundNotes), user);
 	}
 
 	const query = makePaginationQuery(
@@ -69,17 +169,8 @@ export default define(meta, paramDef, async (ps, user) => {
 			"clipNote",
 			"clipNote.noteId = note.id",
 		)
-		.innerJoinAndSelect("note.user", "user")
-		.leftJoinAndSelect("user.avatar", "avatar")
-		.leftJoinAndSelect("user.banner", "banner")
 		.leftJoinAndSelect("note.reply", "reply")
 		.leftJoinAndSelect("note.renote", "renote")
-		.leftJoinAndSelect("reply.user", "replyUser")
-		.leftJoinAndSelect("replyUser.avatar", "replyUserAvatar")
-		.leftJoinAndSelect("replyUser.banner", "replyUserBanner")
-		.leftJoinAndSelect("renote.user", "renoteUser")
-		.leftJoinAndSelect("renoteUser.avatar", "renoteUserAvatar")
-		.leftJoinAndSelect("renoteUser.banner", "renoteUserBanner")
 		.andWhere("clipNote.clipId = :clipId", { clipId: clip.id });
 
 	if (user) {
