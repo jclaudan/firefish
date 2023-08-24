@@ -1,25 +1,6 @@
 import type { CacheableRemoteUser } from "@/models/entities/user.js";
 import { toArray } from "@/prelude/array.js";
-import {
-	isCreate,
-	isDelete,
-	isUpdate,
-	isRead,
-	isFollow,
-	isAccept,
-	isReject,
-	isAdd,
-	isRemove,
-	isAnnounce,
-	isLike,
-	isUndo,
-	isBlock,
-	isCollectionOrOrderedCollection,
-	isCollection,
-	isFlag,
-	isMove,
-	getApId,
-} from "../type.js";
+import * as activityTypes from "../type.js";
 import { apLogger } from "../logger.js";
 import Resolver from "../resolver.js";
 import create from "./create/index.js";
@@ -37,7 +18,7 @@ import remove from "./remove/index.js";
 import block from "./block/index.js";
 import flag from "./flag/index.js";
 import move from "./move/index.js";
-import type { IObject, IActivity } from "../type.js";
+import type { IObject } from "../type.js";
 import { extractDbHost } from "@/misc/convert-host.js";
 import { shouldBlockInstance } from "@/misc/should-block-instance.js";
 
@@ -45,10 +26,12 @@ export async function performActivity(
 	actor: CacheableRemoteUser,
 	activity: IObject,
 ) {
-	if (isCollectionOrOrderedCollection(activity)) {
+	if (activityTypes.isCollectionOrOrderedCollection(activity)) {
 		const resolver = new Resolver();
 		for (const item of toArray(
-			isCollection(activity) ? activity.items : activity.orderedItems,
+			activityTypes.isCollection(activity)
+				? activity.items
+				: activity.orderedItems,
 		)) {
 			const act = await resolver.resolve(item);
 			try {
@@ -71,41 +54,37 @@ async function performOneActivity(
 	if (actor.isSuspended) return;
 
 	if (typeof activity.id !== "undefined") {
-		const host = extractDbHost(getApId(activity));
+		const host = extractDbHost(activityTypes.getApId(activity));
 		if (await shouldBlockInstance(host)) return;
 	}
 
-	if (isCreate(activity)) {
-		await create(actor, activity);
-	} else if (isDelete(activity)) {
-		await performDeleteActivity(actor, activity);
-	} else if (isUpdate(activity)) {
-		await performUpdateActivity(actor, activity);
-	} else if (isRead(activity)) {
-		await performReadActivity(actor, activity);
-	} else if (isFollow(activity)) {
-		await follow(actor, activity);
-	} else if (isAccept(activity)) {
-		await accept(actor, activity);
-	} else if (isReject(activity)) {
-		await reject(actor, activity);
-	} else if (isAdd(activity)) {
-		await add(actor, activity).catch((err) => apLogger.error(err));
-	} else if (isRemove(activity)) {
-		await remove(actor, activity).catch((err) => apLogger.error(err));
-	} else if (isAnnounce(activity)) {
-		await announce(actor, activity);
-	} else if (isLike(activity)) {
-		await like(actor, activity);
-	} else if (isUndo(activity)) {
-		await undo(actor, activity);
-	} else if (isBlock(activity)) {
-		await block(actor, activity);
-	} else if (isFlag(activity)) {
-		await flag(actor, activity);
-	} else if (isMove(activity)) {
-		await move(actor, activity);
+	const activityHandlers: { [key: string]: Function } = {
+		Create: create,
+		Delete: performDeleteActivity,
+		Update: performUpdateActivity,
+		Read: performReadActivity,
+		Follow: follow,
+		Accept: accept,
+		Reject: reject,
+		Add: add,
+		Remove: remove,
+		Announce: announce,
+		Like: like,
+		Undo: undo,
+		Block: block,
+		Flag: flag,
+		Move: move,
+	};
+
+	const handler = activityHandlers[activityTypes.getApType(activity)];
+
+	if (handler) {
+		await handler(actor, activity);
 	} else {
-		apLogger.warn(`Unrecognized activity type: ${(activity as IActivity).type}`);
+		apLogger.warn(
+			`Unrecognized activity type: ${
+				(activity as activityTypes.IActivity).type
+			}`,
+		);
 	}
 }
