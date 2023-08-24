@@ -1,6 +1,7 @@
 import define from "../../define.js";
 import { NoteFavorites } from "@/models/index.js";
 import { makePaginationQuery } from "../../common/make-pagination-query.js";
+import { scyllaClient } from "@/db/scylla.js";
 
 export const meta = {
 	tags: ["account", "notes", "favorites"],
@@ -37,9 +38,11 @@ export default define(meta, paramDef, async (ps, user) => {
 		NoteFavorites.createQueryBuilder("favorite"),
 		ps.sinceId,
 		ps.untilId,
-	)
-		.andWhere("favorite.userId = :meId", { meId: user.id })
-		.leftJoinAndSelect("favorite.note", "note");
+	).andWhere("favorite.userId = :meId", { meId: user.id });
+
+	if (!scyllaClient) {
+		query.leftJoinAndSelect("favorite.note", "note");
+	}
 
 	const favorites = await query.take(ps.limit).getMany();
 

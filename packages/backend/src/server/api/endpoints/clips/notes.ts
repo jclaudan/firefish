@@ -94,7 +94,7 @@ export default define(meta, paramDef, async (ps, user) => {
 			where: whereOpt,
 			order: { noteId: "DESC" },
 			take: ps.limit * 5,
-		});
+		}).then((clips) => clips.map(({ noteId }) => noteId));
 
 		if (noteIds.length === 0) {
 			throw new ApiError(meta.errors.noSuchClip);
