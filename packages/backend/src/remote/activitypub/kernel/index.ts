@@ -22,6 +22,24 @@ import type { IObject } from "../type.js";
 import { extractDbHost } from "@/misc/convert-host.js";
 import { shouldBlockInstance } from "@/misc/should-block-instance.js";
 
+const activityHandlers: { [key: string]: Function } = {
+	Create: create,
+	Delete: performDeleteActivity,
+	Update: performUpdateActivity,
+	Read: performReadActivity,
+	Follow: follow,
+	Accept: accept,
+	Reject: reject,
+	Add: add,
+	Remove: remove,
+	Announce: announce,
+	Like: like,
+	Undo: undo,
+	Block: block,
+	Flag: flag,
+	Move: move,
+};
+
 export async function performActivity(
 	actor: CacheableRemoteUser,
 	activity: IObject,
@@ -57,24 +75,6 @@ async function performOneActivity(
 		const host = extractDbHost(activityTypes.getApId(activity));
 		if (await shouldBlockInstance(host)) return;
 	}
-
-	const activityHandlers: { [key: string]: Function } = {
-		Create: create,
-		Delete: performDeleteActivity,
-		Update: performUpdateActivity,
-		Read: performReadActivity,
-		Follow: follow,
-		Accept: accept,
-		Reject: reject,
-		Add: add,
-		Remove: remove,
-		Announce: announce,
-		Like: like,
-		Undo: undo,
-		Block: block,
-		Flag: flag,
-		Move: move,
-	};
 
 	const handler = activityHandlers[activityTypes.getApType(activity)];
 
