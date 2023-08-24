@@ -93,7 +93,7 @@ export default define(meta, paramDef, async (ps, user) => {
 			select: ["noteId"],
 			where: whereOpt,
 			order: { noteId: "DESC" },
-			take: ps.limit,
+			take: ps.limit * 5,
 		});
 
 		if (noteIds.length === 0) {
@@ -156,7 +156,7 @@ export default define(meta, paramDef, async (ps, user) => {
 			.execute(prepared.note.select.byIds, [noteIds], { prepare: true })
 			.then((result) => result.rows.map(parseScyllaNote));
 
-		return Notes.packMany(await filter(foundNotes), user);
+		return Notes.packMany((await filter(foundNotes)).slice(0, ps.limit), user);
 	}
 
 	const query = makePaginationQuery(
