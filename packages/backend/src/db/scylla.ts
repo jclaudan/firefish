@@ -259,7 +259,8 @@ export type FeedType =
 	| "renotes"
 	| "user"
 	| "channel"
-	| "notification";
+	| "notification"
+	| "list";
 
 export function parseScyllaReaction(row: types.Row): ScyllaNoteReaction {
 	return {
@@ -298,6 +299,7 @@ export function preparePaginationQuery(
 			queryParts.push(prepared.note.select.byRenoteId);
 			break;
 		case "user":
+		case "list":
 			queryParts.push(prepared.note.select.byUserId);
 			break;
 		case "channel":
@@ -330,8 +332,7 @@ export function preparePaginationQuery(
 		queryParts.push(`AND "createdAt" > ?`);
 	}
 
-	const queryLimit = config.scylla?.queryLimit ?? 1000;
-	queryParts.push(`LIMIT ${queryLimit}`);
+	queryParts.push("LIMIT ?");
 
 	const query = queryParts.join(" ");
 
@@ -352,6 +353,7 @@ export async function execPaginationQuery(
 		sinceDate?: number;
 		noteId?: string;
 		channelId?: string;
+		userIds?: string[];
 	},
 	filter?: {
 		note?: (_: ScyllaNote[]) => Promise<ScyllaNote[]>;
@@ -374,6 +376,10 @@ export async function execPaginationQuery(
 		case "channel":
 			if (!ps.channelId) throw new Error(`Feed ${kind} needs channelId`);
 			break;
+		case "list":
+			if (!ps.userIds || ps.userIds.length === 0)
+				throw new Error(`Feed ${kind} needs userIds`);
+			break;
 	}
 
 	let { query, untilDate, sinceDate } = preparePaginationQuery(kind, ps);
@@ -381,9 +387,13 @@ export async function execPaginationQuery(
 	let scannedPartitions = 0;
 	const found: (ScyllaNote | ScyllaNotification)[] = [];
 	const queryLimit = config.scylla?.queryLimit ?? 1000;
+	let foundLimit = ps.limit;
+	if (kind === "list" && ps.userIds) {
+		foundLimit *= ps.userIds.length;
+	}
 
 	// Try to get posts of at most <maxPartitions> in the single request
-	while (found.length < ps.limit && scannedPartitions < maxPartitions) {
+	while (found.length < foundLimit && scannedPartitions < maxPartitions) {
 		const params: (Date | string | string[] | number)[] = [];
 		if (kind === "home" && userId) {
 			params.push(userId, untilDate, untilDate);
@@ -395,6 +405,8 @@ export async function execPaginationQuery(
 			params.push(ps.channelId, untilDate);
 		} else if (kind === "notification" && userId) {
 			params.push(userId, untilDate, untilDate);
+		} else if (kind === "list" && ps.userIds) {
+			params.push(ps.userIds.pop() as string, untilDate);
 		} else {
 			params.push(untilDate, untilDate);
 		}
@@ -402,6 +414,8 @@ export async function execPaginationQuery(
 		if (sinceDate) {
 			params.push(sinceDate);
 		}
+
+		params.push(kind === "list" ? ps.limit : queryLimit);
 
 		const result = await scyllaClient.execute(query, params, {
 			prepare: true,

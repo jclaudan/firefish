@@ -5,6 +5,13 @@ import define from "../../define.js";
 import { ApiError } from "../../error.js";
 import { makePaginationQuery } from "../../common/make-pagination-query.js";
 import { generateVisibilityQuery } from "../../common/generate-visibility-query.js";
+import {
+	type ScyllaNote,
+	scyllaClient,
+	filterVisibility,
+	execPaginationQuery,
+} from "@/db/scylla.js";
+import { LocalFollowingsCache } from "@/misc/cache.js";
 
 export const meta = {
 	tags: ["notes", "lists"],
@@ -64,8 +71,52 @@ export default define(meta, paramDef, async (ps, user) => {
 		userId: user.id,
 	});
 
-	if (list == null) {
+	if (!list) {
 		throw new ApiError(meta.errors.noSuchList);
+	}
+
+	if (scyllaClient) {
+		const followingUserIds = await LocalFollowingsCache.init(user.id).then(
+			(cache) => cache.getAll(),
+		);
+		const optFilter = (n: ScyllaNote) =>
+			!n.renoteId || !!n.text || n.files.length > 0 || n.hasPoll;
+		const filter = async (notes: ScyllaNote[]) => {
+			let filtered = await filterVisibility(notes, user, followingUserIds);
+			if (!ps.includeMyRenotes) {
+				filtered = filtered.filter((n) => n.userId !== user.id || optFilter(n));
+			}
+			if (!ps.includeRenotedMyNotes) {
+				filtered = filtered.filter(
+					(n) => n.renoteUserId !== user.id || optFilter(n),
+				);
+			}
+			if (!ps.includeLocalRenotes) {
+				filtered = filtered.filter((n) => n.renoteUserHost || optFilter(n));
+			}
+			if (ps.withFiles) {
+				filtered = filtered.filter((n) => n.files.length > 0);
+			}
+			filtered = filtered.filter((n) => n.visibility !== "hidden");
+			return filtered;
+		};
+
+		const foundPacked = [];
+		while (foundPacked.length < ps.limit) {
+			const foundNotes = (
+				(await execPaginationQuery(
+					"list",
+					ps,
+					{ note: filter },
+					user.id,
+				)) as ScyllaNote[]
+			).slice(0, ps.limit * 1.5); // Some may filtered out by Notes.packMany, thus we take more than ps.limit.
+			foundPacked.push(...(await Notes.packMany(foundNotes, user)));
+			if (foundNotes.length < ps.limit) break;
+			ps.untilDate = foundNotes[foundNotes.length - 1].createdAt.getTime();
+		}
+
+		return foundPacked.slice(0, ps.limit);
 	}
 
 	//#region Construct query
@@ -79,17 +130,8 @@ export default define(meta, paramDef, async (ps, user) => {
 			"userListJoining",
 			"userListJoining.userId = note.userId",
 		)
-		.innerJoinAndSelect("note.user", "user")
-		.leftJoinAndSelect("user.avatar", "avatar")
-		.leftJoinAndSelect("user.banner", "banner")
 		.leftJoinAndSelect("note.reply", "reply")
 		.leftJoinAndSelect("note.renote", "renote")
-		.leftJoinAndSelect("reply.user", "replyUser")
-		.leftJoinAndSelect("replyUser.avatar", "replyUserAvatar")
-		.leftJoinAndSelect("replyUser.banner", "replyUserBanner")
-		.leftJoinAndSelect("renote.user", "renoteUser")
-		.leftJoinAndSelect("renoteUser.avatar", "renoteUserAvatar")
-		.leftJoinAndSelect("renoteUser.banner", "renoteUserBanner")
 		.andWhere("userListJoining.userListId = :userListId", {
 			userListId: list.id,
 		});
