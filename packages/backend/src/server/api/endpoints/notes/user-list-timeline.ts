@@ -76,6 +76,16 @@ export default define(meta, paramDef, async (ps, user) => {
 	}
 
 	if (scyllaClient) {
+		const userIds = await UserListJoinings.find({
+			select: ["userId"],
+			where: {
+				userListId: list.id,
+			},
+		}).then((lists) => lists.map(({ userId }) => userId));
+		if (userIds.length === 0) {
+			return await Notes.packMany([]);
+		}
+
 		const followingUserIds = await LocalFollowingsCache.init(user.id).then(
 			(cache) => cache.getAll(),
 		);
@@ -106,11 +116,13 @@ export default define(meta, paramDef, async (ps, user) => {
 			const foundNotes = (
 				(await execPaginationQuery(
 					"list",
-					ps,
+					{ ...ps, userIds },
 					{ note: filter },
 					user.id,
 				)) as ScyllaNote[]
-			).slice(0, ps.limit * 1.5); // Some may filtered out by Notes.packMany, thus we take more than ps.limit.
+			)
+				.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+				.slice(0, ps.limit * 1.5); // Some may filtered out by Notes.packMany, thus we take more than ps.limit.
 			foundPacked.push(...(await Notes.packMany(foundNotes, user)));
 			if (foundNotes.length < ps.limit) break;
 			ps.untilDate = foundNotes[foundNotes.length - 1].createdAt.getTime();

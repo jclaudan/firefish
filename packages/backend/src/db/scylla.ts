@@ -406,7 +406,9 @@ export async function execPaginationQuery(
 		} else if (kind === "notification" && userId) {
 			params.push(userId, untilDate, untilDate);
 		} else if (kind === "list" && ps.userIds) {
-			params.push(ps.userIds.pop() as string, untilDate);
+			const targetId = ps.userIds.pop();
+			if (!targetId) break;
+			params.push(targetId, untilDate);
 		} else {
 			params.push(untilDate, untilDate);
 		}
@@ -415,7 +417,8 @@ export async function execPaginationQuery(
 			params.push(sinceDate);
 		}
 
-		params.push(kind === "list" ? ps.limit : queryLimit);
+		const fetchLimit = kind === "list" ? ps.limit : queryLimit;
+		params.push(fetchLimit);
 
 		const result = await scyllaClient.execute(query, params, {
 			prepare: true,
@@ -437,7 +440,7 @@ export async function execPaginationQuery(
 			}
 		}
 
-		if (result.rowLength < queryLimit) {
+		if (result.rowLength < fetchLimit) {
 			// Reached the end of partition. Queries posts created one day before.
 			scannedPartitions++;
 			const yesterday = new Date(untilDate.getTime() - 86400000);
