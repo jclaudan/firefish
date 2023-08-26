@@ -160,7 +160,7 @@ export const scyllaQueries = {
 	},
 	poll: {
 		select: `SELECT * FROM poll_vote WHERE "noteId" = ?`,
-		insert: `INSERT INTO poll_vote ("noteId", "userId", "choice", "createdAt") VALUES (?, ?, ?, ?)`,
+		insert: `INSERT INTO poll_vote ("noteId", "userId", "userHost", "choice", "createdAt") VALUES (?, ?, ?, ?, ?)`,
 	},
 	notification: {
 		insert: `INSERT INTO notification

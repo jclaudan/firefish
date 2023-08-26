@@ -6,7 +6,10 @@ import { Emojis } from "@/models/index.js";
 import renderEmoji from "./emoji.js";
 import { fetchMeta } from "@/misc/fetch-meta.js";
 
-export const renderLike = async (noteReaction: NoteReaction, note: Note) => {
+export const renderLike = async (
+	noteReaction: NoteReaction,
+	note: { uri: string | null },
+) => {
 	const reaction = noteReaction.reaction;
 	const meta = await fetchMeta();
 

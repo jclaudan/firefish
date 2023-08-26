@@ -18,6 +18,7 @@ import { uriPersonCache, userByIdCache } from "@/services/user-cache.js";
 import type { IObject } from "./type.js";
 import { getApId } from "./type.js";
 import { resolvePerson } from "./models/person.js";
+import { parseScyllaNote, prepared, scyllaClient } from "@/db/scylla.js";
 
 const publicKeyCache = new Cache<UserPublickey | null>("publicKey", 60 * 30);
 const publicKeyByUserIdCache = new Cache<UserPublickey | null>(
@@ -78,10 +79,40 @@ export default class DbResolver {
 		if (parsed.local) {
 			if (parsed.type !== "notes") return null;
 
+			if (scyllaClient) {
+				const result = await scyllaClient.execute(
+					prepared.note.select.byId,
+					[parsed.id],
+					{ prepare: true },
+				);
+				if (result.rowLength > 0) {
+					return parseScyllaNote(result.first());
+				}
+				return null;
+			}
+
 			return await Notes.findOneBy({
 				id: parsed.id,
 			});
 		} else {
+			if (scyllaClient) {
+				let result = await scyllaClient.execute(
+					prepared.note.select.byUri,
+					[parsed.uri],
+					{ prepare: true },
+				);
+				if (result.rowLength === 0) {
+					result = await scyllaClient.execute(
+						prepared.note.select.byUrl,
+						[parsed.uri],
+						{ prepare: true },
+					);
+				}
+				if (result.rowLength > 0) {
+					return parseScyllaNote(result.first());
+				}
+				return null;
+			}
 			return await Notes.findOne({
 				where: [
 					{

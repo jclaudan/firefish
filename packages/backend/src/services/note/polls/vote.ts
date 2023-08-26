@@ -57,7 +57,7 @@ export default async function (
 
 		await scyllaClient.execute(
 			prepared.poll.insert,
-			[scyllaNote.id, user.id, Array.from(newChoice), new Date()],
+			[scyllaNote.id, user.id, user.host, Array.from(newChoice), new Date()],
 			{ prepare: true },
 		);
 	} else {

@@ -244,6 +244,7 @@ CREATE MATERIALIZED VIEW reaction_by_id AS
 CREATE TABLE poll_vote (
 	"noteId" ascii,
 	"userId" ascii,
+	"userHost" text,
 	"choice" set<int>,
 	"createdAt" timestamp,
 	PRIMARY KEY ("noteId", "userId")

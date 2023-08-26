@@ -155,6 +155,7 @@ export interface ScyllaPoll {
 export interface ScyllaPollVote {
 	noteId: string;
 	userId: string;
+	userHost: string | null;
 	choice: Set<number>;
 	createdAt: Date;
 }
@@ -163,6 +164,7 @@ export function parseScyllaPollVote(row: types.Row): ScyllaPollVote {
 	return {
 		noteId: row.get("noteId"),
 		userId: row.get("userId"),
+		userHost: row.get("userHost") ?? null,
 		choice: new Set(row.get("choice") ?? []),
 		createdAt: row.get("createdAt"),
 	};

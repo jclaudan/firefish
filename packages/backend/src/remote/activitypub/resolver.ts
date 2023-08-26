@@ -24,6 +24,12 @@ import { renderActivity } from "@/remote/activitypub/renderer/index.js";
 import renderFollow from "@/remote/activitypub/renderer/follow.js";
 import { shouldBlockInstance } from "@/misc/should-block-instance.js";
 import { apLogger } from "@/remote/activitypub/logger.js";
+import {
+	parseScyllaNote,
+	parseScyllaReaction,
+	prepared,
+	scyllaClient,
+} from "@/db/scylla.js";
 
 export default class Resolver {
 	private history: Set<string>;
@@ -146,10 +152,26 @@ export default class Resolver {
 
 		switch (parsed.type) {
 			case "notes":
+				if (scyllaClient) {
+					return scyllaClient
+						.execute(prepared.note.select.byId, [parsed.id], { prepare: true })
+						.then((result) => {
+							if (result.rowLength > 0) {
+								const note = parseScyllaNote(result.first());
+								if (parsed.rest === "activity") {
+									// this refers to the create activity and not the note itself
+									return renderActivity(renderCreate(renderNote(note), note));
+								} else {
+									return renderNote(note);
+								}
+							}
+							throw new Error("Note not found");
+						});
+				}
 				return Notes.findOneByOrFail({ id: parsed.id }).then((note) => {
 					if (parsed.rest === "activity") {
 						// this refers to the create activity and not the note itself
-						return renderActivity(renderCreate(renderNote(note)));
+						return renderActivity(renderCreate(renderNote(note), note));
 					} else {
 						return renderNote(note);
 					}
@@ -159,6 +181,19 @@ export default class Resolver {
 					renderPerson(user as ILocalUser),
 				);
 			case "questions":
+				if (scyllaClient) {
+					return scyllaClient
+						.execute(prepared.note.select.byId, [parsed.id], { prepare: true })
+						.then((result) => {
+							if (result.rowLength > 0) {
+								const note = parseScyllaNote(result.first());
+								if (note.hasPoll && note.poll) {
+									return renderQuestion({ id: note.userId }, note, note.poll);
+								}
+							}
+							throw new Error("Question not found");
+						});
+				}
 				// Polls are indexed by the note they are attached to.
 				return Promise.all([
 					Notes.findOneByOrFail({ id: parsed.id }),
@@ -167,6 +202,19 @@ export default class Resolver {
 					renderQuestion({ id: note.userId }, note, poll),
 				);
 			case "likes":
+				if (scyllaClient) {
+					return scyllaClient
+						.execute(prepared.reaction.select.byId, [parsed.id], {
+							prepare: true,
+						})
+						.then((result) => {
+							if (result.rowLength > 0) {
+								const reaction = parseScyllaReaction(result.first());
+								return renderActivity(renderLike(reaction, { uri: null }));
+							}
+							throw new Error("Reaction not found");
+						});
+				}
 				return NoteReactions.findOneByOrFail({ id: parsed.id }).then(
 					(reaction) => renderActivity(renderLike(reaction, { uri: null })),
 				);
