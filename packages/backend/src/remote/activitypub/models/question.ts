@@ -4,7 +4,17 @@ import type { IObject, IQuestion } from "../type.js";
 import { getApId, isQuestion } from "../type.js";
 import { apLogger } from "../logger.js";
 import { Notes, Polls } from "@/models/index.js";
-import type { IPoll } from "@/models/entities/poll.js";
+import type { IPoll, Poll } from "@/models/entities/poll.js";
+import {
+	parseScyllaNote,
+	prepared,
+	scyllaClient,
+	ScyllaPoll,
+	type ScyllaNote,
+	parseScyllaPollVote,
+} from "@/db/scylla.js";
+import type { Note } from "@/models/entities/note.js";
+import { genId } from "@/misc/gen-id.js";
 
 export async function extractPollFromQuestion(
 	source: string | IObject,
@@ -60,11 +70,31 @@ export async function updateQuestion(
 	if (uri.startsWith(`${config.url}/`)) throw new Error("uri points local");
 
 	//#region Already registered with this server?
-	const note = await Notes.findOneBy({ uri });
-	if (note == null) throw new Error("Question is not registed");
+	let note: Note | ScyllaNote | null = null;
+	if (scyllaClient) {
+		const result = await scyllaClient.execute(
+			prepared.note.select.byUri,
+			[uri],
+			{ prepare: true },
+		);
+		if (result.rowLength > 0) {
+			note = parseScyllaNote(result.first());
+		}
+	} else {
+		note = await Notes.findOneBy({ uri });
+	}
+	if (!note) throw new Error("Question is not registed");
 
-	const poll = await Polls.findOneBy({ noteId: note.id });
-	if (poll == null) throw new Error("Question is not registed");
+	let poll: Poll | ScyllaPoll | null = null;
+	if (scyllaClient) {
+		const scyllaPoll = (note as ScyllaNote).poll;
+		if (note.hasPoll && scyllaPoll) {
+			poll = scyllaPoll;
+		}
+	} else {
+		poll = await Polls.findOneBy({ noteId: note.id });
+	}
+	if (!poll) throw new Error("Question is not registed");
 	//#endregion
 
 	// resolve new Question object
@@ -79,23 +109,49 @@ export async function updateQuestion(
 
 	let changed = false;
 
-	for (const choice of poll.choices) {
-		const oldCount = poll.votes[poll.choices.indexOf(choice)];
-		const newCount = apChoices.filter((ap) => ap.name === choice)[0].replies
-			?.totalItems;
-
-		if (newCount !== undefined && oldCount !== newCount) {
-			changed = true;
-			poll.votes[poll.choices.indexOf(choice)] = newCount;
+	if (scyllaClient) {
+		const votes = await scyllaClient
+			.execute(prepared.poll.select, [note.id], { prepare: true })
+			.then((result) => result.rows.map(parseScyllaPollVote));
+		const scyllaPoll = poll as ScyllaPoll;
+		for (const [i, name] of Object.entries(scyllaPoll.choices)) {
+			const index = parseInt(i);
+			const oldCount = votes.filter((vote) => vote.choice.has(index)).length;
+			const newCount = apChoices.filter((ap) => ap.name === name)[0].replies
+				?.totalItems;
+			// Here, we assume that no implementations allow users to cancel votes.
+			if (newCount !== undefined && oldCount < newCount) {
+				changed = true;
+				for (let i = 0; i < newCount - oldCount; i++) {
+					const now = new Date();
+					await scyllaClient.execute(
+						prepared.poll.insert,
+						[note.id, `anonymous-${genId(now)}`, "anonymous", [index], now],
+						{ prepare: true },
+					);
+				}
+			}
 		}
-	}
+	} else {
+		const dbPoll = poll as Poll;
+		for (const choice of dbPoll.choices) {
+			const oldCount = dbPoll.votes[dbPoll.choices.indexOf(choice)];
+			const newCount = apChoices.filter((ap) => ap.name === choice)[0].replies
+				?.totalItems;
 
-	await Polls.update(
-		{ noteId: note.id },
-		{
-			votes: poll.votes,
-		},
-	);
+			if (newCount !== undefined && oldCount !== newCount) {
+				changed = true;
+				dbPoll.votes[dbPoll.choices.indexOf(choice)] = newCount;
+			}
+		}
+
+		await Polls.update(
+			{ noteId: note.id },
+			{
+				votes: dbPoll.votes,
+			},
+		);
+	}
 
 	return changed;
 }
