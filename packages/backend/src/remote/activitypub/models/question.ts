@@ -9,7 +9,7 @@ import {
 	parseScyllaNote,
 	prepared,
 	scyllaClient,
-	ScyllaPoll,
+	type ScyllaPoll,
 	type ScyllaNote,
 	parseScyllaPollVote,
 } from "@/db/scylla.js";
