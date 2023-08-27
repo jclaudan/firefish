@@ -151,10 +151,10 @@ export const scyllaQueries = {
 			("id", "noteId", "userId", "reaction", "emoji", "createdAt")
 			VALUES (?, ?, ?, ?, ?, ?)`,
 		select: {
-			byNoteId: `SELECT * FROM reaction_by_id WHERE "noteId" IN ?`,
-			byUserId: `SELECT * FROM reaction_by_user_id WHERE "userId" IN ?`,
+			byNoteId: `SELECT * FROM reaction_by_id WHERE "noteId" = ?`,
+			byUserId: `SELECT * FROM reaction_by_user_id WHERE "userId" = ?`,
 			byNoteAndUser: `SELECT * FROM reaction WHERE "noteId" IN ? AND "userId" IN ?`,
-			byId: `SELECT * FROM reaction WHERE "id" IN ?`,
+			byId: `SELECT * FROM reaction WHERE "id" = ?`,
 		},
 		delete: `DELETE FROM reaction WHERE "noteId" = ? AND "userId" = ?`,
 	},

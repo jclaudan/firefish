@@ -262,7 +262,8 @@ export type FeedType =
 	| "user"
 	| "channel"
 	| "notification"
-	| "list";
+	| "list"
+	| "reaction";
 
 export function parseScyllaReaction(row: types.Row): ScyllaNoteReaction {
 	return {
@@ -309,6 +310,9 @@ export function preparePaginationQuery(
 			break;
 		case "notification":
 			queryParts.push(prepared.notification.select.byTargetId);
+			break;
+		case "reaction":
+			queryParts.push(prepared.reaction.select.byUserId);
 			break;
 		default:
 			queryParts.push(prepared.note.select.byDate);
@@ -359,17 +363,19 @@ export async function execPaginationQuery(
 	},
 	filter?: {
 		note?: (_: ScyllaNote[]) => Promise<ScyllaNote[]>;
+		reaction?: (_: ScyllaNoteReaction[]) => Promise<ScyllaNoteReaction[]>;
 		notification?: (_: ScyllaNotification[]) => ScyllaNotification[];
 	},
 	userId?: User["id"],
 	maxPartitions = config.scylla?.sparseTimelineDays ?? 14,
-): Promise<ScyllaNote[] | ScyllaNotification[]> {
+): Promise<ScyllaNote[] | ScyllaNotification[] | ScyllaNoteReaction[]> {
 	if (!scyllaClient) return [];
 
 	switch (kind) {
 		case "home":
 		case "user":
 		case "notification":
+		case "reaction":
 			if (!userId) throw new Error(`Feed ${kind} needs userId`);
 			break;
 		case "renotes":
@@ -387,7 +393,7 @@ export async function execPaginationQuery(
 	let { query, untilDate, sinceDate } = preparePaginationQuery(kind, ps);
 
 	let scannedPartitions = 0;
-	const found: (ScyllaNote | ScyllaNotification)[] = [];
+	const found: ScyllaNote[] | ScyllaNotification[] | ScyllaNoteReaction[] = [];
 	const queryLimit = config.scylla?.queryLimit ?? 1000;
 	let foundLimit = ps.limit;
 	if (kind === "list" && ps.userIds) {
@@ -399,7 +405,7 @@ export async function execPaginationQuery(
 		const params: (Date | string | string[] | number)[] = [];
 		if (kind === "home" && userId) {
 			params.push(userId, untilDate, untilDate);
-		} else if (kind === "user" && userId) {
+		} else if (["user", "reaction"].includes(kind) && userId) {
 			params.push(userId, untilDate);
 		} else if (kind === "renotes" && ps.noteId) {
 			params.push(ps.noteId, untilDate);
@@ -429,15 +435,19 @@ export async function execPaginationQuery(
 		if (result.rowLength > 0) {
 			if (kind === "notification") {
 				const notifications = result.rows.map(parseScyllaNotification);
-				found.push(
+				(found as ScyllaNotification[]).push(
 					...(filter?.notification
 						? filter.notification(notifications)
 						: notifications),
 				);
 				untilDate = notifications[notifications.length - 1].createdAt;
+			} else if (kind === "reaction") {
+				const reactions = result.rows.map(parseScyllaReaction);
+				(found as ScyllaNoteReaction[]).push(...(filter?.reaction ? await filter.reaction(reactions) : reactions));
+				untilDate = reactions[reactions.length - 1].createdAt;
 			} else {
 				const notes = result.rows.map(parseScyllaNote);
-				found.push(...(filter?.note ? await filter.note(notes) : notes));
+				(found as ScyllaNote[]).push(...(filter?.note ? await filter.note(notes) : notes));
 				untilDate = notes[notes.length - 1].createdAt;
 			}
 		}
@@ -454,6 +464,8 @@ export async function execPaginationQuery(
 
 	if (kind === "notification") {
 		return found as ScyllaNotification[];
+	} else if (kind === "reaction") {
+		return found as ScyllaNoteReaction[];
 	}
 
 	return found as ScyllaNote[];

@@ -39,9 +39,9 @@ export const NoteReactionRepository = db.getRepository(NoteReaction).extend({
 
 	async packMany(
 		src: NoteReaction[],
-		me?: { id: User["id"] } | null | undefined,
+		me?: { id: User["id"] } | null,
 		options?: {
-			withNote: booleam;
+			withNote: boolean;
 		},
 	): Promise<Packed<"NoteReaction">[]> {
 		const reactions = await Promise.allSettled(

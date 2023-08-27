@@ -73,7 +73,7 @@ export default define(meta, paramDef, async (ps, user) => {
 	let reactions: NoteReaction[] = [];
 	if (scyllaClient) {
 		const scyllaQuery = [prepared.reaction.select.byNoteId]
-		const params: (string | string[] | number)[] = [[ps.noteId]];
+		const params: (string | string[] | number)[] = [ps.noteId];
 		if (ps.type) {
 			scyllaQuery.push(`AND "reaction" = ?`);
 			params.push(query.reaction as string)

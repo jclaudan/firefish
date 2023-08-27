@@ -3,6 +3,15 @@ import define from "../../define.js";
 import { makePaginationQuery } from "../../common/make-pagination-query.js";
 import { generateVisibilityQuery } from "../../common/generate-visibility-query.js";
 import { ApiError } from "../../error.js";
+import {
+	type ScyllaNoteReaction,
+	execPaginationQuery,
+	filterVisibility,
+	parseScyllaNote,
+	prepared,
+	scyllaClient,
+} from "@/db/scylla.js";
+import { LocalFollowingsCache } from "@/misc/cache.js";
 
 export const meta = {
 	tags: ["users", "reactions"],
@@ -49,8 +58,43 @@ export const paramDef = {
 export default define(meta, paramDef, async (ps, me) => {
 	const profile = await UserProfiles.findOneByOrFail({ userId: ps.userId });
 
-	if (me.id !== ps.userId && !profile.publicReactions) {
+	if (me?.id !== ps.userId && !profile.publicReactions) {
 		throw new ApiError(meta.errors.reactionsNotPublic);
+	}
+
+	if (scyllaClient) {
+		let followingUserIds: string[] = [];
+		if (me) {
+			followingUserIds = await LocalFollowingsCache.init(me.id).then((cache) =>
+				cache.getAll(),
+			);
+		}
+
+		const filter = async (reactions: ScyllaNoteReaction[]) => {
+			if (!scyllaClient) return reactions;
+			let noteIds = reactions.map(({ noteId }) => noteId);
+			if (me) {
+				const notes = await scyllaClient
+					.execute(prepared.note.select.byIds, [noteIds], { prepare: true })
+					.then((result) => result.rows.map(parseScyllaNote));
+				const filteredNoteIds = await filterVisibility(
+					notes,
+					me,
+					followingUserIds,
+				).then((notes) => notes.map(({ id }) => id));
+				noteIds = noteIds.filter((id) => filteredNoteIds.includes(id));
+			}
+
+			return reactions.filter((reaction) => noteIds.includes(reaction.noteId));
+		};
+
+		const foundReactions = (await execPaginationQuery(
+			"reaction",
+			ps,
+			{ reaction: filter },
+			ps.userId,
+		)) as ScyllaNoteReaction[];
+		return await NoteReactions.packMany(foundReactions, me, { withNote: true });
 	}
 
 	const query = makePaginationQuery(
