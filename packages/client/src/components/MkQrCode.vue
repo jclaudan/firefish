@@ -20,8 +20,6 @@ import MkButton from "@/components/MkButton.vue";
 import { i18n } from "@/i18n";
 import QRCodeVue3 from "qrcode-vue3";
 
-// const profileUrl = window.location.href;
-
 const props = defineProps<{
 	qrCode: string
 }>();
