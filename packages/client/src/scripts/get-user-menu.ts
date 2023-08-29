@@ -284,7 +284,7 @@ export function getUserMenu(user, router: Router = mainRouter) {
 			icon: "ph-qr-code ph-bold ph-lg",
 			text: i18n.ts.getQrCode,
 			action: () => {
-				os.displayQrCode(window.location.href)
+				os.displayQrCode(`https://${host}/authorize-follow?acct=${user.username}`)
 			}
 		},
 		meId !== user.id
