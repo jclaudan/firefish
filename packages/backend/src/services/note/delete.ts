@@ -326,7 +326,7 @@ export default async function (
 	}
 
 	if (meilisearch) {
-		await meilisearch.deleteNotes(note.id);
+		await meilisearch.deleteNotes([note.id]);
 	}
 }
 

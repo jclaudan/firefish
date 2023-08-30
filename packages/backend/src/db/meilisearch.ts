@@ -6,6 +6,8 @@ import { Note } from "@/models/entities/note.js";
 import * as url from "url";
 import { ILocalUser } from "@/models/entities/user.js";
 import { Followings, Users } from "@/models/index.js";
+import { userByIdCache } from "@/services/user-cache.js";
+import { ScyllaNote } from "./scylla.js";
 
 const logger = dbLogger.createSubLogger("meilisearch", "gray", false);
 
@@ -347,20 +349,14 @@ export default hasConfig
 					sort: sortRules,
 				});
 			},
-			ingestNote: async (ingestNotes: Note | Note[]) => {
-				if (ingestNotes instanceof Note) {
-					ingestNotes = [ingestNotes];
-				}
-
+			ingestNote: async (ingestNotes: Note[] | ScyllaNote[]) => {
 				const indexingBatch: MeilisearchNote[] = [];
 
 				for (const note of ingestNotes) {
-					if (note.user === undefined) {
-						note.user = await Users.findOne({
-							where: {
-								id: note.userId,
-							},
-						});
+					if (!note.user) {
+						note.user = await userByIdCache.fetch(note.userId, () =>
+							Users.findOneByOrFail({ id: note.userId }),
+						);
 					}
 
 					let attachmentType = "";
@@ -408,40 +404,15 @@ export default hasConfig
 				return {
 					health: health.status,
 					size: stats.databaseSize,
-					indexed_count: stats.indexes["posts"].numberOfDocuments,
+					indexed_count: stats.indexes.posts.numberOfDocuments,
 				};
 			},
-			deleteNotes: async (note: Note | Note[] | string | string[]) => {
-				if (note instanceof Note) {
-					note = [note];
-				}
-				if (typeof note === "string") {
-					note = [note];
-				}
+			deleteNotes: async (notes: Note[] | ScyllaNote[] | string[]) => {
+				const deletionBatch = notes
+					.map((n) => (typeof n === "string" ? n : n.id))
+					.filter((id) => !!id);
 
-				const deletionBatch = note
-					.map((n) => {
-						if (n instanceof Note) {
-							return n.id;
-						}
-
-						if (n.length > 0) return n;
-
-						logger.error(
-							`Failed to delete note from Meilisearch, invalid post ID: ${JSON.stringify(
-								n,
-							)}`,
-						);
-
-						throw new Error(
-							`Invalid note ID passed to meilisearch deleteNote: ${JSON.stringify(
-								n,
-							)}`,
-						);
-					})
-					.filter((el) => el !== null);
-
-				await posts.deleteDocuments(deletionBatch as string[]).then(() => {
+				await posts.deleteDocuments(deletionBatch).then(() => {
 					logger.info(
 						`submitted ${deletionBatch.length} large batch for deletion`,
 					);

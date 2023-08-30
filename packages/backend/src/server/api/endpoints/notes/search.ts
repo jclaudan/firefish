@@ -11,6 +11,7 @@ import { generateVisibilityQuery } from "../../common/generate-visibility-query.
 import { generateMutedUserQuery } from "../../common/generate-muted-user-query.js";
 import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
 import { sqlLikeEscape } from "@/misc/sql-like-escape.js";
+import { parseScyllaNote, prepared, scyllaClient } from "@/db/scylla.js";
 
 export const meta = {
 	tags: ["notes"],
@@ -68,7 +69,7 @@ export const paramDef = {
 } as const;
 
 export default define(meta, paramDef, async (ps, me) => {
-	if (es == null && sonic == null && meilisearch == null) {
+	if (!es && !sonic && !meilisearch && !scyllaClient) {
 		const query = makePaginationQuery(
 			Notes.createQueryBuilder("note"),
 			ps.sinceId,
@@ -86,17 +87,8 @@ export default define(meta, paramDef, async (ps, me) => {
 		query
 			.andWhere("note.text ILIKE :q", { q: `%${sqlLikeEscape(ps.query)}%` })
 			.andWhere("note.visibility = 'public'")
-			.innerJoinAndSelect("note.user", "user")
-			.leftJoinAndSelect("user.avatar", "avatar")
-			.leftJoinAndSelect("user.banner", "banner")
 			.leftJoinAndSelect("note.reply", "reply")
-			.leftJoinAndSelect("note.renote", "renote")
-			.leftJoinAndSelect("reply.user", "replyUser")
-			.leftJoinAndSelect("replyUser.avatar", "replyUserAvatar")
-			.leftJoinAndSelect("replyUser.banner", "replyUserBanner")
-			.leftJoinAndSelect("renote.user", "renoteUser")
-			.leftJoinAndSelect("renoteUser.avatar", "renoteUserAvatar")
-			.leftJoinAndSelect("renoteUser.banner", "renoteUserBanner");
+			.leftJoinAndSelect("note.renote", "renote");
 
 		generateVisibilityQuery(query, me);
 		if (me) generateMutedUserQuery(query, me);
@@ -110,7 +102,7 @@ export default define(meta, paramDef, async (ps, me) => {
 		const chunkSize = 100;
 
 		// Use sonic to fetch and step through all search results that could match the requirements
-		const ids = [];
+		const ids: string[] = [];
 		while (true) {
 			const results = await sonic.search.query(
 				sonic.collection,
@@ -151,18 +143,25 @@ export default define(meta, paramDef, async (ps, me) => {
 		}
 
 		// Sort all the results by note id DESC (newest first)
-		ids.sort((a, b) => b - a);
+		ids.sort().reverse();
 
 		// Fetch the notes from the database until we have enough to satisfy the limit
 		start = 0;
 		const found = [];
 		while (found.length < ps.limit && start < ids.length) {
 			const chunk = ids.slice(start, start + chunkSize);
-			const notes: Note[] = await Notes.find({
-				where: {
-					id: In(chunk),
-				},
-			});
+			let notes: Note[] = [];
+			if (scyllaClient) {
+				notes = await scyllaClient
+					.execute(prepared.note.select.byIds, [chunk], { prepare: true })
+					.then((result) => result.rows.map(parseScyllaNote));
+			} else {
+				notes = await Notes.find({
+					where: {
+						id: In(chunk),
+					},
+				});
+			}
 
 			// The notes are checked for visibility and muted/blocked users when packed
 			found.push(...(await Notes.packMany(notes, me)));
@@ -239,13 +238,14 @@ export default define(meta, paramDef, async (ps, me) => {
 		while (found.length < ps.limit && start < noteIDs.length) {
 			const chunk = noteIDs.slice(start, start + chunkSize);
 
-			let query: FindManyOptions = {
-				where: {
-					id: In(chunk),
-				},
-			};
-
-			const notes: Note[] = await Notes.find(query);
+			let notes: Note[] = [];
+			if (scyllaClient) {
+				notes = await scyllaClient
+					.execute(prepared.note.select.byIds, [chunk], { prepare: true })
+					.then((result) => result.rows.map(parseScyllaNote));
+			} else {
+				notes = await Notes.findBy({ id: In(chunk) });
+			}
 
 			// Re-order the note result according to the noteIDs array (cannot be undefined, we map this earlier)
 			// @ts-ignore
@@ -262,7 +262,7 @@ export default define(meta, paramDef, async (ps, me) => {
 		}
 
 		return found;
-	} else {
+	} else if (es && !scyllaClient) {
 		const userQuery =
 			ps.userId != null
 				? [
@@ -329,7 +329,7 @@ export default define(meta, paramDef, async (ps, me) => {
 
 		const hits = result.body.hits.hits.map((hit: any) => hit._id);
 
-		if (hits.length === 0) return [];
+		if (hits.length === 0) return await Notes.packMany([]);
 
 		// Fetch found notes
 		const notes = await Notes.find({
@@ -343,4 +343,6 @@ export default define(meta, paramDef, async (ps, me) => {
 
 		return await Notes.packMany(notes, me);
 	}
+
+	return await Notes.packMany([]);
 });

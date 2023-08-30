@@ -414,12 +414,11 @@ export const NoteRepository = db.getRepository(Note).extend({
 			const targets = [...notes.map((n) => n.id), ...renoteIds];
 			let myReactions: NoteReaction[] = [];
 			if (scyllaClient) {
-				const result = await scyllaClient.execute(
-					prepared.reaction.select.byNoteAndUser,
-					[targets, [meId]],
-					{ prepare: true },
-				);
-				myReactions = result.rows.map(parseScyllaReaction);
+				myReactions = await scyllaClient
+					.execute(prepared.reaction.select.byNoteAndUser, [targets, [meId]], {
+						prepare: true,
+					})
+					.then((result) => result.rows.map(parseScyllaReaction));
 			} else {
 				myReactions = await NoteReactions.findBy({
 					userId: meId,

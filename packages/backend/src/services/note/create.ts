@@ -1007,7 +1007,7 @@ export async function index(note: Note, reindexing: boolean): Promise<void> {
 	}
 
 	if (meilisearch && !reindexing) {
-		await meilisearch.ingestNote(note);
+		await meilisearch.ingestNote([note]);
 	}
 }
 
