@@ -1,13 +1,37 @@
 import define from "../../define.js";
 import readNote from "@/services/note/read.js";
-import { Antennas, Notes } from "@/models/index.js";
+import { Antennas, Notes, UserProfiles, Users } from "@/models/index.js";
 import { redisClient } from "@/db/redis.js";
-import { genId, getTimestamp } from "@/misc/gen-id.js";
+import { getTimestamp } from "@/misc/gen-id.js";
 import { makePaginationQuery } from "../../common/make-pagination-query.js";
 import { generateVisibilityQuery } from "../../common/generate-visibility-query.js";
 import { generateMutedUserQuery } from "../../common/generate-muted-user-query.js";
 import { ApiError } from "../../error.js";
 import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
+import {
+	type ScyllaNote,
+	scyllaClient,
+	filterVisibility,
+	filterMutedUser,
+	filterMutedNote,
+	filterBlockUser,
+	filterMutedRenotes,
+	filterReply,
+	execPaginationQuery,
+} from "@/db/scylla.js";
+import {
+	InstanceMutingsCache,
+	LocalFollowingsCache,
+	RenoteMutingsCache,
+	UserBlockedCache,
+	UserBlockingCache,
+	UserMutingsCache,
+	userWordMuteCache,
+} from "@/misc/cache.js";
+import * as Acct from "@/misc/acct.js";
+import { acctToUserIdCache } from "@/services/user-cache.js";
+import config from "@/config/index.js";
+import { IsNull } from "typeorm";
 
 export const meta = {
 	tags: ["antennas", "account", "notes"],
@@ -56,8 +80,122 @@ export default define(meta, paramDef, async (ps, user) => {
 		userId: user.id,
 	});
 
-	if (antenna == null) {
+	if (!antenna) {
 		throw new ApiError(meta.errors.noSuchAntenna);
+	}
+
+	if (scyllaClient) {
+		const [
+			followingUserIds,
+			mutedUserIds,
+			mutedInstances,
+			mutedWords,
+			blockerIds,
+			blockingIds,
+			renoteMutedIds,
+		] = await Promise.all([
+			LocalFollowingsCache.init(user.id).then((cache) => cache.getAll()),
+			UserMutingsCache.init(user.id).then((cache) => cache.getAll()),
+			InstanceMutingsCache.init(user.id).then((cache) => cache.getAll()),
+			userWordMuteCache
+				.fetchMaybe(user.id, () =>
+					UserProfiles.findOne({
+						select: ["mutedWords"],
+						where: { userId: user.id },
+					}).then((profile) => profile?.mutedWords),
+				)
+				.then((words) => words ?? []),
+			UserBlockedCache.init(user.id).then((cache) => cache.getAll()),
+			UserBlockingCache.init(user.id).then((cache) => cache.getAll()),
+			RenoteMutingsCache.init(user.id).then((cache) => cache.getAll()),
+		]);
+
+		const userIds: string[] = [];
+		for (const acct of antenna.users) {
+			const { username, host } = Acct.parse(acct);
+			const userId = await acctToUserIdCache.fetchMaybe(
+				`${username.toLowerCase()}@${host ?? config.host}`,
+				() =>
+					Users.findOne({
+						where: {
+							usernameLower: username.toLowerCase(),
+							host: !host || host === config.host ? IsNull() : host,
+							isSuspended: false,
+						},
+					}).then((user) => user?.id ?? undefined),
+			);
+			if (userId) {
+				userIds.push(userId);
+			}
+		}
+
+		const instances = antenna.instances
+			.filter((x) => x !== "")
+			.map((host) => {
+				return host.toLowerCase();
+			});
+
+		const keywords = antenna.keywords
+			.map((xs) => xs.filter((x) => x !== ""))
+			.filter((xs) => xs.length > 0);
+
+		const filter = async (notes: ScyllaNote[]) => {
+			let filtered = await filterVisibility(notes, user, followingUserIds);
+			filtered = await filterReply(filtered, antenna.withReplies, user);
+			filtered = await filterMutedUser(
+				filtered,
+				user,
+				mutedUserIds,
+				mutedInstances,
+			);
+			filtered = await filterMutedNote(filtered, user, mutedWords);
+			filtered = await filterBlockUser(filtered, user, [
+				...blockerIds,
+				...blockingIds,
+			]);
+			filtered = await filterMutedRenotes(filtered, user, renoteMutedIds);
+			if (antenna.withFile) {
+				filtered = filtered.filter((n) => n.files.length > 0);
+			}
+			switch (antenna.src) {
+				case "users":
+					filtered = filtered.filter((note) => userIds.includes(note.userId));
+					break;
+				case "instances":
+					filtered = filtered.filter((note) =>
+						instances.includes(note.userHost?.toLowerCase() ?? ""),
+					);
+					break;
+			}
+			if (keywords.length > 0) {
+				filtered = filtered.filter((note) => {
+					if (!note.text) return false;
+					return keywords.some((and) =>
+						and.every((keyword) =>
+							antenna.caseSensitive
+								? (note.text as string).includes(keyword)
+								: (note.text as string)
+										.toLowerCase()
+										.includes(keyword.toLowerCase()),
+						),
+					);
+				});
+			}
+
+			return filtered;
+		};
+
+		const foundNotes = (
+			(await execPaginationQuery(
+				antenna.src === "users" ? "list" : "antenna",
+				{ ...ps, userIds },
+				{ note: filter },
+				user.id,
+			)) as ScyllaNote[]
+		)
+			.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+			.slice(0, ps.limit);
+		return await Notes.packMany(foundNotes, user);
 	}
 
 	const limit = ps.limit + (ps.untilId ? 1 : 0) + (ps.sinceId ? 1 : 0); // untilIdに指定したものも含まれるため+1
@@ -82,7 +220,7 @@ export default define(meta, paramDef, async (ps, user) => {
 	);
 
 	if (noteIdsRes.length === 0) {
-		return [];
+		return await Notes.packMany([]);
 	}
 
 	const noteIds = noteIdsRes
@@ -90,7 +228,7 @@ export default define(meta, paramDef, async (ps, user) => {
 		.filter((x) => x !== ps.untilId && x !== ps.sinceId);
 
 	if (noteIds.length === 0) {
-		return [];
+		return await Notes.packMany([]);
 	}
 
 	const query = makePaginationQuery(

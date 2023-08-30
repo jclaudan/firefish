@@ -263,7 +263,8 @@ export type FeedType =
 	| "channel"
 	| "notification"
 	| "list"
-	| "reaction";
+	| "reaction"
+	| "antenna";
 
 export function parseScyllaReaction(row: types.Row): ScyllaNoteReaction {
 	return {
