@@ -4,6 +4,7 @@ import { isUserRelated } from "@/misc/is-user-related.js";
 import type { User } from "@/models/entities/user.js";
 import type { StreamMessages } from "../types.js";
 import type { Packed } from "@/misc/schema.js";
+import { scyllaClient } from "@/db/scylla.js";
 
 export default class extends Channel {
 	public readonly chName = "channel";
@@ -45,7 +46,7 @@ export default class extends Channel {
 	}
 
 	private onEvent(data: StreamMessages["channel"]["payload"]) {
-		if (data.type === "typing") {
+		if (data.type === "typing" && !scyllaClient) {
 			const id = data.body;
 			const begin = !this.typers.has(id);
 			this.typers.set(id, new Date());

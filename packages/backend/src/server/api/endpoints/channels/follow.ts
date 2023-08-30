@@ -35,7 +35,7 @@ export default define(meta, paramDef, async (ps, user) => {
 		id: ps.channelId,
 	});
 
-	if (channel == null) {
+	if (!channel) {
 		throw new ApiError(meta.errors.noSuchChannel);
 	}
 

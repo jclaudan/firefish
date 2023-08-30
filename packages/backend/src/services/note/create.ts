@@ -651,16 +651,18 @@ export default async (
 				lastNotedAt: new Date(),
 			});
 
-			await Notes.countBy({
-				userId: user.id,
-				channelId: data.channel.id,
-			}).then((count) => {
-				// この処理が行われるのはノート作成後なので、ノートが一つしかなかったら最初の投稿だと判断できる
-				// TODO: とはいえノートを削除して何回も投稿すればその分だけインクリメントされる雑さもあるのでどうにかしたい
-				if (count === 1 && data.channel != null) {
-					Channels.increment({ id: data.channel.id }, "usersCount", 1);
-				}
-			});
+			if (!scyllaClient) {
+				await Notes.countBy({
+					userId: user.id,
+					channelId: data.channel.id,
+				}).then((count) => {
+					// この処理が行われるのはノート作成後なので、ノートが一つしかなかったら最初の投稿だと判断できる
+					// TODO: とはいえノートを削除して何回も投稿すればその分だけインクリメントされる雑さもあるのでどうにかしたい
+					if (count === 1 && data.channel != null) {
+						Channels.increment({ id: data.channel.id }, "usersCount", 1);
+					}
+				});
+			}
 		}
 
 		// Register to search database
