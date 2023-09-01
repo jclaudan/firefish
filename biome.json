@@ -1,0 +1,50 @@
+{
+	"$schema": "https://biomejs.dev/schemas/1.0.0/schema.json",
+	"organizeImports": {
+		"enabled": true
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true
+		},
+		"ignore": [
+			"packages/firefish-js/api-extractor.json",
+			"packages/*/tsconfig.json",
+			"packages/*/built",
+			"packages/megalodon/lib",
+			"packages/*/package-lock.json",
+			"packages/backend/src/server/web/manifest.ts",
+			"packages/megalodon/src/misskey/web_socket.ts",
+			"packages/megalodon/src/misskey/api_client.ts",
+			"packages/backend/built/",
+			"*/model.json",
+			"*.md",
+			"*.png",
+			"*.jpeg",
+			"*.jpg",
+			"**/tsconfig.json",
+			"*/.yml"
+		]
+	},
+	"formatter": {
+		"ignore": [
+			"packages/firefish-js/api-extractor.json",
+			"packages/*/tsconfig.json",
+			"packages/*/built",
+			"packages/megalodon/lib",
+			"packages/*/package-lock.json",
+			"packages/backend/src/server/web/manifest.ts",
+			"packages/megalodon/src/misskey/web_socket.ts",
+			"packages/megalodon/src/misskey/api_client.ts",
+			"packages/backend/built/",
+			"*/model.json",
+			"*.md",
+			"*.png",
+			"*.jpeg",
+			"*.jpg",
+			"**/tsconfig.json",
+			"*/.yml"
+		]
+	}
+}
