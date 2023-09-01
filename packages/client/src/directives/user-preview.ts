@@ -1,6 +1,6 @@
-import { popup } from "@/os";
 import type { Directive } from "vue";
 import { defineAsyncComponent, ref } from "vue";
+import { popup } from "@/os";
 
 export class UserPreview {
 	private el;

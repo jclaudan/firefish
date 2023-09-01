@@ -1,5 +1,5 @@
-import { unique } from "@/scripts/array";
 import * as mfm from "mfm-js";
+import { unique } from "@/scripts/array";
 
 // unique without hash
 // [ http://a/#1, http://a/#2, http://b/#3 ] => [ http://a/#1, http://b/#3 ]

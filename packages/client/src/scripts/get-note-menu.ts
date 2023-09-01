@@ -1,3 +1,6 @@
+import type * as misskey from "firefish-js";
+import type { Ref } from "vue";
+import { defineAsyncComponent, inject } from "vue";
 import { $i } from "@/account";
 import { url } from "@/config";
 import { i18n } from "@/i18n";
@@ -7,9 +10,6 @@ import copyToClipboard from "@/scripts/copy-to-clipboard";
 import { getUserMenu } from "@/scripts/get-user-menu";
 import { shareAvailable } from "@/scripts/share-available";
 import { noteActions } from "@/store";
-import type * as misskey from "firefish-js";
-import type { Ref } from "vue";
-import { defineAsyncComponent, inject } from "vue";
 
 export function getNoteMenu(props: {
 	note: misskey.entities.Note;

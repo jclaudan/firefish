@@ -1,11 +1,11 @@
 // TODO: useTooltip関数使うようにしたい
 // ただディレクティブ内でonUnmountedなどのcomposition api使えるのか不明
 
+import type { Directive } from "vue";
+import { defineAsyncComponent, ref } from "vue";
 import { alert, popup } from "@/os";
 import { mainRouter } from "@/router";
 import { isTouchUsing } from "@/scripts/touch";
-import type { Directive } from "vue";
-import { defineAsyncComponent, ref } from "vue";
 
 const start = isTouchUsing ? "touchstart" : "mouseover";
 const end = isTouchUsing ? "touchend" : "mouseleave";

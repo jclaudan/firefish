@@ -1,10 +1,10 @@
+import type { DriveFile } from "firefish-js/built/entities";
+import { ref } from "vue";
 import { i18n } from "@/i18n";
 import * as os from "@/os";
 import { uploadFile } from "@/scripts/upload";
 import { defaultStore } from "@/store";
 import { stream } from "@/stream";
-import type { DriveFile } from "firefish-js/built/entities";
-import { ref } from "vue";
 
 function select(
 	src: any,

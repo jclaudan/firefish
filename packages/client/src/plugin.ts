@@ -1,3 +1,6 @@
+import { AiScript, utils, values } from "@syuilo/aiscript";
+import { jsToVal } from "@syuilo/aiscript/built/interpreter/util";
+import { deserialize } from "@syuilo/aiscript/built/serializer";
 import { inputText } from "@/os";
 import { createAiScriptEnv } from "@/scripts/aiscript/api";
 import {
@@ -7,9 +10,6 @@ import {
 	postFormActions,
 	userActions,
 } from "@/store";
-import { AiScript, utils, values } from "@syuilo/aiscript";
-import { jsToVal } from "@syuilo/aiscript/built/interpreter/util";
-import { deserialize } from "@syuilo/aiscript/built/serializer";
 
 const pluginContexts = new Map<string, AiScript>();
 

@@ -1,3 +1,5 @@
+import * as Acct from "firefish-js/built/acct";
+import { defineAsyncComponent } from "vue";
 import { $i, iAmModerator } from "@/account";
 import { host } from "@/config";
 import { i18n } from "@/i18n";
@@ -6,8 +8,6 @@ import * as os from "@/os";
 import { mainRouter } from "@/router";
 import copyToClipboard from "@/scripts/copy-to-clipboard";
 import { userActions } from "@/store";
-import * as Acct from "firefish-js/built/acct";
-import { defineAsyncComponent } from "vue";
 
 export function getUserMenu(user, router: Router = mainRouter) {
 	const meId = $i ? $i.id : null;

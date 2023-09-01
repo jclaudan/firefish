@@ -1,8 +1,8 @@
-import { popup } from "@/os";
 import { toASCII } from "punycode/";
 import getCaretCoordinates from "textarea-caret";
 import type { Ref } from "vue";
 import { defineAsyncComponent, nextTick, ref } from "vue";
+import { popup } from "@/os";
 
 export class Autocomplete {
 	private suggestion: {

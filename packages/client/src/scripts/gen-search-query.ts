@@ -1,9 +1,8 @@
-import { host as localHost } from "@/config";
 import * as Acct from "firefish-js/built/acct";
+import { host as localHost } from "@/config";
 
 export async function genSearchQuery(v: any, q: string) {
-	let host: string;
-	let userId: string;
+	let host: string, userId: string;
 	if (q.split(" ").some((x) => x.startsWith("@"))) {
 		for (const at of q
 			.split(" ")

@@ -1,5 +1,5 @@
-import { i18n } from "@/i18n";
 import type * as misskey from "firefish-js";
+import { i18n } from "@/i18n";
 
 /**
  * 投稿を表す文字列を取得します。

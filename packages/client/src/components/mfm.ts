@@ -1,3 +1,6 @@
+import * as mfm from "mfm-js";
+import { defineComponent, h } from "vue";
+import type { VNode } from "vue";
 import MkCode from "@/components/MkCode.vue";
 import MkFormula from "@/components/MkFormula.vue";
 import MkGoogle from "@/components/MkGoogle.vue";
@@ -11,9 +14,6 @@ import { host } from "@/config";
 import { concat } from "@/scripts/array";
 import { reducedMotion } from "@/scripts/reduced-motion";
 import { defaultStore } from "@/store";
-import * as mfm from "mfm-js";
-import { defineComponent, h } from "vue";
-import type { VNode } from "vue";
 
 export default defineComponent({
 	props: {

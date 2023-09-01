@@ -1,9 +1,9 @@
+import { inject } from "vue";
 import { $i, login } from "@/account";
 import { post } from "@/os";
 import { mainRouter } from "@/router";
 import { getAccountFromId } from "@/scripts/get-account-from-id";
 import { defaultStore } from "@/store";
-import { inject } from "vue";
 
 export function swInject() {
 	navigator.serviceWorker.addEventListener("message", (ev) => {

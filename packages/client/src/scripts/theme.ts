@@ -1,6 +1,6 @@
-import { globalEvents } from "@/events";
 import tinycolor from "tinycolor2";
 import { ref } from "vue";
+import { globalEvents } from "@/events";
 
 export interface Theme {
 	id: string;

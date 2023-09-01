@@ -1,9 +1,9 @@
+import XTutorial from "../components/MkTutorialDialog.vue";
 import { host } from "@/config";
 import { i18n } from "@/i18n";
 import { instance } from "@/instance";
 import * as os from "@/os";
 import { defaultStore } from "@/store";
-import XTutorial from "../components/MkTutorialDialog.vue";
 
 export function openHelpMenu_(ev: MouseEvent) {
 	os.popupMenu(

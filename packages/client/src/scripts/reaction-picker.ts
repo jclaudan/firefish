@@ -1,6 +1,6 @@
-import { popup } from "@/os";
 import type { Ref } from "vue";
 import { defineAsyncComponent, ref } from "vue";
+import { popup } from "@/os";
 
 class ReactionPicker {
 	private src: Ref<HTMLElement | null> = ref(null);

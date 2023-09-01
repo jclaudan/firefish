@@ -1,6 +1,6 @@
-import { url } from "@/config";
 import type * as misskey from "firefish-js";
 import * as Acct from "firefish-js/built/acct";
+import { url } from "@/config";
 
 export const acct = (user: misskey.Acct) => {
 	return Acct.toString(user);
