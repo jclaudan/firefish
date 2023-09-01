@@ -1,58 +1,58 @@
-import promiseLimit from "promise-limit";
-import * as mfm from "mfm-js";
 import config from "@/config/index.js";
-import Resolver from "../resolver.js";
+import { getApLock } from "@/misc/app-lock.js";
+import { extractDbHost, toPuny } from "@/misc/convert-host.js";
+import { type Size, getEmojiSize } from "@/misc/emoji-meta.js";
+import { extractHashtags } from "@/misc/extract-hashtags.js";
+import { fetchMeta } from "@/misc/fetch-meta.js";
+import { StatusError } from "@/misc/fetch.js";
+import { genId } from "@/misc/gen-id.js";
+import { DB_MAX_IMAGE_COMMENT_LENGTH } from "@/misc/hard-limits.js";
+import { shouldBlockInstance } from "@/misc/should-block-instance.js";
+import { truncate } from "@/misc/truncate.js";
+import { DriveFile } from "@/models/entities/drive-file.js";
+import type { Emoji } from "@/models/entities/emoji.js";
+import type { IMentionedRemoteUsers, Note } from "@/models/entities/note.js";
+import type {
+	CacheableRemoteUser,
+	ILocalUser,
+} from "@/models/entities/user.js";
+import {
+	DriveFiles,
+	Emojis,
+	MessagingMessages,
+	NoteEdits,
+	Notes,
+	Polls,
+} from "@/models/index.js";
+import { UserProfiles } from "@/models/index.js";
+import { toArray, toSingle, unique } from "@/prelude/array.js";
+import { createMessage } from "@/services/messages/create.js";
 import post from "@/services/note/create.js";
 import { extractMentionedUsers } from "@/services/note/create.js";
-import { resolvePerson } from "./person.js";
-import { resolveImage } from "./image.js";
-import type {
-	ILocalUser,
-	CacheableRemoteUser,
-} from "@/models/entities/user.js";
-import { htmlToMfm } from "../misc/html-to-mfm.js";
-import { extractApHashtags } from "./tag.js";
-import { unique, toArray, toSingle } from "@/prelude/array.js";
-import { extractPollFromQuestion } from "./question.js";
 import vote from "@/services/note/polls/vote.js";
+import { publishNoteStream } from "@/services/stream.js";
+import * as mfm from "mfm-js";
+import promiseLimit from "promise-limit";
+import { In } from "typeorm";
+import { parseAudience } from "../audience.js";
+import DbResolver from "../db-resolver.js";
 import { apLogger } from "../logger.js";
-import { DriveFile } from "@/models/entities/drive-file.js";
-import { extractDbHost, toPuny } from "@/misc/convert-host.js";
-import {
-	Emojis,
-	Polls,
-	MessagingMessages,
-	Notes,
-	NoteEdits,
-	DriveFiles,
-} from "@/models/index.js";
-import type { IMentionedRemoteUsers, Note } from "@/models/entities/note.js";
+import { htmlToMfm } from "../misc/html-to-mfm.js";
+import Resolver from "../resolver.js";
 import type { IObject, IPost } from "../type.js";
 import {
-	getOneApId,
 	getApId,
-	getOneApHrefNullable,
-	validPost,
-	isEmoji,
 	getApType,
+	getOneApHrefNullable,
+	getOneApId,
+	isEmoji,
+	validPost,
 } from "../type.js";
-import type { Emoji } from "@/models/entities/emoji.js";
-import { genId } from "@/misc/gen-id.js";
-import { getApLock } from "@/misc/app-lock.js";
-import { createMessage } from "@/services/messages/create.js";
-import { parseAudience } from "../audience.js";
+import { resolveImage } from "./image.js";
 import { extractApMentions } from "./mention.js";
-import DbResolver from "../db-resolver.js";
-import { StatusError } from "@/misc/fetch.js";
-import { shouldBlockInstance } from "@/misc/should-block-instance.js";
-import { publishNoteStream } from "@/services/stream.js";
-import { extractHashtags } from "@/misc/extract-hashtags.js";
-import { UserProfiles } from "@/models/index.js";
-import { In } from "typeorm";
-import { DB_MAX_IMAGE_COMMENT_LENGTH } from "@/misc/hard-limits.js";
-import { truncate } from "@/misc/truncate.js";
-import { type Size, getEmojiSize } from "@/misc/emoji-meta.js";
-import { fetchMeta } from "@/misc/fetch-meta.js";
+import { resolvePerson } from "./person.js";
+import { extractPollFromQuestion } from "./question.js";
+import { extractApHashtags } from "./tag.js";
 
 const logger = apLogger;
 
@@ -203,7 +203,7 @@ export async function createNote(
 		? [note.attachment]
 		: [];
 	const files = note.attachment.map(
-		(attach) => (attach.sensitive = note.sensitive),
+		(attach) => attach.sensitive === note.sensitive,
 	)
 		? (
 				await Promise.all(
@@ -455,7 +455,7 @@ export async function extractEmojis(
 
 	return await Promise.all(
 		eomjiTags.map(async (tag) => {
-			const name = tag.name!.replace(/^:/, "").replace(/:$/, "");
+			const name = tag.name?.replace(/^:/, "").replace(/:$/, "");
 			tag.icon = toSingle(tag.icon);
 
 			const exists = await Emojis.findOneBy({
@@ -470,12 +470,12 @@ export async function extractEmojis(
 					(tag.updated != null &&
 						exists.updatedAt != null &&
 						new Date(tag.updated) > exists.updatedAt) ||
-					tag.icon!.url !== exists.originalUrl ||
+					tag.icon?.url !== exists.originalUrl ||
 					!(exists.width && exists.height)
 				) {
 					let size: Size = { width: 0, height: 0 };
 					try {
-						size = await getEmojiSize(tag.icon!.url);
+						size = await getEmojiSize(tag.icon?.url);
 					} catch {
 						/* skip if any error happens */
 					}
@@ -486,8 +486,8 @@ export async function extractEmojis(
 						},
 						{
 							uri: tag.id,
-							originalUrl: tag.icon!.url,
-							publicUrl: tag.icon!.url,
+							originalUrl: tag.icon?.url,
+							publicUrl: tag.icon?.url,
 							updatedAt: new Date(),
 							width: size.width || null,
 							height: size.height || null,
@@ -507,7 +507,7 @@ export async function extractEmojis(
 
 			let size: Size = { width: 0, height: 0 };
 			try {
-				size = await getEmojiSize(tag.icon!.url);
+				size = await getEmojiSize(tag.icon?.url);
 			} catch {
 				/* skip if any error happens */
 			}
@@ -516,8 +516,8 @@ export async function extractEmojis(
 				host,
 				name,
 				uri: tag.id,
-				originalUrl: tag.icon!.url,
-				publicUrl: tag.icon!.url,
+				originalUrl: tag.icon?.url,
+				publicUrl: tag.icon?.url,
 				updatedAt: new Date(),
 				aliases: [],
 				width: size.width || null,
@@ -586,7 +586,7 @@ export async function updateNote(value: string | IObject, resolver?: Resolver) {
 			? post.attachment
 			: [post.attachment]
 		: [];
-	const files = fileList.map((f) => (f.sensitive = post.sensitive));
+	const files = fileList.map((f) => f.sensitive === post.sensitive);
 
 	// Fetch files
 	const limit = promiseLimit(2);

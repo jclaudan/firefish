@@ -1,6 +1,6 @@
-import { onDeactivated, onUnmounted, ref } from "vue";
-import * as os from "@/os";
 import MkChartTooltip from "@/components/MkChartTooltip.vue";
+import * as os from "@/os";
+import { onDeactivated, onUnmounted, ref } from "vue";
 
 export function useChartTooltip(
 	opts: { position: "top" | "middle" } = { position: "top" },

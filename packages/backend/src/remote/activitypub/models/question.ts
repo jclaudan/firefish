@@ -1,10 +1,10 @@
 import config from "@/config/index.js";
+import type { IPoll } from "@/models/entities/poll.js";
+import { Notes, Polls } from "@/models/index.js";
+import { apLogger } from "../logger.js";
 import Resolver from "../resolver.js";
 import type { IObject, IQuestion } from "../type.js";
 import { getApId, isQuestion } from "../type.js";
-import { apLogger } from "../logger.js";
-import { Notes, Polls } from "@/models/index.js";
-import type { IPoll } from "@/models/entities/poll.js";
 
 export async function extractPollFromQuestion(
 	source: string | IObject,
@@ -29,11 +29,11 @@ export async function extractPollFromQuestion(
 		throw new Error("invalid question");
 	}
 
-	const choices = question[multiple ? "anyOf" : "oneOf"]!.map(
+	const choices = question[multiple ? "anyOf" : "oneOf"]?.map(
 		(x, i) => x.name!,
 	);
 
-	const votes = question[multiple ? "anyOf" : "oneOf"]!.map(
+	const votes = question[multiple ? "anyOf" : "oneOf"]?.map(
 		(x, i) => x.replies?.totalItems || x._misskey_votes || 0,
 	);
 

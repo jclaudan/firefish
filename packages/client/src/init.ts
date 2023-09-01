@@ -19,6 +19,7 @@ if (accounts) {
 }
 // #endregion
 
+import { compareVersions } from "compare-versions";
 import {
 	computed,
 	createApp,
@@ -27,29 +28,28 @@ import {
 	version as vueVersion,
 	watch,
 } from "vue";
-import { compareVersions } from "compare-versions";
 
-import widgets from "@/widgets";
-import directives from "@/directives";
+import { $i, login, refreshAccount, signout, updateAccount } from "@/account";
 import components from "@/components";
 import { host, lang, ui, version } from "@/config";
-import { applyTheme } from "@/scripts/theme";
-import { isDeviceDarkmode } from "@/scripts/is-device-darkmode";
+import directives from "@/directives";
 import { i18n } from "@/i18n";
-import { alert, api, confirm, popup, post, toast } from "@/os";
-import { stream } from "@/stream";
-import * as sound from "@/scripts/sound";
-import { $i, login, refreshAccount, signout, updateAccount } from "@/account";
-import { ColdDeviceStorage, defaultStore } from "@/store";
 import { fetchInstance, instance } from "@/instance";
-import { makeHotkey } from "@/scripts/hotkey";
-import { search } from "@/scripts/search";
+import { alert, api, confirm, popup, post, toast } from "@/os";
 import { deviceKind } from "@/scripts/device-kind";
-import { initializeSw } from "@/scripts/initialize-sw";
-import { reloadChannel } from "@/scripts/unison-reload";
-import { reactionPicker } from "@/scripts/reaction-picker";
-import { getUrlWithoutLoginId } from "@/scripts/login-id";
 import { getAccountFromId } from "@/scripts/get-account-from-id";
+import { makeHotkey } from "@/scripts/hotkey";
+import { initializeSw } from "@/scripts/initialize-sw";
+import { isDeviceDarkmode } from "@/scripts/is-device-darkmode";
+import { getUrlWithoutLoginId } from "@/scripts/login-id";
+import { reactionPicker } from "@/scripts/reaction-picker";
+import { search } from "@/scripts/search";
+import * as sound from "@/scripts/sound";
+import { applyTheme } from "@/scripts/theme";
+import { reloadChannel } from "@/scripts/unison-reload";
+import { ColdDeviceStorage, defaultStore } from "@/store";
+import { stream } from "@/stream";
+import widgets from "@/widgets";
 
 function checkForSplash() {
 	const splash = document.getElementById("splash");

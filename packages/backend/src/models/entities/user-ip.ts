@@ -1,10 +1,10 @@
 import {
-	PrimaryColumn,
+	Column,
 	Entity,
 	Index,
 	JoinColumn,
-	Column,
 	ManyToOne,
+	PrimaryColumn,
 	PrimaryGeneratedColumn,
 } from "typeorm";
 import { id } from "../id.js";

@@ -1,13 +1,13 @@
-import { In, IsNull } from "typeorm";
-import { Emojis } from "@/models/index.js";
+import config from "@/config/index.js";
+import { redisClient } from "@/db/redis.js";
 import type { Emoji } from "@/models/entities/emoji.js";
 import type { Note } from "@/models/entities/note.js";
+import { Emojis } from "@/models/index.js";
+import { query } from "@/prelude/url.js";
+import { In, IsNull } from "typeorm";
 import { Cache } from "./cache.js";
 import { isSelfHost, toPunyNullable } from "./convert-host.js";
 import { decodeReaction } from "./reaction-lib.js";
-import config from "@/config/index.js";
-import { query } from "@/prelude/url.js";
-import { redisClient } from "@/db/redis.js";
 
 const cache = new Cache<Emoji | null>("populateEmojis", 60 * 60 * 12);
 
@@ -118,12 +118,12 @@ export function aggregateNoteEmojis(notes: Note[]) {
 		);
 		if (note.renote) {
 			emojis = emojis.concat(
-				note.renote.emojis.map((e) => parseEmojiStr(e, note.renote!.userHost)),
+				note.renote.emojis.map((e) => parseEmojiStr(e, note.renote?.userHost)),
 			);
 			if (note.renote.user) {
 				emojis = emojis.concat(
 					note.renote.user.emojis.map((e) =>
-						parseEmojiStr(e, note.renote!.userHost),
+						parseEmojiStr(e, note.renote?.userHost),
 					),
 				);
 			}

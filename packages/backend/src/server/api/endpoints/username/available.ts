@@ -1,6 +1,6 @@
-import { IsNull } from "typeorm";
-import { Users, UsedUsernames } from "@/models/index.js";
 import config from "@/config/index.js";
+import { UsedUsernames, Users } from "@/models/index.js";
+import { IsNull } from "typeorm";
 import define from "../../define.js";
 
 export const meta = {

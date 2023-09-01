@@ -1,6 +1,6 @@
-import Parser from "rss-parser";
-import { getResponse } from "@/misc/fetch.js";
 import config from "@/config/index.js";
+import { getResponse } from "@/misc/fetch.js";
+import Parser from "rss-parser";
 import define from "../define.js";
 
 const rssParser = new Parser();

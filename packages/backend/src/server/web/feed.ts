@@ -1,8 +1,8 @@
-import { Feed } from "feed";
-import { In, IsNull } from "typeorm";
 import config from "@/config/index.js";
 import type { User } from "@/models/entities/user.js";
-import { Notes, DriveFiles, UserProfiles, Users } from "@/models/index.js";
+import { DriveFiles, Notes, UserProfiles, Users } from "@/models/index.js";
+import { Feed } from "feed";
+import { In, IsNull } from "typeorm";
 
 export default async function (
 	user: User,
@@ -135,7 +135,7 @@ export default async function (
 				}">${file.name}</a>`;
 			}
 		}
-		outstr += `${note.cw ? note.cw + "<br>" : ""}${note.text || ""}${fileEle}`;
+		outstr += `${note.cw ? `${note.cw}<br>` : ""}${note.text || ""}${fileEle}`;
 		if (isTheNote) {
 			outstr += ` <span class="${
 				note.renoteId ? "renote_note" : note.replyId ? "reply_note" : "new_note"
@@ -154,7 +154,7 @@ export default async function (
 			visibility: In(["public", "home"]),
 		});
 		if (findings) {
-			text += `<hr>`;
+			text += "<hr>";
 			text += await noteToString(findings);
 			next = findings.renoteId ? findings.renoteId : findings.replyId;
 		}

@@ -1,13 +1,13 @@
 import { URL } from "node:url";
-import { JSDOM } from "jsdom";
-import fetch from "node-fetch";
-import tinycolor from "tinycolor2";
-import { getJson, getHtml, getAgentByUrl } from "@/misc/fetch.js";
+import { getFetchInstanceMetadataLock } from "@/misc/app-lock.js";
+import { getAgentByUrl, getHtml, getJson } from "@/misc/fetch.js";
 import type { Instance } from "@/models/entities/instance.js";
 import { Instances } from "@/models/index.js";
-import { getFetchInstanceMetadataLock } from "@/misc/app-lock.js";
-import Logger from "./logger.js";
+import { JSDOM } from "jsdom";
 import type { DOMWindow } from "jsdom";
+import fetch from "node-fetch";
+import tinycolor from "tinycolor2";
+import Logger from "./logger.js";
 
 const logger = new Logger("metadata", "cyan");
 

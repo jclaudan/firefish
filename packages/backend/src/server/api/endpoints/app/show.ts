@@ -1,6 +1,6 @@
+import { Apps } from "@/models/index.js";
 import define from "../../define.js";
 import { ApiError } from "../../error.js";
-import { Apps } from "@/models/index.js";
 
 export const meta = {
 	tags: ["app"],
@@ -41,6 +41,6 @@ export default define(meta, paramDef, async (ps, user, token) => {
 
 	return await Apps.pack(ap, user, {
 		detail: true,
-		includeSecret: isSecure && ap.userId === user!.id,
+		includeSecret: isSecure && ap.userId === user?.id,
 	});
 });

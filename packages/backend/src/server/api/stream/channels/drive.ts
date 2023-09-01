@@ -7,7 +7,7 @@ export default class extends Channel {
 
 	public async init(params: any) {
 		// Subscribe drive stream
-		this.subscriber.on(`driveStream:${this.user!.id}`, (data) => {
+		this.subscriber.on(`driveStream:${this.user?.id}`, (data) => {
 			this.send(data);
 		});
 	}

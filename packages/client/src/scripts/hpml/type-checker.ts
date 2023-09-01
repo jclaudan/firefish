@@ -1,9 +1,9 @@
 import autobind from "autobind-decorator";
+import { envVarsDef } from ".";
+import type { PageVar, Type } from ".";
 import type { Expr, Variable } from "./expr";
 import { isLiteralValue } from "./expr";
 import { funcDefs } from "./lib";
-import { envVarsDef } from ".";
-import type { PageVar, Type } from ".";
 
 interface TypeError {
 	arg: number;

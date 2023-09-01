@@ -1,18 +1,18 @@
 // TODO: なんでもかんでもos.tsに突っ込むのやめたいのでよしなに分割する
 
+import { $i } from "@/account";
+import MkDialog from "@/components/MkDialog.vue";
+import MkPostFormDialog from "@/components/MkPostFormDialog.vue";
+import MkToast from "@/components/MkToast.vue";
+import MkWaitingDialog from "@/components/MkWaitingDialog.vue";
+import { url, apiUrl } from "@/config";
+import type { MenuItem } from "@/types/menu";
+import { EventEmitter } from "eventemitter3";
+import * as Misskey from "firefish-js";
+import insertTextAtCursor from "insert-text-at-cursor";
 import type { Component, Ref } from "vue";
 import { defineAsyncComponent, markRaw, ref } from "vue";
-import { EventEmitter } from "eventemitter3";
-import insertTextAtCursor from "insert-text-at-cursor";
-import * as Misskey from "firefish-js";
 import { i18n } from "./i18n";
-import { apiUrl, url } from "@/config";
-import MkPostFormDialog from "@/components/MkPostFormDialog.vue";
-import MkWaitingDialog from "@/components/MkWaitingDialog.vue";
-import MkToast from "@/components/MkToast.vue";
-import MkDialog from "@/components/MkDialog.vue";
-import type { MenuItem } from "@/types/menu";
-import { $i } from "@/account";
 
 export const pendingApiRequestsCount = ref(0);
 
@@ -195,7 +195,7 @@ export function claimZIndex(
 
 let uniqueId = 0;
 export function getUniqueId(): string {
-	return uniqueId++ + "";
+	return `${uniqueId++}`;
 }
 
 export async function popup(
@@ -772,10 +772,10 @@ type AwaitType<T> = T extends Promise<infer U>
 	: T extends (...args: any[]) => Promise<infer V>
 	? V
 	: T;
-let openingEmojiPicker: AwaitType<ReturnType<typeof popup>> | null = null,
-	activeTextarea: HTMLTextAreaElement | HTMLInputElement | null = null;
+let openingEmojiPicker: AwaitType<ReturnType<typeof popup>> | null = null;
+let activeTextarea: HTMLTextAreaElement | HTMLInputElement | null = null;
 export async function openEmojiPicker(
-	src?: HTMLElement,
+	src: HTMLElement,
 	opts,
 	initialTextarea: typeof activeTextarea,
 ) {
@@ -833,7 +833,7 @@ export async function openEmojiPicker(
 				insertTextAtCursor(activeTextarea, emoji);
 			},
 			closed: () => {
-				openingEmojiPicker!.dispose();
+				openingEmojiPicker?.dispose();
 				openingEmojiPicker = null;
 				observer.disconnect();
 			},

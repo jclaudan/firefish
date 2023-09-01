@@ -1,6 +1,6 @@
 import watch from "@/services/note/watch.js";
-import define from "../../../define.js";
 import { getNote } from "../../../common/getters.js";
+import define from "../../../define.js";
 import { ApiError } from "../../../error.js";
 
 export const meta = {

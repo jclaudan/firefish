@@ -1,11 +1,11 @@
+import type { User } from "@/models/entities/user.js";
+import { Users } from "@/models/index.js";
+import { resolveUser } from "@/remote/resolve-user.js";
 import type { FindOptionsWhere } from "typeorm";
 import { In, IsNull } from "typeorm";
-import { resolveUser } from "@/remote/resolve-user.js";
-import { Users } from "@/models/index.js";
-import type { User } from "@/models/entities/user.js";
 import define from "../../define.js";
-import { apiLogger } from "../../logger.js";
 import { ApiError } from "../../error.js";
+import { apiLogger } from "../../logger.js";
 
 export const meta = {
 	tags: ["users"],
@@ -137,7 +137,7 @@ export default define(meta, paramDef, async (ps, me) => {
 					? ps.userId.startsWith("http")
 						? { uri: ps.userId }
 						: { id: ps.userId }
-					: { usernameLower: ps.username!.toLowerCase(), host: IsNull() };
+					: { usernameLower: ps.username?.toLowerCase(), host: IsNull() };
 
 			user = await Users.findOneBy(q);
 		}

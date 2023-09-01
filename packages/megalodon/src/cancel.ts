@@ -9,5 +9,5 @@ export class RequestCanceledError extends Error {
 }
 
 export const isCancel = (value: any): boolean => {
-	return value && value.isCancel;
+	return value?.isCancel;
 };

@@ -28,7 +28,7 @@ export function urlQuery(
 		.filter(([, v]) => (Array.isArray(v) ? v.length : v !== undefined))
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		.reduce(
-			(a, [k, v]) => ((a[k] = v!), a),
+			(a, [k, v]) => (a[k] === v!, a),
 			{} as Record<string, string | number | boolean>,
 		);
 

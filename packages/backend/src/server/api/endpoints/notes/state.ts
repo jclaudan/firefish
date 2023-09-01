@@ -1,8 +1,8 @@
 import {
 	NoteFavorites,
-	Notes,
 	NoteThreadMutings,
 	NoteWatchings,
+	Notes,
 } from "@/models/index.js";
 import { getNote } from "../../common/getters.js";
 import define from "../../define.js";

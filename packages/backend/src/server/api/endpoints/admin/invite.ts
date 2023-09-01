@@ -1,7 +1,7 @@
+import { genId } from "@/misc/gen-id.js";
+import { RegistrationTickets } from "@/models/index.js";
 import rndstr from "rndstr";
 import define from "../../define.js";
-import { RegistrationTickets } from "@/models/index.js";
-import { genId } from "@/misc/gen-id.js";
 
 export const meta = {
 	tags: ["admin"],

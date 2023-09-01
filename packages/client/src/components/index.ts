@@ -1,22 +1,22 @@
 import type { App } from "vue";
 
-import Mfm from "./global/MkMisskeyFlavoredMarkdown.vue";
 import MkA from "./global/MkA.vue";
 import MkAcct from "./global/MkAcct.vue";
-import MkAvatar from "./global/MkAvatar.vue";
-import MkEmoji from "./global/MkEmoji.vue";
-import MkUserName from "./global/MkUserName.vue";
-import MkEllipsis from "./global/MkEllipsis.vue";
-import MkTime from "./global/MkTime.vue";
-import MkUrl from "./global/MkUrl.vue";
-import I18n from "./global/i18n";
-import RouterView from "./global/RouterView.vue";
-import MkLoading from "./global/MkLoading.vue";
-import MkError from "./global/MkError.vue";
 import MkAd from "./global/MkAd.vue";
+import MkAvatar from "./global/MkAvatar.vue";
+import MkEllipsis from "./global/MkEllipsis.vue";
+import MkEmoji from "./global/MkEmoji.vue";
+import MkError from "./global/MkError.vue";
+import MkLoading from "./global/MkLoading.vue";
+import Mfm from "./global/MkMisskeyFlavoredMarkdown.vue";
 import MkPageHeader from "./global/MkPageHeader.vue";
 import MkSpacer from "./global/MkSpacer.vue";
 import MkStickyContainer from "./global/MkStickyContainer.vue";
+import MkTime from "./global/MkTime.vue";
+import MkUrl from "./global/MkUrl.vue";
+import MkUserName from "./global/MkUserName.vue";
+import RouterView from "./global/RouterView.vue";
+import I18n from "./global/i18n";
 
 export default function (app: App) {
 	app.component("I18n", I18n);

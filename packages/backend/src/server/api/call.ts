@@ -1,17 +1,17 @@
-import { performance } from "perf_hooks";
-import type Koa from "koa";
+import { fetchMeta } from "@/misc/fetch-meta.js";
+import { getIpHash } from "@/misc/get-ip-hash.js";
+import type { AccessToken } from "@/models/entities/access-token.js";
+import type { AccessToken } from "@/models/entities/access-token.js";
 import type { CacheableLocalUser } from "@/models/entities/user.js";
 import { User } from "@/models/entities/user.js";
-import type { AccessToken } from "@/models/entities/access-token.js";
-import { getIpHash } from "@/misc/get-ip-hash.js";
-import { limiter } from "./limiter.js";
+import type Koa from "koa";
+import { performance } from "perf_hooks";
+import compatibility from "./compatibility.js";
 import type { IEndpointMeta } from "./endpoints.js";
 import endpoints from "./endpoints.js";
-import compatibility from "./compatibility.js";
 import { ApiError } from "./error.js";
+import { limiter } from "./limiter.js";
 import { apiLogger } from "./logger.js";
-import type { AccessToken } from "@/models/entities/access-token.js";
-import { fetchMeta } from "@/misc/fetch-meta.js";
 
 const accessDenied = {
 	message: "Access denied.",
@@ -52,7 +52,7 @@ export default async (
 		if (user) {
 			limitActor = user.id;
 		} else {
-			limitActor = getIpHash(ctx!.ip);
+			limitActor = getIpHash(ctx?.ip);
 		}
 
 		const limit = Object.assign({}, ep.meta.limit);
@@ -87,7 +87,7 @@ export default async (
 		});
 	}
 
-	if (ep.meta.requireCredential && user!.isSuspended) {
+	if (ep.meta.requireCredential && user?.isSuspended) {
 		throw new ApiError({
 			message: "Your account has been suspended.",
 			code: "YOUR_ACCOUNT_SUSPENDED",
@@ -96,7 +96,7 @@ export default async (
 		});
 	}
 
-	if (ep.meta.requireAdmin && !user!.isAdmin) {
+	if (ep.meta.requireAdmin && !user?.isAdmin) {
 		throw new ApiError(accessDenied, { reason: "You are not an admin." });
 	}
 
@@ -135,7 +135,7 @@ export default async (
 	// Cast non JSON input
 	if ((ep.meta.requireFile || ctx?.method === "GET") && ep.params.properties) {
 		for (const k of Object.keys(ep.params.properties)) {
-			const param = ep.params.properties![k];
+			const param = ep.params.properties?.[k];
 			if (
 				["boolean", "number", "integer"].includes(param.type ?? "") &&
 				typeof data[k] === "string"

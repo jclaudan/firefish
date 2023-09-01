@@ -1,7 +1,7 @@
 import { Instances, NoteReactions, Notes, Users } from "@/models/index.js";
-import define from "../define.js";
 import { driveChart, notesChart, usersChart } from "@/services/chart/index.js";
 import { IsNull } from "typeorm";
+import define from "../define.js";
 
 export const meta = {
 	requireCredential: false,

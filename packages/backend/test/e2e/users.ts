@@ -4,19 +4,19 @@ import * as assert from "assert";
 import { inspect } from "node:util";
 import { DEFAULT_POLICIES } from "@/core/RoleService.js";
 import type { Packed } from "@/misc/json-schema.js";
+import type { INestApplicationContext } from "@nestjs/common";
+import type * as misskey from "misskey-js";
 import {
-	signup,
-	post,
-	page,
-	role,
-	startServer,
 	api,
-	successfulApiCall,
 	failedApiCall,
+	page,
+	post,
+	role,
+	signup,
+	startServer,
+	successfulApiCall,
 	uploadFile,
 } from "../utils.js";
-import type * as misskey from "misskey-js";
-import type { INestApplicationContext } from "@nestjs/common";
 
 describe("ユーザー", () => {
 	// エンティティとしてのユーザーを主眼においたテストを記述する

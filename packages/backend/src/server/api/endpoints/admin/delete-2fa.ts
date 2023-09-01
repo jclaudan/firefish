@@ -1,4 +1,4 @@
-import { Users, UserProfiles } from "@/models/index.js";
+import { UserProfiles, Users } from "@/models/index.js";
 import { publishMainStream } from "@/services/stream.js";
 import define from "../../define.js";
 

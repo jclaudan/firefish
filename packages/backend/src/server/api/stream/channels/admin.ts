@@ -7,7 +7,7 @@ export default class extends Channel {
 
 	public async init(params: any) {
 		// Subscribe admin stream
-		this.subscriber.on(`adminStream:${this.user!.id}`, (data) => {
+		this.subscriber.on(`adminStream:${this.user?.id}`, (data) => {
 			this.send(data);
 		});
 	}

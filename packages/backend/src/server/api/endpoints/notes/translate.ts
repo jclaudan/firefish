@@ -1,13 +1,13 @@
 import { URLSearchParams } from "node:url";
-import fetch from "node-fetch";
 import config from "@/config/index.js";
-import { Converter } from "opencc-js";
-import { getAgentByUrl } from "@/misc/fetch.js";
 import { fetchMeta } from "@/misc/fetch-meta.js";
+import { getAgentByUrl } from "@/misc/fetch.js";
 import { Notes } from "@/models/index.js";
-import { ApiError } from "../../error.js";
+import fetch from "node-fetch";
+import { Converter } from "opencc-js";
 import { getNote } from "../../common/getters.js";
 import define from "../../define.js";
+import { ApiError } from "../../error.js";
 
 export const meta = {
 	tags: ["notes"],

@@ -1,8 +1,8 @@
-import Channel from "../channel.js";
 import { getWordHardMute } from "@/misc/check-word-mute.js";
-import { isUserRelated } from "@/misc/is-user-related.js";
 import { isInstanceMuted } from "@/misc/is-instance-muted.js";
+import { isUserRelated } from "@/misc/is-user-related.js";
 import type { Packed } from "@/misc/schema.js";
+import Channel from "../channel.js";
 
 export default class extends Channel {
 	public readonly chName = "homeTimeline";
@@ -28,7 +28,7 @@ export default class extends Channel {
 			if (!this.followingChannels.has(note.channelId)) return;
 		} else {
 			// その投稿のユーザーをフォローしていなかったら弾く
-			if (this.user!.id !== note.userId && !this.following.has(note.userId))
+			if (this.user?.id !== note.userId && !this.following.has(note.userId))
 				return;
 		}
 
@@ -46,8 +46,8 @@ export default class extends Channel {
 			const reply = note.reply;
 			// 「チャンネル接続主への返信」でもなければ、「チャンネル接続主が行った返信」でもなければ、「投稿者の投稿者自身への返信」でもない場合
 			if (
-				reply.userId !== this.user!.id &&
-				note.userId !== this.user!.id &&
+				reply.userId !== this.user?.id &&
+				note.userId !== this.user?.id &&
 				reply.userId !== note.userId
 			)
 				return;

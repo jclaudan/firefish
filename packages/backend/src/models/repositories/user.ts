@@ -1,42 +1,42 @@
-import { In, Not } from "typeorm";
-import Ajv from "ajv";
+import config from "@/config/index.js";
+import { USER_ACTIVE_THRESHOLD, USER_ONLINE_THRESHOLD } from "@/const.js";
+import { db } from "@/db/postgre.js";
+import { getAntennas } from "@/misc/antenna-cache.js";
+import { Cache } from "@/misc/cache.js";
+import { populateEmojis } from "@/misc/populate-emojis.js";
+import type { Packed } from "@/misc/schema.js";
 import type { ILocalUser, IRemoteUser } from "@/models/entities/user.js";
 import { User } from "@/models/entities/user.js";
-import config from "@/config/index.js";
-import type { Packed } from "@/misc/schema.js";
 import type { Promiseable } from "@/prelude/await-all.js";
 import { awaitAll } from "@/prelude/await-all.js";
-import { populateEmojis } from "@/misc/populate-emojis.js";
-import { getAntennas } from "@/misc/antenna-cache.js";
-import { USER_ACTIVE_THRESHOLD, USER_ONLINE_THRESHOLD } from "@/const.js";
-import { Cache } from "@/misc/cache.js";
-import { db } from "@/db/postgre.js";
-import { isActor, getApId } from "@/remote/activitypub/type.js";
 import DbResolver from "@/remote/activitypub/db-resolver.js";
-import Resolver from "@/remote/activitypub/resolver.js";
 import { createPerson } from "@/remote/activitypub/models/person.js";
+import Resolver from "@/remote/activitypub/resolver.js";
+import { getApId, isActor } from "@/remote/activitypub/type.js";
+import Ajv from "ajv";
+import { In, Not } from "typeorm";
+import type { Instance } from "../entities/instance.js";
 import {
 	AnnouncementReads,
 	Announcements,
 	Blockings,
 	ChannelFollowings,
 	DriveFiles,
-	Followings,
 	FollowRequests,
+	Followings,
 	Instances,
 	MessagingMessages,
 	Mutings,
-	RenoteMutings,
-	Notes,
 	NoteUnreads,
+	Notes,
 	Notifications,
 	Pages,
+	RenoteMutings,
 	UserGroupJoinings,
 	UserNotePinings,
 	UserProfiles,
 	UserSecurityKeys,
 } from "../index.js";
-import type { Instance } from "../entities/instance.js";
 
 const userInstanceCache = new Cache<Instance | null>(
 	"userInstance",
@@ -482,7 +482,7 @@ export const UserRepository = db.getRepository(User).extend({
 
 			...(opts.detail
 				? {
-						url: profile!.url,
+						url: profile?.url,
 						uri: user.uri,
 						movedToUri: user.movedToUri
 							? await this.userFromURI(user.movedToUri)
@@ -500,11 +500,11 @@ export const UserRepository = db.getRepository(User).extend({
 						bannerColor: null, // 後方互換性のため
 						isSilenced: user.isSilenced || falsy,
 						isSuspended: user.isSuspended || falsy,
-						description: profile!.description,
-						location: profile!.location,
-						birthday: profile!.birthday,
-						lang: profile!.lang,
-						fields: profile!.fields,
+						description: profile?.description,
+						location: profile?.location,
+						birthday: profile?.birthday,
+						lang: profile?.lang,
+						fields: profile?.fields,
 						followersCount: followersCount || 0,
 						followingCount: followingCount || 0,
 						notesCount: user.notesCount,
@@ -516,15 +516,15 @@ export const UserRepository = db.getRepository(User).extend({
 								detail: true,
 							},
 						),
-						pinnedPageId: profile!.pinnedPageId,
-						pinnedPage: profile!.pinnedPageId
-							? Pages.pack(profile!.pinnedPageId, me)
+						pinnedPageId: profile?.pinnedPageId,
+						pinnedPage: profile?.pinnedPageId
+							? Pages.pack(profile?.pinnedPageId, me)
 							: null,
-						publicReactions: profile!.publicReactions,
-						ffVisibility: profile!.ffVisibility,
-						twoFactorEnabled: profile!.twoFactorEnabled,
-						usePasswordLessLogin: profile!.usePasswordLessLogin,
-						securityKeys: profile!.twoFactorEnabled
+						publicReactions: profile?.publicReactions,
+						ffVisibility: profile?.ffVisibility,
+						twoFactorEnabled: profile?.twoFactorEnabled,
+						usePasswordLessLogin: profile?.usePasswordLessLogin,
+						securityKeys: profile?.twoFactorEnabled
 							? UserSecurityKeys.countBy({
 									userId: user.id,
 							  }).then((result) => result >= 1)
@@ -536,14 +536,14 @@ export const UserRepository = db.getRepository(User).extend({
 				? {
 						avatarId: user.avatarId,
 						bannerId: user.bannerId,
-						injectFeaturedNote: profile!.injectFeaturedNote,
-						receiveAnnouncementEmail: profile!.receiveAnnouncementEmail,
-						alwaysMarkNsfw: profile!.alwaysMarkNsfw,
-						autoSensitive: profile!.autoSensitive,
-						carefulBot: profile!.carefulBot,
-						autoAcceptFollowed: profile!.autoAcceptFollowed,
-						noCrawle: profile!.noCrawle,
-						preventAiLearning: profile!.preventAiLearning,
+						injectFeaturedNote: profile?.injectFeaturedNote,
+						receiveAnnouncementEmail: profile?.receiveAnnouncementEmail,
+						alwaysMarkNsfw: profile?.alwaysMarkNsfw,
+						autoSensitive: profile?.autoSensitive,
+						carefulBot: profile?.carefulBot,
+						autoAcceptFollowed: profile?.autoAcceptFollowed,
+						noCrawle: profile?.noCrawle,
+						preventAiLearning: profile?.preventAiLearning,
 						isExplorable: user.isExplorable,
 						isDeleted: user.isDeleted,
 						hideOnlineStatus: user.hideOnlineStatus,
@@ -564,19 +564,19 @@ export const UserRepository = db.getRepository(User).extend({
 						hasUnreadNotification: this.getHasUnreadNotification(user.id),
 						hasPendingReceivedFollowRequest:
 							this.getHasPendingReceivedFollowRequest(user.id),
-						integrations: profile!.integrations,
-						mutedWords: profile!.mutedWords,
-						mutedInstances: profile!.mutedInstances,
-						mutingNotificationTypes: profile!.mutingNotificationTypes,
-						emailNotificationTypes: profile!.emailNotificationTypes,
+						integrations: profile?.integrations,
+						mutedWords: profile?.mutedWords,
+						mutedInstances: profile?.mutedInstances,
+						mutingNotificationTypes: profile?.mutingNotificationTypes,
+						emailNotificationTypes: profile?.emailNotificationTypes,
 				  }
 				: {}),
 
 			...(opts.includeSecrets
 				? {
-						email: profile!.email,
-						emailVerified: profile!.emailVerified,
-						securityKeysList: profile!.twoFactorEnabled
+						email: profile?.email,
+						emailVerified: profile?.emailVerified,
+						securityKeysList: profile?.twoFactorEnabled
 							? UserSecurityKeys.find({
 									where: {
 										userId: user.id,

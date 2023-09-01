@@ -1,6 +1,6 @@
+import config from "@/config/index.js";
 import { getHtml } from "@/misc/fetch.js";
 import { JSDOM } from "jsdom";
-import config from "@/config/index.js";
 
 async function getRelMeLinks(url: string): Promise<string[]> {
 	try {

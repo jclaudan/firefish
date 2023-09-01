@@ -1,16 +1,16 @@
-import autobind from "autobind-decorator";
+import { version } from "@/config";
+import * as os from "@/os";
 import { AiScript, utils, values } from "@syuilo/aiscript";
+import autobind from "autobind-decorator";
 import type { Ref } from "vue";
 import { markRaw, ref, unref } from "vue";
-import { collectPageVars } from "../collect-page-vars";
-import { createAiScriptEnv } from "../aiscript/api";
-import { initAiLib, initHpmlLib } from "./lib";
-import type { Expr, Variable } from "./expr";
-import { isLiteralValue } from "./expr";
 import { HpmlError, HpmlScope } from ".";
 import type { Fn, PageVar, envVarsDef } from ".";
-import * as os from "@/os";
-import { version } from "@/config";
+import { createAiScriptEnv } from "../aiscript/api";
+import { collectPageVars } from "../collect-page-vars";
+import type { Expr, Variable } from "./expr";
+import { isLiteralValue } from "./expr";
+import { initAiLib, initHpmlLib } from "./lib";
 
 /**
  * Hpml evaluator

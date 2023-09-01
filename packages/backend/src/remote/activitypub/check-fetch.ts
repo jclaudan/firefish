@@ -1,14 +1,14 @@
+import type { IncomingMessage } from "http";
 import { URL } from "url";
-import httpSignature from "@peertube/http-signature";
 import config from "@/config/index.js";
-import { fetchMeta } from "@/misc/fetch-meta.js";
 import { toPuny } from "@/misc/convert-host.js";
+import { fetchMeta } from "@/misc/fetch-meta.js";
+import { shouldBlockInstance } from "@/misc/should-block-instance.js";
+import type { UserPublickey } from "@/models/entities/user-publickey.js";
+import type { CacheableRemoteUser } from "@/models/entities/user.js";
 import DbResolver from "@/remote/activitypub/db-resolver.js";
 import { getApId } from "@/remote/activitypub/type.js";
-import { shouldBlockInstance } from "@/misc/should-block-instance.js";
-import type { IncomingMessage } from "http";
-import type { CacheableRemoteUser } from "@/models/entities/user.js";
-import type { UserPublickey } from "@/models/entities/user-publickey.js";
+import httpSignature from "@peertube/http-signature";
 
 export async function hasSignature(req: IncomingMessage): Promise<string> {
 	const meta = await fetchMeta();

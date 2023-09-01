@@ -1,9 +1,9 @@
 // Original: https://github.com/rollup/plugins/tree/8835dd2aed92f408d7dc72d7cc25a9728e16face/packages/json
 
+import { RollupJsonOptions } from "@rollup/plugin-json";
+import { createFilter, dataToEsm } from "@rollup/pluginutils";
 import JSON5 from "json5";
 import { Plugin } from "rollup";
-import { createFilter, dataToEsm } from "@rollup/pluginutils";
-import { RollupJsonOptions } from "@rollup/plugin-json";
 
 interface Json5SyntaxError extends SyntaxError {
 	lineNumber: number;

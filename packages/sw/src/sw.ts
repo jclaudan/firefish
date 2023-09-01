@@ -1,12 +1,12 @@
-import { get } from "idb-keyval";
-import * as Acct from "firefish-js/built/acct";
-import type { PushNotificationDataMap } from "@/types";
 import {
 	createEmptyNotification,
 	createNotification,
 } from "@/scripts/create-notification";
 import { swLang } from "@/scripts/lang";
 import * as swos from "@/scripts/operations";
+import type { PushNotificationDataMap } from "@/types";
+import * as Acct from "firefish-js/built/acct";
+import { get } from "idb-keyval";
 
 globalThis.addEventListener("install", () => {
 	// ev.waitUntil(globalThis.skipWaiting());

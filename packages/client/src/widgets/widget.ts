@@ -1,8 +1,8 @@
-import { reactive, watch } from "vue";
-import { throttle } from "throttle-debounce";
-import type { Form, GetFormResultType } from "@/scripts/form";
 import * as os from "@/os";
 import { deepClone } from "@/scripts/clone";
+import type { Form, GetFormResultType } from "@/scripts/form";
+import { throttle } from "throttle-debounce";
+import { reactive, watch } from "vue";
 
 export interface Widget<P extends Record<string, unknown>> {
 	id: string;

@@ -1,7 +1,7 @@
-import { defineAsyncComponent } from "vue";
 import { $i } from "@/account";
 import { i18n } from "@/i18n";
 import { popup } from "@/os";
+import { defineAsyncComponent } from "vue";
 
 export function pleaseLogin(path?: string) {
 	if ($i) return;

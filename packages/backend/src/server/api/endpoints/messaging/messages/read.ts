@@ -1,10 +1,10 @@
-import define from "../../../define.js";
-import { ApiError } from "../../../error.js";
 import { MessagingMessages } from "@/models/index.js";
 import {
-	readUserMessagingMessage,
 	readGroupMessagingMessage,
+	readUserMessagingMessage,
 } from "../../../common/read-messaging-message.js";
+import define from "../../../define.js";
+import { ApiError } from "../../../error.js";
 
 export const meta = {
 	tags: ["messaging"],

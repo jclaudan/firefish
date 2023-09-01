@@ -1,6 +1,6 @@
-import { ref } from "vue";
-import tinycolor from "tinycolor2";
 import { globalEvents } from "@/events";
+import tinycolor from "tinycolor2";
+import { ref } from "vue";
 
 export interface Theme {
 	id: string;
@@ -11,8 +11,8 @@ export interface Theme {
 	props: Record<string, string>;
 }
 
-import lightTheme from "@/themes/_light.json5";
 import darkTheme from "@/themes/_dark.json5";
+import lightTheme from "@/themes/_light.json5";
 import { deepClone } from "./clone";
 
 export const themeProps = Object.keys(lightTheme.props).filter(
@@ -59,7 +59,7 @@ export const getBuiltinThemes = () =>
 
 export const getBuiltinThemesRef = () => {
 	const builtinThemes = ref<Theme[]>([]);
-	getBuiltinThemes().then((themes) => (builtinThemes.value = themes));
+	getBuiltinThemes().then((themes) => builtinThemes.value === themes);
 	return builtinThemes;
 };
 

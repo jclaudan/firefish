@@ -1,11 +1,11 @@
-import type Koa from "koa";
-import { Users, UserProfiles } from "@/models/index.js";
+import { UserProfiles, Users } from "@/models/index.js";
 import { publishMainStream } from "@/services/stream.js";
+import type Koa from "koa";
 
 export default async (ctx: Koa.Context) => {
 	const body = ctx.request.body;
 
-	const code = body["code"];
+	const code = body.code;
 
 	const profile = await UserProfiles.findOneByOrFail({ emailVerifyCode: code });
 

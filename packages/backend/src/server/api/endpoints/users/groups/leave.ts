@@ -1,4 +1,4 @@
-import { UserGroups, UserGroupJoinings } from "@/models/index.js";
+import { UserGroupJoinings, UserGroups } from "@/models/index.js";
 import define from "../../../define.js";
 import { ApiError } from "../../../error.js";
 

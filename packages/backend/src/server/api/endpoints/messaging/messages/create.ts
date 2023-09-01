@@ -1,16 +1,16 @@
+import type { UserGroup } from "@/models/entities/user-group.js";
+import type { User } from "@/models/entities/user.js";
+import {
+	Blockings,
+	DriveFiles,
+	MessagingMessages,
+	UserGroupJoinings,
+	UserGroups,
+} from "@/models/index.js";
+import { createMessage } from "@/services/messages/create.js";
+import { getUser } from "../../../common/getters.js";
 import define from "../../../define.js";
 import { ApiError } from "../../../error.js";
-import { getUser } from "../../../common/getters.js";
-import {
-	MessagingMessages,
-	DriveFiles,
-	UserGroups,
-	UserGroupJoinings,
-	Blockings,
-} from "@/models/index.js";
-import type { User } from "@/models/entities/user.js";
-import type { UserGroup } from "@/models/entities/user-group.js";
-import { createMessage } from "@/services/messages/create.js";
 
 export const meta = {
 	tags: ["messaging"],

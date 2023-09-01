@@ -1,8 +1,8 @@
-import { UserGroupJoinings, UserGroupInvitations } from "@/models/index.js";
 import { genId } from "@/misc/gen-id.js";
 import type { UserGroupJoining } from "@/models/entities/user-group-joining.js";
-import { ApiError } from "../../../../error.js";
+import { UserGroupInvitations, UserGroupJoinings } from "@/models/index.js";
 import define from "../../../../define.js";
+import { ApiError } from "../../../../error.js";
 
 export const meta = {
 	tags: ["groups", "users"],

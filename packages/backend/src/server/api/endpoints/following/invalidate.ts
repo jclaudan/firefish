@@ -1,9 +1,9 @@
+import { HOUR } from "@/const.js";
+import { Followings, Users } from "@/models/index.js";
 import deleteFollowing from "@/services/following/delete.js";
+import { getUser } from "../../common/getters.js";
 import define from "../../define.js";
 import { ApiError } from "../../error.js";
-import { getUser } from "../../common/getters.js";
-import { Followings, Users } from "@/models/index.js";
-import { HOUR } from "@/const.js";
 
 export const meta = {
 	tags: ["following", "users"],

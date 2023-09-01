@@ -49,7 +49,7 @@ export default define(meta, paramDef, async (ps, me) => {
 	const maskedKeys = ["accessToken", "accessTokenSecret", "refreshToken"];
 	Object.keys(profile.integrations).forEach((integration) => {
 		maskedKeys.forEach(
-			(key) => (profile.integrations[integration][key] = "<MASKED>"),
+			(key) => profile.integrations[integration][key] === "<MASKED>",
 		);
 	});
 

@@ -1,4 +1,4 @@
-import { Pages, PageLikes } from "@/models/index.js";
+import { PageLikes, Pages } from "@/models/index.js";
 import define from "../../define.js";
 import { ApiError } from "../../error.js";
 

@@ -1,8 +1,8 @@
-import Channel from "../channel.js";
 import {
 	isInstanceMuted,
 	isUserFromMutedInstance,
 } from "@/misc/is-instance-muted.js";
+import Channel from "../channel.js";
 
 export default class extends Channel {
 	public readonly chName = "main";
@@ -11,7 +11,7 @@ export default class extends Channel {
 
 	public async init(params: any) {
 		// Subscribe main stream channel
-		this.subscriber.on(`mainStream:${this.user!.id}`, async (data) => {
+		this.subscriber.on(`mainStream:${this.user?.id}`, async (data) => {
 			switch (data.type) {
 				case "notification": {
 					// Ignore notifications from instances the user has muted

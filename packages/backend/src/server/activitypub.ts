@@ -1,36 +1,36 @@
 import Router from "@koa/router";
-import json from "koa-json-body";
 import httpSignature from "@peertube/http-signature";
+import json from "koa-json-body";
 
-import { In, IsNull, Not } from "typeorm";
-import { renderActivity } from "@/remote/activitypub/renderer/index.js";
-import renderNote from "@/remote/activitypub/renderer/note.js";
-import renderKey from "@/remote/activitypub/renderer/key.js";
-import { renderPerson } from "@/remote/activitypub/renderer/person.js";
-import renderEmoji from "@/remote/activitypub/renderer/emoji.js";
-import { inbox as processInbox } from "@/queue/index.js";
 import { isSelfHost, toPuny } from "@/misc/convert-host.js";
+import { fetchMeta } from "@/misc/fetch-meta.js";
+import { getUserKeypair } from "@/misc/keypair-store.js";
+import type { ILocalUser, User } from "@/models/entities/user.js";
 import {
+	Emojis,
+	FollowRequests,
+	NoteReactions,
 	Notes,
 	Users,
-	Emojis,
-	NoteReactions,
-	FollowRequests,
 } from "@/models/index.js";
-import type { ILocalUser, User } from "@/models/entities/user.js";
-import { renderLike } from "@/remote/activitypub/renderer/like.js";
-import { getUserKeypair } from "@/misc/keypair-store.js";
+import { inbox as processInbox } from "@/queue/index.js";
 import {
 	checkFetch,
-	hasSignature,
 	getSignatureUser,
+	hasSignature,
 } from "@/remote/activitypub/check-fetch.js";
-import { getInstanceActor } from "@/services/instance-actor.js";
-import { fetchMeta } from "@/misc/fetch-meta.js";
+import renderEmoji from "@/remote/activitypub/renderer/emoji.js";
 import renderFollow from "@/remote/activitypub/renderer/follow.js";
+import { renderActivity } from "@/remote/activitypub/renderer/index.js";
+import renderKey from "@/remote/activitypub/renderer/key.js";
+import { renderLike } from "@/remote/activitypub/renderer/like.js";
+import renderNote from "@/remote/activitypub/renderer/note.js";
+import { renderPerson } from "@/remote/activitypub/renderer/person.js";
+import { getInstanceActor } from "@/services/instance-actor.js";
+import { In, IsNull, Not } from "typeorm";
 import Featured from "./activitypub/featured.js";
-import Following from "./activitypub/following.js";
 import Followers from "./activitypub/followers.js";
+import Following from "./activitypub/following.js";
 import Outbox, { packActivity } from "./activitypub/outbox.js";
 import { serverLogger } from "./index.js";
 

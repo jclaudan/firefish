@@ -1,10 +1,10 @@
-import { publishUserListStream } from "@/services/stream.js";
-import type { User } from "@/models/entities/user.js";
-import type { UserList } from "@/models/entities/user-list.js";
-import { UserListJoinings, Users } from "@/models/index.js";
-import type { UserListJoining } from "@/models/entities/user-list-joining.js";
-import { genId } from "@/misc/gen-id.js";
 import { fetchProxyAccount } from "@/misc/fetch-proxy-account.js";
+import { genId } from "@/misc/gen-id.js";
+import type { UserListJoining } from "@/models/entities/user-list-joining.js";
+import type { UserList } from "@/models/entities/user-list.js";
+import type { User } from "@/models/entities/user.js";
+import { UserListJoinings, Users } from "@/models/index.js";
+import { publishUserListStream } from "@/services/stream.js";
 import createFollowing from "../following/create.js";
 
 export async function pushUserToUserList(target: User, list: UserList) {

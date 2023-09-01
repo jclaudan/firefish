@@ -1,9 +1,9 @@
-import deleteNote from "@/services/note/delete.js";
+import { HOUR, SECOND } from "@/const.js";
 import { Users } from "@/models/index.js";
-import define from "../../define.js";
+import deleteNote from "@/services/note/delete.js";
 import { getNote } from "../../common/getters.js";
+import define from "../../define.js";
 import { ApiError } from "../../error.js";
-import { SECOND, HOUR } from "@/const.js";
 
 export const meta = {
 	tags: ["notes"],

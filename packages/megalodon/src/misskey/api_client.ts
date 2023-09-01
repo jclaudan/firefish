@@ -1,15 +1,15 @@
-import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import dayjs from "dayjs";
 import FormData from "form-data";
 
 import { DEFAULT_UA } from "../default";
+import MegalodonEntity from "../entity";
+import NotificationType from "../notification";
 import proxyAgent, { ProxyConfig } from "../proxy_config";
 import Response from "../response";
 import MisskeyEntity from "./entity";
-import MegalodonEntity from "../entity";
-import WebSocket from "./web_socket";
 import MisskeyNotificationType from "./notification";
-import NotificationType from "../notification";
+import WebSocket from "./web_socket";
 
 namespace MisskeyAPI {
 	export namespace Entity {

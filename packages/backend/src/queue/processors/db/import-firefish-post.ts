@@ -1,15 +1,15 @@
-import * as Post from "@/misc/post.js";
-import create from "@/services/note/create.js";
-import { Users } from "@/models/index.js";
-import type { DbUserImportMastoPostJobData } from "@/queue/types.js";
-import { queueLogger } from "../../logger.js";
-import { uploadFromUrl } from "@/services/drive/upload-from-url.js";
-import type { DriveFile } from "@/models/entities/drive-file.js";
-import type Bull from "bull";
-import { createImportCkPostJob } from "@/queue/index.js";
-import { Notes, NoteEdits } from "@/models/index.js";
-import type { Note } from "@/models/entities/note.js";
 import { genId } from "@/misc/gen-id.js";
+import * as Post from "@/misc/post.js";
+import type { DriveFile } from "@/models/entities/drive-file.js";
+import type { Note } from "@/models/entities/note.js";
+import { Users } from "@/models/index.js";
+import { NoteEdits, Notes } from "@/models/index.js";
+import { createImportCkPostJob } from "@/queue/index.js";
+import type { DbUserImportMastoPostJobData } from "@/queue/types.js";
+import { uploadFromUrl } from "@/services/drive/upload-from-url.js";
+import create from "@/services/note/create.js";
+import type Bull from "bull";
+import { queueLogger } from "../../logger.js";
 
 const logger = queueLogger.createSubLogger("import-firefish-post");
 
@@ -71,12 +71,12 @@ export async function importCkPost(
 			fileIds: note.fileIds,
 			updatedAt: new Date(),
 		});
-		logger.info(`Note file updated`);
+		logger.info("Note file updated");
 	}
 	if (!note) {
 		note = await create(user, {
 			createdAt: createdAt,
-			files: files.length == 0 ? undefined : files,
+			files: files.length === 0 ? undefined : files,
 			poll: undefined,
 			text: text || undefined,
 			reply: post.replyId ? job.data.parent : null,
@@ -90,9 +90,9 @@ export async function importCkPost(
 			apHashtags: undefined,
 			apEmojis: undefined,
 		});
-		logger.info(`Create new note`);
+		logger.info("Create new note");
 	} else {
-		logger.info(`Note exist`);
+		logger.info("Note exist");
 	}
 	logger.succ("Imported");
 	if (post.childNotes) {

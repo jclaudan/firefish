@@ -1,8 +1,8 @@
+import { hashPassword } from "@/misc/password.js";
+import { PasswordResetRequests, UserProfiles, Users } from "@/models/index.js";
 import { publishMainStream } from "@/services/stream.js";
-import { Users, UserProfiles, PasswordResetRequests } from "@/models/index.js";
 import define from "../define.js";
 import { ApiError } from "../error.js";
-import { hashPassword } from "@/misc/password.js";
 
 export const meta = {
 	tags: ["reset password"],

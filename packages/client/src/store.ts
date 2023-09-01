@@ -362,11 +362,11 @@ interface Plugin {
 	ast: any[];
 }
 
+import darkTheme from "@/themes/d-rosepine.json5";
 /**
  * 常にメモリにロードしておく必要がないような設定情報を保管するストレージ(非リアクティブ)
  */
 import lightTheme from "@/themes/l-rosepinedawn.json5";
-import darkTheme from "@/themes/d-rosepine.json5";
 
 export class ColdDeviceStorage {
 	public static default = {

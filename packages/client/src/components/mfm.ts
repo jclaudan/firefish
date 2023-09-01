@@ -1,19 +1,19 @@
-import { defineComponent, h } from "vue";
-import * as mfm from "mfm-js";
-import type { VNode } from "vue";
-import MkUrl from "@/components/global/MkUrl.vue";
+import MkCode from "@/components/MkCode.vue";
+import MkFormula from "@/components/MkFormula.vue";
+import MkGoogle from "@/components/MkGoogle.vue";
 import MkLink from "@/components/MkLink.vue";
 import MkMention from "@/components/MkMention.vue";
-import MkEmoji from "@/components/global/MkEmoji.vue";
-import { concat } from "@/scripts/array";
-import MkFormula from "@/components/MkFormula.vue";
-import MkCode from "@/components/MkCode.vue";
-import MkGoogle from "@/components/MkGoogle.vue";
 import MkSparkle from "@/components/MkSparkle.vue";
 import MkA from "@/components/global/MkA.vue";
+import MkEmoji from "@/components/global/MkEmoji.vue";
+import MkUrl from "@/components/global/MkUrl.vue";
 import { host } from "@/config";
+import { concat } from "@/scripts/array";
 import { reducedMotion } from "@/scripts/reduced-motion";
 import { defaultStore } from "@/store";
+import * as mfm from "mfm-js";
+import { defineComponent, h } from "vue";
+import type { VNode } from "vue";
 
 export default defineComponent({
 	props: {

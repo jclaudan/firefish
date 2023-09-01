@@ -1,8 +1,8 @@
+import { defaultStore } from "@/store";
+import keywordSet from "emojilib";
+import individualData from "unicode-emoji-json/data-by-emoji.json";
 import data from "unicode-emoji-json/data-by-group.json";
 import emojiComponents from "unicode-emoji-json/data-emoji-components.json";
-import individualData from "unicode-emoji-json/data-by-emoji.json";
-import keywordSet from "emojilib";
-import { defaultStore } from "@/store";
 
 export interface UnicodeEmojiDef {
 	emoji: string;

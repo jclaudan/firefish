@@ -1,8 +1,8 @@
+import { HOUR, SECOND } from "@/const.js";
 import deleteReaction from "@/services/note/reaction/delete.js";
-import define from "../../../define.js";
 import { getNote } from "../../../common/getters.js";
+import define from "../../../define.js";
 import { ApiError } from "../../../error.js";
-import { SECOND, HOUR } from "@/const.js";
 
 export const meta = {
 	tags: ["reactions", "notes"],

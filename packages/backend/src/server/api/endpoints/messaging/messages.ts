@@ -1,19 +1,19 @@
-import define from "../../define.js";
-import { ApiError } from "../../error.js";
-import { getUser } from "../../common/getters.js";
 import {
 	MessagingMessages,
-	UserGroups,
 	UserGroupJoinings,
+	UserGroups,
 	Users,
 } from "@/models/index.js";
-import { makePaginationQuery } from "../../common/make-pagination-query.js";
 import { Brackets } from "typeorm";
+import { getUser } from "../../common/getters.js";
+import { makePaginationQuery } from "../../common/make-pagination-query.js";
 import {
-	readUserMessagingMessage,
-	readGroupMessagingMessage,
 	deliverReadActivity,
+	readGroupMessagingMessage,
+	readUserMessagingMessage,
 } from "../../common/read-messaging-message.js";
+import define from "../../define.js";
+import { ApiError } from "../../error.js";
 
 export const meta = {
 	tags: ["messaging"],

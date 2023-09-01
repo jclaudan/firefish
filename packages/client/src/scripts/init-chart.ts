@@ -1,3 +1,4 @@
+import { defaultStore } from "@/store";
 import {
 	ArcElement,
 	BarController,
@@ -16,11 +17,10 @@ import {
 	Title,
 	Tooltip,
 } from "chart.js";
+import "chartjs-adapter-date-fns";
+import { MatrixController, MatrixElement } from "chartjs-chart-matrix";
 import gradient from "chartjs-plugin-gradient";
 import zoomPlugin from "chartjs-plugin-zoom";
-import { MatrixController, MatrixElement } from "chartjs-chart-matrix";
-import { defaultStore } from "@/store";
-import "chartjs-adapter-date-fns";
 
 export function initChart() {
 	Chart.register(

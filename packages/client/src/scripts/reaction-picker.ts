@@ -1,16 +1,12 @@
+import { popup } from "@/os";
 import type { Ref } from "vue";
 import { defineAsyncComponent, ref } from "vue";
-import { popup } from "@/os";
 
 class ReactionPicker {
 	private src: Ref<HTMLElement | null> = ref(null);
 	private manualShowing = ref(false);
 	private onChosen?: (reaction: string) => void;
 	private onClosed?: () => void;
-
-	constructor() {
-		// nop
-	}
 
 	public async init() {
 		await popup(
@@ -24,14 +20,14 @@ class ReactionPicker {
 			},
 			{
 				done: (reaction) => {
-					this.onChosen!(reaction);
+					this.onChosen?.(reaction);
 				},
 				close: () => {
 					this.manualShowing.value = false;
 				},
 				closed: () => {
 					this.src.value = null;
-					this.onClosed!();
+					this.onClosed?.();
 				},
 			},
 		);

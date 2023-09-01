@@ -1,6 +1,6 @@
-import { IsNull, MoreThan, Not } from "typeorm";
 import { Followings, Instances } from "@/models/index.js";
 import { awaitAll } from "@/prelude/await-all.js";
+import { IsNull, MoreThan, Not } from "typeorm";
 import define from "../../define.js";
 
 export const meta = {

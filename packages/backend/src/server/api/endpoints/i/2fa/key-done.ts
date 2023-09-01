@@ -1,16 +1,16 @@
 import { promisify } from "node:util";
-import * as cbor from "cbor";
-import define from "../../../define.js";
+import config from "@/config/index.js";
+import { comparePassword } from "@/misc/password.js";
 import {
+	AttestationChallenges,
 	UserProfiles,
 	UserSecurityKeys,
-	AttestationChallenges,
 	Users,
 } from "@/models/index.js";
-import config from "@/config/index.js";
-import { procedures, hash } from "../../../2fa.js";
 import { publishMainStream } from "@/services/stream.js";
-import { comparePassword } from "@/misc/password.js";
+import * as cbor from "cbor";
+import { hash, procedures } from "../../../2fa.js";
+import define from "../../../define.js";
 
 const cborDecodeFirst = promisify(cbor.decodeFirst) as any;
 const rpIdHashReal = hash(Buffer.from(config.hostname, "utf-8"));

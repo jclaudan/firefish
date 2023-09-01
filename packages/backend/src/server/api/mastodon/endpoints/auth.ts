@@ -1,8 +1,8 @@
-import megalodon, { MegalodonInterface } from "megalodon";
 import Router from "@koa/router";
 import { koaBody } from "koa-body";
-import { getClient } from "../ApiMastodonCompatibleService.js";
 import bodyParser from "koa-bodyparser";
+import megalodon, { MegalodonInterface } from "megalodon";
+import { getClient } from "../ApiMastodonCompatibleService.js";
 
 const readScope = [
 	"read:account",

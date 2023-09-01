@@ -1,10 +1,10 @@
+import type { NoteReaction } from "@/models/entities/note-reaction.js";
+import { NoteReactions } from "@/models/index.js";
 import type { FindOptionsWhere } from "typeorm";
 import { DeepPartial } from "typeorm";
-import { NoteReactions } from "@/models/index.js";
-import type { NoteReaction } from "@/models/entities/note-reaction.js";
+import { getNote } from "../../common/getters.js";
 import define from "../../define.js";
 import { ApiError } from "../../error.js";
-import { getNote } from "../../common/getters.js";
 
 export const meta = {
 	tags: ["notes", "reactions"],

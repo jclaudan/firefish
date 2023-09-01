@@ -1,6 +1,6 @@
-import { IsNull } from "typeorm";
-import { Pages, Users } from "@/models/index.js";
 import type { Page } from "@/models/entities/page.js";
+import { Pages, Users } from "@/models/index.js";
+import { IsNull } from "typeorm";
 import define from "../../define.js";
 import { ApiError } from "../../error.js";
 

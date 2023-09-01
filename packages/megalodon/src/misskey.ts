@@ -1,22 +1,22 @@
-import FormData from "form-data";
 import AsyncLock from "async-lock";
+import FormData from "form-data";
 
-import MisskeyAPI from "./misskey/api_client";
+import fs from "node:fs";
+import MegalodonEntity from "@/entity";
 import { DEFAULT_UA } from "./default";
-import { ProxyConfig } from "./proxy_config";
-import OAuth from "./oauth";
-import Response from "./response";
 import Entity from "./entity";
 import {
-	MegalodonInterface,
-	WebSocketInterface,
-	NoImplementedError,
 	ArgumentError,
+	MegalodonInterface,
+	NoImplementedError,
 	UnexpectedError,
+	WebSocketInterface,
 } from "./megalodon";
-import MegalodonEntity from "@/entity";
-import fs from "node:fs";
+import MisskeyAPI from "./misskey/api_client";
 import MisskeyNotificationType from "./misskey/notification";
+import OAuth from "./oauth";
+import { ProxyConfig } from "./proxy_config";
+import Response from "./response";
 
 type AccountCache = {
 	locks: AsyncLock;
@@ -1538,7 +1538,7 @@ export default class Misskey implements MegalodonInterface {
 				"gi",
 			);
 
-			if (m.acct == m.username) {
+			if (m.acct === m.username) {
 				status.content = status.content.replace(regexLocalUser, `@${m.acct}`);
 			} else if (!status.content.match(regexFull)) {
 				status.content = status.content.replace(regexRemoteUser, `@${m.acct}`);
@@ -1559,7 +1559,7 @@ export default class Misskey implements MegalodonInterface {
 	): Promise<Entity.Mention[]> {
 		const mentions: Entity.Mention[] = [];
 
-		if (text == undefined) return mentions;
+		if (text === undefined) return mentions;
 
 		const mentionMatch = text.matchAll(
 			/(?<=^|\s)@(?<user>[a-zA-Z0-9_]+)(?:@(?<host>[a-zA-Z0-9-.]+\.[a-zA-Z0-9-]+)|)(?=[^a-zA-Z0-9]|$)/g,
@@ -1859,10 +1859,10 @@ export default class Misskey implements MegalodonInterface {
 			.then((res) => {
 				if (
 					!res.data ||
-					(res.data != "public" &&
-						res.data != "home" &&
-						res.data != "followers" &&
-						res.data != "specified")
+					(res.data !== "public" &&
+						res.data !== "home" &&
+						res.data !== "followers" &&
+						res.data !== "specified")
 				)
 					return "public";
 				return this.converter.visibility(res.data);
@@ -2861,7 +2861,7 @@ export default class Misskey implements MegalodonInterface {
 				data: await Promise.all(
 					res.data
 						.filter(
-							(p) => p.type != MisskeyNotificationType.FollowRequestAccepted,
+							(p) => p.type !== MisskeyNotificationType.FollowRequestAccepted,
 						) // these aren't supported on mastodon
 						.map((n) =>
 							this.notificationWithDetails(
@@ -2989,7 +2989,7 @@ export default class Misskey implements MegalodonInterface {
 					return this.client
 						.post("/api/ap/show", { uri: q })
 						.then(async (res) => {
-							if (res.status != 200 || res.data.type != "User") {
+							if (res.status !== 200 || res.data.type !== "User") {
 								res.status = 200;
 								res.statusText = "OK";
 								res.data = {
@@ -3112,7 +3112,7 @@ export default class Misskey implements MegalodonInterface {
 					return this.client
 						.post("/api/ap/show", { uri: q })
 						.then(async (res) => {
-							if (res.status != 200 || res.data.type != "Note") {
+							if (res.status !== 200 || res.data.type !== "Note") {
 								res.status = 200;
 								res.statusText = "OK";
 								res.data = {

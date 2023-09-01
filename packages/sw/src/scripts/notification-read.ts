@@ -1,8 +1,8 @@
 declare let self: ServiceWorkerGlobalScope;
 
-import { get } from "idb-keyval";
-import { pushNotificationDataMap } from "@/types";
 import { api } from "@/scripts/operations";
+import { pushNotificationDataMap } from "@/types";
+import { get } from "idb-keyval";
 
 type Accounts = {
 	[x: string]: {

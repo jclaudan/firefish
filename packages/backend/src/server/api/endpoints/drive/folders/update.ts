@@ -1,7 +1,7 @@
+import { DriveFolders } from "@/models/index.js";
 import { publishDriveStream } from "@/services/stream.js";
 import define from "../../../define.js";
 import { ApiError } from "../../../error.js";
-import { DriveFolders } from "@/models/index.js";
 
 export const meta = {
 	tags: ["drive"],
@@ -84,10 +84,10 @@ export default define(meta, paramDef, async (ps, user) => {
 					id: folderId,
 				});
 
-				if (folder2!.id === folder!.id) {
+				if (folder2?.id === folder?.id) {
 					return true;
-				} else if (folder2!.parentId) {
-					return await checkCircle(folder2!.parentId);
+				} else if (folder2?.parentId) {
+					return await checkCircle(folder2?.parentId);
 				} else {
 					return false;
 				}

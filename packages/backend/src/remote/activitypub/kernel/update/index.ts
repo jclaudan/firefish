@@ -1,10 +1,10 @@
 import type { CacheableRemoteUser } from "@/models/entities/user.js";
-import type { IUpdate } from "../../type.js";
-import { getApType, isActor } from "../../type.js";
 import { apLogger } from "../../logger.js";
 import { updateNote } from "../../models/note.js";
-import Resolver from "../../resolver.js";
 import { updatePerson } from "../../models/person.js";
+import Resolver from "../../resolver.js";
+import type { IUpdate } from "../../type.js";
+import { getApType, isActor } from "../../type.js";
 
 /**
  * Handler for the Update activity
@@ -37,12 +37,13 @@ export default async (
 		case "Note":
 		case "Article":
 		case "Document":
-		case "Page":
+		case "Page": {
 			let failed = false;
 			await updateNote(object, resolver).catch((e: Error) => {
 				failed = true;
 			});
 			return failed ? "skip: Note update failed" : "ok: Note updated";
+		}
 
 		default:
 			return `skip: Unknown type: ${objectType}`;

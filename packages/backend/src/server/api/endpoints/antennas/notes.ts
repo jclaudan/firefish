@@ -1,13 +1,13 @@
-import define from "../../define.js";
-import readNote from "@/services/note/read.js";
-import { Antennas, Notes } from "@/models/index.js";
 import { redisClient } from "@/db/redis.js";
 import { genId, getTimestamp } from "@/misc/gen-id.js";
-import { makePaginationQuery } from "../../common/make-pagination-query.js";
-import { generateVisibilityQuery } from "../../common/generate-visibility-query.js";
-import { generateMutedUserQuery } from "../../common/generate-muted-user-query.js";
-import { ApiError } from "../../error.js";
+import { Antennas, Notes } from "@/models/index.js";
+import readNote from "@/services/note/read.js";
 import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
+import { generateMutedUserQuery } from "../../common/generate-muted-user-query.js";
+import { generateVisibilityQuery } from "../../common/generate-visibility-query.js";
+import { makePaginationQuery } from "../../common/make-pagination-query.js";
+import define from "../../define.js";
+import { ApiError } from "../../error.js";
 
 export const meta = {
 	tags: ["antennas", "account", "notes"],

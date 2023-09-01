@@ -1,15 +1,15 @@
+import * as Acct from "@/misc/acct.js";
 import type { Antenna } from "@/models/entities/antenna.js";
 import type { Note } from "@/models/entities/note.js";
 import type { User } from "@/models/entities/user.js";
 import {
-	UserListJoinings,
-	UserGroupJoinings,
 	Blockings,
+	UserGroupJoinings,
+	UserListJoinings,
 } from "@/models/index.js";
-import { getFullApAccount } from "./convert-host.js";
-import * as Acct from "@/misc/acct.js";
-import type { Packed } from "./schema.js";
 import { Cache } from "./cache.js";
+import { getFullApAccount } from "./convert-host.js";
+import type { Packed } from "./schema.js";
 
 const blockingCache = new Cache<User["id"][]>("blocking", 60 * 5);
 
@@ -101,8 +101,8 @@ export async function checkHitAntenna(
 		const matched = keywords.some((and) =>
 			and.every((keyword) =>
 				antenna.caseSensitive
-					? note.text!.includes(keyword)
-					: note.text!.toLowerCase().includes(keyword.toLowerCase()),
+					? note.text?.includes(keyword)
+					: note.text?.toLowerCase().includes(keyword.toLowerCase()),
 			),
 		);
 
@@ -120,8 +120,8 @@ export async function checkHitAntenna(
 		const matched = excludeKeywords.some((and) =>
 			and.every((keyword) =>
 				antenna.caseSensitive
-					? note.text!.includes(keyword)
-					: note.text!.toLowerCase().includes(keyword.toLowerCase()),
+					? note.text?.includes(keyword)
+					: note.text?.toLowerCase().includes(keyword.toLowerCase()),
 			),
 		);
 

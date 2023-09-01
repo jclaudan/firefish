@@ -1,13 +1,13 @@
+import { $i, iAmModerator } from "@/account";
+import { host } from "@/config";
+import { i18n } from "@/i18n";
+import type { Router } from "@/nirax";
+import * as os from "@/os";
+import { mainRouter } from "@/router";
+import copyToClipboard from "@/scripts/copy-to-clipboard";
+import { userActions } from "@/store";
 import * as Acct from "firefish-js/built/acct";
 import { defineAsyncComponent } from "vue";
-import { i18n } from "@/i18n";
-import copyToClipboard from "@/scripts/copy-to-clipboard";
-import { host } from "@/config";
-import * as os from "@/os";
-import { userActions } from "@/store";
-import { $i, iAmModerator } from "@/account";
-import { mainRouter } from "@/router";
-import type { Router } from "@/nirax";
 
 export function getUserMenu(user, router: Router = mainRouter) {
 	const meId = $i ? $i.id : null;

@@ -1,10 +1,10 @@
-import { defineAsyncComponent, reactive } from "vue";
-import type * as misskey from "firefish-js";
-import { i18n } from "./i18n";
-import { del, get, set } from "@/scripts/idb-proxy";
 import { apiUrl } from "@/config";
 import { alert, api, popup, popupMenu, success, waiting } from "@/os";
+import { del, get, set } from "@/scripts/idb-proxy";
 import { reloadChannel, unisonReload } from "@/scripts/unison-reload";
+import type * as misskey from "firefish-js";
+import { defineAsyncComponent, reactive } from "vue";
+import { i18n } from "./i18n";
 
 // TODO: 他のタブと永続化されたstateを同期
 

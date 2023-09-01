@@ -1,5 +1,5 @@
-import { appendQuery } from "./url";
 import * as config from "@/config";
+import { appendQuery } from "./url";
 
 export function popout(path: string, w?: HTMLElement) {
 	let url =

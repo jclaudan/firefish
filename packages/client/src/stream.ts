@@ -1,7 +1,7 @@
-import * as Misskey from "firefish-js";
-import { markRaw } from "vue";
 import { $i } from "@/account";
 import { url } from "@/config";
+import * as Misskey from "firefish-js";
+import { markRaw } from "vue";
 
 export const stream = markRaw(
 	new Misskey.Stream(

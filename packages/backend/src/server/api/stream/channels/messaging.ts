@@ -1,12 +1,12 @@
+import type { UserGroup } from "@/models/entities/user-group.js";
+import type { ILocalUser, IRemoteUser, User } from "@/models/entities/user.js";
+import { MessagingMessages, UserGroupJoinings, Users } from "@/models/index.js";
 import {
-	readUserMessagingMessage,
-	readGroupMessagingMessage,
 	deliverReadActivity,
+	readGroupMessagingMessage,
+	readUserMessagingMessage,
 } from "../../common/read-messaging-message.js";
 import Channel from "../channel.js";
-import { UserGroupJoinings, Users, MessagingMessages } from "@/models/index.js";
-import type { User, ILocalUser, IRemoteUser } from "@/models/entities/user.js";
-import type { UserGroup } from "@/models/entities/user-group.js";
 import type { StreamMessages } from "../types.js";
 
 export default class extends Channel {
@@ -40,7 +40,7 @@ export default class extends Channel {
 		// Check joining
 		if (this.groupId) {
 			const joining = await UserGroupJoinings.findOneBy({
-				userId: this.user!.id,
+				userId: this.user?.id,
 				userGroupId: this.groupId,
 			});
 
@@ -52,7 +52,7 @@ export default class extends Channel {
 		this.emitTypersIntervalId = setInterval(this.emitTypers, 5000);
 
 		this.subCh = this.otherpartyId
-			? `messagingStream:${this.user!.id}-${this.otherpartyId}`
+			? `messagingStream:${this.user?.id}-${this.otherpartyId}`
 			: `messagingStream:${this.groupId}`;
 
 		// Subscribe messaging stream
@@ -80,7 +80,7 @@ export default class extends Channel {
 		switch (type) {
 			case "read":
 				if (this.otherpartyId) {
-					readUserMessagingMessage(this.user!.id, this.otherpartyId, [body.id]);
+					readUserMessagingMessage(this.user?.id, this.otherpartyId, [body.id]);
 
 					// リモートユーザーからのメッセージだったら既読配信
 					if (
@@ -97,7 +97,7 @@ export default class extends Channel {
 						});
 					}
 				} else if (this.groupId) {
-					readGroupMessagingMessage(this.user!.id, this.groupId, [body.id]);
+					readGroupMessagingMessage(this.user?.id, this.groupId, [body.id]);
 				}
 				break;
 		}

@@ -1,9 +1,9 @@
-import Channel from "../channel.js";
-import { fetchMeta } from "@/misc/fetch-meta.js";
 import { getWordHardMute } from "@/misc/check-word-mute.js";
-import { isUserRelated } from "@/misc/is-user-related.js";
+import { fetchMeta } from "@/misc/fetch-meta.js";
 import { isInstanceMuted } from "@/misc/is-instance-muted.js";
+import { isUserRelated } from "@/misc/is-user-related.js";
 import type { Packed } from "@/misc/schema.js";
+import Channel from "../channel.js";
 
 export default class extends Channel {
 	public readonly chName = "hybridTimeline";
@@ -20,8 +20,8 @@ export default class extends Channel {
 		const meta = await fetchMeta();
 		if (
 			meta.disableLocalTimeline &&
-			!this.user!.isAdmin &&
-			!this.user!.isModerator
+			!this.user?.isAdmin &&
+			!this.user?.isModerator
 		)
 			return;
 
@@ -39,7 +39,7 @@ export default class extends Channel {
 		// フォローしているチャンネルの投稿 の場合だけ
 		if (
 			!(
-				(note.channelId == null && this.user!.id === note.userId) ||
+				(note.channelId == null && this.user?.id === note.userId) ||
 				(note.channelId == null && this.following.has(note.userId)) ||
 				(note.channelId == null &&
 					note.user.host == null &&
@@ -63,8 +63,8 @@ export default class extends Channel {
 			const reply = note.reply;
 			// 「チャンネル接続主への返信」でもなければ、「チャンネル接続主が行った返信」でもなければ、「投稿者の投稿者自身への返信」でもない場合
 			if (
-				reply.userId !== this.user!.id &&
-				note.userId !== this.user!.id &&
+				reply.userId !== this.user?.id &&
+				note.userId !== this.user?.id &&
 				reply.userId !== note.userId
 			)
 				return;

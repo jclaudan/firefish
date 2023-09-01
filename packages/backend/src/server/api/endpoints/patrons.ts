@@ -1,8 +1,8 @@
-import define from "../define.js";
-import { redisClient } from "@/db/redis.js";
 import * as fs from "node:fs";
-import { fileURLToPath } from "node:url";
 import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import { redisClient } from "@/db/redis.js";
+import define from "../define.js";
 
 const _filename = fileURLToPath(import.meta.url);
 const _dirname = dirname(_filename);
@@ -52,7 +52,7 @@ export default define(meta, paramDef, async (ps) => {
 		await redisClient.set("patrons", JSON.stringify(patrons), "EX", 3600);
 	}
 	return {
-		patrons: patrons["patrons"],
-		sponsors: patrons["sponsors"],
+		patrons: patrons.patrons,
+		sponsors: patrons.sponsors,
 	};
 });

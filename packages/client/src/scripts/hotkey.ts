@@ -83,7 +83,7 @@ export const makeHotkey = (keymap: Keymap) => {
 
 	return (ev: KeyboardEvent) => {
 		if (document.activeElement) {
-			if (ignoreElemens.some((el) => document.activeElement!.matches(el)))
+			if (ignoreElemens.some((el) => document.activeElement?.matches(el)))
 				return;
 			if (document.activeElement.attributes.contenteditable) return;
 		}

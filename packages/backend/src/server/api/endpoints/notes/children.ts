@@ -1,9 +1,9 @@
 import { Notes } from "@/models/index.js";
-import define from "../../define.js";
-import { makePaginationQuery } from "../../common/make-pagination-query.js";
-import { generateVisibilityQuery } from "../../common/generate-visibility-query.js";
-import { generateMutedUserQuery } from "../../common/generate-muted-user-query.js";
 import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
+import { generateMutedUserQuery } from "../../common/generate-muted-user-query.js";
+import { generateVisibilityQuery } from "../../common/generate-visibility-query.js";
+import { makePaginationQuery } from "../../common/make-pagination-query.js";
+import define from "../../define.js";
 
 export const meta = {
 	tags: ["notes"],

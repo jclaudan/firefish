@@ -1,8 +1,8 @@
+import { Emojis } from "@/models/index.js";
+import { IsNull } from "typeorm";
+import { toPunyNullable } from "./convert-host.js";
 import { emojiRegex } from "./emoji-regex.js";
 import { fetchMeta } from "./fetch-meta.js";
-import { Emojis } from "@/models/index.js";
-import { toPunyNullable } from "./convert-host.js";
-import { IsNull } from "typeorm";
 
 const legacies = new Map([
 	["like", "👍"],
@@ -38,7 +38,7 @@ export function convertLegacyReactions(reactions: Record<string, number>) {
 			decodedReactions.set(reaction, decodedReaction);
 		}
 
-		let emoji = legacies.get(decodedReaction.reaction);
+		const emoji = legacies.get(decodedReaction.reaction);
 		if (emoji) {
 			_reactions.set(emoji, (_reactions.get(emoji) || 0) + reactions[reaction]);
 		} else {

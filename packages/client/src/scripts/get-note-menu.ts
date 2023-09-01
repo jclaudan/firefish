@@ -1,15 +1,15 @@
-import type { Ref } from "vue";
-import { defineAsyncComponent, inject } from "vue";
-import type * as misskey from "firefish-js";
 import { $i } from "@/account";
+import { url } from "@/config";
 import { i18n } from "@/i18n";
 import { instance } from "@/instance";
 import * as os from "@/os";
 import copyToClipboard from "@/scripts/copy-to-clipboard";
-import { url } from "@/config";
-import { noteActions } from "@/store";
-import { shareAvailable } from "@/scripts/share-available";
 import { getUserMenu } from "@/scripts/get-user-menu";
+import { shareAvailable } from "@/scripts/share-available";
+import { noteActions } from "@/store";
+import type * as misskey from "firefish-js";
+import type { Ref } from "vue";
+import { defineAsyncComponent, inject } from "vue";
 
 export function getNoteMenu(props: {
 	note: misskey.entities.Note;

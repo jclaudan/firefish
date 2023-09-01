@@ -1,7 +1,7 @@
-import megalodon, { MegalodonInterface } from "megalodon";
 import Router from "@koa/router";
-import { getClient } from "../ApiMastodonCompatibleService.js";
+import megalodon, { MegalodonInterface } from "megalodon";
 import { IdType, convertId } from "../../index.js";
+import { getClient } from "../ApiMastodonCompatibleService.js";
 import { convertFilter } from "../converters.js";
 
 export function apiFilterMastodon(router: Router): void {

@@ -1,17 +1,17 @@
-import Router from "@koa/router";
-import { getClient } from "../ApiMastodonCompatibleService.js";
-import { emojiRegexAtStartToEnd } from "@/misc/emoji-regex.js";
-import axios from "axios";
 import querystring from "node:querystring";
+import { emojiRegexAtStartToEnd } from "@/misc/emoji-regex.js";
+import Router from "@koa/router";
+import axios from "axios";
 import qs from "qs";
-import { convertTimelinesArgsId, limitToInt } from "./timeline.js";
-import { convertId, IdType } from "../../index.js";
+import { IdType, convertId } from "../../index.js";
+import { getClient } from "../ApiMastodonCompatibleService.js";
 import {
 	convertAccount,
 	convertAttachment,
 	convertPoll,
 	convertStatus,
 } from "../converters.js";
+import { convertTimelinesArgsId, limitToInt } from "./timeline.js";
 
 function normalizeQuery(data: any) {
 	const str = querystring.stringify(data);
@@ -80,12 +80,12 @@ export function apiStatusMastodon(router: Router): void {
 					body.poll.multiple != null &&
 					typeof body.poll.multiple === "string"
 				)
-					body.poll.multiple = body.poll.multiple == "true";
+					body.poll.multiple = body.poll.multiple === "true";
 				if (
 					body.poll.hide_totals != null &&
 					typeof body.poll.hide_totals === "string"
 				)
-					body.poll.hide_totals = body.poll.hide_totals == "true";
+					body.poll.hide_totals = body.poll.hide_totals === "true";
 			}
 
 			const data = await client.postStatus(text, body);
@@ -107,7 +107,7 @@ export function apiStatusMastodon(router: Router): void {
 			ctx.body = convertStatus(data.data);
 		} catch (e: any) {
 			console.error(e);
-			ctx.status = ctx.status == 404 ? 404 : 401;
+			ctx.status = ctx.status === 404 ? 404 : 401;
 			ctx.body = e.response.data;
 		}
 	});

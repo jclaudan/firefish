@@ -1,17 +1,17 @@
 import type { App } from "vue";
 
-import userPreview from "./user-preview";
-import size from "./size";
-import getSize from "./get-size";
-import ripple from "./ripple";
-import tooltip from "./tooltip";
-import hotkey from "./hotkey";
-import appear from "./appear";
-import anim from "./anim";
-import clickAnime from "./click-anime";
-import panel from "./panel";
 import adaptiveBorder from "./adaptive-border";
+import anim from "./anim";
+import appear from "./appear";
+import clickAnime from "./click-anime";
 import focus from "./focus";
+import getSize from "./get-size";
+import hotkey from "./hotkey";
+import panel from "./panel";
+import ripple from "./ripple";
+import size from "./size";
+import tooltip from "./tooltip";
+import userPreview from "./user-preview";
 
 export default function (app: App) {
 	app.directive("userPreview", userPreview);

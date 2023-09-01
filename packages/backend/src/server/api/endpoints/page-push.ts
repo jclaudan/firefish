@@ -1,5 +1,5 @@
+import { Pages, Users } from "@/models/index.js";
 import { publishMainStream } from "@/services/stream.js";
-import { Users, Pages } from "@/models/index.js";
 import define from "../define.js";
 import { ApiError } from "../error.js";
 

@@ -1,6 +1,6 @@
-import define from "../../../define.js";
-import { Users, UserProfiles, UserSecurityKeys } from "@/models/index.js";
+import { UserProfiles, UserSecurityKeys, Users } from "@/models/index.js";
 import { publishMainStream } from "@/services/stream.js";
+import define from "../../../define.js";
 import { ApiError } from "../../../error.js";
 
 export const meta = {

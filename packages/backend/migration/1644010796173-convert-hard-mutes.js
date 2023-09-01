@@ -4,11 +4,11 @@ export class convertHardMutes1644010796173 {
 	name = "convertHardMutes1644010796173";
 
 	async up(queryRunner) {
-		let entries = await queryRunner.query(
+		const entries = await queryRunner.query(
 			`SELECT "userId", "mutedWords" FROM "user_profile" WHERE "userHost" IS NULL`,
 		);
 		for (let i = 0; i < entries.length; i++) {
-			let words = entries[i].mutedWords
+			const words = entries[i].mutedWords
 				.map((line) => {
 					if (typeof line === "string") return [];
 					const regexp = line.join(" ").match(/^\/(.+)\/(.*)$/);
@@ -41,11 +41,11 @@ export class convertHardMutes1644010796173 {
 	}
 
 	async down(queryRunner) {
-		let entries = await queryRunner.query(
+		const entries = await queryRunner.query(
 			`SELECT "userId", "mutedWords" FROM "user_profile"`,
 		);
 		for (let i = 0; i < entries.length; i++) {
-			let words = entries[i].mutedWords
+			const words = entries[i].mutedWords
 				.map((line) => {
 					if (Array.isArray(line)) {
 						return line;

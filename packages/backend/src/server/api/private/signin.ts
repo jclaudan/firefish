@@ -1,35 +1,35 @@
-import type Koa from "koa";
-import * as OTPAuth from "otpauth";
-import signin from "../common/signin.js";
+import { randomBytes } from "node:crypto";
 import config from "@/config/index.js";
-import {
-	Users,
-	Signins,
-	UserProfiles,
-	UserSecurityKeys,
-	AttestationChallenges,
-} from "@/models/index.js";
-import type { ILocalUser } from "@/models/entities/user.js";
 import { genId } from "@/misc/gen-id.js";
+import { getIpHash } from "@/misc/get-ip-hash.js";
 import {
 	comparePassword,
 	hashPassword,
 	isOldAlgorithm,
 } from "@/misc/password.js";
-import { verifyLogin, hash } from "../2fa.js";
-import { randomBytes } from "node:crypto";
+import type { ILocalUser } from "@/models/entities/user.js";
+import {
+	AttestationChallenges,
+	Signins,
+	UserProfiles,
+	UserSecurityKeys,
+	Users,
+} from "@/models/index.js";
+import type Koa from "koa";
+import * as OTPAuth from "otpauth";
 import { IsNull } from "typeorm";
+import { hash, verifyLogin } from "../2fa.js";
+import signin from "../common/signin.js";
 import { limiter } from "../limiter.js";
-import { getIpHash } from "@/misc/get-ip-hash.js";
 
 export default async (ctx: Koa.Context) => {
 	ctx.set("Access-Control-Allow-Origin", config.url);
 	ctx.set("Access-Control-Allow-Credentials", "true");
 
 	const body = ctx.request.body as any;
-	const username = body["username"];
-	const password = body["password"];
-	const token = body["token"];
+	const username = body.username;
+	const password = body.password;
+	const token = body.token;
 
 	function error(status: number, error: { id: string }) {
 		ctx.status = status;

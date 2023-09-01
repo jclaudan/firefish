@@ -2,38 +2,38 @@ import * as fs from "node:fs";
 
 import { v4 as uuid } from "uuid";
 
-import type S3 from "aws-sdk/clients/s3.js";
-import sharp from "sharp";
-import { IsNull } from "typeorm";
-import { publishMainStream, publishDriveStream } from "@/services/stream.js";
-import { fetchMeta } from "@/misc/fetch-meta.js";
+import { FILE_TYPE_BROWSERSAFE } from "@/const.js";
 import { contentDisposition } from "@/misc/content-disposition.js";
+import { fetchMeta } from "@/misc/fetch-meta.js";
+import { genId } from "@/misc/gen-id.js";
 import { getFileInfo } from "@/misc/get-file-info.js";
-import {
-	DriveFiles,
-	DriveFolders,
-	Users,
-	Instances,
-	UserProfiles,
-} from "@/models/index.js";
+import { IdentifiableError } from "@/misc/identifiable-error.js";
+import { isDuplicateKeyValueError } from "@/misc/is-duplicate-key-value-error.js";
 import { DriveFile } from "@/models/entities/drive-file.js";
 import type { IRemoteUser, User } from "@/models/entities/user.js";
 import {
+	DriveFiles,
+	DriveFolders,
+	Instances,
+	UserProfiles,
+	Users,
+} from "@/models/index.js";
+import {
 	driveChart,
-	perUserDriveChart,
 	instanceChart,
+	perUserDriveChart,
 } from "@/services/chart/index.js";
-import { genId } from "@/misc/gen-id.js";
-import { isDuplicateKeyValueError } from "@/misc/is-duplicate-key-value-error.js";
-import { FILE_TYPE_BROWSERSAFE } from "@/const.js";
-import { IdentifiableError } from "@/misc/identifiable-error.js";
-import { getS3 } from "./s3.js";
-import { InternalStorage } from "./internal-storage.js";
+import { publishDriveStream, publishMainStream } from "@/services/stream.js";
+import type S3 from "aws-sdk/clients/s3.js";
+import sharp from "sharp";
+import { IsNull } from "typeorm";
+import { deleteFile } from "./delete-file.js";
+import { GenerateVideoThumbnail } from "./generate-video-thumbnail.js";
 import type { IImage } from "./image-processor.js";
 import { convertSharpToWebp } from "./image-processor.js";
+import { InternalStorage } from "./internal-storage.js";
 import { driveLogger } from "./logger.js";
-import { GenerateVideoThumbnail } from "./generate-video-thumbnail.js";
-import { deleteFile } from "./delete-file.js";
+import { getS3 } from "./s3.js";
 
 const logger = driveLogger.createSubLogger("register", "yellow");
 
@@ -597,11 +597,11 @@ export async function addFile({
 	} = {};
 
 	if (info.width) {
-		properties["width"] = info.width;
-		properties["height"] = info.height;
+		properties.width = info.width;
+		properties.height = info.height;
 	}
 	if (info.orientation != null) {
-		properties["orientation"] = info.orientation;
+		properties.orientation = info.orientation;
 	}
 
 	const profile = user
@@ -625,14 +625,14 @@ export async function addFile({
 	file.maybeSensitive = info.sensitive;
 	file.maybePorn = info.porn;
 	file.isSensitive = user
-		? Users.isLocalUser(user) && profile!.alwaysMarkNsfw
+		? Users.isLocalUser(user) && profile?.alwaysMarkNsfw
 			? true
 			: sensitive !== null && sensitive !== undefined
 			? sensitive
 			: false
 		: false;
 
-	if (info.sensitive && profile!.autoSensitive) file.isSensitive = true;
+	if (info.sensitive && profile?.autoSensitive) file.isSensitive = true;
 	if (info.sensitive && instance.setSensitiveFlagAutomatically)
 		file.isSensitive = true;
 

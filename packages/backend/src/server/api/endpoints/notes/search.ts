@@ -1,16 +1,16 @@
-import { FindManyOptions, In } from "typeorm";
-import { Notes } from "@/models/index.js";
-import { Note } from "@/models/entities/note.js";
 import config from "@/config/index.js";
 import es from "@/db/elasticsearch.js";
-import sonic from "@/db/sonic.js";
 import meilisearch, { MeilisearchNote } from "@/db/meilisearch.js";
-import define from "../../define.js";
-import { makePaginationQuery } from "../../common/make-pagination-query.js";
-import { generateVisibilityQuery } from "../../common/generate-visibility-query.js";
-import { generateMutedUserQuery } from "../../common/generate-muted-user-query.js";
-import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
+import sonic from "@/db/sonic.js";
 import { sqlLikeEscape } from "@/misc/sql-like-escape.js";
+import { Note } from "@/models/entities/note.js";
+import { Notes } from "@/models/index.js";
+import { FindManyOptions, In } from "typeorm";
+import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
+import { generateMutedUserQuery } from "../../common/generate-muted-user-query.js";
+import { generateVisibilityQuery } from "../../common/generate-visibility-query.js";
+import { makePaginationQuery } from "../../common/make-pagination-query.js";
+import define from "../../define.js";
 
 export const meta = {
 	tags: ["notes"],
@@ -239,7 +239,7 @@ export default define(meta, paramDef, async (ps, me) => {
 		while (found.length < ps.limit && start < noteIDs.length) {
 			const chunk = noteIDs.slice(start, start + chunkSize);
 
-			let query: FindManyOptions = {
+			const query: FindManyOptions = {
 				where: {
 					id: In(chunk),
 				},

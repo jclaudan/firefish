@@ -1,7 +1,7 @@
+import { Antennas, UserGroupJoinings, UserLists } from "@/models/index.js";
+import { publishInternalEvent } from "@/services/stream.js";
 import define from "../../define.js";
 import { ApiError } from "../../error.js";
-import { Antennas, UserLists, UserGroupJoinings } from "@/models/index.js";
-import { publishInternalEvent } from "@/services/stream.js";
 
 export const meta = {
 	tags: ["antennas"],

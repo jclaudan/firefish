@@ -1,5 +1,3 @@
-"use strict";
-
 window.onload = async () => {
 	const account = JSON.parse(localStorage.getItem("account"));
 	const i = account.token;

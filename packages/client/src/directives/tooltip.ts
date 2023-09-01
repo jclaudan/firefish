@@ -1,11 +1,11 @@
 // TODO: useTooltip関数使うようにしたい
 // ただディレクティブ内でonUnmountedなどのcomposition api使えるのか不明
 
-import type { Directive } from "vue";
-import { defineAsyncComponent, ref } from "vue";
-import { isTouchUsing } from "@/scripts/touch";
 import { alert, popup } from "@/os";
 import { mainRouter } from "@/router";
+import { isTouchUsing } from "@/scripts/touch";
+import type { Directive } from "vue";
+import { defineAsyncComponent, ref } from "vue";
 
 const start = isTouchUsing ? "touchstart" : "mouseover";
 const end = isTouchUsing ? "touchend" : "mouseleave";
@@ -14,7 +14,7 @@ export default {
 	mounted(el: HTMLElement, binding, vn) {
 		const delay = binding.modifiers.noDelay ? 0 : 100;
 
-		const self = ((el as any)._tooltipDirective_ = {} as any);
+		const self = (el as any)._tooltipDirective_ === ({} as any);
 
 		self.text = binding.value as string;
 		self._close = null;

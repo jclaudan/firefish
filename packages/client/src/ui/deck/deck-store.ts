@@ -1,10 +1,10 @@
-import { throttle } from "throttle-debounce";
-import { markRaw } from "vue";
-import type { notificationTypes } from "firefish-js";
-import { Storage } from "../../pizzax";
 import { i18n } from "@/i18n";
 import { api } from "@/os";
 import { deepClone } from "@/scripts/clone";
+import type { notificationTypes } from "firefish-js";
+import { throttle } from "throttle-debounce";
+import { markRaw } from "vue";
+import { Storage } from "../../pizzax";
 
 interface ColumnWidget {
 	name: string;

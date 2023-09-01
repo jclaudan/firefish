@@ -1,32 +1,32 @@
 import type { EventEmitter } from "events";
-import type * as websocket from "websocket";
-import readNote from "@/services/note/read.js";
-import type { User } from "@/models/entities/user.js";
+import type { Packed } from "@/misc/schema.js";
+import type { AccessToken } from "@/models/entities/access-token.js";
 import type { Channel as ChannelModel } from "@/models/entities/channel.js";
+import type { UserGroup } from "@/models/entities/user-group.js";
+import type { UserProfile } from "@/models/entities/user-profile.js";
+import type { User } from "@/models/entities/user.js";
 import {
-	Users,
+	Blockings,
+	ChannelFollowings,
 	Followings,
 	Mutings,
 	RenoteMutings,
 	UserProfiles,
-	ChannelFollowings,
-	Blockings,
+	Users,
 } from "@/models/index.js";
-import type { AccessToken } from "@/models/entities/access-token.js";
-import type { UserProfile } from "@/models/entities/user-profile.js";
+import readNote from "@/services/note/read.js";
 import {
 	publishChannelStream,
 	publishGroupMessagingStream,
 	publishMessagingStream,
 } from "@/services/stream.js";
-import type { UserGroup } from "@/models/entities/user-group.js";
-import type { Packed } from "@/misc/schema.js";
-import { readNotification } from "../common/read-notification.js";
-import channels from "./channels/index.js";
-import type Channel from "./channel.js";
-import type { StreamEventEmitter, StreamMessages } from "./types.js";
 import { Converter } from "megalodon";
+import type * as websocket from "websocket";
+import { readNotification } from "../common/read-notification.js";
 import { getClient } from "../mastodon/ApiMastodonCompatibleService.js";
+import type Channel from "./channel.js";
+import channels from "./channels/index.js";
+import type { StreamEventEmitter, StreamMessages } from "./types.js";
 
 /**
  * Main stream connection
@@ -159,7 +159,7 @@ export default class Connection {
 			// is Mastodon Compatible
 			this.isMastodonCompatible = true;
 			if (simpleObj.type === "subscribe") {
-				let forSubscribe = [];
+				const forSubscribe = [];
 				if (simpleObj.stream === "user") {
 					this.currentSubscribe.push(["user"]);
 					objs = [
@@ -329,7 +329,7 @@ export default class Connection {
 
 	private onReadNotification(payload: any) {
 		if (!payload.id) return;
-		readNotification(this.user!.id, [payload.id]);
+		readNotification(this.user?.id, [payload.id]);
 	}
 
 	/**
@@ -534,7 +534,7 @@ export default class Connection {
 	private async updateFollowing() {
 		const followings = await Followings.find({
 			where: {
-				followerId: this.user!.id,
+				followerId: this.user?.id,
 			},
 			select: ["followeeId"],
 		});
@@ -545,7 +545,7 @@ export default class Connection {
 	private async updateMuting() {
 		const mutings = await Mutings.find({
 			where: {
-				muterId: this.user!.id,
+				muterId: this.user?.id,
 			},
 			select: ["muteeId"],
 		});
@@ -556,7 +556,7 @@ export default class Connection {
 	private async updateRenoteMuting() {
 		const renoteMutings = await RenoteMutings.find({
 			where: {
-				muterId: this.user!.id,
+				muterId: this.user?.id,
 			},
 			select: ["muteeId"],
 		});
@@ -568,7 +568,7 @@ export default class Connection {
 		// ここでいうBlockingは被Blockingの意
 		const blockings = await Blockings.find({
 			where: {
-				blockeeId: this.user!.id,
+				blockeeId: this.user?.id,
 			},
 			select: ["blockerId"],
 		});
@@ -579,7 +579,7 @@ export default class Connection {
 	private async updateFollowingChannels() {
 		const followings = await ChannelFollowings.find({
 			where: {
-				followerId: this.user!.id,
+				followerId: this.user?.id,
 			},
 			select: ["followeeId"],
 		});
@@ -591,7 +591,7 @@ export default class Connection {
 
 	private async updateUserProfile() {
 		this.userProfile = await UserProfiles.findOneBy({
-			userId: this.user!.id,
+			userId: this.user?.id,
 		});
 	}
 

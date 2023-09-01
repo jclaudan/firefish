@@ -6,9 +6,9 @@
  * ※ https://github.com/TypeStrong/ts-node/pull/1585 が取り込まれたらこのカスタムローダーは必要なくなる
  */
 
-import { resolve as resolveTs, load } from "ts-node/esm";
-import { loadConfig, createMatchPath } from "tsconfig-paths";
 import { pathToFileURL } from "url";
+import { load, resolve as resolveTs } from "ts-node/esm";
+import { createMatchPath, loadConfig } from "tsconfig-paths";
 
 const tsconfig = loadConfig();
 const matchPath = createMatchPath(tsconfig.absoluteBaseUrl, tsconfig.paths);

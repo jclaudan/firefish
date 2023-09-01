@@ -1,9 +1,9 @@
-import { IsNull } from "typeorm";
-import { Users, Followings, UserProfiles } from "@/models/index.js";
 import { toPunyNullable } from "@/misc/convert-host.js";
+import { Followings, UserProfiles, Users } from "@/models/index.js";
+import { IsNull } from "typeorm";
+import { makePaginationQuery } from "../../common/make-pagination-query.js";
 import define from "../../define.js";
 import { ApiError } from "../../error.js";
-import { makePaginationQuery } from "../../common/make-pagination-query.js";
 
 export const meta = {
 	tags: ["users"],
@@ -78,7 +78,7 @@ export default define(meta, paramDef, async (ps, me) => {
 		ps.userId != null
 			? { id: ps.userId }
 			: {
-					usernameLower: ps.username!.toLowerCase(),
+					usernameLower: ps.username?.toLowerCase(),
 					host: toPunyNullable(ps.host) ?? IsNull(),
 			  },
 	);

@@ -1,19 +1,19 @@
-import type Koa from "koa";
-import Router from "@koa/router";
-import { OAuth2 } from "oauth";
-import { v4 as uuid } from "uuid";
-import { IsNull } from "typeorm";
-import { getJson } from "@/misc/fetch.js";
 import config from "@/config/index.js";
-import { publishMainStream } from "@/services/stream.js";
 import { fetchMeta } from "@/misc/fetch-meta.js";
-import { Users, UserProfiles } from "@/models/index.js";
+import { getJson } from "@/misc/fetch.js";
 import type { ILocalUser } from "@/models/entities/user.js";
+import { UserProfiles, Users } from "@/models/index.js";
+import { publishMainStream } from "@/services/stream.js";
+import Router from "@koa/router";
+import type Koa from "koa";
+import { OAuth2 } from "oauth";
+import { IsNull } from "typeorm";
+import { v4 as uuid } from "uuid";
 import { redisClient } from "../../../db/redis.js";
 import signin from "../common/signin.js";
 
 function getUserToken(ctx: Koa.BaseContext): string | null {
-	return ((ctx.headers["cookie"] || "").match(/igi=(\w+)/) || [null, null])[1];
+	return ((ctx.headers.cookie || "").match(/igi=(\w+)/) || [null, null])[1];
 }
 
 function compareOrigin(ctx: Koa.BaseContext): boolean {
@@ -21,7 +21,7 @@ function compareOrigin(ctx: Koa.BaseContext): boolean {
 		return url ? (url.endsWith("/") ? url.slice(0, url.length - 1) : url) : "";
 	}
 
-	const referer = ctx.headers["referer"];
+	const referer = ctx.headers.referer;
 
 	return normalizeUrl(referer) === normalizeUrl(config.url);
 }
@@ -108,7 +108,7 @@ router.get("/connect/github", async (ctx) => {
 	redisClient.set(userToken, JSON.stringify(params));
 
 	const oauth2 = await getOath2();
-	ctx.redirect(oauth2!.getAuthorizeUrl(params));
+	ctx.redirect(oauth2?.getAuthorizeUrl(params));
 });
 
 router.get("/signin/github", async (ctx) => {
@@ -129,7 +129,7 @@ router.get("/signin/github", async (ctx) => {
 	redisClient.set(sessid, JSON.stringify(params));
 
 	const oauth2 = await getOath2();
-	ctx.redirect(oauth2!.getAuthorizeUrl(params));
+	ctx.redirect(oauth2?.getAuthorizeUrl(params));
 });
 
 router.get("/gh/cb", async (ctx) => {
@@ -164,7 +164,7 @@ router.get("/gh/cb", async (ctx) => {
 		}
 
 		const { accessToken } = await new Promise<any>((res, rej) =>
-			oauth2!.getOAuthAccessToken(
+			oauth2?.getOAuthAccessToken(
 				code,
 				{
 					redirect_uri,
@@ -232,7 +232,7 @@ router.get("/gh/cb", async (ctx) => {
 		}
 
 		const { accessToken } = await new Promise<any>((res, rej) =>
-			oauth2!.getOAuthAccessToken(
+			oauth2?.getOAuthAccessToken(
 				code,
 				{ redirect_uri },
 				(err, accessToken, refresh, result) => {

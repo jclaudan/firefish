@@ -1,7 +1,7 @@
-import { Announcements, AnnouncementReads } from "@/models/index.js";
 import type { Announcement } from "@/models/entities/announcement.js";
-import define from "../../../define.js";
+import { AnnouncementReads, Announcements } from "@/models/index.js";
 import { makePaginationQuery } from "../../../common/make-pagination-query.js";
+import define from "../../../define.js";
 
 export const meta = {
 	tags: ["admin"],

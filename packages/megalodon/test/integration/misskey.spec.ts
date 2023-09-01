@@ -1,6 +1,6 @@
+import Misskey from "@/misskey";
 import MisskeyEntity from "@/misskey/entity";
 import MisskeyNotificationType from "@/misskey/notification";
-import Misskey from "@/misskey";
 import MegalodonNotificationType from "@/notification";
 import axios, { AxiosResponse } from "axios";
 

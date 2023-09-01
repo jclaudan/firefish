@@ -1,10 +1,10 @@
-import megalodon, { MegalodonInterface } from "megalodon";
 import Router from "@koa/router";
-import { getClient } from "../ApiMastodonCompatibleService.js";
 import axios from "axios";
+import megalodon, { MegalodonInterface } from "megalodon";
 import { Converter } from "megalodon";
-import { convertTimelinesArgsId, limitToInt } from "./timeline.js";
+import { getClient } from "../ApiMastodonCompatibleService.js";
 import { convertAccount, convertStatus } from "../converters.js";
+import { convertTimelinesArgsId, limitToInt } from "./timeline.js";
 
 export function apiSearchMastodon(router: Router): void {
 	router.get("/v1/search", async (ctx) => {

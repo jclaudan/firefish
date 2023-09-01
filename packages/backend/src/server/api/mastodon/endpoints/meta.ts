@@ -1,9 +1,9 @@
-import { Entity } from "megalodon";
 import config from "@/config/index.js";
+import { FILE_TYPE_BROWSERSAFE, MAX_NOTE_TEXT_LENGTH } from "@/const.js";
 import { fetchMeta } from "@/misc/fetch-meta.js";
-import { Users, Notes } from "@/models/index.js";
+import { Notes, Users } from "@/models/index.js";
+import { Entity } from "megalodon";
 import { IsNull } from "typeorm";
-import { MAX_NOTE_TEXT_LENGTH, FILE_TYPE_BROWSERSAFE } from "@/const.js";
 
 export async function getInstance(
 	response: Entity.Instance,

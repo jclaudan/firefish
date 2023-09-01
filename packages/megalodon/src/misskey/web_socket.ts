@@ -1,7 +1,7 @@
-import WS from "ws";
+import { EventEmitter } from "events";
 import dayjs, { Dayjs } from "dayjs";
 import { v4 as uuid } from "uuid";
-import { EventEmitter } from "events";
+import WS from "ws";
 import { WebSocketInterface } from "../megalodon";
 import proxyAgent, { ProxyConfig } from "../proxy_config";
 import MisskeyAPI from "./api_client";

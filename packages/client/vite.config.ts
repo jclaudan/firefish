@@ -2,10 +2,10 @@ import * as fs from "fs";
 import pluginVue from "@vitejs/plugin-vue";
 import { defineConfig } from "vite";
 
+import viteCompression from "vite-plugin-compression";
 import locales from "../../locales";
 import meta from "../../package.json";
 import pluginJson5 from "./vite.json5";
-import viteCompression from "vite-plugin-compression";
 
 const extensions = [
 	".ts",

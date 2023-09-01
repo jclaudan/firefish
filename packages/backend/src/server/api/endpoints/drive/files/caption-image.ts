@@ -1,5 +1,5 @@
-import define from "../../../define.js";
 import { createWorker } from "tesseract.js";
+import define from "../../../define.js";
 
 export const meta = {
 	tags: ["drive"],

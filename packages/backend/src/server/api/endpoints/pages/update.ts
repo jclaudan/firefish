@@ -1,8 +1,8 @@
+import { HOUR } from "@/const.js";
+import { DriveFiles, Pages } from "@/models/index.js";
 import { Not } from "typeorm";
-import { Pages, DriveFiles } from "@/models/index.js";
 import define from "../../define.js";
 import { ApiError } from "../../error.js";
-import { HOUR } from "@/const.js";
 
 export const meta = {
 	tags: ["pages"],
@@ -129,6 +129,6 @@ export default define(meta, paramDef, async (ps, user) => {
 				? null
 				: ps.eyeCatchingImageId === undefined
 				? page.eyeCatchingImageId
-				: eyeCatchingImage!.id,
+				: eyeCatchingImage?.id,
 	});
 });

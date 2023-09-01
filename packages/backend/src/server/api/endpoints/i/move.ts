@@ -1,18 +1,18 @@
-import type { User } from "@/models/entities/user.js";
-import { resolveUser } from "@/remote/resolve-user.js";
+import config from "@/config/index.js";
 import { DAY } from "@/const.js";
+import { parse } from "@/misc/acct.js";
+import type { User } from "@/models/entities/user.js";
+import { Followings, Users } from "@/models/index.js";
 import DeliverManager from "@/remote/activitypub/deliver-manager.js";
 import { renderActivity } from "@/remote/activitypub/renderer/index.js";
+import { resolveUser } from "@/remote/resolve-user.js";
+import { getUser } from "@/server/api/common/getters.js";
+import create from "@/services/following/create.js";
+import deleteFollowing from "@/services/following/delete.js";
+import { publishMainStream } from "@/services/stream.js";
 import define from "../../define.js";
 import { ApiError } from "../../error.js";
 import { apiLogger } from "../../logger.js";
-import deleteFollowing from "@/services/following/delete.js";
-import create from "@/services/following/create.js";
-import { getUser } from "@/server/api/common/getters.js";
-import { Followings, Users } from "@/models/index.js";
-import config from "@/config/index.js";
-import { publishMainStream } from "@/services/stream.js";
-import { parse } from "@/misc/acct.js";
 
 export const meta = {
 	tags: ["users"],
@@ -115,7 +115,7 @@ export default define(meta, paramDef, async (ps, user) => {
 	let allowed = false;
 
 	moveTo.alsoKnownAs?.forEach((element) => {
-		if (fromUrl!.includes(element)) allowed = true;
+		if (fromUrl?.includes(element)) allowed = true;
 	});
 
 	if (!(allowed && toUrl && fromUrl))

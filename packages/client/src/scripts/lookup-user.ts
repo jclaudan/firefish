@@ -1,6 +1,6 @@
-import * as Acct from "firefish-js/built/acct";
 import { i18n } from "@/i18n";
 import * as os from "@/os";
+import * as Acct from "firefish-js/built/acct";
 
 export async function lookupUser() {
 	const { canceled, result } = await os.inputText({

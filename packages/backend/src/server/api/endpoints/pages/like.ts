@@ -1,5 +1,5 @@
-import { Pages, PageLikes } from "@/models/index.js";
 import { genId } from "@/misc/gen-id.js";
+import { PageLikes, Pages } from "@/models/index.js";
 import define from "../../define.js";
 import { ApiError } from "../../error.js";
 

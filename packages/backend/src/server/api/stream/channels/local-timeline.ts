@@ -1,8 +1,8 @@
-import Channel from "../channel.js";
-import { fetchMeta } from "@/misc/fetch-meta.js";
 import { getWordHardMute } from "@/misc/check-word-mute.js";
+import { fetchMeta } from "@/misc/fetch-meta.js";
 import { isUserRelated } from "@/misc/is-user-related.js";
 import type { Packed } from "@/misc/schema.js";
+import Channel from "../channel.js";
 
 export default class extends Channel {
 	public readonly chName = "localTimeline";
@@ -39,8 +39,8 @@ export default class extends Channel {
 			const reply = note.reply;
 			// 「チャンネル接続主への返信」でもなければ、「チャンネル接続主が行った返信」でもなければ、「投稿者の投稿者自身への返信」でもない場合
 			if (
-				reply.userId !== this.user!.id &&
-				note.userId !== this.user!.id &&
+				reply.userId !== this.user?.id &&
+				note.userId !== this.user?.id &&
 				reply.userId !== note.userId
 			)
 				return;

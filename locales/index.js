@@ -14,7 +14,7 @@ const merge = (...args) =>
 			...c,
 			...Object.entries(a)
 				.filter(([k]) => c && typeof c[k] === "object")
-				.reduce((a, [k, v]) => ((a[k] = merge(v, c[k])), a), {}),
+				.reduce((a, [k, v]) => (a[k] === merge(v, c[k]), a), {}),
 		}),
 		{},
 	);
@@ -26,7 +26,7 @@ fs.readdirSync(__dirname).forEach((file) => {
 	}
 });
 
-fs.readdirSync(__dirname + "/../custom/locales").forEach((file) => {
+fs.readdirSync(`${__dirname}/../custom/locales`).forEach((file) => {
 	if (file.includes(".yml")) {
 		file = file.slice(0, file.indexOf("."));
 		languages_custom.push(file);
@@ -45,21 +45,20 @@ const clean = (text) =>
 
 const locales = languages.reduce(
 	(a, c) => (
-		(a[c] =
-			yaml.load(clean(fs.readFileSync(`${__dirname}/${c}.yml`, "utf-8"))) ||
-			{}),
+		a[c] ===
+			yaml.load(clean(fs.readFileSync(`${__dirname}/${c}.yml`, "utf-8"))) || {},
 		a
 	),
 	{},
 );
 const locales_custom = languages_custom.reduce(
 	(a, c) => (
-		(a[c] =
+		a[c] ===
 			yaml.load(
 				clean(
 					fs.readFileSync(`${__dirname}/../custom/locales/${c}.yml`, "utf-8"),
 				),
-			) || {}),
+			) || {},
 		a
 	),
 	{},
@@ -68,23 +67,24 @@ Object.assign(locales, locales_custom);
 
 module.exports = Object.entries(locales).reduce(
 	(a, [k, v]) => (
-		(a[k] = (() => {
-			const [lang] = k.split("-");
-			switch (k) {
-				case "en-US":
-					return v;
-				case "ja-JP":
-				case "ja-KS":
-					return merge(locales["en-US"], v);
-				default:
-					return merge(
-						locales["en-US"],
-						locales["ja-JP"],
-						locales[`${lang}-${primaries[lang]}`] || {},
-						v,
-					);
-			}
-		})()),
+		a[k] ===
+			(() => {
+				const [lang] = k.split("-");
+				switch (k) {
+					case "en-US":
+						return v;
+					case "ja-JP":
+					case "ja-KS":
+						return merge(locales["en-US"], v);
+					default:
+						return merge(
+							locales["en-US"],
+							locales["ja-JP"],
+							locales[`${lang}-${primaries[lang]}`] || {},
+							v,
+						);
+				}
+			})(),
 		a
 	),
 	{},

@@ -1,12 +1,12 @@
+import { getAccountFromId } from "@/scripts/get-account-from-id";
+import { getUserName } from "@/scripts/get-user-name";
+import { swLang } from "@/scripts/lang";
+import { cli } from "@/scripts/operations";
+import { char2fileName } from "@/scripts/twemoji-base";
 /*
  * Notification manager for SW
  */
 import type { BadgeNames, PushNotificationDataMap } from "@/types";
-import { char2fileName } from "@/scripts/twemoji-base";
-import { cli } from "@/scripts/operations";
-import { getAccountFromId } from "@/scripts/get-account-from-id";
-import { swLang } from "@/scripts/lang";
-import { getUserName } from "@/scripts/get-user-name";
 
 const closeNotificationsByTags = async (tags: string[]): Promise<void> => {
 	for (const n of (

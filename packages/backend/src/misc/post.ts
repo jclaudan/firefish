@@ -12,7 +12,7 @@ export function parse(acct: any): Post {
 		cw: acct.cw,
 		localOnly: acct.localOnly,
 		createdAt: new Date(acct.createdAt),
-		visibility: "hidden" + (acct.visibility || ""),
+		visibility: `hidden${acct.visibility || ""}`,
 	};
 }
 

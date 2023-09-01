@@ -1,5 +1,5 @@
-import { Parser } from "@/parser";
 import Entity from "@/entity";
+import { Parser } from "@/parser";
 
 const account: Entity.Account = {
 	id: "1",
@@ -94,7 +94,7 @@ describe("Parser", () => {
 
 		describe("message is not json", () => {
 			describe("event is delete", () => {
-				const message = `event: delete\ndata: 12asdf34\n\n`;
+				const message = "event: delete\ndata: 12asdf34\n\n";
 				it("should be called", () => {
 					const spy = jest.fn();
 					parser.once("delete", spy);
@@ -104,7 +104,7 @@ describe("Parser", () => {
 			});
 
 			describe("event is not delete", () => {
-				const message = `event: event\ndata: 12asdf34\n\n`;
+				const message = "event: event\ndata: 12asdf34\n\n";
 				it("should be error", () => {
 					const error = jest.fn();
 					const deleted = jest.fn();

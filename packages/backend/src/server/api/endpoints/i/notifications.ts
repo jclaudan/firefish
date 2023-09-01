@@ -1,16 +1,16 @@
-import { Brackets } from "typeorm";
 import {
-	Notifications,
 	Followings,
 	Mutings,
-	Users,
+	Notifications,
 	UserProfiles,
+	Users,
 } from "@/models/index.js";
-import { notificationTypes } from "@/types.js";
 import read from "@/services/note/read.js";
+import { notificationTypes } from "@/types.js";
+import { Brackets } from "typeorm";
+import { makePaginationQuery } from "../../common/make-pagination-query.js";
 import { readNotification } from "../../common/read-notification.js";
 import define from "../../define.js";
-import { makePaginationQuery } from "../../common/make-pagination-query.js";
 
 export const meta = {
 	tags: ["account", "notifications"],

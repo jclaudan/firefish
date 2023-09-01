@@ -1,11 +1,11 @@
 import type Koa from "koa";
 
+import { fetchMeta } from "@/misc/fetch-meta.js";
 import type { User } from "@/models/entities/user.js";
 import { UserIps } from "@/models/index.js";
-import { fetchMeta } from "@/misc/fetch-meta.js";
-import type { IEndpoint } from "./endpoints.js";
 import authenticate, { AuthenticationError } from "./authenticate.js";
 import call from "./call.js";
+import type { IEndpoint } from "./endpoints.js";
 import { ApiError } from "./error.js";
 
 const userIpHistories = new Map<User["id"], Set<string>>();
@@ -29,12 +29,12 @@ export default (endpoint: IEndpoint, ctx: Koa.Context) =>
 				ctx.status = x;
 				ctx.body = {
 					error: {
-						message: y!.message,
-						code: y!.code,
-						id: y!.id,
-						kind: y!.kind,
-						...(y!.info && process.env.NODE_ENV !== "production"
-							? { info: y!.info }
+						message: y?.message,
+						code: y?.code,
+						id: y?.id,
+						kind: y?.kind,
+						...(y?.info && process.env.NODE_ENV !== "production"
+							? { info: y?.info }
 							: {}),
 					},
 				};
@@ -49,7 +49,7 @@ export default (endpoint: IEndpoint, ctx: Koa.Context) =>
 		// for GET requests, do not even pass on the body parameter as it is considered unsafe
 		authenticate(
 			ctx.headers.authorization,
-			ctx.method === "GET" ? null : body["i"],
+			ctx.method === "GET" ? null : body.i,
 		)
 			.then(([user, app]) => {
 				// API invoking
@@ -58,7 +58,7 @@ export default (endpoint: IEndpoint, ctx: Koa.Context) =>
 						if (
 							ctx.method === "GET" &&
 							endpoint.meta.cacheSec &&
-							!body["i"] &&
+							!body.i &&
 							!user
 						) {
 							ctx.set(

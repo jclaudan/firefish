@@ -1,7 +1,7 @@
 import config from "@/config/index.js";
-import { IObject, IActivity } from "@/remote/activitypub/type.js";
 import type { ILocalUser } from "@/models/entities/user.js";
 import { IRemoteUser } from "@/models/entities/user.js";
+import { IActivity, IObject } from "@/remote/activitypub/type.js";
 import { getInstanceActor } from "@/services/instance-actor.js";
 
 // to anonymise reporters, the reporting actor must be a system user

@@ -1,7 +1,7 @@
-import * as os from "@/os";
 import { i18n } from "@/i18n";
-import { mainRouter } from "@/router";
 import { instance } from "@/instance";
+import * as os from "@/os";
+import { mainRouter } from "@/router";
 
 export async function search() {
 	const { canceled, result: query } = await os.inputText({

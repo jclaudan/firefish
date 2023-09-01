@@ -1,8 +1,8 @@
+import { UserListJoinings, UserLists, Users } from "@/models/index.js";
 import { publishUserListStream } from "@/services/stream.js";
-import { UserLists, UserListJoinings, Users } from "@/models/index.js";
+import { getUser } from "../../../common/getters.js";
 import define from "../../../define.js";
 import { ApiError } from "../../../error.js";
-import { getUser } from "../../../common/getters.js";
 
 export const meta = {
 	tags: ["lists", "users"],

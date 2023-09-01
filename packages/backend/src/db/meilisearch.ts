@@ -1,9 +1,9 @@
 import { Health, Index, MeiliSearch, Stats } from "meilisearch";
 import { dbLogger } from "./logger.js";
 
+import * as url from "url";
 import config from "@/config/index.js";
 import { Note } from "@/models/entities/note.js";
-import * as url from "url";
 import { ILocalUser } from "@/models/entities/user.js";
 import { Followings, Users } from "@/models/index.js";
 
@@ -408,7 +408,7 @@ export default hasConfig
 				return {
 					health: health.status,
 					size: stats.databaseSize,
-					indexed_count: stats.indexes["posts"].numberOfDocuments,
+					indexed_count: stats.indexes.posts.numberOfDocuments,
 				};
 			},
 			deleteNotes: async (note: Note | Note[] | string | string[]) => {

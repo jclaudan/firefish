@@ -1,5 +1,5 @@
-import { query } from "@/scripts/url";
 import { url } from "@/config";
+import { query } from "@/scripts/url";
 
 export function getProxiedImageUrl(imageUrl: string, type?: "preview"): string {
 	return `${url}/proxy/image.webp?${query({

@@ -1,7 +1,7 @@
 import { NoteFavorites } from "@/models/index.js";
+import { getNote } from "../../../common/getters.js";
 import define from "../../../define.js";
 import { ApiError } from "../../../error.js";
-import { getNote } from "../../../common/getters.js";
 
 export const meta = {
 	tags: ["notes", "favorites"],

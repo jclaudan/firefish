@@ -1,11 +1,11 @@
 import { Notes } from "@/models/index.js";
-import define from "../../define.js";
-import { getNote } from "../../common/getters.js";
-import { ApiError } from "../../error.js";
-import { generateVisibilityQuery } from "../../common/generate-visibility-query.js";
-import { generateMutedUserQuery } from "../../common/generate-muted-user-query.js";
-import { makePaginationQuery } from "../../common/make-pagination-query.js";
 import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
+import { generateMutedUserQuery } from "../../common/generate-muted-user-query.js";
+import { generateVisibilityQuery } from "../../common/generate-visibility-query.js";
+import { getNote } from "../../common/getters.js";
+import { makePaginationQuery } from "../../common/make-pagination-query.js";
+import define from "../../define.js";
+import { ApiError } from "../../error.js";
 
 export const meta = {
 	tags: ["notes"],
@@ -53,7 +53,7 @@ export default define(meta, paramDef, async (ps, user) => {
 		throw err;
 	});
 
-	let query = makePaginationQuery(
+	const query = makePaginationQuery(
 		Notes.createQueryBuilder("note"),
 		ps.sinceId,
 		ps.untilId,

@@ -1,8 +1,8 @@
-import { Notes, NoteThreadMutings } from "@/models/index.js";
 import { genId } from "@/misc/gen-id.js";
+import { NoteThreadMutings, Notes } from "@/models/index.js";
 import readNote from "@/services/note/read.js";
-import define from "../../../define.js";
 import { getNote } from "../../../common/getters.js";
+import define from "../../../define.js";
 import { ApiError } from "../../../error.js";
 
 export const meta = {

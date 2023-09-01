@@ -61,8 +61,8 @@ function parseSingleKaTeXMacro(src: string): [string, KaTeXMacro] {
 	currentPos = skipSpaces(currentPos);
 
 	while (currentPos < src.length - 1) {
-		let numbersignPos = -1,
-			isEscaped = false;
+		let numbersignPos = -1;
+		let isEscaped = false;
 
 		for (let i = currentPos; i < src.length - 1; ++i) {
 			if (src[i] !== "\\" && src[i] !== "#") {
@@ -210,15 +210,15 @@ function expandKaTeXMacroOnce(
 		--maxNumberOfExpansions;
 
 		// search for a custom macro
-		let checkedPos = beginPos - 1,
-			macroName = "",
-			macroBackslashPos = 0,
-			// for macros w/o args: unused
-			//            w/  args: the first open bracket ("(", "{", or "[") after cmd name
-			macroArgBeginPos = 0,
-			// for macros w/o args: the end of cmd name
-			//            w/  args: the closing bracket of the last arg
-			macroArgEndPos = 0;
+		let checkedPos = beginPos - 1;
+		let macroName = "";
+		let macroBackslashPos = 0;
+		// for macros w/o args: unused
+		//            w/  args: the first open bracket ("(", "{", or "[") after cmd name
+		let macroArgBeginPos = 0;
+		// for macros w/o args: the end of cmd name
+		//            w/  args: the closing bracket of the last arg
+		let macroArgEndPos = 0;
 
 		while (checkedPos < endPos) {
 			checkedPos = src.indexOf("\\", checkedPos + 1);

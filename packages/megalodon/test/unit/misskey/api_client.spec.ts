@@ -1,8 +1,8 @@
-import MisskeyAPI from "@/misskey/api_client";
 import MegalodonEntity from "@/entity";
+import MisskeyAPI from "@/misskey/api_client";
 import MisskeyEntity from "@/misskey/entity";
-import MegalodonNotificationType from "@/notification";
 import MisskeyNotificationType from "@/misskey/notification";
+import MegalodonNotificationType from "@/notification";
 
 const user: MisskeyEntity.User = {
 	id: "1",

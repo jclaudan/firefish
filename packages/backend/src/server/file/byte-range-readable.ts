@@ -1,6 +1,6 @@
-import { Readable, ReadableOptions } from "node:stream";
-import { Buffer, constants as BufferConstants } from "node:buffer";
+import { constants as BufferConstants, Buffer } from "node:buffer";
 import * as fs from "node:fs";
+import { Readable, ReadableOptions } from "node:stream";
 
 interface ByteRange {
 	start: bigint;
@@ -82,7 +82,7 @@ function extractRanges(
 }
 
 function createBoundary(len: number): string {
-	let chars = [];
+	const chars = [];
 	for (let i = 0; i < len; i = i + 1) {
 		chars[i] = BOUNDARY_CHARS.charAt(
 			Math.floor(Math.random() * BOUNDARY_CHARS.length),
@@ -167,7 +167,7 @@ class ByteRangeReadable extends Readable {
 	}
 
 	_read(n) {
-		if (this.index == this.ranges.length) {
+		if (this.index === this.ranges.length) {
 			this.push(null);
 			return;
 		}
@@ -204,7 +204,7 @@ class ByteRangeReadable extends Readable {
 				this.destroy(err);
 				return;
 			}
-			if (bytesRead == 0) {
+			if (bytesRead === 0) {
 				/* something seems to have gone wrong? */
 				this.push(null);
 				return;

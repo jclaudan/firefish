@@ -1,18 +1,18 @@
-import type Koa from "koa";
-import Router from "@koa/router";
-import { v4 as uuid } from "uuid";
-import autwh from "autwh";
-import { IsNull } from "typeorm";
-import { publishMainStream } from "@/services/stream.js";
 import config from "@/config/index.js";
 import { fetchMeta } from "@/misc/fetch-meta.js";
-import { Users, UserProfiles } from "@/models/index.js";
 import type { ILocalUser } from "@/models/entities/user.js";
-import signin from "../common/signin.js";
+import { UserProfiles, Users } from "@/models/index.js";
+import { publishMainStream } from "@/services/stream.js";
+import Router from "@koa/router";
+import autwh from "autwh";
+import type Koa from "koa";
+import { IsNull } from "typeorm";
+import { v4 as uuid } from "uuid";
 import { redisClient } from "../../../db/redis.js";
+import signin from "../common/signin.js";
 
 function getUserToken(ctx: Koa.BaseContext): string | null {
-	return ((ctx.headers["cookie"] || "").match(/igi=(\w+)/) || [null, null])[1];
+	return ((ctx.headers.cookie || "").match(/igi=(\w+)/) || [null, null])[1];
 }
 
 function compareOrigin(ctx: Koa.BaseContext): boolean {
@@ -24,7 +24,7 @@ function compareOrigin(ctx: Koa.BaseContext): boolean {
 			: url;
 	}
 
-	const referer = ctx.headers["referer"];
+	const referer = ctx.headers.referer;
 
 	return normalizeUrl(referer) === normalizeUrl(config.url);
 }
@@ -101,14 +101,14 @@ router.get("/connect/twitter", async (ctx) => {
 	}
 
 	const twAuth = await getTwAuth();
-	const twCtx = await twAuth!.begin();
+	const twCtx = await twAuth?.begin();
 	redisClient.set(userToken, JSON.stringify(twCtx));
 	ctx.redirect(twCtx.url);
 });
 
 router.get("/signin/twitter", async (ctx) => {
 	const twAuth = await getTwAuth();
-	const twCtx = await twAuth!.begin();
+	const twCtx = await twAuth?.begin();
 
 	const sessid = uuid();
 
@@ -150,7 +150,7 @@ router.get("/tw/cb", async (ctx) => {
 			return;
 		}
 
-		const result = await twAuth!.done(JSON.parse(twCtx), verifier);
+		const result = await twAuth?.done(JSON.parse(twCtx), verifier);
 
 		const link = await UserProfiles.createQueryBuilder()
 			.where("\"integrations\"->'twitter'->>'userId' = :id", {
@@ -188,7 +188,7 @@ router.get("/tw/cb", async (ctx) => {
 
 		const twCtx = await get;
 
-		const result = await twAuth!.done(JSON.parse(twCtx), verifier);
+		const result = await twAuth?.done(JSON.parse(twCtx), verifier);
 
 		const user = await Users.findOneByOrFail({
 			host: IsNull(),

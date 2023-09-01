@@ -6,13 +6,13 @@ export function useTooltip(
 	onShow: (showing: Ref<boolean>) => void,
 	delay = 300,
 ): void {
-	let isHovering = false,
-		// iOS(Androidも？)では、要素をタップした直後に(おせっかいで)mouseoverイベントを発火させたりするため、それを無視するためのフラグ
-		// 無視しないと、画面に触れてないのにツールチップが出たりし、ユーザビリティが損なわれる
-		// TODO: 一度でもタップすると二度とマウスでツールチップ出せなくなるのをどうにかする 定期的にfalseに戻すとか...？
-		shouldIgnoreMouseover = false,
-		timeoutId: number,
-		changeShowingState: (() => void) | null;
+	let isHovering = false;
+	// iOS(Androidも？)では、要素をタップした直後に(おせっかいで)mouseoverイベントを発火させたりするため、それを無視するためのフラグ
+	// 無視しないと、画面に触れてないのにツールチップが出たりし、ユーザビリティが損なわれる
+	// TODO: 一度でもタップすると二度とマウスでツールチップ出せなくなるのをどうにかする 定期的にfalseに戻すとか...？
+	let shouldIgnoreMouseover = false;
+	let timeoutId: number;
+	let changeShowingState: (() => void) | null;
 
 	const open = () => {
 		close();

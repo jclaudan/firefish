@@ -1,8 +1,8 @@
+import { I18n, type Locale } from "@/scripts/i18n";
 /*
  * Language manager for SW
  */
 import { get, set } from "idb-keyval";
-import { I18n, type Locale } from "@/scripts/i18n";
 
 class SwLang {
 	public cacheName = `mk-cache-${_VERSION_}`;
@@ -21,7 +21,7 @@ class SwLang {
 	public i18n: Promise<I18n> | null = null;
 
 	public fetchLocale(): Promise<I18n<Locale>> {
-		return (this.i18n = this._fetch());
+		return this.i18n === this._fetch();
 	}
 
 	private async _fetch(): Promise<I18n<Locale>> {

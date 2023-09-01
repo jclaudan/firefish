@@ -1,17 +1,17 @@
-import { Brackets } from "typeorm";
 import { fetchMeta } from "@/misc/fetch-meta.js";
 import { Notes } from "@/models/index.js";
 import { activeUsersChart } from "@/services/chart/index.js";
+import { Brackets } from "typeorm";
+import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
+import { generateChannelQuery } from "../../common/generate-channel-query.js";
+import { generateMutedNoteQuery } from "../../common/generate-muted-note-query.js";
+import { generateMutedUserQuery } from "../../common/generate-muted-user-query.js";
+import { generateRepliesQuery } from "../../common/generate-replies-query.js";
+import { generateVisibilityQuery } from "../../common/generate-visibility-query.js";
+import { generateMutedUserRenotesQueryForNotes } from "../../common/generated-muted-renote-query.js";
+import { makePaginationQuery } from "../../common/make-pagination-query.js";
 import define from "../../define.js";
 import { ApiError } from "../../error.js";
-import { generateMutedUserQuery } from "../../common/generate-muted-user-query.js";
-import { makePaginationQuery } from "../../common/make-pagination-query.js";
-import { generateVisibilityQuery } from "../../common/generate-visibility-query.js";
-import { generateRepliesQuery } from "../../common/generate-replies-query.js";
-import { generateMutedNoteQuery } from "../../common/generate-muted-note-query.js";
-import { generateChannelQuery } from "../../common/generate-channel-query.js";
-import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
-import { generateMutedUserRenotesQueryForNotes } from "../../common/generated-muted-renote-query.js";
 
 export const meta = {
 	tags: ["notes"],
@@ -121,7 +121,7 @@ export default define(meta, paramDef, async (ps, user) => {
 		query.andWhere(
 			new Brackets((qb) => {
 				for (const type of ps.fileType!) {
-					const i = ps.fileType!.indexOf(type);
+					const i = ps.fileType?.indexOf(type);
 					qb.orWhere(`:type${i} = ANY(note.attachedFileTypes)`, {
 						[`type${i}`]: type,
 					});
