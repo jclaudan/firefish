@@ -59,11 +59,18 @@
 </template>
 
 <script lang="ts" setup>
-import { defineAsyncComponent, inject, nextTick, onMounted, onUnmounted, onActivated, provide, watch, ref, computed } from 'vue';
+import {
+	computed,
+	onActivated,
+	onMounted,
+	onUnmounted,
+	provide,
+	ref,
+	watch,
+} from "vue";
 import { i18n } from "@/i18n";
 import MkSuperMenu from "@/components/MkSuperMenu.vue";
 import MkInfo from "@/components/MkInfo.vue";
-import { scroll } from "@/scripts/scroll";
 import { instance } from "@/instance";
 import { version } from "@/config";
 import { $i } from "@/account";
@@ -77,7 +84,6 @@ import { useRouter } from "@/router";
 import {
 	definePageMetadata,
 	provideMetadataReceiver,
-	setPageMetadata,
 } from "@/scripts/page-metadata";
 
 const isEmpty = (x: string | null) => x == null || x === "";
@@ -92,21 +98,19 @@ const indexInfo = {
 
 provide("shouldOmitHeaderTitle", false);
 
-let INFO = ref(indexInfo);
-let childInfo = ref(null);
-let narrow = ref(false);
-let view = ref(null);
-let pageProps = ref({});
-let noMaintainerInformation =
+const INFO = ref(indexInfo);
+const childInfo = ref(null);
+const narrow = ref(false);
+const noMaintainerInformation =
 	isEmpty(instance.maintainerName) || isEmpty(instance.maintainerEmail);
-let noBotProtection =
+const noBotProtection =
 	!instance.disableRegistration &&
 	!instance.enableHcaptcha &&
 	!instance.enableRecaptcha;
-let noEmailServer = !instance.enableEmail;
-let thereIsUnresolvedAbuseReport = ref(false);
-let updateAvailable = ref(false);
-let currentPage = computed(() => router.currentRef.value.child);
+const noEmailServer = !instance.enableEmail;
+const thereIsUnresolvedAbuseReport = ref(false);
+const updateAvailable = ref(false);
+const currentPage = computed(() => router.currentRef.value.child);
 
 os.api("admin/abuse-user-reports", {
 	state: "unresolved",
@@ -231,27 +235,31 @@ const menuDef = computed(() => [
 							icon: "ph-gear-six ph-bold ph-lg",
 							text: i18n.ts.general,
 							to: "/admin/settings",
-							active: currentPage.value?.route.name === "settings",
+							active:
+								currentPage.value?.route.name === "settings",
 						},
 						{
 							icon: "ph-envelope-simple-open ph-bold ph-lg",
 							text: i18n.ts.emailServer,
 							to: "/admin/email-settings",
 							active:
-								currentPage.value?.route.name === "email-settings",
+								currentPage.value?.route.name ===
+								"email-settings",
 						},
 						{
 							icon: "ph-cloud ph-bold ph-lg",
 							text: i18n.ts.objectStorage,
 							to: "/admin/object-storage",
 							active:
-								currentPage.value?.route.name === "object-storage",
+								currentPage.value?.route.name ===
+								"object-storage",
 						},
 						{
 							icon: "ph-lock ph-bold ph-lg",
 							text: i18n.ts.security,
 							to: "/admin/security",
-							active: currentPage.value?.route.name === "security",
+							active:
+								currentPage.value?.route.name === "security",
 						},
 						{
 							icon: "ph-arrows-merge ph-bold ph-lg",
@@ -263,38 +271,46 @@ const menuDef = computed(() => [
 							icon: "ph-plug ph-bold ph-lg",
 							text: i18n.ts.integration,
 							to: "/admin/integrations",
-							active: currentPage.value?.route.name === "integrations",
+							active:
+								currentPage.value?.route.name ===
+								"integrations",
 						},
 						{
 							icon: "ph-prohibit ph-bold ph-lg",
 							text: i18n.ts.instanceBlocking,
 							to: "/admin/instance-block",
 							active:
-								currentPage.value?.route.name === "instance-block",
+								currentPage.value?.route.name ===
+								"instance-block",
 						},
 						{
 							icon: "ph-hash ph-bold ph-lg",
 							text: i18n.ts.hiddenTags,
 							to: "/admin/hashtags",
-							active: currentPage.value?.route.name === "hashtags",
+							active:
+								currentPage.value?.route.name === "hashtags",
 						},
 						{
 							icon: "ph-ghost ph-bold ph-lg",
 							text: i18n.ts.proxyAccount,
 							to: "/admin/proxy-account",
-							active: currentPage.value?.route.name === "proxy-account",
+							active:
+								currentPage.value?.route.name ===
+								"proxy-account",
 						},
 						{
 							icon: "ph-database ph-bold ph-lg",
 							text: i18n.ts.database,
 							to: "/admin/database",
-							active: currentPage.value?.route.name === "database",
+							active:
+								currentPage.value?.route.name === "database",
 						},
 						{
 							icon: "ph-flask ph-bold ph-lg",
 							text: i18n.ts._experiments.title,
 							to: "/admin/experiments",
-							active: currentPage.value?.route.name === "experiments",
+							active:
+								currentPage.value?.route.name === "experiments",
 						},
 					],
 				},
@@ -330,7 +346,11 @@ onUnmounted(() => {
 });
 
 watch(router.currentRef, (to) => {
-	if (to.route.path === "/admin" && to.child?.route.name == null && !narrow.value) {
+	if (
+		to.route.path === "/admin" &&
+		to.child?.route.name == null &&
+		!narrow.value
+	) {
 		router.replace("/admin/overview");
 	}
 });
