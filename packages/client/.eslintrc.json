@@ -3,6 +3,7 @@
 	"plugins": ["file-progress", "prettier"],
 	"ignorePatterns": ["**/*.json5"],
 	"rules": {
-		"file-progress/activate": 1
+		"file-progress/activate": 1,
+		"comma-dangle": 0
 	}
 }
