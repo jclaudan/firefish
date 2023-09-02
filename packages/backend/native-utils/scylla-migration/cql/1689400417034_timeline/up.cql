@@ -157,6 +157,16 @@ CREATE MATERIALIZED VIEW local_timeline AS
 	PRIMARY KEY ("createdAtDate", "createdAt", "userId", "userHost", "visibility")
 	WITH CLUSTERING ORDER BY ("createdAt" DESC);
 
+CREATE MATERIALIZED VIEW local_note AS
+	SELECT "createdAtDate", "createdAt", "userId", "userHost", "visibility" FROM note
+	WHERE "createdAtDate" IS NOT NULL
+	AND "createdAt" IS NOT NULL
+	AND "userId" IS NOT NULL
+	AND "userHost" = 'local'
+	AND "visibility" IS NOT NULL
+	PRIMARY KEY ("createdAtDate", "createdAt", "userId", "userHost", "visibility")
+	WITH CLUSTERING ORDER BY ("createdAt" DESC);
+
 CREATE MATERIALIZED VIEW score_feed AS
 	SELECT * FROM note
 	WHERE "createdAtDate" IS NOT NULL
