@@ -116,6 +116,7 @@ export const scyllaQueries = {
 		select: {
 			byUserAndDate: `SELECT * FROM home_timeline WHERE "feedUserId" = ? AND "createdAtDate" = ?`,
 			byId: `SELECT * FROM home_timeline WHERE "id" = ?`,
+			byUser: `SELECT * FROM home_timeline WHERE "feedUserId" = ?`,
 		},
 		delete: `DELETE FROM home_timeline WHERE "feedUserId" = ? AND "createdAtDate" = ? AND "createdAt" = ? AND "userId" = ?`,
 		update: {

@@ -216,6 +216,8 @@ CREATE TABLE home_timeline (
 
 CREATE INDEX home_by_id ON home_timeline ("id");
 
+CREATE INDEX home_by_feed_user_id ON home_timeline ("feedUserId");
+
 CREATE TABLE reaction (
 	"id" text,
 	"noteId" ascii,

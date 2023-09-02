@@ -46,12 +46,33 @@ export async function deleteAccount(
 		let cursor: Note["id"] | null = null;
 
 		if (scyllaClient) {
+			// FIXME: Cascading notes won't be deleted. Reply and renote counts will be incorrect.
+			const client = scyllaClient as Client;
+			// Clear user's home timeline
+			scyllaClient.eachRow(
+				prepared.homeTimeline.select.byUser,
+				[user.id],
+				{ prepare: true },
+				(_, row) => {
+					const timeline = parseHomeTimeline(row);
+					client.execute(
+						prepared.homeTimeline.delete,
+						[
+							timeline.feedUserId,
+							timeline.createdAtDate,
+							timeline.createdAt,
+							timeline.userId,
+						],
+						{ prepare: true },
+					);
+				},
+			);
+			// Delete notes
 			scyllaClient.eachRow(
 				prepared.note.select.byUserId,
 				[user.id],
 				{ prepare: true },
 				(_, row) => {
-					const client = scyllaClient as Client;
 					const note = parseScyllaNote(row);
 					const noteDeleteParams = [
 						note.createdAt,
@@ -60,9 +81,11 @@ export async function deleteAccount(
 						note.userHost ?? "local",
 						note.visibility,
 					] as [Date, Date, string, string, string];
+					// Delete note from global feed
 					client.execute(prepared.note.delete, noteDeleteParams, {
 						prepare: true,
 					});
+					// Delete note from home timelines
 					client.eachRow(
 						prepared.homeTimeline.select.byId,
 						[note.id],
@@ -140,7 +163,7 @@ export async function deleteAccount(
 				}
 			}
 		}
-		logger.succ("All of notes deleted");
+		logger.succ("All associated notes deleted");
 	}
 
 	{
@@ -170,7 +193,7 @@ export async function deleteAccount(
 			}
 		}
 
-		logger.succ("All of files deleted");
+		logger.succ("All associated files deleted");
 	}
 
 	{
