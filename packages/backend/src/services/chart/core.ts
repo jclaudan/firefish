@@ -430,7 +430,6 @@ export default abstract class Chart<T extends Schema> {
 			? `${this.name}:${date}:${span}:${group}`
 			: `${this.name}:${date}:${span}`;
 
-		const unlock = await getChartInsertLock(lockKey);
 		try {
 			// ロック内でもう1回チェックする
 			const currentLog = (await repository.findOneBy({
@@ -466,14 +465,14 @@ export default abstract class Chart<T extends Schema> {
 
 			return log;
 		} finally {
-			unlock();
+			await getChartInsertLock(lockKey);
 		}
 	}
 
 	protected commit(diff: Commit<T>, group: string | null = null): void {
 		for (const [k, v] of Object.entries(diff)) {
 			if (v == null || v === 0 || (Array.isArray(v) && v.length === 0))
-				// rome-ignore lint/performance/noDelete: needs to be deleted not just set to undefined
+				// biome-ignore lint/performance/noDelete: needs to be deleted not just set to undefined
 				delete diff[k];
 		}
 		this.buffer.push({
