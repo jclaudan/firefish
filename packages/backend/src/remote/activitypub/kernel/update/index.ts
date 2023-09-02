@@ -27,7 +27,7 @@ export default async (
 	});
 
 	if (isActor(object)) {
-		await updatePerson(actor.uri!, resolver, object);
+		await updatePerson(actor.uri as string, resolver, object);
 		return "ok: Person updated";
 	}
 
@@ -37,12 +37,13 @@ export default async (
 		case "Note":
 		case "Article":
 		case "Document":
-		case "Page":
+		case "Page": {
 			let failed = false;
 			await updateNote(object, resolver).catch((e: Error) => {
 				failed = true;
 			});
 			return failed ? "skip: Note update failed" : "ok: Note updated";
+		}
 
 		default:
 			return `skip: Unknown type: ${objectType}`;

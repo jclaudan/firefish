@@ -35,6 +35,17 @@ import renderUpdate from "@/remote/activitypub/renderer/update.js";
 import { deliverToRelays } from "@/services/relay.js";
 // import { deliverQuestionUpdate } from "@/services/note/polls/update.js";
 import { fetchMeta } from "@/misc/fetch-meta.js";
+import {
+	type ScyllaNote,
+	type ScyllaPoll,
+	type ScyllaDriveFile,
+	type ScyllaNoteEditHistory,
+	scyllaClient,
+	prepared,
+	parseScyllaNote,
+	parseHomeTimeline,
+} from "@/db/scylla.js";
+import type { Client } from "cassandra-driver";
 
 export const meta = {
 	tags: ["notes"],
@@ -248,7 +259,7 @@ export const paramDef = {
 } as const;
 
 export default define(meta, paramDef, async (ps, user) => {
-	if (user.movedToUri != null) throw new ApiError(meta.errors.accountLocked);
+	if (user.movedToUri) throw new ApiError(meta.errors.accountLocked);
 
 	if (!Users.isLocalUser(user)) {
 		throw new ApiError(meta.errors.notLocalUser);
@@ -259,11 +270,23 @@ export default define(meta, paramDef, async (ps, user) => {
 	}
 
 	let publishing = false;
-	let note = await Notes.findOneBy({
-		id: ps.editId,
-	});
+	let note: Note | ScyllaNote | null = null;
+	if (scyllaClient) {
+		const result = await scyllaClient.execute(
+			prepared.note.select.byId,
+			[ps.editId],
+			{ prepare: true },
+		);
+		if (result.rowLength > 0) {
+			note = parseScyllaNote(result.first());
+		}
+	} else {
+		note = await Notes.findOneBy({
+			id: ps.editId,
+		});
+	}
 
-	if (note == null) {
+	if (!note) {
 		throw new ApiError(meta.errors.noSuchNote);
 	}
 
@@ -272,7 +295,7 @@ export default define(meta, paramDef, async (ps, user) => {
 	}
 
 	let renote: Note | null = null;
-	if (ps.renoteId != null) {
+	if (ps.renoteId) {
 		// Fetch renote to note
 		renote = await getNote(ps.renoteId, user).catch((e) => {
 			if (e.id === "9725d0ce-ba28-4dde-95a7-2cbb2c15de24")
@@ -301,7 +324,7 @@ export default define(meta, paramDef, async (ps, user) => {
 	}
 
 	let reply: Note | null = null;
-	if (ps.replyId != null) {
+	if (ps.replyId) {
 		// Fetch reply
 		reply = await getNote(ps.replyId, user).catch((e) => {
 			if (e.id === "9725d0ce-ba28-4dde-95a7-2cbb2c15de24")
@@ -326,10 +349,10 @@ export default define(meta, paramDef, async (ps, user) => {
 	}
 
 	let channel: Channel | null = null;
-	if (ps.channelId != null) {
+	if (ps.channelId) {
 		channel = await Channels.findOneBy({ id: ps.channelId });
 
-		if (channel == null) {
+		if (!channel) {
 			throw new ApiError(meta.errors.noSuchChannel);
 		}
 	}
@@ -443,6 +466,9 @@ export default define(meta, paramDef, async (ps, user) => {
 			.getMany();
 	}
 
+	let scyllaPoll: ScyllaPoll | null = null;
+	let scyllaUpdating = false;
+
 	if (ps.poll) {
 		let expires = ps.poll.expiresAt;
 		if (typeof expires === "number") {
@@ -453,51 +479,78 @@ export default define(meta, paramDef, async (ps, user) => {
 			expires = Date.now() + ps.poll.expiredAfter;
 		}
 
-		let poll = await Polls.findOneBy({ noteId: note.id });
-		const pp = ps.poll;
-		if (!poll && pp) {
-			poll = new Poll({
-				noteId: note.id,
-				choices: pp.choices,
-				expiresAt: expires ? new Date(expires) : null,
-				multiple: pp.multiple,
-				votes: new Array(pp.choices.length).fill(0),
-				noteVisibility: ps.visibility,
-				userId: user.id,
-				userHost: user.host,
+		if (scyllaClient) {
+			let expiresAt: Date | null;
+			if (!expires || isNaN(expires)) {
+				expiresAt = null;
+			} else {
+				expiresAt = new Date(expires);
+			}
+
+			scyllaPoll = {
+				expiresAt,
+				choices: Object.fromEntries(
+					ps.poll.choices.map((v, i) => [i, v] as [number, string]),
+				),
+				multiple: ps.poll.multiple,
+			};
+
+			publishing = true;
+			scyllaUpdating = true;
+
+			// FIXME: Keep votes for unmodified choices, reset votes if choice is modified or new
+
+			// Delete all votes cast to the target note (i.e., delete whole rows in the partition)
+			await scyllaClient.execute(prepared.poll.delete, [note.id], {
+				prepare: true,
 			});
-			await Polls.insert(poll);
-			publishing = true;
-		} else if (poll && !pp) {
-			await Polls.remove(poll);
-			publishing = true;
-		} else if (poll && pp) {
-			const pollUpdate: Partial<Poll> = {};
-			if (poll.expiresAt !== expires) {
-				pollUpdate.expiresAt = expires ? new Date(expires) : null;
+		} else {
+			let poll = await Polls.findOneBy({ noteId: note.id });
+			const pp = ps.poll;
+			if (!poll && pp) {
+				poll = new Poll({
+					noteId: note.id,
+					choices: pp.choices,
+					expiresAt: expires ? new Date(expires) : null,
+					multiple: pp.multiple,
+					votes: new Array(pp.choices.length).fill(0),
+					noteVisibility: ps.visibility,
+					userId: user.id,
+					userHost: user.host,
+				});
+				await Polls.insert(poll);
+				publishing = true;
+			} else if (poll && !pp) {
+				await Polls.remove(poll);
+				publishing = true;
+			} else if (poll && pp) {
+				const pollUpdate: Partial<Poll> = {};
+				if (poll.expiresAt !== expires) {
+					pollUpdate.expiresAt = expires ? new Date(expires) : null;
+				}
+				if (poll.multiple !== pp.multiple) {
+					pollUpdate.multiple = pp.multiple;
+				}
+				if (poll.noteVisibility !== ps.visibility) {
+					pollUpdate.noteVisibility = ps.visibility;
+				}
+				// Keep votes for unmodified choices, reset votes if choice is modified or new
+				const oldVoteCounts = new Map<string, number>();
+				for (let i = 0; i < poll.choices.length; i++) {
+					oldVoteCounts.set(poll.choices[i], poll.votes[i]);
+				}
+				const newVotes = pp.choices.map(
+					(choice) => oldVoteCounts.get(choice) || 0,
+				);
+				pollUpdate.choices = pp.choices;
+				pollUpdate.votes = newVotes;
+				if (notEmpty(pollUpdate)) {
+					await Polls.update(note.id, pollUpdate);
+					// Seemingly already handled by the rendered update activity
+					// await deliverQuestionUpdate(note.id);
+				}
+				publishing = true;
 			}
-			if (poll.multiple !== pp.multiple) {
-				pollUpdate.multiple = pp.multiple;
-			}
-			if (poll.noteVisibility !== ps.visibility) {
-				pollUpdate.noteVisibility = ps.visibility;
-			}
-			// Keep votes for unmodified choices, reset votes if choice is modified or new
-			const oldVoteCounts = new Map<string, number>();
-			for (let i = 0; i < poll.choices.length; i++) {
-				oldVoteCounts.set(poll.choices[i], poll.votes[i]);
-			}
-			const newVotes = pp.choices.map(
-				(choice) => oldVoteCounts.get(choice) || 0,
-			);
-			pollUpdate.choices = pp.choices;
-			pollUpdate.votes = newVotes;
-			if (notEmpty(pollUpdate)) {
-				await Polls.update(note.id, pollUpdate);
-				// Seemingly already handled by by the rendered update activity
-				// await deliverQuestionUpdate(note.id);
-			}
-			publishing = true;
 		}
 	}
 
@@ -542,6 +595,7 @@ export default define(meta, paramDef, async (ps, user) => {
 		// update.visibility = ps.visibility;
 		throw new ApiError(meta.errors.cannotChangeVisibility);
 	}
+	update.localOnly = note.localOnly;
 	if (ps.localOnly !== note.localOnly) {
 		update.localOnly = ps.localOnly;
 	}
@@ -586,24 +640,126 @@ export default define(meta, paramDef, async (ps, user) => {
 		}
 	}
 
-	if (notEmpty(update)) {
+	if (notEmpty(update) || scyllaUpdating) {
 		update.updatedAt = new Date();
-		await Notes.update(note.id, update);
 
-		// Add NoteEdit history
-		await NoteEdits.insert({
-			id: genId(),
-			noteId: note.id,
-			text: ps.text || undefined,
-			cw: ps.cw,
-			fileIds: ps.fileIds,
-			updatedAt: new Date(),
-		});
+		if (scyllaClient) {
+			const client = scyllaClient as Client;
+			const fileMapper = (file: DriveFile) => ({
+				...file,
+				width: file.properties.width ?? null,
+				height: file.properties.height ?? null,
+			});
+			const scyllaFiles: ScyllaDriveFile[] = files.map(fileMapper);
+			const scyllaNote = note as ScyllaNote;
+			const editHistory: ScyllaNoteEditHistory = {
+				content: scyllaNote.text,
+				cw: scyllaNote.cw,
+				files: scyllaNote.files,
+				updatedAt: update.updatedAt,
+			};
+
+			const newScyllaNote: ScyllaNote = {
+				...scyllaNote,
+				...update,
+				hasPoll: !!scyllaPoll,
+				poll: scyllaPoll,
+				files: scyllaFiles,
+				noteEdit: [...scyllaNote.noteEdit, editHistory],
+			};
+
+			const params = [
+				newScyllaNote.createdAt,
+				newScyllaNote.createdAt,
+				newScyllaNote.id,
+				scyllaNote.visibility,
+				newScyllaNote.text,
+				newScyllaNote.name,
+				newScyllaNote.cw,
+				newScyllaNote.localOnly,
+				newScyllaNote.renoteCount ?? 0,
+				newScyllaNote.repliesCount ?? 0,
+				newScyllaNote.uri,
+				newScyllaNote.url,
+				newScyllaNote.score ?? 0,
+				newScyllaNote.files,
+				newScyllaNote.visibleUserIds,
+				newScyllaNote.mentions,
+				newScyllaNote.mentionedRemoteUsers,
+				newScyllaNote.emojis,
+				newScyllaNote.tags,
+				newScyllaNote.hasPoll,
+				newScyllaNote.poll,
+				newScyllaNote.threadId,
+				newScyllaNote.channelId,
+				newScyllaNote.userId,
+				newScyllaNote.userHost ?? "local",
+				newScyllaNote.replyId,
+				newScyllaNote.replyUserId,
+				newScyllaNote.replyUserHost,
+				newScyllaNote.replyText,
+				newScyllaNote.replyCw,
+				newScyllaNote.replyFiles,
+				newScyllaNote.renoteId,
+				newScyllaNote.renoteUserId,
+				newScyllaNote.renoteUserHost,
+				newScyllaNote.renoteText,
+				newScyllaNote.renoteCw,
+				newScyllaNote.renoteFiles,
+				newScyllaNote.reactions,
+				newScyllaNote.noteEdit,
+				newScyllaNote.updatedAt,
+			];
+
+			// To let ScyllaDB do upsert, do NOT change the visibility.
+			await client.execute(prepared.note.insert, params, { prepare: true });
+
+			// Update home timelines
+			client.eachRow(
+				prepared.homeTimeline.select.byId,
+				[scyllaNote.id],
+				{ prepare: true },
+				(_, row) => {
+					const timeline = parseHomeTimeline(row);
+					client.execute(
+						prepared.homeTimeline.insert,
+						[timeline.feedUserId, ...params],
+						{ prepare: true },
+					);
+				},
+			);
+		} else {
+			await Notes.update(note.id, update);
+
+			// Add NoteEdit history
+			await NoteEdits.insert({
+				id: genId(),
+				noteId: note.id,
+				text: ps.text || undefined,
+				cw: ps.cw,
+				fileIds: ps.fileIds,
+				updatedAt: new Date(),
+			});
+		}
 
 		publishing = true;
 	}
 
-	note = await Notes.findOneBy({ id: note.id });
+	if (scyllaClient) {
+		const result = await scyllaClient.execute(
+			prepared.note.select.byId,
+			[note.id],
+			{ prepare: true },
+		);
+		if (result.rowLength > 0) {
+			note = parseScyllaNote(result.first());
+		}
+	} else {
+		note = await Notes.findOneBy({
+			id: note.id,
+		});
+	}
+
 	if (!note) {
 		throw new ApiError(meta.errors.noSuchNote);
 	}
@@ -616,45 +772,47 @@ export default define(meta, paramDef, async (ps, user) => {
 			updatedAt: update.updatedAt,
 		});
 
-		(async () => {
-			const noteActivity = await renderNote(note, false);
-			noteActivity.updated = note.updatedAt.toISOString();
-			const updateActivity = renderUpdate(noteActivity, user);
-			updateActivity.to = noteActivity.to;
-			updateActivity.cc = noteActivity.cc;
-			const activity = renderActivity(updateActivity);
-			const dm = new DeliverManager(user, activity);
+		if (!update.localOnly) {
+			(async () => {
+				const noteActivity = await renderNote(note, false);
+				noteActivity.updated = note.updatedAt.toISOString();
+				const updateActivity = renderUpdate(noteActivity, user);
+				updateActivity.to = noteActivity.to;
+				updateActivity.cc = noteActivity.cc;
+				const activity = renderActivity(updateActivity);
+				const dm = new DeliverManager(user, activity);
 
-			// Delivery to remote mentioned users
-			for (const u of mentionedUsers.filter((u) => Users.isRemoteUser(u))) {
-				dm.addDirectRecipe(u as IRemoteUser);
-			}
+				// Delivery to remote mentioned users
+				for (const u of mentionedUsers.filter((u) => Users.isRemoteUser(u))) {
+					dm.addDirectRecipe(u as IRemoteUser);
+				}
 
-			// Post is a reply and remote user is the contributor of the original post
-			if (note.reply && note.reply.userHost !== null) {
-				const u = await Users.findOneBy({ id: note.reply.userId });
-				if (u && Users.isRemoteUser(u)) dm.addDirectRecipe(u);
-			}
+				// Post is a reply and remote user is the contributor of the original post
+				if (note.reply && note.reply.userHost !== null) {
+					const u = await Users.findOneBy({ id: note.reply.userId });
+					if (u && Users.isRemoteUser(u)) dm.addDirectRecipe(u);
+				}
 
-			// Post is a renote and remote user is the contributor of the original post
-			if (note.renote && note.renote.userHost !== null) {
-				const u = await Users.findOneBy({ id: note.renote.userId });
-				if (u && Users.isRemoteUser(u)) dm.addDirectRecipe(u);
-			}
+				// Post is a renote and remote user is the contributor of the original post
+				if (note.renote && note.renote.userHost !== null) {
+					const u = await Users.findOneBy({ id: note.renote.userId });
+					if (u && Users.isRemoteUser(u)) dm.addDirectRecipe(u);
+				}
 
-			// Deliver to followers for non-direct posts.
-			if (["public", "home", "followers"].includes(note.visibility)) {
-				dm.addFollowersRecipe();
-			}
+				// Deliver to followers for non-direct posts.
+				if (["public", "home", "followers"].includes(note.visibility)) {
+					dm.addFollowersRecipe();
+				}
 
-			// Deliver to relays for public posts.
-			if (["public"].includes(note.visibility)) {
-				deliverToRelays(user, activity);
-			}
+				// Deliver to relays for public posts.
+				if (["public"].includes(note.visibility)) {
+					deliverToRelays(user, activity);
+				}
 
-			// GO!
-			dm.execute();
-		})();
+				// GO!
+				dm.execute();
+			})();
+		}
 	}
 
 	return {

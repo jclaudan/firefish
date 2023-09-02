@@ -53,7 +53,17 @@ import { DB_MAX_IMAGE_COMMENT_LENGTH } from "@/misc/hard-limits.js";
 import { truncate } from "@/misc/truncate.js";
 import { type Size, getEmojiSize } from "@/misc/emoji-meta.js";
 import { fetchMeta } from "@/misc/fetch-meta.js";
-import { parseScyllaNote, prepared, scyllaClient } from "@/db/scylla.js";
+import {
+	type ScyllaNote,
+	type ScyllaPoll,
+	type ScyllaDriveFile,
+	type ScyllaNoteEditHistory,
+	parseScyllaNote,
+	prepared,
+	scyllaClient,
+	parseHomeTimeline,
+} from "@/db/scylla.js";
+import type { Client } from "cassandra-driver";
 
 const logger = apLogger;
 
@@ -573,20 +583,33 @@ export async function updateNote(value: string | IObject, resolver?: Resolver) {
 	if (uri.startsWith(`${config.url}/`)) throw new Error("uri points local");
 
 	// A new resolver is created if not specified
-	if (resolver == null) resolver = new Resolver();
+	let _resolver = resolver;
+	if (!_resolver) _resolver = new Resolver();
 
 	// Resolve the updated Note object
-	const post = (await resolver.resolve(value)) as IPost;
+	const post = (await _resolver.resolve(value)) as IPost;
 
 	const actor = (await resolvePerson(
 		getOneApId(post.attributedTo),
-		resolver,
+		_resolver,
 	)) as CacheableRemoteUser;
 
 	// Already registered with this server?
-	const note = await Notes.findOneBy({ uri });
-	if (note == null) {
-		return await createNote(post, resolver);
+	let note: Note | ScyllaNote | null = null;
+	if (scyllaClient) {
+		const result = await scyllaClient.execute(
+			prepared.note.select.byUri,
+			[uri],
+			{ prepare: true },
+		);
+		if (result.rowLength > 0) {
+			note = parseScyllaNote(result.first());
+		}
+	} else {
+		note = await Notes.findOneBy({ uri });
+	}
+	if (!note) {
+		return await createNote(post, _resolver);
 	}
 
 	// Whether to tell clients the note has been updated and requires refresh.
@@ -613,7 +636,9 @@ export async function updateNote(value: string | IObject, resolver?: Resolver) {
 			? post.attachment
 			: [post.attachment]
 		: [];
-	const files = fileList.map((f) => (f.sensitive = post.sensitive));
+	const files = fileList.map((f) => {
+		f.sensitive = post.sensitive;
+	});
 
 	// Fetch files
 	const limit = promiseLimit(2);
@@ -654,9 +679,9 @@ export async function updateNote(value: string | IObject, resolver?: Resolver) {
 		await extractEmojis(post.tag || [], actor.host).catch((e) => [])
 	).map((emoji) => emoji.name);
 	const apMentions = await extractApMentions(post.tag);
-	const apHashtags = await extractApHashtags(post.tag);
+	const apHashtags = extractApHashtags(post.tag);
 
-	const poll = await extractPollFromQuestion(post, resolver).catch(
+	const poll = await extractPollFromQuestion(post, _resolver).catch(
 		() => undefined,
 	);
 
@@ -719,65 +744,179 @@ export async function updateNote(value: string | IObject, resolver?: Resolver) {
 		update.hasPoll = !!poll;
 	}
 
+	let scyllaPoll: ScyllaPoll | null = null;
+	let scyllaUpdating = false;
+
 	if (poll) {
-		const dbPoll = await Polls.findOneBy({ noteId: note.id });
-		if (dbPoll == null) {
-			await Polls.insert({
-				noteId: note.id,
-				choices: poll?.choices,
-				multiple: poll?.multiple,
-				votes: poll?.votes,
-				expiresAt: poll?.expiresAt,
-				noteVisibility: note.visibility === "hidden" ? "home" : note.visibility,
-				userId: actor.id,
-				userHost: actor.host,
+		if (scyllaClient) {
+			let expiresAt: Date | null;
+			if (!poll.expiresAt || isNaN(poll.expiresAt.getTime())) {
+				expiresAt = null;
+			} else {
+				expiresAt = poll.expiresAt;
+			}
+
+			scyllaPoll = {
+				expiresAt,
+				choices: Object.fromEntries(
+					poll.choices.map((v, i) => [i, v] as [number, string]),
+				),
+				multiple: poll.multiple,
+			};
+
+			scyllaUpdating = true;
+			publishing = true;
+
+			// Delete all votes cast to the target note (i.e., delete whole rows in the partition)
+			await scyllaClient.execute(prepared.poll.delete, [note.id], {
+				prepare: true,
 			});
-			updating = true;
-		} else if (
-			dbPoll.multiple !== poll.multiple ||
-			dbPoll.expiresAt !== poll.expiresAt ||
-			dbPoll.noteVisibility !== note.visibility ||
-			JSON.stringify(dbPoll.choices) !== JSON.stringify(poll.choices)
-		) {
-			await Polls.update(
-				{ noteId: note.id },
-				{
+		} else {
+			const dbPoll = await Polls.findOneBy({ noteId: note.id });
+			if (dbPoll == null) {
+				await Polls.insert({
+					noteId: note.id,
 					choices: poll?.choices,
 					multiple: poll?.multiple,
 					votes: poll?.votes,
 					expiresAt: poll?.expiresAt,
 					noteVisibility:
 						note.visibility === "hidden" ? "home" : note.visibility,
-				},
-			);
-			updating = true;
-		} else {
-			for (let i = 0; i < poll.choices.length; i++) {
-				if (dbPoll.votes[i] !== poll.votes?.[i]) {
-					await Polls.update({ noteId: note.id }, { votes: poll?.votes });
-					publishing = true;
-					break;
+					userId: actor.id,
+					userHost: actor.host,
+				});
+			} else if (
+				dbPoll.multiple !== poll.multiple ||
+				dbPoll.expiresAt !== poll.expiresAt ||
+				dbPoll.noteVisibility !== note.visibility ||
+				JSON.stringify(dbPoll.choices) !== JSON.stringify(poll.choices)
+			) {
+				await Polls.update(
+					{ noteId: note.id },
+					{
+						choices: poll?.choices,
+						multiple: poll?.multiple,
+						votes: poll?.votes,
+						expiresAt: poll?.expiresAt,
+						noteVisibility:
+							note.visibility === "hidden" ? "home" : note.visibility,
+					},
+				);
+			} else {
+				for (let i = 0; i < poll.choices.length; i++) {
+					if (dbPoll.votes[i] !== poll.votes?.[i]) {
+						await Polls.update({ noteId: note.id }, { votes: poll?.votes });
+						publishing = true;
+						break;
+					}
 				}
 			}
 		}
 	}
 
 	// Update Note
-	if (notEmpty(update)) {
+	if (notEmpty(update) || scyllaUpdating) {
 		update.updatedAt = new Date();
 
-		// Save updated note to the database
-		await Notes.update({ uri }, update);
+		if (scyllaClient) {
+			const client = scyllaClient as Client;
+			const fileMapper = (file: DriveFile) => ({
+				...file,
+				width: file.properties.width ?? null,
+				height: file.properties.height ?? null,
+			});
+			const scyllaFiles: ScyllaDriveFile[] = driveFiles.map(fileMapper);
+			const scyllaNote = note as ScyllaNote;
+			const editHistory: ScyllaNoteEditHistory = {
+				content: scyllaNote.text,
+				cw: scyllaNote.cw,
+				files: scyllaNote.files,
+				updatedAt: update.updatedAt,
+			};
 
-		// Save an edit history for the previous note
-		await NoteEdits.insert({
-			id: genId(),
-			noteId: note.id,
-			text: note.text,
-			cw: note.cw,
-			fileIds: note.fileIds,
-			updatedAt: update.updatedAt,
-		});
+			const newScyllaNote: ScyllaNote = {
+				...scyllaNote,
+				...update,
+				hasPoll: !!scyllaPoll,
+				poll: scyllaPoll,
+				files: scyllaFiles,
+				noteEdit: [...scyllaNote.noteEdit, editHistory],
+			};
+
+			const params = [
+				newScyllaNote.createdAt,
+				newScyllaNote.createdAt,
+				newScyllaNote.id,
+				scyllaNote.visibility,
+				newScyllaNote.text,
+				newScyllaNote.name,
+				newScyllaNote.cw,
+				newScyllaNote.localOnly,
+				newScyllaNote.renoteCount ?? 0,
+				newScyllaNote.repliesCount ?? 0,
+				newScyllaNote.uri,
+				newScyllaNote.url,
+				newScyllaNote.score ?? 0,
+				newScyllaNote.files,
+				newScyllaNote.visibleUserIds,
+				newScyllaNote.mentions,
+				newScyllaNote.mentionedRemoteUsers,
+				newScyllaNote.emojis,
+				newScyllaNote.tags,
+				newScyllaNote.hasPoll,
+				newScyllaNote.poll,
+				newScyllaNote.threadId,
+				newScyllaNote.channelId,
+				newScyllaNote.userId,
+				newScyllaNote.userHost ?? "local",
+				newScyllaNote.replyId,
+				newScyllaNote.replyUserId,
+				newScyllaNote.replyUserHost,
+				newScyllaNote.replyText,
+				newScyllaNote.replyCw,
+				newScyllaNote.replyFiles,
+				newScyllaNote.renoteId,
+				newScyllaNote.renoteUserId,
+				newScyllaNote.renoteUserHost,
+				newScyllaNote.renoteText,
+				newScyllaNote.renoteCw,
+				newScyllaNote.renoteFiles,
+				newScyllaNote.reactions,
+				newScyllaNote.noteEdit,
+				newScyllaNote.updatedAt,
+			];
+
+			// To let ScyllaDB do upsert, do NOT change the visibility.
+			await client.execute(prepared.note.insert, params, { prepare: true });
+
+			// Update home timelines
+			client.eachRow(
+				prepared.homeTimeline.select.byId,
+				[scyllaNote.id],
+				{ prepare: true },
+				(_, row) => {
+					const timeline = parseHomeTimeline(row);
+					client.execute(
+						prepared.homeTimeline.insert,
+						[timeline.feedUserId, ...params],
+						{ prepare: true },
+					);
+				},
+			);
+		} else {
+			// Save updated note to the database
+			await Notes.update({ uri }, update);
+
+			// Save an edit history for the previous note
+			await NoteEdits.insert({
+				id: genId(),
+				noteId: note.id,
+				text: note.text,
+				cw: note.cw,
+				fileIds: note.fileIds,
+				updatedAt: update.updatedAt,
+			});
+		}
 
 		publishing = true;
 	}
@@ -788,4 +927,6 @@ export async function updateNote(value: string | IObject, resolver?: Resolver) {
 			updatedAt: update.updatedAt,
 		});
 	}
+
+	return { ...note, ...update };
 }

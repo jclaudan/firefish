@@ -109,7 +109,7 @@ export interface ScyllaDriveFile {
 	comment: string | null;
 	blurhash: string | null;
 	url: string;
-	thumbnailUrl: string;
+	thumbnailUrl: string | null;
 	isSensitive: boolean;
 	isLink: boolean;
 	md5: string;
@@ -140,8 +140,8 @@ export function getScyllaDrivePublicUrl(
 }
 
 export interface ScyllaNoteEditHistory {
-	content: string;
-	cw: string;
+	content: string | null;
+	cw: string | null;
 	files: ScyllaDriveFile[];
 	updatedAt: Date;
 }
