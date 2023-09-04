@@ -173,11 +173,12 @@ export default async (
 		createdAt: User["createdAt"];
 		isBot: User["isBot"];
 		inbox?: User["inbox"];
+		isIndexable?: User["isIndexable"];
 	},
 	data: Option,
 	silent = false,
 ) =>
-	// biome-ignore lint/suspicious/noAsyncPromiseExecutor: FIXME
+	// rome-ignore lint/suspicious/noAsyncPromiseExecutor: FIXME
 	new Promise<Note>(async (res, rej) => {
 		const dontFederateInitially = data.visibility === "hidden";
 
@@ -666,7 +667,9 @@ export default async (
 		}
 
 		// Register to search database
-		await index(note, false);
+		if (user.isIndexable) {
+			await index(note, false);
+		}
 	});
 
 async function renderNoteOrRenoteActivity(data: Option, note: Note) {
