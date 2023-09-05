@@ -10,6 +10,7 @@ import {
 	UserProfiles,
 } from "@/models/index.js";
 import { IsNull } from "typeorm";
+import config from "@/config/index.js";
 
 export class Cache<T> {
 	private ttl: number;
@@ -52,23 +53,29 @@ export class Cache<T> {
 	}
 
 	public async getAll(renew = false): Promise<Map<string, T>> {
-		const keys = await redisClient.keys(`${this.prefix}*`);
+		const redisPrefix = `${config.cacheServer?.prefix ?? config.redis.prefix}:`;
+		let keys = await redisClient.keys(`${redisPrefix}${this.prefix}*`);
 		const map = new Map<string, T>();
 		if (keys.length === 0) {
 			return map;
 		}
+		keys = keys.map((key) => key.slice(redisPrefix?.length));
 		const values = await redisClient.mgetBuffer(keys);
 
 		for (const [i, key] of keys.entries()) {
 			const val = values[i];
 			if (val !== null) {
-				map.set(key, decode(val) as T);
+				let mapKey = key.substring(this.prefix.length);
+				if (mapKey.indexOf(":") === 0) {
+					mapKey = mapKey.substring(1);
+				}
+				map.set(mapKey, decode(val) as T);
 			}
 		}
 
 		if (renew) {
 			const trans = redisClient.multi();
-			for (const key of map.keys()) {
+			for (const key of keys) {
 				trans.expire(key, this.ttl);
 			}
 			await trans.exec();
