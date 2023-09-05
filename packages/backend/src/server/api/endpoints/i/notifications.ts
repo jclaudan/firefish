@@ -86,6 +86,11 @@ export default define(meta, paramDef, async (ps, user) => {
 	}
 
 	if (scyllaClient) {
+		if (ps.unreadOnly) {
+			// FIXME: isRead is always true at the moment
+			return await Notifications.packMany([], user.id);
+		}
+
 		const client = scyllaClient as Client;
 		const [
 			followingUserIds,
@@ -104,10 +109,6 @@ export default define(meta, paramDef, async (ps, user) => {
 
 		const filter = async (notifications: ScyllaNotification[]) => {
 			let filtered = notifications;
-			if (ps.unreadOnly) {
-				// FIXME: isRead is always true at the moment
-				filtered = [];
-			}
 			if (ps.following) {
 				filtered = filtered.filter(
 					(n) => n.notifierId && validUserIds.includes(n.notifierId),
