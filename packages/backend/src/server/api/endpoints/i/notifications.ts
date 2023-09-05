@@ -14,7 +14,8 @@ import { makePaginationQuery } from "../../common/make-pagination-query.js";
 import {
 	ScyllaNotification,
 	execPaginationQuery,
-	filterMutedUser,
+	parseScyllaNote,
+	prepared,
 	scyllaClient,
 } from "@/db/scylla.js";
 import {
@@ -23,18 +24,13 @@ import {
 	UserBlockedCache,
 	UserBlockingCache,
 	UserMutingsCache,
-	userWordMuteCache,
 } from "@/misc/cache.js";
+import type { Client } from "cassandra-driver";
 
 export const meta = {
 	tags: ["account", "notifications"],
 
 	requireCredential: true,
-
-	limit: {
-		duration: 60000,
-		max: 15,
-	},
 
 	kind: "read:notifications",
 
@@ -59,6 +55,7 @@ export const paramDef = {
 		untilId: { type: "string", format: "misskey:id" },
 		following: { type: "boolean", default: false },
 		unreadOnly: { type: "boolean", default: false },
+		directOnly: { type: "boolean", default: false },
 		markAsRead: { type: "boolean", default: true },
 		includeTypes: {
 			type: "array",
@@ -89,6 +86,7 @@ export default define(meta, paramDef, async (ps, user) => {
 	}
 
 	if (scyllaClient) {
+		const client = scyllaClient as Client;
 		const [
 			followingUserIds,
 			mutedUserIds,
@@ -104,7 +102,7 @@ export default define(meta, paramDef, async (ps, user) => {
 		]);
 		const validUserIds = [user.id, ...followingUserIds];
 
-		const filter = (notifications: ScyllaNotification[]) => {
+		const filter = async (notifications: ScyllaNotification[]) => {
 			let filtered = notifications;
 			if (ps.unreadOnly) {
 				// FIXME: isRead is always true at the moment
@@ -134,6 +132,25 @@ export default define(meta, paramDef, async (ps, user) => {
 							blockerIds.includes(n.notifierId))
 					),
 			);
+			if (
+				ps.directOnly &&
+				ps.includeTypes?.every((t) => ["mention", "reply"].includes(t))
+			) {
+				filtered = filtered.filter(({ entityId }) => !!entityId);
+				let notes = await client
+					.execute(
+						prepared.note.select.byIds,
+						[filtered.map(({ entityId }) => entityId as string)],
+						{ prepare: true },
+					)
+					.then((result) => result.rows.map(parseScyllaNote));
+				notes = notes.filter((n) => n.visibility === "specified");
+				const validNoteIds = notes.map(({ id }) => id);
+				filtered = filtered.filter(
+					({ entityId }) => entityId && validNoteIds.includes(entityId),
+				);
+			}
+
 			return filtered;
 		};
 
@@ -173,11 +190,8 @@ export default define(meta, paramDef, async (ps, user) => {
 		.andWhere("notification.notifieeId = :meId", { meId: user.id })
 		.leftJoinAndSelect("notification.notifier", "notifier")
 		.leftJoinAndSelect("notification.note", "note")
-		.leftJoinAndSelect("note.user", "user")
 		.leftJoinAndSelect("note.reply", "reply")
-		.leftJoinAndSelect("note.renote", "renote")
-		.leftJoinAndSelect("reply.user", "replyUser")
-		.leftJoinAndSelect("renote.user", "renoteUser");
+		.leftJoinAndSelect("note.renote", "renote");
 
 	// muted users
 	query.andWhere(
@@ -224,6 +238,10 @@ export default define(meta, paramDef, async (ps, user) => {
 		query.andWhere("notification.type NOT IN (:...excludeTypes)", {
 			excludeTypes: ps.excludeTypes,
 		});
+	}
+
+	if (ps.directOnly) {
+		query.andWhere("note.visibility = 'specified'");
 	}
 
 	if (ps.unreadOnly) {

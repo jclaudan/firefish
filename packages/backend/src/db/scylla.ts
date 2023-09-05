@@ -401,7 +401,7 @@ export async function execPaginationQuery(
 	filter?: {
 		note?: (_: ScyllaNote[]) => Promise<ScyllaNote[]>;
 		reaction?: (_: ScyllaNoteReaction[]) => Promise<ScyllaNoteReaction[]>;
-		notification?: (_: ScyllaNotification[]) => ScyllaNotification[];
+		notification?: (_: ScyllaNotification[]) => Promise<ScyllaNotification[]>;
 	},
 	userId?: User["id"],
 	maxPartitions = config.scylla?.sparseTimelineDays ?? 14,
@@ -474,7 +474,7 @@ export async function execPaginationQuery(
 				const notifications = result.rows.map(parseScyllaNotification);
 				(found as ScyllaNotification[]).push(
 					...(filter?.notification
-						? filter.notification(notifications)
+						? await filter.notification(notifications)
 						: notifications),
 				);
 				untilDate = notifications[notifications.length - 1].createdAt;

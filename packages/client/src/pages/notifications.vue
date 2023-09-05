@@ -30,6 +30,7 @@
 						class="notifications"
 						:include-types="includeTypes"
 						:unread-only="false"
+						:direct-only="false"
 					/>
 				</swiper-slide>
 				<swiper-slide>
@@ -37,13 +38,24 @@
 						class="notifications"
 						:include-types="includeTypes"
 						:unread-only="true"
+						:direct-only="false"
 					/>
 				</swiper-slide>
 				<swiper-slide>
-					<XNotes :pagination="mentionsPagination" />
+					<XNotifications
+						class="notifications"
+						:include-types="['mention', 'reply']"
+						:unread-only="false"
+						:direct-only="false"
+					/>
 				</swiper-slide>
 				<swiper-slide>
-					<XNotes :pagination="directNotesPagination" />
+					<XNotifications
+						class="notifications"
+						:include-types="['mention', 'reply']"
+						:unread-only="false"
+						:direct-only="true"
+					/>
 				</swiper-slide>
 			</swiper>
 		</MkSpacer>
@@ -56,7 +68,6 @@ import { Virtual } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { notificationTypes } from "firefish-js";
 import XNotifications from "@/components/MkNotifications.vue";
-import XNotes from "@/components/MkNotes.vue";
 import * as os from "@/os";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
@@ -80,19 +91,6 @@ window.addEventListener("resize", () => {
 	isMobile.value =
 		deviceKind === "smartphone" || window.innerWidth <= MOBILE_THRESHOLD;
 });
-
-const mentionsPagination = {
-	endpoint: "notes/mentions" as const,
-	limit: 10,
-};
-
-const directNotesPagination = {
-	endpoint: "notes/mentions" as const,
-	limit: 10,
-	params: {
-		visibility: "specified",
-	},
-};
 
 function setFilter(ev) {
 	const typeItems = notificationTypes.map((t) => ({
