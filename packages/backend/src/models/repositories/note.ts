@@ -327,7 +327,10 @@ export const NoteRepository = db.getRepository(Note).extend({
 				? (note as ScyllaNote).files.map((file) => ({
 						...file,
 						thumbnailUrl: getScyllaDrivePublicUrl(file, true),
-						createdAt: file.createdAt.toISOString(),
+						createdAt: (typeof file.createdAt === "string"
+							? new Date(file.createdAt)
+							: file.createdAt
+						).toISOString(),
 						properties: {
 							width: file.width ?? undefined,
 							height: file.height ?? undefined,

@@ -140,7 +140,7 @@ export function parseScyllaNotification(row: types.Row): ScyllaNotification {
 export interface ScyllaDriveFile {
 	id: string;
 	type: string;
-	createdAt: Date;
+	createdAt: Date | string;
 	name: string;
 	comment: string | null;
 	blurhash: string | null;
