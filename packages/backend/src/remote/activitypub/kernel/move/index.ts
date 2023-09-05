@@ -9,6 +9,7 @@ import deleteFollowing from "@/services/following/delete.js";
 
 import type { IMove } from "../../type.js";
 import { getApHrefNullable } from "../../type.js";
+import { userByIdCache, userDenormalizedCache } from "@/services/user-cache.js";
 
 export default async (
 	actor: CacheableRemoteUser,
@@ -45,6 +46,19 @@ export default async (
 	}
 
 	// add target uri to movedToUri in order to indicate that the user has moved
+	await userByIdCache.get(old_acc.id).then((cached) => {
+		if (cached) {
+			userByIdCache.set(cached.id, { ...cached, movedToUri: targetUri });
+		}
+	});
+	await userDenormalizedCache.get(old_acc.id).then((cached) => {
+		if (cached) {
+			userDenormalizedCache.set(cached.id, {
+				...cached,
+				movedToUri: targetUri,
+			});
+		}
+	});
 	await Users.update(old_acc.id, { movedToUri: targetUri });
 
 	// follow the new account and unfollow the old one

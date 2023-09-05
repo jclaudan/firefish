@@ -13,6 +13,7 @@ import { Followings, Users } from "@/models/index.js";
 import config from "@/config/index.js";
 import { publishMainStream } from "@/services/stream.js";
 import { parse } from "@/misc/acct.js";
+import { userByIdCache, userDenormalizedCache } from "@/services/user-cache.js";
 
 export const meta = {
 	tags: ["users"],
@@ -127,7 +128,18 @@ export default define(meta, paramDef, async (ps, user) => {
 	updates.movedToUri = toUrl;
 	updates.alsoKnownAs = user.alsoKnownAs?.concat(toUrl) ?? [toUrl];
 
+	await userByIdCache.get(user.id).then((cached) => {
+		if (cached) {
+			userByIdCache.set(cached.id, { ...cached, ...updates });
+		}
+	});
+	await userDenormalizedCache.get(user.id).then((cached) => {
+		if (cached) {
+			userDenormalizedCache.set(cached.id, { ...cached, ...updates });
+		}
+	});
 	await Users.update(user.id, updates);
+
 	const iObj = await Users.pack<true, true>(user.id, user, {
 		detail: true,
 		includeSecrets: true,
