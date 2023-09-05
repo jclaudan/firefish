@@ -33,8 +33,14 @@ import Following from "./activitypub/following.js";
 import Followers from "./activitypub/followers.js";
 import Outbox, { packActivity } from "./activitypub/outbox.js";
 import { serverLogger } from "./index.js";
-import { parseScyllaNote, prepared, scyllaClient } from "@/db/scylla.js";
+import {
+	parseScyllaNote,
+	parseScyllaReaction,
+	prepared,
+	scyllaClient,
+} from "@/db/scylla.js";
 import type { Note } from "@/models/entities/note.js";
+import type { NoteReaction } from "@/models/entities/note-reaction.js";
 
 // Init router
 const router = new Router();
@@ -388,16 +394,40 @@ router.get("/likes/:like", async (ctx) => {
 		return;
 	}
 
-	const reaction = await NoteReactions.findOneBy({ id: ctx.params.like });
+	let reaction: NoteReaction | null = null;
+	if (scyllaClient) {
+		const result = await scyllaClient.execute(
+			prepared.reaction.select.byId,
+			[ctx.params.like],
+			{ prepare: true },
+		);
+		if (result.rowLength > 0) {
+			reaction = parseScyllaReaction(result.first());
+		}
+	} else {
+		reaction = await NoteReactions.findOneBy({ id: ctx.params.like });
+	}
 
-	if (reaction == null) {
+	if (!reaction) {
 		ctx.status = 404;
 		return;
 	}
 
-	const note = await Notes.findOneBy({ id: reaction.noteId });
+	let note: Note | null = null;
+	if (scyllaClient) {
+		const result = await scyllaClient.execute(
+			prepared.note.select.byId,
+			[reaction.noteId],
+			{ prepare: true },
+		);
+		if (result.rowLength > 0) {
+			note = parseScyllaNote(result.first());
+		}
+	} else {
+		note = await Notes.findOneBy({ id: reaction.noteId });
+	}
 
-	if (note == null) {
+	if (!note) {
 		ctx.status = 404;
 		return;
 	}
