@@ -132,11 +132,11 @@ export default define(meta, paramDef, async (ps, user) => {
 							blockerIds.includes(n.notifierId))
 					),
 			);
-			if (
-				ps.directOnly &&
-				ps.includeTypes?.every((t) => ["mention", "reply"].includes(t))
-			) {
-				filtered = filtered.filter(({ entityId }) => !!entityId);
+			if (ps.directOnly) {
+				filtered = filtered.filter(
+					({ entityId, type }) =>
+						entityId && ["mention", "reply"].includes(type),
+				);
 				let notes = await client
 					.execute(
 						prepared.note.select.byIds,
