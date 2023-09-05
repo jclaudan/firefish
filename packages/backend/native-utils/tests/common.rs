@@ -44,7 +44,6 @@ async fn setup_schema(db: &DbConn) {
         ad,
         announcement_read,
         announcement,
-        antenna_note,
         antenna,
         app,
         attestation_challenge,

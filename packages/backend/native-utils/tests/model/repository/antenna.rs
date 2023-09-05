@@ -1,13 +1,13 @@
 mod int_test {
-    use native_utils::{database, model, util};
+    use native_utils::{database, model};
 
     use model::{
-        entity::{antenna, antenna_note, note, user},
+        entity::{antenna, user},
         repository::Repository,
         schema,
     };
     use pretty_assertions::assert_eq;
-    use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter};
+    use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
 
     use crate::{cleanup, prepare};
 
@@ -71,7 +71,7 @@ mod int_test {
         prepare().await;
         let db = database::get_database().unwrap();
 
-        let (alice, alice_antenna) = user::Entity::find()
+        let (_, alice_antenna) = user::Entity::find()
             .filter(user::Column::Username.eq("alice"))
             .find_also_related(antenna::Entity)
             .one(db)
@@ -86,24 +86,6 @@ mod int_test {
             .expect("Unable to pack");
         assert_eq!(packed.has_unread_note, false);
 
-        let note_model = note::Entity::find()
-            .filter(note::Column::UserId.eq(alice.id))
-            .one(db)
-            .await
-            .unwrap()
-            .expect("note not found");
-        let antenna_note = antenna_note::Model {
-            id: util::id::create_id(0).unwrap(),
-            antenna_id: alice_antenna.id.to_owned(),
-            note_id: note_model.id.to_owned(),
-            read: false,
-        };
-        antenna_note
-            .into_active_model()
-            .reset_all()
-            .insert(db)
-            .await
-            .unwrap();
         let packed = alice_antenna
             .to_owned()
             .pack()

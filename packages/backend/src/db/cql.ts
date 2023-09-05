@@ -53,6 +53,9 @@ export const scyllaQueries = {
 			byReplyId: `SELECT * FROM note WHERE "replyId" = ?`,
 			byChannelId: `SELECT * FROM note_by_channel_id WHERE "channelId" = ?`,
 		},
+		count: {
+			byUserId: `SELECT COUNT(*) FROM note_by_user_id WHERE "userId" = ?`,
+		},
 		delete: `DELETE FROM note WHERE "createdAtDate" = ? AND "createdAt" = ? AND "userId" = ? AND "userHost" = ? AND "visibility" = ?`,
 		update: {
 			renoteCount: `UPDATE note SET

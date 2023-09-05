@@ -11,6 +11,7 @@ import {
 import { awaitAll } from "@/prelude/await-all.js";
 import define from "../../define.js";
 import { ApiError } from "../../error.js";
+import { scyllaClient } from "@/db/scylla.js";
 
 export const meta = {
 	tags: ["users"],
@@ -147,6 +148,32 @@ export const paramDef = {
 } as const;
 
 export default define(meta, paramDef, async (ps, me) => {
+	// FIXME: do we really need this chart?
+	if (scyllaClient) {
+		return {
+			notesCount: 0,
+			repliesCount: 0,
+			renotesCount: 0,
+			repliedCount: 0,
+			renotedCount: 0,
+			pollVotesCount: 0,
+			pollVotedCount: 0,
+			localFollowingCount: 0,
+			remoteFollowingCount: 0,
+			localFollowersCount: 0,
+			remoteFollowersCount: 0,
+			sentReactionsCount: 0,
+			receivedReactionsCount: 0,
+			noteFavoritesCount: 0,
+			pageLikesCount: 0,
+			pageLikedCount: 0,
+			driveFilesCount: 0,
+			driveUsage: 0,
+			followingCount: 0,
+			followersCount: 0,
+		};
+	}
+
 	const user = await Users.findOneBy({ id: ps.userId });
 	if (user == null) {
 		throw new ApiError(meta.errors.noSuchUser);
