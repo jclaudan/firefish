@@ -12,15 +12,19 @@
 			>{{ column.name }}</template
 		>
 
-		<XNotes :pagination="pagination" />
+		<XNotifications
+			:include-types="['mention', 'reply']"
+			:unread-only="false"
+			:direct-only="true"
+		/>
 	</XColumn>
 </template>
 
 <script lang="ts" setup>
 import {} from "vue";
 import XColumn from "./column.vue";
+import XNotifications from "@/components/MkNotifications.vue";
 import type { Column } from "./deck-store";
-import XNotes from "@/components/MkNotes.vue";
 
 defineProps<{
 	column: Column;
@@ -30,12 +34,4 @@ defineProps<{
 const emit = defineEmits<{
 	(ev: "parent-focus", direction: "up" | "down" | "left" | "right"): void;
 }>();
-
-const pagination = {
-	endpoint: "notes/mentions" as const,
-	limit: 10,
-	params: {
-		visibility: "specified",
-	},
-};
 </script>

@@ -10,7 +10,7 @@
 			>{{ column.name }}</template
 		>
 
-		<XNotifications :include-types="column.includingTypes" />
+		<XNotifications :include-types="column.includingTypes" :direct-only="false" />
 	</XColumn>
 </template>
 
