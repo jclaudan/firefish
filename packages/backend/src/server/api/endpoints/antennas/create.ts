@@ -112,7 +112,7 @@ export default define(meta, paramDef, async (ps, user) => {
 	const antennas = await Antennas.findBy({
 		userId: user.id,
 	});
-	if (antennas.length > 5 && !user.isAdmin) {
+	if (antennas.length > 100 && !user.isAdmin) {
 		throw new ApiError(meta.errors.tooManyAntennas);
 	}
 
