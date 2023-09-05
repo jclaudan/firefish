@@ -1,7 +1,7 @@
-import { Instances, NoteReactions, Notes, Users } from "@/models/index.js";
+import { Instances, NoteReactions } from "@/models/index.js";
 import define from "../define.js";
 import { driveChart, notesChart, usersChart } from "@/services/chart/index.js";
-import { IsNull } from "typeorm";
+import { fetchReactionCount, scyllaClient } from "@/db/scylla.js";
 
 export const meta = {
 	requireCredential: false,
@@ -79,7 +79,7 @@ export default define(meta, paramDef, async () => {
 		//originalReactionsCount,
 		instances,
 	] = await Promise.all([
-		NoteReactions.count({ cache: 3600000 }), // 1 hour
+		scyllaClient ? fetchReactionCount() : NoteReactions.count({ cache: 3600000 }), // 1 hour
 		//NoteReactions.count({ where: { userHost: IsNull() }, cache: 3600000 }),
 		Instances.count({ cache: 3600000 }),
 	]);

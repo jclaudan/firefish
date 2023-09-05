@@ -4,7 +4,7 @@ import { fetchMeta } from "@/misc/fetch-meta.js";
 import { Users, Notes } from "@/models/index.js";
 import { IsNull } from "typeorm";
 import { MAX_NOTE_TEXT_LENGTH, FILE_TYPE_BROWSERSAFE } from "@/const.js";
-import { fetchPostCount, scyllaClient } from "@/db/scylla";
+import { fetchPostCount, scyllaClient } from "@/db/scylla.js";
 
 export async function getInstance(
 	response: Entity.Instance,

@@ -65,14 +65,11 @@ function newClient(): Client | null {
 }
 
 export const scyllaClient = newClient();
-
 export const prepared = scyllaQueries;
 
-const localPostCountCache = new Cache<number>("localPostCount", 1000 * 60 * 10);
-export const allPostCountCache = new Cache<number>(
-	"allPostCount",
-	1000 * 60 * 10,
-);
+const localPostCountCache = new Cache<number>("localPostCount", 1000 * 60 * 60);
+const allPostCountCache = new Cache<number>("allPostCount", 1000 * 60 * 60);
+const reactionCountCache = new Cache<number>("reactionCount", 1000 * 60 * 60);
 
 export async function fetchPostCount(local = false): Promise<number> {
 	if (!scyllaClient) {
@@ -90,6 +87,18 @@ export async function fetchPostCount(local = false): Promise<number> {
 	return await allPostCountCache.fetch(null, () =>
 		scyllaClient
 			.execute("SELECT COUNT(*) FROM note")
+			.then((result) => result.first().get("count") as number),
+	);
+}
+
+export async function fetchReactionCount(): Promise<number> {
+	if (!scyllaClient) {
+		throw new Error("ScyllaDB is disabled");
+	}
+
+	return await reactionCountCache.fetch(null, () =>
+		scyllaClient
+			.execute("SELECT COUNT(*) FROM reaction")
 			.then((result) => result.first().get("count") as number),
 	);
 }

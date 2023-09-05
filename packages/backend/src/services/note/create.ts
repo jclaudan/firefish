@@ -38,7 +38,12 @@ import {
 import type { DriveFile } from "@/models/entities/drive-file.js";
 import type { App } from "@/models/entities/app.js";
 import { Not, In } from "typeorm";
-import type { User, ILocalUser, IRemoteUser } from "@/models/entities/user.js";
+import type {
+	User,
+	ILocalUser,
+	IRemoteUser,
+	CacheableUser,
+} from "@/models/entities/user.js";
 import { genId } from "@/misc/gen-id.js";
 import {
 	notesChart,
@@ -75,6 +80,7 @@ import {
 	scyllaClient,
 	ScyllaPoll,
 } from "@/db/scylla.js";
+import { userByIdCache, userDenormalizedCache } from "../user-cache.js";
 
 export const mutedWordsCache = new Cache<
 	{ userId: UserProfile["userId"]; mutedWords: UserProfile["mutedWords"] }[]
@@ -1136,6 +1142,25 @@ function incNotesCountOfUser(user: { id: User["id"] }) {
 		})
 		.where("id = :id", { id: user.id })
 		.execute();
+
+	userByIdCache.get(user.id).then((cache) => {
+		if (cache) {
+			const newUser: CacheableUser = {
+				...cache,
+				notesCount: cache.notesCount + 1,
+			};
+			userByIdCache.set(user.id, newUser);
+		}
+	});
+	userDenormalizedCache.get(user.id).then((cache) => {
+		if (cache) {
+			const newUser: CacheableUser = {
+				...cache,
+				notesCount: cache.notesCount + 1,
+			};
+			userDenormalizedCache.set(user.id, newUser);
+		}
+	});
 }
 
 export async function extractMentionedUsers(

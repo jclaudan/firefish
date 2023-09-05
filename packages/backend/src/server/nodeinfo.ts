@@ -5,7 +5,7 @@ import { Users, Notes } from "@/models/index.js";
 import { IsNull, MoreThan } from "typeorm";
 import { MAX_NOTE_TEXT_LENGTH, MAX_CAPTION_TEXT_LENGTH } from "@/const.js";
 import { Cache } from "@/misc/cache.js";
-import { fetchPostCount, scyllaClient } from "@/db/scylla";
+import { fetchPostCount, scyllaClient } from "@/db/scylla.js";
 
 const router = new Router();
 
