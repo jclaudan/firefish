@@ -5,7 +5,7 @@ import { Users, Notes } from "@/models/index.js";
 import { IsNull, MoreThan } from "typeorm";
 import { MAX_NOTE_TEXT_LENGTH, MAX_CAPTION_TEXT_LENGTH } from "@/const.js";
 import { Cache } from "@/misc/cache.js";
-import { scyllaClient } from "@/db/scylla";
+import { fetchPostCount, scyllaClient } from "@/db/scylla";
 
 const router = new Router();
 
@@ -43,9 +43,7 @@ const nodeinfo2 = async () => {
 				},
 			}),
 			scyllaClient
-				? scyllaClient
-						.execute("SELECT COUNT(1) FROM local_note")
-						.then((result) => result.first().get("count") as number)
+				? fetchPostCount(true)
 				: Notes.count({ where: { userHost: IsNull() } }),
 		]);
 

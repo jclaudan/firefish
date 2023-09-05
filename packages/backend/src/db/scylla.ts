@@ -6,6 +6,7 @@ import type { NoteReaction } from "@/models/entities/note-reaction.js";
 import { Client, types, tracker } from "cassandra-driver";
 import type { User } from "@/models/entities/user.js";
 import {
+	Cache,
 	ChannelFollowingsCache,
 	InstanceMutingsCache,
 	LocalFollowingsCache,
@@ -66,6 +67,32 @@ function newClient(): Client | null {
 export const scyllaClient = newClient();
 
 export const prepared = scyllaQueries;
+
+const localPostCountCache = new Cache<number>("localPostCount", 1000 * 60 * 10);
+export const allPostCountCache = new Cache<number>(
+	"allPostCount",
+	1000 * 60 * 10,
+);
+
+export async function fetchPostCount(local = false): Promise<number> {
+	if (!scyllaClient) {
+		throw new Error("ScyllaDB is disabled");
+	}
+
+	if (local) {
+		return await localPostCountCache.fetch(null, () =>
+			scyllaClient
+				.execute("SELECT COUNT(*) FROM local_note_by_user_id")
+				.then((result) => result.first().get("count") as number),
+		);
+	}
+
+	return await allPostCountCache.fetch(null, () =>
+		scyllaClient
+			.execute("SELECT COUNT(*) FROM note")
+			.then((result) => result.first().get("count") as number),
+	);
+}
 
 export interface ScyllaNotification {
 	targetId: string;
@@ -444,11 +471,15 @@ export async function execPaginationQuery(
 				untilDate = notifications[notifications.length - 1].createdAt;
 			} else if (kind === "reaction") {
 				const reactions = result.rows.map(parseScyllaReaction);
-				(found as ScyllaNoteReaction[]).push(...(filter?.reaction ? await filter.reaction(reactions) : reactions));
+				(found as ScyllaNoteReaction[]).push(
+					...(filter?.reaction ? await filter.reaction(reactions) : reactions),
+				);
 				untilDate = reactions[reactions.length - 1].createdAt;
 			} else {
 				const notes = result.rows.map(parseScyllaNote);
-				(found as ScyllaNote[]).push(...(filter?.note ? await filter.note(notes) : notes));
+				(found as ScyllaNote[]).push(
+					...(filter?.note ? await filter.note(notes) : notes),
+				);
 				untilDate = notes[notes.length - 1].createdAt;
 			}
 		}

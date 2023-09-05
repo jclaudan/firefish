@@ -4,6 +4,7 @@ import type { User } from "@/models/entities/user.js";
 import { Notes } from "@/models/index.js";
 import type { Note } from "@/models/entities/note.js";
 import { name, schema } from "./entities/per-user-notes.js";
+import { scyllaClient } from "@/db/scylla.js";
 
 /**
  * ユーザーごとのノートに関するチャート
@@ -17,7 +18,15 @@ export default class PerUserNotesChart extends Chart<typeof schema> {
 	protected async tickMajor(
 		group: string,
 	): Promise<Partial<KVs<typeof schema>>> {
-		const [count] = await Promise.all([Notes.countBy({ userId: group })]);
+		const count = await (scyllaClient
+			? scyllaClient
+					.execute(
+						`SELECT COUNT(*) note_by_user_id WHERE "userId" = ?`,
+						[group],
+						{ prepare: true },
+					)
+					.then((result) => result.first().get("count") as number)
+			: Notes.countBy({ userId: group }));
 
 		return {
 			total: count,

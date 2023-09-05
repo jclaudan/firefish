@@ -5,6 +5,7 @@ import type { DriveFile } from "@/models/entities/drive-file.js";
 import type { Note } from "@/models/entities/note.js";
 import { toPuny } from "@/misc/convert-host.js";
 import { name, schema } from "./entities/instance.js";
+import { scyllaClient } from "@/db/scylla.js";
 
 /**
  * インスタンスごとのチャート
@@ -18,9 +19,10 @@ export default class InstanceChart extends Chart<typeof schema> {
 	protected async tickMajor(
 		group: string,
 	): Promise<Partial<KVs<typeof schema>>> {
+		const zero = async () => 0;
 		const [notesCount, usersCount, followingCount, followersCount, driveFiles] =
 			await Promise.all([
-				Notes.countBy({ userHost: group }),
+				scyllaClient ? zero() : Notes.countBy({ userHost: group }),
 				Users.countBy({ host: group }),
 				Followings.countBy({ followerHost: group }),
 				Followings.countBy({ followeeHost: group }),

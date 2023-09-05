@@ -4,6 +4,7 @@ import { Notes } from "@/models/index.js";
 import { Not, IsNull } from "typeorm";
 import type { Note } from "@/models/entities/note.js";
 import { name, schema } from "./entities/notes.js";
+import { fetchPostCount, scyllaClient } from "@/db/scylla.js";
 
 /**
  * ノートに関するチャート
@@ -16,8 +17,12 @@ export default class NotesChart extends Chart<typeof schema> {
 
 	protected async tickMajor(): Promise<Partial<KVs<typeof schema>>> {
 		const [localCount, remoteCount] = await Promise.all([
-			Notes.countBy({ userHost: IsNull() }),
-			Notes.countBy({ userHost: Not(IsNull()) }),
+			scyllaClient
+				? fetchPostCount(true)
+				: Notes.countBy({ userHost: IsNull() }),
+			scyllaClient
+				? fetchPostCount(false)
+				: Notes.countBy({ userHost: Not(IsNull()) }),
 		]);
 
 		return {
