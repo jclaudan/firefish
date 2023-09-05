@@ -7,6 +7,7 @@ import { MoreThan } from "typeorm";
 import { index } from "@/services/note/create.js";
 import { Note } from "@/models/entities/note.js";
 import meilisearch from "../../../db/meilisearch.js";
+import { scyllaClient } from "@/db/scylla.js";
 
 const logger = queueLogger.createSubLogger("index-all-notes");
 
@@ -55,7 +56,11 @@ export default async function indexAllNotes(
 		}
 
 		try {
-			const count = await Notes.count();
+			const count = await (scyllaClient
+				? scyllaClient
+						.execute("SELECT COUNT(1) FROM note")
+						.then((result) => result.first().get("count") as number)
+				: Notes.count());
 			total = count;
 			await job.update({ indexedCount, cursor, total });
 		} catch (e) {}

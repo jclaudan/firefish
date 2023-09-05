@@ -4,6 +4,7 @@ import { fetchMeta } from "@/misc/fetch-meta.js";
 import { Users, Notes } from "@/models/index.js";
 import { IsNull } from "typeorm";
 import { MAX_NOTE_TEXT_LENGTH, FILE_TYPE_BROWSERSAFE } from "@/const.js";
+import { scyllaClient } from "@/db/scylla";
 
 export async function getInstance(
 	response: Entity.Instance,
@@ -12,7 +13,11 @@ export async function getInstance(
 	const [meta, totalUsers, totalStatuses] = await Promise.all([
 		fetchMeta(true),
 		Users.count({ where: { host: IsNull() } }),
-		Notes.count({ where: { userHost: IsNull() } }),
+		scyllaClient
+			? scyllaClient
+					.execute("SELECT COUNT(1) FROM note")
+					.then((result) => result.first().get("count") as number)
+			: Notes.count({ where: { userHost: IsNull() } }),
 	]);
 
 	return {
