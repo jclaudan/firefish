@@ -33,6 +33,8 @@ import Following from "./activitypub/following.js";
 import Followers from "./activitypub/followers.js";
 import Outbox, { packActivity } from "./activitypub/outbox.js";
 import { serverLogger } from "./index.js";
+import { parseScyllaNote, prepared, scyllaClient } from "@/db/scylla.js";
+import type { Note } from "@/models/entities/note.js";
 
 // Init router
 const router = new Router();
@@ -87,13 +89,32 @@ router.get("/notes/:note", async (ctx, next) => {
 		return;
 	}
 
-	const note = await Notes.findOneBy({
-		id: ctx.params.note,
-		visibility: In(["public" as const, "home" as const, "followers" as const]),
-		localOnly: false,
-	});
+	let note: Note | null = null;
+	const validVisibilities = ["public", "home", "followers"];
+	if (scyllaClient) {
+		const result = await scyllaClient.execute(
+			prepared.note.select.byId,
+			[ctx.params.note],
+			{ prepare: true },
+		);
+		if (result.rowLength > 0) {
+			const candidate = parseScyllaNote(result.first());
+			if (
+				!candidate.localOnly &&
+				validVisibilities.includes(candidate.visibility)
+			) {
+				note = candidate;
+			}
+		}
+	} else {
+		note = await Notes.findOneBy({
+			id: ctx.params.note,
+			visibility: In(validVisibilities),
+			localOnly: false,
+		});
+	}
 
-	if (note == null) {
+	if (!note) {
 		ctx.status = 404;
 		return;
 	}
@@ -158,14 +179,34 @@ router.get("/notes/:note/activity", async (ctx) => {
 		return;
 	}
 
-	const note = await Notes.findOneBy({
-		id: ctx.params.note,
-		userHost: IsNull(),
-		visibility: In(["public" as const, "home" as const]),
-		localOnly: false,
-	});
+	let note: Note | null = null;
+	const validVisibilities = ["public", "home"];
+	if (scyllaClient) {
+		const result = await scyllaClient.execute(
+			prepared.note.select.byId,
+			[ctx.params.note],
+			{ prepare: true },
+		);
+		if (result.rowLength > 0) {
+			const candidate = parseScyllaNote(result.first());
+			if (
+				!candidate.userHost &&
+				!candidate.localOnly &&
+				validVisibilities.includes(candidate.visibility)
+			) {
+				note = candidate;
+			}
+		}
+	} else {
+		note = await Notes.findOneBy({
+			id: ctx.params.note,
+			userHost: IsNull(),
+			visibility: In(validVisibilities),
+			localOnly: false,
+		});
+	}
 
-	if (note == null) {
+	if (!note) {
 		ctx.status = 404;
 		return;
 	}

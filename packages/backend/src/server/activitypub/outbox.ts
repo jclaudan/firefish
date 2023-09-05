@@ -15,6 +15,7 @@ import { fetchMeta } from "@/misc/fetch-meta.js";
 import { makePaginationQuery } from "../api/common/make-pagination-query.js";
 import { setResponseType } from "../activitypub.js";
 import type Router from "@koa/router";
+import { parseScyllaNote, prepared, scyllaClient } from "@/db/scylla.js";
 
 export default async (ctx: Router.RouterContext) => {
 	const verify = await checkFetch(ctx.req);
@@ -136,7 +137,25 @@ export async function packActivity(note: Note): Promise<any> {
 		!note.hasPoll &&
 		(note.fileIds == null || note.fileIds.length === 0)
 	) {
-		const renote = await Notes.findOneByOrFail({ id: note.renoteId });
+		let renote: Note | null = null;
+
+		if (scyllaClient) {
+			const result = await scyllaClient.execute(
+				prepared.note.select.byId,
+				[note.renoteId],
+				{ prepare: true },
+			);
+			if (result.rowLength > 0) {
+				renote = parseScyllaNote(result.first());
+			}
+		} else {
+			renote = await Notes.findOneBy({ id: note.renoteId });
+		}
+
+		if (!renote) {
+			throw new Error("Renote not found");
+		}
+
 		return renderAnnounce(
 			renote.uri ? renote.uri : `${config.url}/notes/${renote.id}`,
 			note,

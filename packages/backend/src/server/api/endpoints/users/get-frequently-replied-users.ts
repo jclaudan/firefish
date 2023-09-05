@@ -4,6 +4,7 @@ import { Notes, Users } from "@/models/index.js";
 import define from "../../define.js";
 import { ApiError } from "../../error.js";
 import { getUser } from "../../common/getters.js";
+import { scyllaClient } from "@/db/scylla.js";
 
 export const meta = {
 	tags: ["users"],
@@ -63,6 +64,10 @@ export default define(meta, paramDef, async (ps, me) => {
 			throw new ApiError(meta.errors.noSuchUser);
 		throw e;
 	});
+
+	if (scyllaClient) {
+		return [];
+	}
 
 	// Fetch recent notes
 	const recentNotes = await Notes.find({

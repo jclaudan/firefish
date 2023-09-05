@@ -8,6 +8,8 @@ import { checkFetch } from "@/remote/activitypub/check-fetch.js";
 import { fetchMeta } from "@/misc/fetch-meta.js";
 import { setResponseType } from "../activitypub.js";
 import type Router from "@koa/router";
+import { parseScyllaNote, prepared, scyllaClient } from "@/db/scylla.js";
+import { Note } from "@/models/entities/note.js";
 
 export default async (ctx: Router.RouterContext) => {
 	const verify = await checkFetch(ctx.req);
@@ -33,9 +35,17 @@ export default async (ctx: Router.RouterContext) => {
 		order: { id: "DESC" },
 	});
 
-	const pinnedNotes = await Promise.all(
-		pinings.map((pining) => Notes.findOneByOrFail({ id: pining.noteId })),
-	);
+	let pinnedNotes: Note[] = [];
+	if (scyllaClient) {
+		const noteIds = pinings.map(({ noteId }) => noteId);
+		pinnedNotes = await scyllaClient
+			.execute(prepared.note.select.byIds, [noteIds], { prepare: true })
+			.then((result) => result.rows.map(parseScyllaNote));
+	} else {
+		pinnedNotes = await Promise.all(
+			pinings.map((pining) => Notes.findOneByOrFail({ id: pining.noteId })),
+		);
+	}
 
 	const renderedNotes = await Promise.all(
 		pinnedNotes.map((note) => renderNote(note)),

@@ -3,6 +3,8 @@ import { In, IsNull } from "typeorm";
 import config from "@/config/index.js";
 import type { User } from "@/models/entities/user.js";
 import { Notes, DriveFiles, UserProfiles, Users } from "@/models/index.js";
+import { parseScyllaNote, prepared, scyllaClient } from "@/db/scylla.js";
+import type { Note } from "@/models/entities/note.js";
 
 export default async function (
 	user: User,
@@ -146,17 +148,35 @@ export default async function (
 		return outstr;
 	}
 
-	async function findById(id) {
+	async function findById(id: string) {
 		let text = "";
-		let next = null;
-		const findings = await Notes.findOneBy({
-			id: id,
-			visibility: In(["public", "home"]),
-		});
-		if (findings) {
-			text += `<hr>`;
-			text += await noteToString(findings);
-			next = findings.renoteId ? findings.renoteId : findings.replyId;
+		let next: string | null = null;
+		let note: Note | null = null;
+		const validVisibilities = ["public", "home"];
+
+		if (scyllaClient) {
+			const result = await scyllaClient.execute(
+				prepared.note.select.byId,
+				[id],
+				{ prepare: true },
+			);
+			if (result.rowLength > 0) {
+				const candidate = parseScyllaNote(result.first());
+				if (validVisibilities.includes(candidate.visibility)) {
+					note = candidate;
+				}
+			}
+		} else {
+			note = await Notes.findOneBy({
+				id: id,
+				visibility: In(validVisibilities),
+			});
+		}
+
+		if (note) {
+			text += "<hr>";
+			text += await noteToString(note);
+			next = note.renoteId ? note.renoteId : note.replyId;
 		}
 		return { text, next };
 	}

@@ -78,7 +78,7 @@ export async function addPinned(
 }
 
 /**
- * 指定した投稿のピン留めを解除します
+ * Remove pinned note
  * @param user
  * @param noteId
  */
@@ -87,12 +87,27 @@ export async function removePinned(
 	noteId: Note["id"],
 ) {
 	// Fetch unpinee
-	const note = await Notes.findOneBy({
-		id: noteId,
-		userId: user.id,
-	});
+	let note: Note | null = null;
+	if (scyllaClient) {
+		const result = await scyllaClient.execute(
+			prepared.note.select.byId,
+			[noteId],
+			{ prepare: true },
+		);
+		if (result.rowLength > 0) {
+			const candidate = parseScyllaNote(result.first());
+			if (candidate.userId === user.id) {
+				note = candidate;
+			}
+		}
+	} else {
+		note = await Notes.findOneBy({
+			id: noteId,
+			userId: user.id,
+		});
+	}
 
-	if (note == null) {
+	if (!note) {
 		throw new IdentifiableError(
 			"b302d4cf-c050-400a-bbb3-be208681f40c",
 			"No such note.",
