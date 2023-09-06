@@ -7,6 +7,9 @@ import { makePaginationQuery } from "../../common/make-pagination-query.js";
 import { generateMutedUserQuery } from "../../common/generate-muted-user-query.js";
 import { generateVisibilityQuery } from "../../common/generate-visibility-query.js";
 import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
+import { parseScyllaNote, prepared, scyllaClient } from "@/db/scylla.js";
+import sonic from "@/db/sonic.js";
+import meilisearch, { MeilisearchNote } from "@/db/meilisearch.js";
 
 export const meta = {
 	tags: ["notes", "hashtags"],
@@ -70,22 +73,164 @@ export const paramDef = {
 } as const;
 
 export default define(meta, paramDef, async (ps, me) => {
+	if (scyllaClient) {
+		if (!ps.tag) {
+			return await Notes.packMany([]);
+		}
+
+		const query = `#${ps.tag}`;
+
+		if (sonic) {
+			let start = 0;
+			const chunkSize = 100;
+
+			// Use sonic to fetch and step through all search results that could match the requirements
+			const ids: string[] = [];
+			while (true) {
+				const results = await sonic.search.query(
+					sonic.collection,
+					sonic.bucket,
+					query,
+					{
+						limit: chunkSize,
+						offset: start,
+					},
+				);
+
+				start += chunkSize;
+
+				if (results.length === 0) {
+					break;
+				}
+
+				const res = results
+					.map((k) => JSON.parse(k))
+					.filter((key) => {
+						if (ps.sinceId && key.id <= ps.sinceId) {
+							return false;
+						}
+						if (ps.untilId && key.id >= ps.untilId) {
+							return false;
+						}
+						return true;
+					})
+					.map((key) => key.id);
+
+				ids.push(...res);
+			}
+
+			// Sort all the results by note id DESC (newest first)
+			ids.sort().reverse();
+
+			// Fetch the notes from the database until we have enough to satisfy the limit
+			start = 0;
+			const found = [];
+			while (found.length < ps.limit && start < ids.length) {
+				const chunk = ids.slice(start, start + chunkSize);
+				const notes = await scyllaClient
+					.execute(prepared.note.select.byIds, [chunk], { prepare: true })
+					.then((result) => result.rows.map(parseScyllaNote));
+
+				// The notes are checked for visibility and muted/blocked users when packed
+				found.push(...(await Notes.packMany(notes, me)));
+				start += chunkSize;
+			}
+
+			// If we have more results than the limit, trim them
+			if (found.length > ps.limit) {
+				found.length = ps.limit;
+			}
+
+			return found;
+		} else if (meilisearch) {
+			let start = 0;
+			const chunkSize = 100;
+			const sortByDate = true;
+
+			type NoteResult = {
+				id: string;
+				createdAt: number;
+			};
+			const extractedNotes: NoteResult[] = [];
+
+			while (true) {
+				const searchRes = await meilisearch.search(
+					query,
+					chunkSize,
+					start,
+					me,
+					sortByDate ? "createdAt:desc" : null,
+				);
+				const results: MeilisearchNote[] = searchRes.hits as MeilisearchNote[];
+
+				start += chunkSize;
+
+				if (results.length === 0) {
+					break;
+				}
+
+				const res = results
+					.filter((key: MeilisearchNote) => {
+						if (ps.sinceId && key.id <= ps.sinceId) {
+							return false;
+						}
+						if (ps.untilId && key.id >= ps.untilId) {
+							return false;
+						}
+						return true;
+					})
+					.map((key) => {
+						return {
+							id: key.id,
+							createdAt: key.createdAt,
+						};
+					});
+
+				extractedNotes.push(...res);
+			}
+
+			// Fetch the notes from the database until we have enough to satisfy the limit
+			start = 0;
+			const found = [];
+			const noteIDs = extractedNotes.map((note) => note.id);
+
+			// Index the ID => index number into a map, so we can restore the array ordering efficiently later
+			const idIndexMap = new Map(noteIDs.map((id, index) => [id, index]));
+
+			while (found.length < ps.limit && start < noteIDs.length) {
+				const chunk = noteIDs.slice(start, start + chunkSize);
+
+				const notes = await scyllaClient
+					.execute(prepared.note.select.byIds, [chunk], { prepare: true })
+					.then((result) => result.rows.map(parseScyllaNote));
+
+				// Re-order the note result according to the noteIDs array (cannot be undefined, we map this earlier)
+				// @ts-ignore
+				notes.sort((a, b) => idIndexMap.get(a.id) - idIndexMap.get(b.id));
+
+				// The notes are checked for visibility and muted/blocked users when packed
+				found.push(...(await Notes.packMany(notes, me)));
+				start += chunkSize;
+			}
+
+			// If we have more results than the limit, trim the results down
+			if (found.length > ps.limit) {
+				found.length = ps.limit;
+			}
+
+			return found;
+		}
+
+		return await Notes.packMany([]);
+	}
+
 	const query = makePaginationQuery(
 		Notes.createQueryBuilder("note"),
 		ps.sinceId,
 		ps.untilId,
 	)
-		.innerJoinAndSelect("note.user", "user")
-		.leftJoinAndSelect("user.avatar", "avatar")
-		.leftJoinAndSelect("user.banner", "banner")
 		.leftJoinAndSelect("note.reply", "reply")
-		.leftJoinAndSelect("note.renote", "renote")
-		.leftJoinAndSelect("reply.user", "replyUser")
-		.leftJoinAndSelect("replyUser.avatar", "replyUserAvatar")
-		.leftJoinAndSelect("replyUser.banner", "replyUserBanner")
-		.leftJoinAndSelect("renote.user", "renoteUser")
-		.leftJoinAndSelect("renoteUser.avatar", "renoteUserAvatar")
-		.leftJoinAndSelect("renoteUser.banner", "renoteUserBanner");
+		.leftJoinAndSelect("note.renote", "renote");
 
 	generateVisibilityQuery(query, me);
 	if (me) generateMutedUserQuery(query, me);
