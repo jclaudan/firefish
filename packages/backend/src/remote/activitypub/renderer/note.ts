@@ -60,7 +60,7 @@ export default async function renderNote(
 					),
 			);
 
-			if (!inReplyToUser) {
+			if (inReplyToUser) {
 				if (inReplyToNote.uri) {
 					inReplyTo = inReplyToNote.uri;
 				} else {
