@@ -7,6 +7,7 @@ import { generateMutedUserQuery } from "../../common/generate-muted-user-query.j
 import { makePaginationQuery } from "../../common/make-pagination-query.js";
 import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
 import { generateMutedNoteThreadQuery } from "../../common/generate-muted-note-thread-query.js";
+import { scyllaClient } from "@/db/scylla.js";
 
 export const meta = {
 	tags: ["notes"],
@@ -39,6 +40,10 @@ export const paramDef = {
 } as const;
 
 export default define(meta, paramDef, async (ps, user) => {
+	if (scyllaClient) {
+		return await Notes.packMany([]);
+	}
+
 	const followingQuery = Followings.createQueryBuilder("following")
 		.select("following.followeeId")
 		.where("following.followerId = :followerId", { followerId: user.id });
@@ -55,17 +60,8 @@ export default define(meta, paramDef, async (ps, user) => {
 				);
 			}),
 		)
-		.innerJoinAndSelect("note.user", "user")
-		.leftJoinAndSelect("user.avatar", "avatar")
-		.leftJoinAndSelect("user.banner", "banner")
 		.leftJoinAndSelect("note.reply", "reply")
-		.leftJoinAndSelect("note.renote", "renote")
-		.leftJoinAndSelect("reply.user", "replyUser")
-		.leftJoinAndSelect("replyUser.avatar", "replyUserAvatar")
-		.leftJoinAndSelect("replyUser.banner", "replyUserBanner")
-		.leftJoinAndSelect("renote.user", "renoteUser")
-		.leftJoinAndSelect("renoteUser.avatar", "renoteUserAvatar")
-		.leftJoinAndSelect("renoteUser.banner", "renoteUserBanner");
+		.leftJoinAndSelect("note.renote", "renote");
 
 	generateVisibilityQuery(query, user);
 	generateMutedUserQuery(query, user);
