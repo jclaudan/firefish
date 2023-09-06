@@ -3,6 +3,7 @@ import { genId } from "@/misc/gen-id.js";
 import { Antennas, UserLists, UserGroupJoinings } from "@/models/index.js";
 import { ApiError } from "../../error.js";
 import { publishInternalEvent } from "@/services/stream.js";
+import { scyllaClient } from "@/db/scylla.js";
 
 export const meta = {
 	tags: ["antennas"],
@@ -112,7 +113,8 @@ export default define(meta, paramDef, async (ps, user) => {
 	const antennas = await Antennas.findBy({
 		userId: user.id,
 	});
-	if (antennas.length > 100 && !user.isAdmin) {
+	const antennaLimit = scyllaClient ? 100 : 5;
+	if (antennas.length > antennaLimit && !user.isAdmin) {
 		throw new ApiError(meta.errors.tooManyAntennas);
 	}
 
