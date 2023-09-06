@@ -23,21 +23,31 @@ export default async function indexAllNotes(
 
 	if (scyllaClient) {
 		total = await fetchPostCount(false);
-		scyllaClient.eachRow("SELECT * FROM note", [], (n, row) => {
-			if (n % 1000 === 0) {
-				job.progress(((n / total) * 100).toFixed(1));
-				logger.info(`Indexed notes ${n}/${total}`);
-			}
-			const note = parseScyllaNote(row);
-			if (meilisearch) {
-				meilisearch.ingestNote([note]).then(() => index(note, true));
-			} else {
-				index(note, true);
-			}
-		});
+		scyllaClient.eachRow(
+			"SELECT * FROM note",
+			[],
+			(n, row) => {
+				if (n % 1000 === 0) {
+					job.progress(((n / total) * 100).toFixed(1));
+					logger.info(`Indexed notes ${n}/${total}`);
+				}
+				const note = parseScyllaNote(row);
+				if (meilisearch) {
+					meilisearch.ingestNote([note]).then(() => index(note, true));
+				} else {
+					index(note, true);
+				}
+			},
+			(err, _) => {
+				if (err.message) {
+					logger.error(err);
+				} else {
+					logger.info("All notes have been indexed.");
+				}
+				done();
+			},
+		);
 
-		done();
-		logger.info("All notes have been indexed.");
 		return;
 	}
 
