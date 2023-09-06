@@ -7,7 +7,7 @@ import { MoreThan } from "typeorm";
 import { index } from "@/services/note/create.js";
 import { Note } from "@/models/entities/note.js";
 import meilisearch from "../../../db/meilisearch.js";
-import { fetchPostCount, scyllaClient } from "@/db/scylla.js";
+import { fetchPostCount, parseScyllaNote, scyllaClient } from "@/db/scylla.js";
 
 const logger = queueLogger.createSubLogger("index-all-notes");
 
@@ -20,6 +20,26 @@ export default async function indexAllNotes(
 	let cursor: string | null = (job.data.cursor as string) ?? null;
 	let indexedCount: number = (job.data.indexedCount as number) ?? 0;
 	let total: number = (job.data.total as number) ?? 0;
+
+	if (scyllaClient) {
+		total = await fetchPostCount(false);
+		scyllaClient.eachRow("SELECT * FROM note", [], (n, row) => {
+			if (n % 1000 === 0) {
+				job.progress(((n / total) * 100).toFixed(1));
+				logger.info(`Indexed notes ${n}/${total}`);
+			}
+			const note = parseScyllaNote(row);
+			if (meilisearch) {
+				meilisearch.ingestNote([note]).then(() => index(note, true));
+			} else {
+				index(note, true);
+			}
+		});
+
+		done();
+		logger.info("All notes have been indexed.");
+		return;
+	}
 
 	let running = true;
 	const take = 10000;
