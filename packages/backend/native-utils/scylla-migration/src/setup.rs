@@ -1,9 +1,15 @@
-use scylla::{Session, SessionBuilder};
-use sea_orm::{ConnectionTrait, Database, Statement};
+use std::collections::HashMap;
+
+use futures::TryStreamExt;
+use scylla::{Session, SessionBuilder, IntoUserType, FromUserType, ValueList};
+use sea_orm::{ConnectionTrait, Database, EntityTrait, Statement};
 use urlencoding::encode;
+
+use chrono::{DateTime, Utc, NaiveDate};
 
 use crate::{
     config::{DbConfig, ScyllaConfig},
+    entity::note,
     error::Error,
 };
 
@@ -40,6 +46,11 @@ impl Initializer {
     pub(crate) async fn setup(&self) -> Result<(), Error> {
         let pool = Database::connect(&self.postgres_url).await?;
         let db_backend = pool.get_database_backend();
+
+        let mut notes = note::Entity::find().stream(&pool).await?;
+        while let Some(note) = notes.try_next().await? {
+
+        }
 
         let fk_pairs = vec![
             ("channel_note_pining", "FK_10b19ef67d297ea9de325cd4502"),
@@ -78,4 +89,87 @@ impl Initializer {
 
         Ok(())
     }
+}
+
+#[derive(Debug, IntoUserType, FromUserType)]
+struct DriveFileType {
+    id: String,
+    #[scylla_crate(rename = "type")]
+    kind: String,
+    #[scylla_crate(rename = "createdAt")]
+    created_at: DateTime<Utc>,
+    name: String,
+    comment: Option<String>,
+    blurhash: Option<String>,
+    url: String,
+    #[scylla_crate(rename = "thumbnailUrl")]
+    thumbnail_url: Option<String>,
+    #[scylla_crate(rename = "isSensitive")]
+    is_sensitive: bool,
+    #[scylla_crate(rename = "isLink")]
+    is_link: bool,
+    md5: String,
+    size: i32,
+    width: Option<i32>,
+    height: Option<i32>,
+}
+
+#[derive(Debug, IntoUserType, FromUserType)]
+struct NoteEditHistoryType {
+    content: Option<String>,
+    cw: Option<String>,
+    files: Vec<DriveFileType>,
+    #[scylla_crate(rename = "updatedAt")]
+    updated_at: DateTime<Utc>
+}
+
+#[derive(Debug, IntoUserType, FromUserType)]
+struct EmojiType {
+    name: String,
+    url: String,
+    width: Option<i32>,
+    height: Option<i32>,
+}
+
+#[derive(Debug, IntoUserType, FromUserType)]
+struct PollType {
+    #[scylla_crate(rename = "expiresAt")]
+    expires_at: Option<DateTime<Utc>>,
+    multiple: bool,
+    choices: HashMap<i32, String>,
+}
+
+#[derive(ValueList)]
+struct NoteTable {
+    #[scylla_crate(rename = "createdAtDate")]
+    created_at_date: NaiveDate,
+    #[scylla_crate(rename = "createdAt")]
+    created_at: DateTime<Utc>,
+    id: String,
+    visibility: String,
+    content: Option<String>,
+    name: Option<String>,
+    cw: Option<String>,
+    #[scylla_crate(rename = "localOnly")]
+    local_only: bool,
+    #[scylla_crate(rename = "renoteCount")]
+    renote_count: i32,
+    #[scylla_crate(rename = "scyllaCrate")]
+    replies_count: i32,
+    uri: Option<String>,
+    url: Option<String>,
+    score: i32,
+    files: Vec<DriveFileType>,
+    #[scylla_crate(rename = "visibleUserIds")]
+    visible_user_ids: Vec<String>,
+    mentions: Vec<String>,
+    #[scylla_crate(rename = "mentionedRemoteUsers")]
+    mentioned_remote_users: String,
+    emojis: Vec<String>,
+    tags: Vec<String>,
+    #[scylla_crate(rename = "hasPoll")]
+    has_poll: bool,
+    poll: PollType,
+    #[scylla_crate(rename = "threadId")]
+    thread_id: String,
 }

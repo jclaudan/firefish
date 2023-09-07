@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 chrono = "0.4.26"
 clap = { version = "4.3.11", features = ["derive"] }
+futures = "0.3.28"
 scylla = "0.8.2"
 sea-orm = { version = "0.12.2", features = ["sqlx-postgres", "runtime-tokio-rustls"] }
 serde = { version = "1.0.171", features = ["derive"] }

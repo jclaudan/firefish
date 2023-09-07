@@ -26,6 +26,7 @@ export default async function indexAllNotes(
 		scyllaClient.eachRow(
 			"SELECT * FROM note",
 			[],
+			{ prepare: true },
 			(n, row) => {
 				if (n % 1000 === 0) {
 					job.progress(((n / total) * 100).toFixed(1));

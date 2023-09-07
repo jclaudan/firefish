@@ -32,10 +32,17 @@ function newClient(): Client | null {
 	const requestTracker = new tracker.RequestLogger({
 		slowThreshold: 1000,
 	});
+
 	const client = new Client({
 		contactPoints: config.scylla.nodes,
 		localDataCenter: config.scylla.localDataCentre,
 		keyspace: config.scylla.keyspace,
+		pooling: {
+			coreConnectionsPerHost: {
+				[types.distance.local]: 2,
+				[types.distance.remote]: 1,
+			},
+		},
 		requestTracker,
 	});
 
@@ -79,14 +86,16 @@ export async function fetchPostCount(local = false): Promise<number> {
 	if (local) {
 		return await localPostCountCache.fetch(null, () =>
 			scyllaClient
-				.execute("SELECT COUNT(*) FROM local_note_by_user_id")
+				.execute("SELECT COUNT(*) FROM local_note_by_user_id", [], {
+					prepare: true,
+				})
 				.then((result) => result.first().get("count") as number),
 		);
 	}
 
 	return await allPostCountCache.fetch(null, () =>
 		scyllaClient
-			.execute("SELECT COUNT(*) FROM note")
+			.execute("SELECT COUNT(*) FROM note", [], { prepare: true })
 			.then((result) => result.first().get("count") as number),
 	);
 }
@@ -98,7 +107,7 @@ export async function fetchReactionCount(): Promise<number> {
 
 	return await reactionCountCache.fetch(null, () =>
 		scyllaClient
-			.execute("SELECT COUNT(*) FROM reaction")
+			.execute("SELECT COUNT(*) FROM reaction", [], { prepare: true })
 			.then((result) => result.first().get("count") as number),
 	);
 }

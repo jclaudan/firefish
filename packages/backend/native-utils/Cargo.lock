@@ -2445,6 +2445,7 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "clap",
+ "futures",
  "scylla",
  "sea-orm",
  "serde",
