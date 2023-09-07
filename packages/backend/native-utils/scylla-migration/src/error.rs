@@ -5,6 +5,7 @@ use scylla::{
         query_result::SingleRowTypedError,
     },
 };
+use sea_orm::DbErr;
 use std::io;
 use thiserror::Error;
 
@@ -21,5 +22,5 @@ pub enum Error {
     #[error("File error: {0}")]
     File(#[from] io::Error),
     #[error("PostgreSQL error: {0}")]
-    Postgres(#[from] sqlx::Error),
+    Postgres(#[from] DbErr),
 }

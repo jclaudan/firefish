@@ -2,8 +2,6 @@
 
 use sea_orm::entity::prelude::*;
 
-use super::newtype::StringVec;
-
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Default)]
 #[sea_orm(table_name = "messaging_message")]
 pub struct Model {
@@ -22,7 +20,7 @@ pub struct Model {
     pub file_id: Option<String>,
     #[sea_orm(column_name = "groupId")]
     pub group_id: Option<String>,
-    pub reads: StringVec,
+    pub reads: Vec<String>,
     pub uri: Option<String>,
 }
 

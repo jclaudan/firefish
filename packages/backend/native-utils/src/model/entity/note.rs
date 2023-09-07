@@ -3,8 +3,6 @@
 use super::sea_orm_active_enums::NoteVisibilityEnum;
 use sea_orm::entity::prelude::*;
 
-use super::newtype::StringVec;
-
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Default)]
 #[sea_orm(table_name = "note")]
 pub struct Model {
@@ -34,16 +32,16 @@ pub struct Model {
     pub uri: Option<String>,
     pub score: i32,
     #[sea_orm(column_name = "fileIds")]
-    pub file_ids: StringVec,
+    pub file_ids: Vec<String>,
     #[sea_orm(column_name = "attachedFileTypes")]
-    pub attached_file_types: StringVec,
+    pub attached_file_types: Vec<String>,
     #[sea_orm(column_name = "visibleUserIds")]
-    pub visible_user_ids: StringVec,
-    pub mentions: StringVec,
+    pub visible_user_ids: Vec<String>,
+    pub mentions: Vec<String>,
     #[sea_orm(column_name = "mentionedRemoteUsers", column_type = "Text")]
     pub mentioned_remote_users: String,
-    pub emojis: StringVec,
-    pub tags: StringVec,
+    pub emojis: Vec<String>,
+    pub tags: Vec<String>,
     #[sea_orm(column_name = "hasPoll")]
     pub has_poll: bool,
     #[sea_orm(column_name = "userHost")]

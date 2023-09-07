@@ -1,5 +1,5 @@
 use scylla::{Session, SessionBuilder};
-use sqlx::{Connection, PgConnection};
+use sea_orm::{ConnectionTrait, Database, Statement};
 use urlencoding::encode;
 
 use crate::{
@@ -38,7 +38,8 @@ impl Initializer {
     }
 
     pub(crate) async fn setup(&self) -> Result<(), Error> {
-        let mut conn = PgConnection::connect(&self.postgres_url).await?;
+        let pool = Database::connect(&self.postgres_url).await?;
+        let db_backend = pool.get_database_backend();
 
         let fk_pairs = vec![
             ("channel_note_pining", "FK_10b19ef67d297ea9de325cd4502"),
@@ -52,16 +53,27 @@ impl Initializer {
             ("user_note_pining", "FK_68881008f7c3588ad7ecae471cf"),
         ];
         for (table, fk) in fk_pairs {
-            sqlx::query(&format!("ALTER TABLE {} DROP CONSTRAINT \"{}\"", table, fk))
-                .execute(&mut conn)
-                .await?;
+            pool.execute(Statement::from_string(
+                db_backend.to_owned(),
+                format!("ALTER TABLE {} DROP CONSTRAINT \"{}\"", table, fk),
+            ))
+            .await?;
         }
 
-        let tables = vec!["note_reaction", "note_edit", "poll", "poll_vote", "notification", "note"];
+        let tables = vec![
+            "note_reaction",
+            "note_edit",
+            "poll",
+            "poll_vote",
+            "notification",
+            "note",
+        ];
         for table in tables {
-            sqlx::query(&format!("DROP TABLE {}", table))
-                .execute(&mut conn)
-                .await?;
+            pool.execute(Statement::from_string(
+                db_backend,
+                format!("DROP TABLE {}", table),
+            ))
+            .await?;
         }
 
         Ok(())

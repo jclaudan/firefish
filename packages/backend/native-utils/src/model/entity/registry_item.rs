@@ -2,8 +2,6 @@
 
 use sea_orm::entity::prelude::*;
 
-use super::newtype::StringVec;
-
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Default)]
 #[sea_orm(table_name = "registry_item")]
 pub struct Model {
@@ -16,7 +14,7 @@ pub struct Model {
     #[sea_orm(column_name = "userId")]
     pub user_id: String,
     pub key: String,
-    pub scope: StringVec,
+    pub scope: Vec<String>,
     pub domain: Option<String>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub value: Option<Json>,

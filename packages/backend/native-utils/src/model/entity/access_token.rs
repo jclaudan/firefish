@@ -2,8 +2,6 @@
 
 use sea_orm::entity::prelude::*;
 
-use super::newtype::StringVec;
-
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Default)]
 #[sea_orm(table_name = "access_token")]
 pub struct Model {
@@ -24,7 +22,7 @@ pub struct Model {
     pub description: Option<String>,
     #[sea_orm(column_name = "iconUrl")]
     pub icon_url: Option<String>,
-    pub permission: StringVec,
+    pub permission: Vec<String>,
     pub fetched: bool,
 }
 

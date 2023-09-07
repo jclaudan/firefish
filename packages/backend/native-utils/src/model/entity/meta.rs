@@ -4,8 +4,6 @@ use super::sea_orm_active_enums::MetaSensitivemediadetectionEnum;
 use super::sea_orm_active_enums::MetaSensitivemediadetectionsensitivityEnum;
 use sea_orm::entity::prelude::*;
 
-use super::newtype::StringVec;
-
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Default)]
 #[sea_orm(table_name = "meta")]
 pub struct Model {
@@ -25,11 +23,11 @@ pub struct Model {
     pub disable_global_timeline: bool,
     #[sea_orm(column_name = "useStarForReactionFallback")]
     pub use_star_for_reaction_fallback: bool,
-    pub langs: StringVec,
+    pub langs: Vec<String>,
     #[sea_orm(column_name = "hiddenTags")]
-    pub hidden_tags: StringVec,
+    pub hidden_tags: Vec<String>,
     #[sea_orm(column_name = "blockedHosts")]
-    pub blocked_hosts: StringVec,
+    pub blocked_hosts: Vec<String>,
     #[sea_orm(column_name = "mascotImageUrl")]
     pub mascot_image_url: Option<String>,
     #[sea_orm(column_name = "bannerUrl")]
@@ -90,7 +88,7 @@ pub struct Model {
     #[sea_orm(column_name = "discordClientSecret")]
     pub discord_client_secret: Option<String>,
     #[sea_orm(column_name = "pinnedUsers")]
-    pub pinned_users: StringVec,
+    pub pinned_users: Vec<String>,
     #[sea_orm(column_name = "ToSUrl")]
     pub to_s_url: Option<String>,
     #[sea_orm(column_name = "repositoryUrl")]
@@ -130,7 +128,7 @@ pub struct Model {
     #[sea_orm(column_name = "objectStorageSetPublicRead")]
     pub object_storage_set_public_read: bool,
     #[sea_orm(column_name = "pinnedPages")]
-    pub pinned_pages: StringVec,
+    pub pinned_pages: Vec<String>,
     #[sea_orm(column_name = "backgroundImageUrl")]
     pub background_image_url: Option<String>,
     #[sea_orm(column_name = "logoImageUrl")]
@@ -140,7 +138,7 @@ pub struct Model {
     #[sea_orm(column_name = "objectStorageS3ForcePathStyle")]
     pub object_storage_s3_force_path_style: bool,
     #[sea_orm(column_name = "allowedHosts")]
-    pub allowed_hosts: Option<StringVec>,
+    pub allowed_hosts: Option<Vec<String>>,
     #[sea_orm(column_name = "secureMode")]
     pub secure_mode: Option<bool>,
     #[sea_orm(column_name = "privateMode")]
@@ -170,13 +168,13 @@ pub struct Model {
     #[sea_orm(column_name = "enableActiveEmailValidation")]
     pub enable_active_email_validation: bool,
     #[sea_orm(column_name = "customMOTD")]
-    pub custom_motd: StringVec,
+    pub custom_motd: Vec<String>,
     #[sea_orm(column_name = "customSplashIcons")]
-    pub custom_splash_icons: StringVec,
+    pub custom_splash_icons: Vec<String>,
     #[sea_orm(column_name = "disableRecommendedTimeline")]
     pub disable_recommended_timeline: bool,
     #[sea_orm(column_name = "recommendedInstances")]
-    pub recommended_instances: StringVec,
+    pub recommended_instances: Vec<String>,
     #[sea_orm(column_name = "enableGuestTimeline")]
     pub enable_guest_timeline: bool,
     #[sea_orm(column_name = "defaultReaction")]
@@ -186,7 +184,7 @@ pub struct Model {
     #[sea_orm(column_name = "libreTranslateApiKey")]
     pub libre_translate_api_key: Option<String>,
     #[sea_orm(column_name = "silencedHosts")]
-    pub silenced_hosts: StringVec,
+    pub silenced_hosts: Vec<String>,
     #[sea_orm(column_name = "experimentalFeatures", column_type = "JsonBinary")]
     pub experimental_features: Json,
     #[sea_orm(column_name = "enableServerMachineStats")]
