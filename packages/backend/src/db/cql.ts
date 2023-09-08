@@ -163,8 +163,8 @@ export const scyllaQueries = {
 		delete: `DELETE FROM reaction WHERE "noteId" = ? AND "userId" = ?`,
 	},
 	poll: {
-		select: `SELECT * FROM poll_vote WHERE "noteId" = ?`,
 		insert: `INSERT INTO poll_vote ("noteId", "userId", "userHost", "choice", "createdAt") VALUES (?, ?, ?, ?, ?)`,
+		select: `SELECT * FROM poll_vote WHERE "noteId" = ?`,
 		delete: `DELETE FROM poll_vote WHERE "noteId" = ?`
 	},
 	notification: {

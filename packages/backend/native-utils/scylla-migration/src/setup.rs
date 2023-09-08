@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use futures::TryStreamExt;
-use scylla::{Session, SessionBuilder, IntoUserType, FromUserType, ValueList};
-use sea_orm::{ConnectionTrait, Database, EntityTrait, Statement};
+use scylla::{Session, SessionBuilder, IntoUserType, FromUserType, ValueList, FromRow};
+use sea_orm::{query::*, entity::*, Database};
 use urlencoding::encode;
 
 use chrono::{DateTime, Utc, NaiveDate};
@@ -47,9 +47,12 @@ impl Initializer {
         let pool = Database::connect(&self.postgres_url).await?;
         let db_backend = pool.get_database_backend();
 
+        let num_notes: i64 = note::Entity::find().select_only().column_as(note::Column::Id.count(), "count").into_tuple().one(&pool).await?.unwrap_or_default();
+
+        println!("{num_notes} posts are being copied.")
+
         let mut notes = note::Entity::find().stream(&pool).await?;
         while let Some(note) = notes.try_next().await? {
-
         }
 
         let fk_pairs = vec![
@@ -141,47 +144,210 @@ struct PollType {
 
 #[derive(ValueList)]
 struct NoteTable {
-    #[scylla_crate(rename = "createdAtDate")]
     created_at_date: NaiveDate,
-    #[scylla_crate(rename = "createdAt")]
     created_at: DateTime<Utc>,
     id: String,
     visibility: String,
     content: Option<String>,
     name: Option<String>,
     cw: Option<String>,
-    #[scylla_crate(rename = "localOnly")]
     local_only: bool,
-    #[scylla_crate(rename = "renoteCount")]
     renote_count: i32,
-    #[scylla_crate(rename = "scyllaCrate")]
     replies_count: i32,
     uri: Option<String>,
     url: Option<String>,
     score: i32,
     files: Vec<DriveFileType>,
-    #[scylla_crate(rename = "visibleUserIds")]
     visible_user_ids: Vec<String>,
     mentions: Vec<String>,
-    #[scylla_crate(rename = "mentionedRemoteUsers")]
     mentioned_remote_users: String,
     emojis: Vec<String>,
     tags: Vec<String>,
-    #[scylla_crate(rename = "hasPoll")]
     has_poll: bool,
     poll: PollType,
-    #[scylla_crate(rename = "threadId")]
     thread_id: Option<String>,
-    #[scylla_crate(rename = "channelId")]
     channel_id: Option<String>,
-    #[scylla_crate(rename = "userId")]
     user_id: String,
-    #[scylla_crate(rename = "userHost")]
     user_host: String,
-    #[scylla_crate(rename = "replyId")]
     reply_id: Option<String>,
-    #[scylla_crate(rename = "replyUserId")]
     reply_user_id: Option<String>,
-    #[scylla_crate(rename = "replyUserHost")]
     reply_user_host: Option<String>,
+    reply_content: Option<String>,
+    reply_cw: Option<String>,
+    reply_files: Vec<DriveFileType>,
+    renote_id: Option<String>,
+    renote_user_id: Option<String>,
+    renote_user_host: Option<String>,
+    renote_content: Option<String>,
+    renote_cw: Option<String>,
+    renote_files: Vec<DriveFileType>,
+    reactions: HashMap<String, i32>,
+    note_edit: Vec<NoteEditHistoryType>,
+    updated_at: DateTime<Utc>,
+}
+
+const INSERT_NOTE: &str = r#"
+INSERT INTO note (
+"createdAtDate",
+"createdAt",
+"id",
+"visibility",
+"content",
+"name",
+"cw",
+"localOnly",
+"renoteCount",
+"repliesCount",
+"uri",
+"url",
+"score",
+"files",
+"visibleUserIds",
+"mentions",
+"mentionedRemoteUsers",
+"emojis",
+"tags",
+"hasPoll",
+"poll",
+"threadId",
+"channelId",
+"userId",
+"userHost",
+"replyId",
+"replyUserId",
+"replyUserHost",
+"replyContent",
+"replyCw",
+"replyFiles",
+"renoteId",
+"renoteUserId",
+"renoteUserHost",
+"renoteContent",
+"renoteCw",
+"renoteFiles",
+"reactions",
+"noteEdit",
+"updatedAt"
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+"#;
+
+#[derive(ValueList)]
+struct HomeTimelineTable {
+    feed_user_id: String,
+    created_at_date: NaiveDate,
+    created_at: DateTime<Utc>,
+    id: String,
+    visibility: String,
+    content: Option<String>,
+    name: Option<String>,
+    cw: Option<String>,
+    local_only: bool,
+    renote_count: i32,
+    replies_count: i32,
+    uri: Option<String>,
+    url: Option<String>,
+    score: i32,
+    files: Vec<DriveFileType>,
+    visible_user_ids: Vec<String>,
+    mentions: Vec<String>,
+    mentioned_remote_users: String,
+    emojis: Vec<String>,
+    tags: Vec<String>,
+    has_poll: bool,
+    poll: PollType,
+    thread_id: Option<String>,
+    channel_id: Option<String>,
+    user_id: String,
+    user_host: String,
+    reply_id: Option<String>,
+    reply_user_id: Option<String>,
+    reply_user_host: Option<String>,
+    reply_content: Option<String>,
+    reply_cw: Option<String>,
+    reply_files: Vec<DriveFileType>,
+    renote_id: Option<String>,
+    renote_user_id: Option<String>,
+    renote_user_host: Option<String>,
+    renote_content: Option<String>,
+    renote_cw: Option<String>,
+    renote_files: Vec<DriveFileType>,
+    reactions: HashMap<String, i32>,
+    note_edit: Vec<NoteEditHistoryType>,
+    updated_at: DateTime<Utc>,
+}
+
+const INSERT_HOME_TIMELINE: &str = r#"
+INSERT INTO home_timeline (
+"feedUserId",
+"createdAtDate",
+"createdAt",
+"id",
+"visibility",
+"content",
+"name",
+"cw",
+"localOnly",
+"renoteCount",
+"repliesCount",
+"uri",
+"url",
+"score",
+"files",
+"visibleUserIds",
+"mentions",
+"mentionedRemoteUsers",
+"emojis",
+"tags",
+"hasPoll",
+"poll",
+"threadId",
+"channelId",
+"userId",
+"userHost",
+"replyId",
+"replyUserId",
+"replyUserHost",
+"replyContent",
+"replyCw",
+"replyFiles",
+"renoteId",
+"renoteUserId",
+"renoteUserHost",
+"renoteContent",
+"renoteCw",
+"renoteFiles",
+"reactions",
+"noteEdit",
+"updatedAt"
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+"#;
+
+#[derive(ValueList)]
+struct ReactionTable {
+    id: String,
+    note_id: String,
+    user_id: String,
+    reaction: String,
+    emoji: EmojiType,
+    created_at: DateTime<Utc>,
+}
+
+const INSERT_REACTION: &str = r#"INSERT INTO reaction ("id", "noteId", "userId", "reaction", "emoji", "createdAt") VALUES (?, ?, ?, ?, ?, ?)"#;
+
+#[derive(ValueList)]
+struct PollVoteTable {
+    note_id: String,
+    user_id: String,
+    user_host: String,
+    choice: Vec<i32>,
+    created_at: DateTime<Utc>,
+}
+
+const INSERT_POLL_VOTE: &str = r#"INSERT INTO poll_vote ("noteId", "userId", "userHost", "choice", "createdAt") VALUES (?, ?, ?, ?, ?)"#;
+
+#[derive(ValueList)]
+struct NotificationTable {
+    target_id: String,
+    created_at_date: NaiveDate,
+
 }
