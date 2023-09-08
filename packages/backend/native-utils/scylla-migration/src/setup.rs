@@ -171,5 +171,17 @@ struct NoteTable {
     has_poll: bool,
     poll: PollType,
     #[scylla_crate(rename = "threadId")]
-    thread_id: String,
+    thread_id: Option<String>,
+    #[scylla_crate(rename = "channelId")]
+    channel_id: Option<String>,
+    #[scylla_crate(rename = "userId")]
+    user_id: String,
+    #[scylla_crate(rename = "userHost")]
+    user_host: String,
+    #[scylla_crate(rename = "replyId")]
+    reply_id: Option<String>,
+    #[scylla_crate(rename = "replyUserId")]
+    reply_user_id: Option<String>,
+    #[scylla_crate(rename = "replyUserHost")]
+    reply_user_host: Option<String>,
 }
