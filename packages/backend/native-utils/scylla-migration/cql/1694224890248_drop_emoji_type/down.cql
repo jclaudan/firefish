@@ -1,4 +1,4 @@
-CREATE TYPE emoji (
+CREATE TYPE IF NOT EXISTS emoji (
 	"name" text,
 	"url" text,
 	"width" int,
