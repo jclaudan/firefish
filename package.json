@@ -16,7 +16,7 @@
 		"init": "pnpm run migrate",
 		"migrate": "pnpm --filter backend run migrate",
 		"scylla:migrate": "pnpm --filter native-utils run scylla:migrate",
-		"scylla:setup": "pnpm --filter native-utils run scylla:setup && pnpm run scylla:migrate",
+		"scylla:setup": "pnpm run scylla:migrate && pnpm --filter native-utils run scylla:setup",
 		"revertmigration": "pnpm --filter backend run revertmigration",
 		"migrateandstart": "pnpm run migrate && pnpm run start",
 		"gulp": "gulp build",

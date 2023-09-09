@@ -10,7 +10,7 @@ chrono = "0.4.26"
 clap = { version = "4.3.11", features = ["derive"] }
 dialoguer = "0.10.4"
 futures = "0.3.28"
-indicatif = { version = "0.17.6", features = ["tokio"] }
+indicatif = { version = "0.17.6", features = ["tokio", "futures"] }
 scylla = "0.8.2"
 sea-orm = { version = "0.12.2", features = ["sqlx-postgres", "runtime-tokio-rustls"] }
 serde = { version = "1.0.171", features = ["derive"] }
