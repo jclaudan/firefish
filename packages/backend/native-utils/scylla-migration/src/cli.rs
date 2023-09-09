@@ -41,9 +41,9 @@ pub async fn run_cli() -> Result<(), Error> {
                 .down(num)
                 .await?
         }
-        MigrationCommand::Setup => {
+        MigrationCommand::Setup { multi_thread } => {
             let initializer = Initializer::new(&scylla_conf, &config.db).await?;
-            initializer.setup().await?;
+            initializer.setup(multi_thread).await?;
         }
         _ => {}
     };
@@ -115,5 +115,15 @@ pub(crate) enum MigrationCommand {
         num: u32,
     },
     #[clap(about = "Set up PostgreSQL and ScyllaDB", display_order = 40)]
-    Setup,
+    Setup {
+        #[clap(
+            value_parser,
+            short,
+            long,
+            default_value = "false",
+            help = "Enable multi-thread mode (WARNING: High memory consumption)",
+            display_order = 41
+        )]
+        multi_thread: bool,
+    },
 }

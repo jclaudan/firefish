@@ -93,5 +93,4 @@ impl Related<super::poll_vote::Entity> for Entity {
     }
 }
 
-
 impl ActiveModelBehavior for ActiveModel {}

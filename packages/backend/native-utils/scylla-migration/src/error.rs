@@ -11,13 +11,13 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum Error {
-    #[error("ScyllaDB Session error: {0}")]
+    #[error("ScyllaDB session error: {0}")]
     Session(#[from] NewSessionError),
-    #[error("Query error: {0}")]
+    #[error("ScyllaDB query error: {0}")]
     Query(#[from] QueryError),
-    #[error("Conversion error: {0}")]
+    #[error("ScyllaDB conversion error: {0}")]
     Conversion(#[from] FromRowError),
-    #[error("Row error: {0}")]
+    #[error("ScyllaDB row error: {0}")]
     Row(#[from] SingleRowTypedError),
     #[error("File error: {0}")]
     File(#[from] io::Error),

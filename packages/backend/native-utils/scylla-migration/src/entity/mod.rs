@@ -6,5 +6,5 @@ pub mod note_reaction;
 pub mod notification;
 pub mod poll;
 pub mod poll_vote;
-pub mod user;
 pub mod sea_orm_active_enums;
+pub mod user;
