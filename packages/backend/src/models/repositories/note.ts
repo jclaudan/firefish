@@ -21,7 +21,6 @@ import {
 } from "@/misc/reaction-lib.js";
 import type { NoteReaction } from "@/models/entities/note-reaction.js";
 import {
-	type PopulatedEmoji,
 	aggregateNoteEmojis,
 	populateEmojis,
 	prefetchEmojis,
