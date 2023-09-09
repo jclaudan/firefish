@@ -1,6 +1,10 @@
 pub mod drive_file;
 pub mod emoji;
+pub mod following;
 pub mod note;
-pub mod poll_vote;
+pub mod note_edit;
+pub mod note_reaction;
 pub mod poll;
+pub mod poll_vote;
+pub mod user;
 pub mod sea_orm_active_enums;

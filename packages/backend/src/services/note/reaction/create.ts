@@ -49,7 +49,7 @@ export default async (
 	}
 
 	// Emoji data will be cached in toDbReaction.
-	const { name: _reaction, emoji: emojiData } = await toDbReaction(
+	const { name: _reaction } = await toDbReaction(
 		reaction,
 		user.host,
 	);
@@ -74,7 +74,6 @@ export default async (
 					record.noteId,
 					record.userId,
 					_reaction,
-					emojiData,
 					record.createdAt,
 				],
 				{ prepare: true },

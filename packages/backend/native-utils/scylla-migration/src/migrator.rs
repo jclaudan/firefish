@@ -183,7 +183,7 @@ impl Migrator {
                         self.down(1).await?;
 
                         return Err(e.into());
-                    },
+                    }
                     Ok(_) => {}
                 };
             }

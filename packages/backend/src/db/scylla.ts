@@ -294,9 +294,7 @@ export function parseHomeTimeline(
 	};
 }
 
-export interface ScyllaNoteReaction extends NoteReaction {
-	emoji: PopulatedEmoji;
-}
+export type ScyllaNoteReaction = NoteReaction;
 
 export type FeedType =
 	| "home"
@@ -318,7 +316,6 @@ export function parseScyllaReaction(row: types.Row): ScyllaNoteReaction {
 		userId: row.get("userId"),
 		reaction: row.get("reaction"),
 		createdAt: row.get("createdAt"),
-		emoji: row.get("emoji"),
 	};
 }
 

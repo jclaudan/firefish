@@ -152,8 +152,8 @@ export const scyllaQueries = {
 	},
 	reaction: {
 		insert: `INSERT INTO reaction
-			("id", "noteId", "userId", "reaction", "emoji", "createdAt")
-			VALUES (?, ?, ?, ?, ?, ?)`,
+			("id", "noteId", "userId", "reaction", "createdAt")
+			VALUES (?, ?, ?, ?, ?)`,
 		select: {
 			byNoteId: `SELECT * FROM reaction_by_id WHERE "noteId" = ?`,
 			byUserId: `SELECT * FROM reaction_by_user_id WHERE "userId" = ?`,
