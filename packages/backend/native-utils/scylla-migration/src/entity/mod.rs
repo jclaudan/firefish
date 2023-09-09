@@ -1,9 +1,9 @@
 pub mod drive_file;
-pub mod emoji;
 pub mod following;
 pub mod note;
 pub mod note_edit;
 pub mod note_reaction;
+pub mod notification;
 pub mod poll;
 pub mod poll_vote;
 pub mod user;

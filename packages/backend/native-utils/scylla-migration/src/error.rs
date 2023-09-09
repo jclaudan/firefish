@@ -11,7 +11,7 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum Error {
-    #[error("Session error: {0}")]
+    #[error("ScyllaDB Session error: {0}")]
     Session(#[from] NewSessionError),
     #[error("Query error: {0}")]
     Query(#[from] QueryError),
