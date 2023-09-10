@@ -73,6 +73,7 @@ const usersPagination = {
 		query: props.query,
 		origin: "combined",
 	})),
+	noPaging: true,
 };
 
 const tabs = ["notes", "users"];
