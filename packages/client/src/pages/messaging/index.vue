@@ -160,7 +160,6 @@ const dmsPagination = {
 	params: {
 		group: false,
 	},
-	noPaging: true,
 };
 const groupsPagination = {
 	endpoint: "messaging/history" as const,
@@ -168,7 +167,6 @@ const groupsPagination = {
 	params: {
 		group: true,
 	},
-	noPaging: true,
 };
 
 function onMessage(message): void {
