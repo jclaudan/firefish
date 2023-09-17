@@ -338,7 +338,7 @@ export const defaultStore = markRaw(
 			default: true,
 		},
 		showTimelineReplies: {
-			where: "device",
+			where: "deviceAccount",
 			default: false,
 		},
 		addRe: {
@@ -347,6 +347,10 @@ export const defaultStore = markRaw(
 		},
 		detectPostLanguage: {
 			where: "deviceAccount",
+			default: true,
+		},
+		openServerInfo: {
+			where: "device",
 			default: true,
 		},
 	}),
