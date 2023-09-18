@@ -214,6 +214,11 @@ impl Initializer {
                 });
                 tasks.push(handler);
             }
+
+            if tasks.len() > 1000 {
+                future::join_all(tasks).await;
+                tasks = Vec::new()
+            }
         }
 
         let mut reactions = note_reaction::Entity::find()
@@ -231,6 +236,11 @@ impl Initializer {
                     drop(permit);
                 });
                 tasks.push(handler);
+            }
+
+            if tasks.len() > 1000 {
+                future::join_all(tasks).await;
+                tasks = Vec::new()
             }
         }
 
@@ -256,6 +266,11 @@ impl Initializer {
                 });
                 tasks.push(handler);
             }
+
+            if tasks.len() > 1000 {
+                future::join_all(tasks).await;
+                tasks = Vec::new()
+            }
         }
 
         let mut notifications = notification::Entity::find()
@@ -279,9 +294,12 @@ impl Initializer {
                 });
                 tasks.push(handler);
             }
-        }
 
-        future::join_all(tasks).await;
+            if tasks.len() > 1000 {
+                future::join_all(tasks).await;
+                tasks = Vec::new()
+            }
+        }
 
         Ok(())
     }
