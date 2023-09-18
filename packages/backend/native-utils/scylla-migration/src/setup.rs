@@ -53,7 +53,7 @@ impl Initializer {
     }
 
     pub(crate) async fn setup(&self, mt: bool) -> Result<(), Error> {
-        println!("Several tables in PostgreSQL are going to moved to ScyllaDB.");
+        println!("Several tables in PostgreSQL are going to be moved to ScyllaDB.");
 
         let pool = Database::connect(&self.postgres_url).await?;
         let db_backend = pool.get_database_backend();
@@ -76,7 +76,7 @@ impl Initializer {
             return Ok(());
         }
 
-        println!("Copyping data from PostgreSQL to ScyllaDB.");
+        println!("Copying data from PostgreSQL to ScyllaDB.");
         self.copy(pool.clone(), mt).await?;
 
         println!("Dropping constraints from PostgreSQL.");
@@ -202,7 +202,9 @@ impl Initializer {
                 note_pb.clone(),
             );
             let f = async move {
-                s.copy_note(note, d, n, h).await.expect("Note copy failed");
+                if let Err(e) = s.copy_note(note, d, n, h).await {
+                    p.println(format!("Note copy error: {e}"));
+                }
                 p.inc(1);
             };
             if multi_thread {
@@ -220,9 +222,9 @@ impl Initializer {
         while let Some(reaction) = reactions.try_next().await? {
             let (s, r, p) = (self.clone(), reaction_prepared.clone(), reaction_pb.clone());
             let f = async move {
-                s.copy_reaction(reaction, r)
-                    .await
-                    .expect("Reaction copy failed");
+                if let Err(e) = s.copy_reaction(reaction, r).await {
+                    p.println(format!("Reaction copy error: {e}"));
+                }
                 p.inc(1);
             };
             if multi_thread {
@@ -246,9 +248,9 @@ impl Initializer {
                 vote_pb.clone(),
             );
             let f = async move {
-                s.copy_vote(vote, d, sp, ip)
-                    .await
-                    .expect("Vote copy failed");
+                if let Err(e) = s.copy_vote(vote, d, sp, ip).await {
+                    p.println(format!("Vote copy error: {e}"));
+                }
                 p.inc(1);
             };
             if multi_thread {
@@ -271,9 +273,9 @@ impl Initializer {
                 notification_pb.clone(),
             );
             let f = async move {
-                s.copy_notification(n, d, ps)
-                    .await
-                    .expect("Notification copy failed");
+                if let Err(e) = s.copy_notification(n, d, ps).await {
+                    p.println(format!("Notification copy error: {e}"));
+                }
                 p.inc(1);
             };
             if multi_thread {
@@ -563,12 +565,12 @@ fn map_drive_file(file: drive_file::Model) -> DriveFileType {
             .properties
             .get("width")
             .filter(|v| v.is_number())
-            .map(|v| v.as_i64().unwrap() as i32),
+            .map(|v| v.as_i64().unwrap_or_default() as i32),
         height: file
             .properties
             .get("height")
             .filter(|v| v.is_number())
-            .map(|v| v.as_i64().unwrap() as i32),
+            .map(|v| v.as_i64().unwrap_or_default() as i32),
     }
 }
 
