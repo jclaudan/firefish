@@ -158,6 +158,7 @@ export default define(meta, paramDef, async (ps, user) => {
 			if (notes.length < take) break;
 		}
 	} catch (error) {
+		console.log(`\n\n\nQUERY ERROR: ${error}\n\n\n`)
 		throw new ApiError(meta.errors.queryError);
 	}
 
