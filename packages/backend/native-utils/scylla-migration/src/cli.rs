@@ -41,9 +41,9 @@ pub async fn run_cli() -> Result<(), Error> {
                 .down(num)
                 .await?
         }
-        MigrationCommand::Setup { multi_thread } => {
+        MigrationCommand::Setup { threads } => {
             let initializer = Initializer::new(&scylla_conf, &config.db).await?;
-            initializer.setup(multi_thread).await?;
+            initializer.setup(threads).await?;
         }
         _ => {}
     };
@@ -120,10 +120,10 @@ pub(crate) enum MigrationCommand {
             value_parser,
             short,
             long,
-            default_value = "false",
-            help = "Enable multi-thread mode (WARNING: High memory consumption)",
+            default_value = "1",
+            help = "Number of threads used to copy",
             display_order = 41
         )]
-        multi_thread: bool,
+        threads: u32,
     },
 }
