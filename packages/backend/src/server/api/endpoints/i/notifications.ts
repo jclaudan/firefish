@@ -163,8 +163,8 @@ export default define(meta, paramDef, async (ps, user) => {
 				user.id,
 				30,
 			)) as ScyllaNotification[]
-		).slice(0, ps.limit);
-		return await Notifications.packMany(foundNotifications, user.id);
+		);
+		return (await Notifications.packMany(foundNotifications, user.id)).slice(0, ps.limit);
 	}
 
 	const followingQuery = Followings.createQueryBuilder("following")

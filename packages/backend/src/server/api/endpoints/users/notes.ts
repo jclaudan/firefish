@@ -17,8 +17,10 @@ import {
 	scyllaClient,
 } from "@/db/scylla.js";
 import {
+	ChannelFollowingsCache,
 	InstanceMutingsCache,
 	LocalFollowingsCache,
+	RenoteMutingsCache,
 	UserBlockedCache,
 	UserBlockingCache,
 	UserMutingsCache,
@@ -84,28 +86,44 @@ export default define(meta, paramDef, async (ps, me) => {
 	});
 
 	if (scyllaClient) {
-		const [
+		let [
+			followingChannelIds,
 			followingUserIds,
 			mutedUserIds,
 			mutedInstances,
-			mutedWords,
 			blockerIds,
 			blockingIds,
-		] = await Promise.all([
-			LocalFollowingsCache.init(user.id).then((cache) => cache.getAll()),
-			UserMutingsCache.init(user.id).then((cache) => cache.getAll()),
-			InstanceMutingsCache.init(user.id).then((cache) => cache.getAll()),
-			userWordMuteCache
-				.fetchMaybe(user.id, () =>
-					UserProfiles.findOne({
-						select: ["mutedWords"],
-						where: { userId: user.id },
-					}).then((profile) => profile?.mutedWords),
-				)
-				.then((words) => words ?? []),
-			UserBlockedCache.init(user.id).then((cache) => cache.getAll()),
-			UserBlockingCache.init(user.id).then((cache) => cache.getAll()),
-		]);
+			renoteMutedIds,
+		]: string[][] = [];
+		let mutedWords: string[][];
+		if (me) {
+			[
+				followingChannelIds,
+				followingUserIds,
+				mutedUserIds,
+				mutedInstances,
+				mutedWords,
+				blockerIds,
+				blockingIds,
+				renoteMutedIds,
+			] = await Promise.all([
+				ChannelFollowingsCache.init(me.id).then((cache) => cache.getAll()),
+				LocalFollowingsCache.init(me.id).then((cache) => cache.getAll()),
+				UserMutingsCache.init(me.id).then((cache) => cache.getAll()),
+				InstanceMutingsCache.init(me.id).then((cache) => cache.getAll()),
+				userWordMuteCache
+					.fetchMaybe(me.id, () =>
+						UserProfiles.findOne({
+							select: ["mutedWords"],
+							where: { userId: user.id },
+						}).then((profile) => profile?.mutedWords),
+					)
+					.then((words) => words ?? []),
+				UserBlockedCache.init(me.id).then((cache) => cache.getAll()),
+				UserBlockingCache.init(me.id).then((cache) => cache.getAll()),
+				RenoteMutingsCache.init(me.id).then((cache) => cache.getAll()),
+			]);
+		}
 
 		if (
 			mutedUserIds.includes(user.id) ||
@@ -117,18 +135,20 @@ export default define(meta, paramDef, async (ps, me) => {
 
 		const filter = async (notes: ScyllaNote[]) => {
 			let filtered = notes.filter((n) => n.userId === ps.userId);
-			filtered = await filterVisibility(filtered, user, followingUserIds);
-			filtered = await filterMutedUser(
-				filtered,
-				user,
-				mutedUserIds,
-				mutedInstances,
-			);
-			filtered = await filterMutedNote(filtered, user, mutedWords);
-			filtered = await filterBlockUser(filtered, user, [
-				...blockerIds,
-				...blockingIds,
-			]);
+			filtered = await filterVisibility(filtered, me, followingUserIds);
+			if (me) {
+				filtered = await filterMutedUser(
+					filtered,
+					me,
+					mutedUserIds,
+					mutedInstances,
+				);
+				filtered = await filterMutedNote(filtered, me, mutedWords);
+				filtered = await filterBlockUser(filtered, me, [
+					...blockerIds,
+					...blockingIds,
+				]);
+			}
 			if (ps.withFiles) {
 				filtered = filtered.filter((n) => n.files.length > 0);
 			}
