@@ -80,8 +80,10 @@ db:
 #   sparseTimelineDays: 14
 #
 #   # <queryLimit> determines the number of maximum rows read within one pagination.
-#   # (default 1000, max 5000, min 1)
-#   queryLimit: 1000
+#   # You may need to make [max_clustering_key_restrictions_per_query] bigger for ScyllaDB
+#   # if you want to set this value larger than 100.
+#   # (default 100, max 5000, min 1)
+#   queryLimit: 100
 
 #   ┌─────────────────────┐
 #───┘ Redis configuration └─────────────────────────────────────

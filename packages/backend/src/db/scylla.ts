@@ -437,7 +437,7 @@ export async function execPaginationQuery(
 
 	let scannedPartitions = 0;
 	const found: ScyllaNote[] | ScyllaNotification[] | ScyllaNoteReaction[] = [];
-	const queryLimit = config.scylla?.queryLimit ?? 1000;
+	const queryLimit = config.scylla?.queryLimit ?? 100;
 	let foundLimit = ps.limit;
 	if (kind === "list" && ps.userIds) {
 		foundLimit *= ps.userIds.length;
@@ -468,7 +468,7 @@ export async function execPaginationQuery(
 			params.push(sinceDate);
 		}
 
-		const fetchLimit = kind === "list" ? ps.limit : queryLimit;
+		const fetchLimit = kind === "list" && ps.limit < 100 ? ps.limit : queryLimit;
 		params.push(fetchLimit);
 
 		const result = await scyllaClient.execute(query, params, {

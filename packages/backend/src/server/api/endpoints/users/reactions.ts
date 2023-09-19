@@ -12,6 +12,7 @@ import {
 	scyllaClient,
 } from "@/db/scylla.js";
 import { LocalFollowingsCache } from "@/misc/cache.js";
+import type { Client } from "cassandra-driver";
 
 export const meta = {
 	tags: ["users", "reactions"],
@@ -63,6 +64,8 @@ export default define(meta, paramDef, async (ps, me) => {
 	}
 
 	if (scyllaClient) {
+		const client: Client = scyllaClient
+
 		let followingUserIds: string[] = [];
 		if (me) {
 			followingUserIds = await LocalFollowingsCache.init(me.id).then((cache) =>
@@ -71,10 +74,9 @@ export default define(meta, paramDef, async (ps, me) => {
 		}
 
 		const filter = async (reactions: ScyllaNoteReaction[]) => {
-			if (!scyllaClient) return reactions;
 			let noteIds = reactions.map(({ noteId }) => noteId);
 			if (me) {
-				const notes = await scyllaClient
+				const notes = await client
 					.execute(prepared.note.select.byIds, [noteIds], { prepare: true })
 					.then((result) => result.rows.map(parseScyllaNote));
 				const filteredNoteIds = await filterVisibility(
