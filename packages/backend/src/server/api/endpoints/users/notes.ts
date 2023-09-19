@@ -184,7 +184,7 @@ export default define(meta, paramDef, async (ps, me) => {
 				"user",
 				ps,
 				{ note: filter },
-				me?.id,
+				user.id,
 			)) as ScyllaNote[]
 		).slice(0, ps.limit);
 		return await Notes.packMany(foundNotes, me);
