@@ -91,7 +91,7 @@ export default define(meta, paramDef, async (ps, user) => {
 
 		const noteIds = await ClipNotes.find({
 			where: whereOpt,
-			order: { id: "DESC" },
+			order: { noteId: "DESC" },
 			take: ps.limit * 5,
 		}).then((clips) => clips.map(({ noteId }) => noteId));
 
