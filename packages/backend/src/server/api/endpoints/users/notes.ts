@@ -87,27 +87,22 @@ export default define(meta, paramDef, async (ps, me) => {
 
 	if (scyllaClient) {
 		let [
-			followingChannelIds,
 			followingUserIds,
 			mutedUserIds,
 			mutedInstances,
 			blockerIds,
 			blockingIds,
-			renoteMutedIds,
 		]: string[][] = [];
 		let mutedWords: string[][];
 		if (me) {
 			[
-				followingChannelIds,
 				followingUserIds,
 				mutedUserIds,
 				mutedInstances,
 				mutedWords,
 				blockerIds,
 				blockingIds,
-				renoteMutedIds,
 			] = await Promise.all([
-				ChannelFollowingsCache.init(me.id).then((cache) => cache.getAll()),
 				LocalFollowingsCache.init(me.id).then((cache) => cache.getAll()),
 				UserMutingsCache.init(me.id).then((cache) => cache.getAll()),
 				InstanceMutingsCache.init(me.id).then((cache) => cache.getAll()),
@@ -121,7 +116,6 @@ export default define(meta, paramDef, async (ps, me) => {
 					.then((words) => words ?? []),
 				UserBlockedCache.init(me.id).then((cache) => cache.getAll()),
 				UserBlockingCache.init(me.id).then((cache) => cache.getAll()),
-				RenoteMutingsCache.init(me.id).then((cache) => cache.getAll()),
 			]);
 		}
 
