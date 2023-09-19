@@ -136,7 +136,6 @@ export default define(meta, paramDef, async (ps, user) => {
 		const filter = async (notes: ScyllaNote[]) => {
 			let filtered = notes;
 			if (user) {
-				filtered = await filterVisibility(filtered, user, followingUserIds);
 				filtered = await filterMutedUser(
 					filtered,
 					user,
