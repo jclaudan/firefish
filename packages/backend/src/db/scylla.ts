@@ -1,5 +1,4 @@
 import config from "@/config/index.js";
-import type { PopulatedEmoji } from "@/misc/populate-emojis.js";
 import type { Channel } from "@/models/entities/channel.js";
 import type { Note } from "@/models/entities/note.js";
 import type { NoteReaction } from "@/models/entities/note-reaction.js";
