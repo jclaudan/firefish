@@ -126,9 +126,10 @@ export default define(meta, paramDef, async (ps, me) => {
 		}
 
 		if (
-			mutedUserIds.includes(user.id) ||
-			blockerIds.includes(user.id) ||
-			(user.host && mutedInstances.includes(user.host))
+			me &&
+			(mutedUserIds.includes(user.id) ||
+				blockerIds.includes(user.id) ||
+				(user.host && mutedInstances.includes(user.host)))
 		) {
 			return Notes.packMany([]);
 		}
