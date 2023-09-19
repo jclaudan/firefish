@@ -101,7 +101,6 @@ export default define(meta, paramDef, async (ps, user) => {
 		}
 
 		let [
-			followingUserIds,
 			mutedUserIds,
 			mutedInstances,
 			blockerIds,
@@ -110,14 +109,12 @@ export default define(meta, paramDef, async (ps, user) => {
 		let mutedWords: string[][];
 		if (user) {
 			[
-				followingUserIds,
 				mutedUserIds,
 				mutedInstances,
 				mutedWords,
 				blockerIds,
 				blockingIds,
 			] = await Promise.all([
-				LocalFollowingsCache.init(user.id).then((cache) => cache.getAll()),
 				UserMutingsCache.init(user.id).then((cache) => cache.getAll()),
 				InstanceMutingsCache.init(user.id).then((cache) => cache.getAll()),
 				userWordMuteCache
