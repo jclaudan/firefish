@@ -503,7 +503,7 @@ export async function execPaginationQuery(
 			// Reached the end of partition. Queries posts created one day before.
 			scannedPartitions++;
 			const yesterday = new Date(untilDate.getTime() - 86400000);
-			yesterday.setUTCHours(23, 59, 59, 999);
+			yesterday.setHours(23, 59, 59, 990);
 			untilDate = yesterday;
 			if (sinceDate && untilDate < sinceDate) break;
 		}
