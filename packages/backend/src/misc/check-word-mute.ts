@@ -31,10 +31,10 @@ function checkWordMute(
 			scyllaNote.renoteCw ?? ""
 		} ${scyllaNote.renoteText ?? ""}`;
 
-		if (scyllaNote.replyFiles.length > 0) {
+		if (scyllaNote.replyFiles && scyllaNote.replyFiles.length > 0) {
 			text += ` ${scyllaNote.replyFiles.map((f) => f.comment ?? "").join(" ")}`;
 		}
-		if (scyllaNote.renoteFiles.length > 0) {
+		if (scyllaNote.renoteFiles && scyllaNote.renoteFiles.length > 0) {
 			text += ` ${scyllaNote.renoteFiles
 				.map((f) => f.comment ?? "")
 				.join(" ")}`;
