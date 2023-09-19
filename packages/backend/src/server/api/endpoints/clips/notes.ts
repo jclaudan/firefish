@@ -155,7 +155,7 @@ export default define(meta, paramDef, async (ps, user) => {
 			.execute(prepared.note.select.byIds, [noteIds], { prepare: true })
 			.then((result) => result.rows.map(parseScyllaNote));
 
-		return Notes.packMany((await filter(foundNotes)).slice(0, ps.limit), user);
+		return (await Notes.packMany((await filter(foundNotes)), user)).slice(0, ps.limit);
 	}
 
 	const query = makePaginationQuery(
