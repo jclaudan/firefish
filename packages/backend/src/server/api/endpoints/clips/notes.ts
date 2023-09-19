@@ -80,6 +80,25 @@ export default define(meta, paramDef, async (ps, user) => {
 	}
 
 	if (scyllaClient) {
+		let whereOpt: FindOptionsWhere<ClipNote> = { clipId: clip.id };
+		if (ps.sinceId && ps.untilId) {
+			whereOpt = { ...whereOpt, noteId: Between(ps.sinceId, ps.untilId) };
+		} else if (ps.sinceId) {
+			whereOpt = { ...whereOpt, noteId: MoreThan(ps.sinceId) };
+		} else if (ps.untilId) {
+			whereOpt = { ...whereOpt, noteId: LessThan(ps.untilId) };
+		}
+
+		const noteIds = await ClipNotes.find({
+			where: whereOpt,
+			order: { id: "DESC" },
+			take: ps.limit * 5,
+		}).then((clips) => clips.map(({ noteId }) => noteId));
+
+		if (noteIds.length === 0) {
+			throw new ApiError(meta.errors.noSuchClip);
+		}
+
 		let [
 			followingUserIds,
 			mutedUserIds,
@@ -132,35 +151,11 @@ export default define(meta, paramDef, async (ps, user) => {
 			return filtered;
 		};
 
-		const foundPacked = [];
-		while (foundPacked.length < ps.limit) {
-			let whereOpt: FindOptionsWhere<ClipNote> = { clipId: clip.id };
-			if (ps.sinceId && ps.untilId) {
-				whereOpt = { ...whereOpt, noteId: Between(ps.sinceId, ps.untilId) };
-			} else if (ps.sinceId) {
-				whereOpt = { ...whereOpt, noteId: MoreThan(ps.sinceId) };
-			} else if (ps.untilId) {
-				whereOpt = { ...whereOpt, noteId: LessThan(ps.untilId) };
-			}
+		const foundNotes = await scyllaClient
+			.execute(prepared.note.select.byIds, [noteIds], { prepare: true })
+			.then((result) => result.rows.map(parseScyllaNote));
 
-			const noteIds = await ClipNotes.find({
-				where: whereOpt,
-				order: { noteId: "DESC" },
-				take: ps.limit * 1.5, // Some may be filtered out by Notes.packMany, thus we take more than ps.limit.
-			}).then((clips) => clips.map(({ noteId }) => noteId));
-
-			if (noteIds.length === 0) break;
-
-			const foundNotes = (await scyllaClient
-				.execute(prepared.note.select.byIds, [noteIds], { prepare: true })
-				.then((result) => result.rows.map(parseScyllaNote)))
-
-			foundPacked.push(...(await Notes.packMany((await filter(foundNotes)), user)));
-			if (foundNotes.length < ps.limit) break;
-			ps.untilId = foundNotes[foundNotes.length - 1].id;
-		}
-
-		return foundPacked.slice(0, ps.limit);
+		return Notes.packMany((await filter(foundNotes)).slice(0, ps.limit), user);
 	}
 
 	const query = makePaginationQuery(
