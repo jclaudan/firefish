@@ -25,6 +25,7 @@ import {
 } from "@/misc/cache.js";
 import { Between, MoreThan, LessThan, FindOptionsWhere } from "typeorm";
 import type { ClipNote } from "@/models/entities/clip-note.js";
+import config from "@/config/index.js";
 
 export const meta = {
 	tags: ["account", "notes", "clips"],
@@ -92,7 +93,7 @@ export default define(meta, paramDef, async (ps, user) => {
 		const noteIds = await ClipNotes.find({
 			where: whereOpt,
 			order: { noteId: "DESC" },
-			take: ps.limit * 5,
+			take: Math.min(ps.limit * 2, config.scylla?.queryLimit ?? 100),
 		}).then((clips) => clips.map(({ noteId }) => noteId));
 
 		if (noteIds.length === 0) {

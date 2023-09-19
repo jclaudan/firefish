@@ -68,7 +68,7 @@ db:
 #   # <sparseTimelineDays> determines how many days ScyllaDB searches posts within
 #   # one pagination when user's timelines are "sparse". As the user follows more
 #   # accounts and more posts appear in the feeds, user's timelines will no longer
-#   # be sparse.  The bigger this value is, the slower the responses of timeline
+#   # be sparse. The larger this value is, the slower the responses of timeline
 #   # APIs would be.
 #   #
 #   # Let's say <sparseTimelineDays> is 14 and a user signed up and only created one
@@ -80,7 +80,7 @@ db:
 #   sparseTimelineDays: 14
 #
 #   # <queryLimit> determines the number of maximum rows read within one pagination.
-#   # You may need to make [max_clustering_key_restrictions_per_query] bigger for ScyllaDB
+#   # You may need to make [max_clustering_key_restrictions_per_query] larger for ScyllaDB
 #   # if you want to set this value larger than 100.
 #   # (default 100, max 5000, min 1)
 #   queryLimit: 100

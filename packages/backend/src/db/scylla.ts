@@ -468,7 +468,7 @@ export async function execPaginationQuery(
 			params.push(sinceDate);
 		}
 
-		const fetchLimit = kind === "list" && ps.limit < 100 ? ps.limit : queryLimit;
+		const fetchLimit = kind === "list" ? Math.min(ps.limit, queryLimit) : queryLimit;
 		params.push(fetchLimit);
 
 		const result = await scyllaClient.execute(query, params, {
