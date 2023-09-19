@@ -184,10 +184,10 @@ export default define(meta, paramDef, async (ps, me) => {
 				"user",
 				ps,
 				{ note: filter },
-				user.id,
+				me?.id,
 			)) as ScyllaNote[]
 		).slice(0, ps.limit);
-		return await Notes.packMany(foundNotes, user);
+		return await Notes.packMany(foundNotes, me);
 	}
 
 	//#region Construct query
