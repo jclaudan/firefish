@@ -155,6 +155,8 @@ export default define(meta, paramDef, async (ps, user) => {
 			.execute(prepared.note.select.byIds, [noteIds], { prepare: true })
 			.then((result) => result.rows.map(parseScyllaNote));
 
+		foundNotes.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
 		return (await Notes.packMany((await filter(foundNotes)), user)).slice(0, ps.limit);
 	}
 

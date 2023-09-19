@@ -163,6 +163,8 @@ export default define(meta, paramDef, async (ps, me) => {
 				});
 			}
 
+			notes.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
 			// The notes are checked for visibility and muted/blocked users when packed
 			found.push(...(await Notes.packMany(notes, me)));
 			start += chunkSize;
