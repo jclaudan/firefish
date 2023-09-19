@@ -90,9 +90,8 @@ export default define(meta, paramDef, async (ps, user) => {
 		}
 
 		const noteIds = await ClipNotes.find({
-			select: ["noteId"],
 			where: whereOpt,
-			order: { noteId: "DESC" },
+			order: { id: "DESC" },
 			take: ps.limit * 5,
 		}).then((clips) => clips.map(({ noteId }) => noteId));
 
@@ -101,6 +100,7 @@ export default define(meta, paramDef, async (ps, user) => {
 		}
 
 		let [
+			followingUserIds,
 			mutedUserIds,
 			mutedInstances,
 			blockerIds,
@@ -109,12 +109,14 @@ export default define(meta, paramDef, async (ps, user) => {
 		let mutedWords: string[][];
 		if (user) {
 			[
+				followingUserIds,
 				mutedUserIds,
 				mutedInstances,
 				mutedWords,
 				blockerIds,
 				blockingIds,
 			] = await Promise.all([
+				LocalFollowingsCache.init(user.id).then((cache) => cache.getAll()),
 				UserMutingsCache.init(user.id).then((cache) => cache.getAll()),
 				InstanceMutingsCache.init(user.id).then((cache) => cache.getAll()),
 				userWordMuteCache
@@ -133,6 +135,7 @@ export default define(meta, paramDef, async (ps, user) => {
 		const filter = async (notes: ScyllaNote[]) => {
 			let filtered = notes;
 			if (user) {
+				filtered = await filterVisibility(filtered, user, followingUserIds);
 				filtered = await filterMutedUser(
 					filtered,
 					user,
