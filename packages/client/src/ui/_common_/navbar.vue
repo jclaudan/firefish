@@ -596,39 +596,10 @@ function more(ev: MouseEvent) {
 						display: none;
 					}
 
-<<<<<<< packages/client/src/ui/_common_/navbar.vue
-			> .indicator {
-				position: absolute;
-				top: 6px;
-				inset-inline-start: 24px;
-				color: var(--navIndicator);
-				font-size: 8px;
-			}
-
-			> .animateIndicator {
-				animation: blink 1s infinite;
-			}
-		}
-		.post {
-			width: 100%;
-			height: 52px;
-			margin-bottom: 16px;
-			&:before, &::after {
-				inset: 0;
-				margin: auto;
-				width: 52px;
-				aspect-ratio: 1/1;
-			}
-			> .icon {
-				inset-inline-start: unset;
-			}
-			> .text {
-				display: none;
-=======
 					> .indicator {
 						position: absolute;
 						top: 6px;
-						left: 24px;
+						inset-inline-start: 24px;
 						color: var(--navIndicator);
 						font-size: 8px;
 						animation: blink 1s infinite;
@@ -662,7 +633,6 @@ function more(ev: MouseEvent) {
 						}
 					}
 				}
->>>>>>> packages/client/src/ui/_common_/navbar.vue
 			}
 		}
 	}
