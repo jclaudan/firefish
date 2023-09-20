@@ -27,7 +27,7 @@
 								class="avatar"
 								:user="req.follower"
 								:show-indicator="true"
-								disableLink
+								disable-link
 							/>
 							<div class="body">
 								<div class="name">
@@ -59,12 +59,14 @@
 								<div class="actions">
 									<button
 										class="_button"
+										:aria-label="i18n.t('accept')"
 										@click="accept(req.follower)"
 									>
 										<i class="ph-check ph-bold ph-lg"></i>
 									</button>
 									<button
 										class="_button"
+										:aria-label="i18n.t('reject')"
 										@click="reject(req.follower)"
 									>
 										<i class="ph-x ph-bold ph-lg"></i>
@@ -80,9 +82,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from "vue";
+import { computed, ref } from "vue";
 import MkPagination from "@/components/MkPagination.vue";
-import { userPage, acct } from "@/filters/user";
+import { acct, userPage } from "@/filters/user";
 import * as os from "@/os";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
@@ -93,6 +95,7 @@ const paginationComponent = ref<InstanceType<typeof MkPagination>>();
 const pagination = {
 	endpoint: "following/requests/list" as const,
 	limit: 10,
+	noPaging: true,
 };
 
 function accept(user) {
@@ -106,10 +109,6 @@ function reject(user) {
 		paginationComponent.value.reload();
 	});
 }
-
-const headerActions = $computed(() => []);
-
-const headerTabs = $computed(() => []);
 
 definePageMetadata(
 	computed(() => ({

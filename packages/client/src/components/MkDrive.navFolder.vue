@@ -15,7 +15,7 @@
 
 <script lang="ts" setup>
 import { ref } from "vue";
-import * as Misskey from "calckey-js";
+import type * as Misskey from "firefish-js";
 import * as os from "@/os";
 import { i18n } from "@/i18n";
 
@@ -40,14 +40,6 @@ const draghover = ref(false);
 
 function onClick() {
 	emit("move", props.folder);
-}
-
-function onMouseover() {
-	hover.value = true;
-}
-
-function onMouseout() {
-	hover.value = false;
 }
 
 function onDragover(ev: DragEvent) {
@@ -94,7 +86,7 @@ function onDrop(ev: DragEvent) {
 		return;
 	}
 
-	//#region ドライブのファイル
+	// #region ドライブのファイル
 	const driveFile = ev.dataTransfer.getData(_DATA_TRANSFER_DRIVE_FILE_);
 	if (driveFile != null && driveFile !== "") {
 		const file = JSON.parse(driveFile);
@@ -104,9 +96,9 @@ function onDrop(ev: DragEvent) {
 			folderId: props.folder ? props.folder.id : null,
 		});
 	}
-	//#endregion
+	// #endregion
 
-	//#region ドライブのフォルダ
+	// #region ドライブのフォルダ
 	const driveFolder = ev.dataTransfer.getData(_DATA_TRANSFER_DRIVE_FOLDER_);
 	if (driveFolder != null && driveFolder !== "") {
 		const folder = JSON.parse(driveFolder);
@@ -118,7 +110,7 @@ function onDrop(ev: DragEvent) {
 			parentId: props.folder ? props.folder.id : null,
 		});
 	}
-	//#endregion
+	// #endregion
 }
 </script>
 

@@ -1,6 +1,6 @@
 <template>
 	<form class="mk-setup" @submit.prevent="submit()">
-		<h1>Welcome to Calckey!</h1>
+		<h1>Welcome to Firefish!</h1>
 		<div class="_formRoot">
 			<p>{{ i18n.ts.intro }}</p>
 			<MkInput
@@ -42,7 +42,8 @@
 </template>
 
 <script lang="ts" setup>
-import {} from "vue";
+import { ref } from "vue";
+
 import MkButton from "@/components/MkButton.vue";
 import MkInput from "@/components/form/input.vue";
 import { host } from "@/config";
@@ -50,16 +51,16 @@ import * as os from "@/os";
 import { login } from "@/account";
 import { i18n } from "@/i18n";
 
-let username = $ref("");
-let password = $ref("");
-let submitting = $ref(false);
+const username = ref("");
+const password = ref("");
+const submitting = ref(false);
 
 function submit() {
-	if (submitting) return;
-	submitting = true;
+	if (submitting.value) return;
+	submitting.value = true;
 	os.api("admin/accounts/create", {
-		username: username,
-		password: password,
+		username: username.value,
+		password: password.value,
 	})
 		.then((res) => {
 			os.api("admin/accounts/hosted").then((res) => {
@@ -74,7 +75,7 @@ function submit() {
 			return login(res?.token);
 		})
 		.catch(() => {
-			submitting = false;
+			submitting.value = false;
 			os.alert({
 				type: "error",
 				text: i18n.ts.somethingHappened,

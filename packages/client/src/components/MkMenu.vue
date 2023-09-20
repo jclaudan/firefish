@@ -8,16 +8,17 @@
 		<div>
 			<div
 				ref="itemsEl"
+				v-vibrate="5"
 				class="rrevdjwt _popup _shadow"
 				:class="{ center: align === 'center', asDrawer }"
 				:style="{
 					width: width && !asDrawer ? width + 'px' : '',
 					maxHeight: maxHeight ? maxHeight + 'px' : '',
 				}"
-				@contextmenu.self="(e) => e.preventDefault()"
 				tabindex="-1"
+				@contextmenu.self="(e) => e.preventDefault()"
 			>
-				<template v-for="(item, i) in items2">
+				<template v-for="item in items2">
 					<div v-if="item === null" class="divider"></div>
 					<span v-else-if="item.type === 'label'" class="label item">
 						<span :style="item.textStyle || ''">{{
@@ -47,7 +48,7 @@
 							v-if="item.avatar"
 							:user="item.avatar"
 							class="avatar"
-							disableLink
+							disable-link
 						/>
 						<span :style="item.textStyle || ''">{{
 							item.text
@@ -100,7 +101,7 @@
 						<MkAvatar
 							:user="item.user"
 							class="avatar"
-							disableLink
+							disable-link
 						/><MkUserName :user="item.user" />
 						<span
 							v-if="item.indicate"
@@ -168,7 +169,7 @@
 							v-if="item.avatar"
 							:user="item.avatar"
 							class="avatar"
-							disableLink
+							disable-link
 						/>
 						<span :style="item.textStyle || ''">{{
 							item.text
@@ -204,23 +205,22 @@
 
 <script lang="ts" setup>
 import {
-	computed,
-	menu,
 	defineAsyncComponent,
-	nextTick,
 	onBeforeUnmount,
 	onMounted,
-	onUnmounted,
-	Ref,
 	ref,
 	watch,
 } from "vue";
-import { focusPrev, focusNext } from "@/scripts/focus";
+import { FocusTrap } from "focus-trap-vue";
 import FormSwitch from "@/components/form/switch.vue";
-import { MenuItem, InnerMenuItem, MenuPending, MenuAction } from "@/types/menu";
+import type {
+	InnerMenuItem,
+	MenuAction,
+	MenuItem,
+	MenuPending,
+} from "@/types/menu";
 import * as os from "@/os";
 import { i18n } from "@/i18n";
-import { FocusTrap } from "focus-trap-vue";
 
 const XChild = defineAsyncComponent(() => import("./MkMenu.child.vue"));
 const focusTrap = ref();
@@ -239,13 +239,13 @@ const emit = defineEmits<{
 	(ev: "close", actioned?: boolean): void;
 }>();
 
-let itemsEl = $ref<HTMLDivElement>();
+const itemsEl = ref<HTMLDivElement>();
 
-let items2: InnerMenuItem[] = $ref([]);
+const items2: InnerMenuItem[] = ref([]);
 
-let child = $ref<InstanceType<typeof XChild>>();
+const child = ref<InstanceType<typeof XChild>>();
 
-let childShowingItem = $ref<MenuItem | null>();
+const childShowingItem = ref<MenuItem | null>();
 
 watch(
 	() => props.items,
@@ -261,24 +261,24 @@ watch(
 				// if item is Promise
 				items[i] = { type: "pending" };
 				item.then((actualItem) => {
-					items2[i] = actualItem;
+					items2.value[i] = actualItem;
 				});
 			}
 		}
 
-		items2 = items as InnerMenuItem[];
+		items2.value = items as InnerMenuItem[];
 	},
 	{
 		immediate: true,
 	},
 );
 
-let childMenu = $ref<MenuItem[] | null>();
-let childTarget = $ref<HTMLElement | null>();
+const childMenu = ref<MenuItem[] | null>();
+const childTarget = ref<HTMLElement | null>();
 
 function closeChild() {
-	childMenu = null;
-	childShowingItem = null;
+	childMenu.value = null;
+	childShowingItem.value = null;
 }
 
 function childActioned() {
@@ -288,11 +288,12 @@ function childActioned() {
 
 function onGlobalMousedown(event: MouseEvent) {
 	if (
-		childTarget &&
-		(event.target === childTarget || childTarget.contains(event.target))
+		childTarget.value &&
+		(event.target === childTarget.value ||
+			childTarget.value.contains(event.target))
 	)
 		return;
-	if (child && child.checkHit(event)) return;
+	if (child.value && child.value.checkHit(event)) return;
 	closeChild();
 }
 
@@ -311,9 +312,9 @@ async function showChildren(item: MenuItem, ev: MouseEvent) {
 		os.popupMenu(item.children, ev.currentTarget ?? ev.target);
 		close();
 	} else {
-		childTarget = ev.currentTarget ?? ev.target;
-		childMenu = item.children;
-		childShowingItem = item;
+		childTarget.value = ev.currentTarget ?? ev.target;
+		childMenu.value = item.children;
+		childShowingItem.value = item;
 	}
 }
 

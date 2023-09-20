@@ -17,9 +17,9 @@
 </template>
 
 <script lang="ts" setup>
-import { onBeforeUnmount, onMounted } from "vue";
-import bytes from "@/filters/bytes";
+import { onBeforeUnmount, onMounted, ref } from "vue";
 import XPie from "./pie.vue";
+import bytes from "@/filters/bytes";
 import { i18n } from "@/i18n";
 import * as os from "@/os";
 
@@ -28,22 +28,22 @@ const props = defineProps<{
 	meta: any;
 }>();
 
-let progress: number = $ref(0);
-let serverStats = $ref(null);
-let totalSize: number = $ref(0);
-let indexCount: number = $ref(0);
-let available: string = $ref("unavailable");
+const progress: number = ref(0);
+const serverStats = ref(null);
+const totalSize: number = ref(0);
+const indexCount: number = ref(0);
+const available: string = ref("unavailable");
 
 function onStats(stats) {
-	totalSize = stats.meilisearch.size;
-	indexCount = stats.meilisearch.indexed_count;
-	available = stats.meilisearch.health;
-	progress = indexCount / serverStats.notesCount;
+	totalSize.value = stats.meilisearch.size;
+	indexCount.value = stats.meilisearch.indexed_count;
+	available.value = stats.meilisearch.health;
+	progress.value = indexCount.value / serverStats.value.notesCount;
 }
 
 onMounted(() => {
 	os.api("stats", {}).then((res) => {
-		serverStats = res;
+		serverStats.value = res;
 	});
 	props.connection.on("stats", onStats);
 });

@@ -41,7 +41,7 @@
 
 <script lang="ts" setup>
 import { computed } from "vue";
-import type * as Misskey from "calckey-js";
+import type * as Misskey from "firefish-js";
 import ImgWithBlurhash from "@/components/MkImgWithBlurhash.vue";
 
 const props = defineProps<{
@@ -68,7 +68,7 @@ const is = computed(() => {
 			"application/x-tar",
 			"application/gzip",
 			"application/x-7z-compressed",
-		].some((archiveType) => archiveType === props.file.type)
+		].includes(props.file.type)
 	)
 		return "archive";
 	return "unknown";
@@ -91,6 +91,8 @@ const isThumbnailAvailable = computed(() => {
 	border: 0;
 	padding: 0;
 	cursor: pointer;
+	align-items: center;
+	justify-content: center;
 
 	> .icon-sub {
 		position: absolute;

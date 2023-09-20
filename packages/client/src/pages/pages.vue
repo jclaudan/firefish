@@ -11,7 +11,7 @@
 				:round-lengths="true"
 				:touch-angle="25"
 				:threshold="10"
-				:centeredSlides="true"
+				:centered-slides="true"
 				:modules="[Virtual]"
 				:space-between="20"
 				:virtual="true"
@@ -80,8 +80,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, watch, onMounted } from "vue";
-import { Virtual } from "swiper";
+import { computed, onMounted, ref, watch } from "vue";
+import { Virtual } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import MkPagePreview from "@/components/MkPagePreview.vue";
 import MkPagination from "@/components/MkPagination.vue";
@@ -96,9 +96,9 @@ import "swiper/scss/virtual";
 
 const router = useRouter();
 
-let tab = $ref("featured");
+const tab = ref("featured");
 const tabs = ["featured", "liked", "my"];
-watch($$(tab), () => syncSlide(tabs.indexOf(tab)));
+watch(tab, () => syncSlide(tabs.indexOf(tab.value)));
 
 const featuredPagesPagination = {
 	endpoint: "pages/featured" as const,
@@ -117,7 +117,7 @@ function create() {
 	router.push("/pages/new");
 }
 
-const headerActions = $computed(() => [
+const headerActions = computed(() => [
 	{
 		icon: "ph-plus ph-bold ph-lg",
 		text: i18n.ts.create,
@@ -125,7 +125,7 @@ const headerActions = $computed(() => [
 	},
 ]);
 
-const headerTabs = $computed(() => [
+const headerTabs = computed(() => [
 	{
 		key: "featured",
 		title: i18n.ts._pages.featured,
@@ -154,11 +154,11 @@ let swiperRef = null;
 
 function setSwiperRef(swiper) {
 	swiperRef = swiper;
-	syncSlide(tabs.indexOf(tab));
+	syncSlide(tabs.indexOf(tab.value));
 }
 
 function onSlideChange() {
-	tab = tabs[swiperRef.activeIndex];
+	tab.value = tabs[swiperRef.activeIndex];
 }
 
 function syncSlide(index) {

@@ -165,14 +165,14 @@ export default async (
 		createdAt: User["createdAt"];
 		isBot: User["isBot"];
 		inbox?: User["inbox"];
+		isIndexable?: User["isIndexable"];
 	},
 	data: Option,
 	silent = false,
 ) =>
 	// rome-ignore lint/suspicious/noAsyncPromiseExecutor: FIXME
 	new Promise<Note>(async (res, rej) => {
-		const dontFederateInitially =
-			data.localOnly || data.visibility === "hidden";
+		const dontFederateInitially = data.visibility === "hidden";
 
 		// If you reply outside the channel, match the scope of the target.
 		// TODO (I think it's a process that could be done on the client side, but it's server side for now.)
@@ -206,7 +206,8 @@ export default async (
 		if (data.channel != null) data.visibility = "public";
 		if (data.channel != null) data.visibleUsers = [];
 		if (data.channel != null) data.localOnly = true;
-		if (data.visibility === "hidden") data.visibility = "public";
+		if (data.visibility.startsWith("hidden"))
+			data.visibility = data.visibility.slice(6);
 
 		// enforce silent clients on server
 		if (
@@ -652,7 +653,9 @@ export default async (
 		}
 
 		// Register to search database
-		await index(note, false);
+		if (user.isIndexable) {
+			await index(note, false);
+		}
 	});
 
 async function renderNoteOrRenoteActivity(data: Option, note: Note) {
@@ -805,7 +808,7 @@ async function insertNote(
 }
 
 export async function index(note: Note, reindexing: boolean): Promise<void> {
-	if (!note.text) return;
+	if (!note.text || note.visibility !== "public") return;
 
 	if (config.elasticsearch && es) {
 		es.index({

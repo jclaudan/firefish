@@ -193,10 +193,6 @@ onMounted(() => {
 	});
 });
 
-const headerActions = $computed(() => []);
-
-const headerTabs = $computed(() => []);
-
 definePageMetadata({
 	title: i18n.ts.accountInfo,
 	icon: "ph-info ph-bold ph-lg",

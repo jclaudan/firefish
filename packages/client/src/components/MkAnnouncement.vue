@@ -5,6 +5,15 @@
 				<MkSparkle v-if="isGoodNews">{{ title }}</MkSparkle>
 				<p v-else>{{ title }}</p>
 			</div>
+			<div :class="$style.time">
+				<MkTime :time="announcement.createdAt" />
+				<div v-if="announcement.updatedAt">
+					<small>
+						{{ i18n.ts.updatedAt }}:
+						<MkTime :time="announcement.createdAt" />
+					</small>
+				</div>
+			</div>
 			<Mfm :text="text" />
 			<img
 				v-if="imageUrl != null"
@@ -68,7 +77,11 @@ const gotIt = () => {
 	}
 }
 
+.time {
+	font-size: 0.8rem;
+}
+
 .gotIt {
-	margin: 8px 0 0 0;
+	margin: 1rem 0 1rem 2rem;
 }
 </style>

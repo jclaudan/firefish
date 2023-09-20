@@ -51,6 +51,9 @@
 </template>
 
 <script lang="ts" setup>
+import { ref } from "vue";
+
+import { toString } from "firefish-js/built/acct";
 import FormSection from "@/components/form/section.vue";
 import FormInput from "@/components/form/input.vue";
 import FormButton from "@/components/MkButton.vue";
@@ -59,35 +62,36 @@ import * as os from "@/os";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
 import { $i } from "@/account";
-import { toString } from "calckey-js/built/acct";
 
-let moveToAccount = $ref("");
-let accountAlias = $ref([""]);
+const moveToAccount = ref("");
+const accountAlias = ref([""]);
 
 await init();
 
 async function init() {
 	if ($i?.alsoKnownAs && $i.alsoKnownAs.length > 0) {
 		const aka = await os.api("users/show", { userIds: $i.alsoKnownAs });
-		accountAlias =
+		accountAlias.value =
 			aka && aka.length > 0
 				? aka.map((user) => `@${toString(user)}`)
 				: [""];
 	} else {
-		accountAlias = [""];
+		accountAlias.value = [""];
 	}
 }
 
 async function save(): Promise<void> {
 	const i = await os.apiWithDialog("i/known-as", {
-		alsoKnownAs: accountAlias.map((e) => e.trim()).filter((e) => e !== ""),
+		alsoKnownAs: accountAlias.value
+			.map((e) => e.trim())
+			.filter((e) => e !== ""),
 	});
 	$i.alsoKnownAs = i.alsoKnownAs;
 	await init();
 }
 
 function add(): void {
-	accountAlias.push("");
+	accountAlias.value.push("");
 }
 
 async function move(account): Promise<void> {

@@ -1,8 +1,8 @@
+import XTutorial from "../components/MkTutorialDialog.vue";
 import { defaultStore } from "@/store";
 import { instance } from "@/instance";
 import { host } from "@/config";
 import * as os from "@/os";
-import XTutorial from "../components/MkTutorialDialog.vue";
 import { i18n } from "@/i18n";
 
 export function openHelpMenu_(ev: MouseEvent) {
@@ -20,9 +20,9 @@ export function openHelpMenu_(ev: MouseEvent) {
 			},
 			{
 				type: "link",
-				text: i18n.ts.aboutMisskey,
+				text: i18n.ts.aboutFirefish,
 				icon: "ph-lightbulb ph-bold ph-lg",
-				to: "/about-calckey",
+				to: "/about-firefish",
 			},
 			{
 				type: "button",
@@ -37,7 +37,7 @@ export function openHelpMenu_(ev: MouseEvent) {
 				text: i18n.ts.apps,
 				icon: "ph-device-mobile ph-bold ph-lg",
 				action: () => {
-					window.open("https://calckey.org/apps", "_blank");
+					window.open("https://joinfirefish.org/apps", "_blank");
 				},
 			},
 			{

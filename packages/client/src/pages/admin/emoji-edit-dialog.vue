@@ -41,13 +41,13 @@
 </template>
 
 <script lang="ts" setup>
-import {} from "vue";
+import { ref } from "vue";
+
 import XModalWindow from "@/components/MkModalWindow.vue";
 import MkButton from "@/components/MkButton.vue";
 import MkInput from "@/components/form/input.vue";
 import MkTextarea from "@/components/form/textarea.vue";
 import * as os from "@/os";
-import { unique } from "@/scripts/array";
 import { i18n } from "@/i18n";
 import { emojiCategories } from "@/instance";
 
@@ -55,12 +55,12 @@ const props = defineProps<{
 	emoji: any;
 }>();
 
-let dialog = $ref(null);
-let name: string = $ref(props.emoji.name);
-let category: string = $ref(props.emoji.category);
-let aliases: string = $ref(props.emoji.aliases.join(" "));
-let categories: string[] = $ref(emojiCategories);
-let license: string = $ref(props.emoji.license ?? "");
+const dialog = ref<any>(null);
+const name = ref<string>(props.emoji.name);
+const category = ref<string>(props.emoji.category);
+const aliases = ref<string>(props.emoji.aliases.join(" "));
+const categories = ref(emojiCategories);
+const license = ref<string>(props.emoji.license ?? "");
 
 const emit = defineEmits<{
 	(ev: "done", v: { deleted?: boolean; updated?: any }): void;
@@ -74,29 +74,29 @@ function ok() {
 async function update() {
 	await os.apiWithDialog("admin/emoji/update", {
 		id: props.emoji.id,
-		name,
-		category,
-		aliases: aliases.split(" "),
-		license: license === "" ? null : license,
+		name: name.value,
+		category: category.value,
+		aliases: aliases.value.split(" "),
+		license: license.value === "" ? null : license.value,
 	});
 
 	emit("done", {
 		updated: {
 			id: props.emoji.id,
-			name,
-			category,
-			aliases: aliases.split(" "),
-			license: license === "" ? null : license,
+			name: name.value,
+			category: category.value,
+			aliases: aliases.value.split(" "),
+			license: license.value === "" ? null : license.value,
 		},
 	});
 
-	dialog.close();
+	dialog.value.close();
 }
 
 async function del() {
 	const { canceled } = await os.confirm({
 		type: "warning",
-		text: i18n.t("removeAreYouSure", { x: name }),
+		text: i18n.t("removeAreYouSure", { x: name.value }),
 	});
 	if (canceled) return;
 
@@ -106,7 +106,7 @@ async function del() {
 		emit("done", {
 			deleted: true,
 		});
-		dialog.close();
+		dialog.value.close();
 	});
 }
 </script>

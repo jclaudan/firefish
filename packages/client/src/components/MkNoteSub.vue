@@ -1,10 +1,10 @@
 <template>
 	<article
 		v-if="!muted.muted || muted.what === 'reply'"
+		:id="detailedView ? appearNote.id : null"
 		ref="el"
 		v-size="{ max: [450, 500] }"
 		class="wrpstxzv"
-		:id="detailedView ? appearNote.id : null"
 		tabindex="-1"
 		:class="{
 			children: depth > 1,
@@ -16,8 +16,8 @@
 		<div v-if="conversation && depth > 1" class="line"></div>
 		<div
 			class="main"
-			@click="noteClick"
 			:style="{ cursor: expandOnNoteClick ? 'pointer' : '' }"
+			@click="noteClick"
 		>
 			<div class="avatar-container">
 				<MkAvatar class="avatar" :user="appearNote.user" />
@@ -32,9 +32,9 @@
 					<MkSubNoteContent
 						class="text"
 						:note="note"
-						:parentId="parentId"
+						:parent-id="parentId"
 						:conversation="conversation"
-						:detailedView="detailedView"
+						:detailed-view="detailedView"
 						@focusfooter="footerEl.focus()"
 					/>
 					<div v-if="translating || translation" class="translation">
@@ -56,7 +56,7 @@
 						</div>
 					</div>
 				</div>
-				<footer ref="footerEl" class="footer" @click.stop tabindex="-1">
+				<footer ref="footerEl" class="footer" tabindex="-1">
 					<XReactionsViewer
 						v-if="enableEmojiReactions"
 						ref="reactionsViewer"
@@ -65,7 +65,7 @@
 					<button
 						v-tooltip.noDelay.bottom="i18n.ts.reply"
 						class="button _button"
-						@click="reply()"
+						@click.stop="reply()"
 					>
 						<i class="ph-arrow-u-up-left ph-bold ph-lg"></i>
 						<template v-if="appearNote.repliesCount > 0">
@@ -107,7 +107,7 @@
 						ref="reactButton"
 						v-tooltip.noDelay.bottom="i18n.ts.reaction"
 						class="button _button"
-						@click="react()"
+						@click.stop="react()"
 					>
 						<i class="ph-smiley ph-bold ph-lg"></i>
 					</button>
@@ -117,18 +117,30 @@
 							appearNote.myReaction != null
 						"
 						ref="reactButton"
-						class="button _button reacted"
-						@click="undoReact(appearNote)"
 						v-tooltip.noDelay.bottom="i18n.ts.removeReaction"
+						class="button _button reacted"
+						@click.stop="undoReact(appearNote)"
 					>
 						<i class="ph-minus ph-bold ph-lg"></i>
 					</button>
 					<XQuoteButton class="button" :note="appearNote" />
 					<button
+						v-if="
+							$i != null &&
+							isForeignLanguage &&
+							translation == null
+						"
+						v-tooltip.noDelay.bottom="i18n.ts.translate"
+						class="button _button"
+						@click.stop="translate"
+					>
+						<i class="ph-translate ph-bold ph-lg"></i>
+					</button>
+					<button
 						ref="menuButton"
 						v-tooltip.noDelay.bottom="i18n.ts.more"
 						class="button _button"
-						@click="menu()"
+						@click.stop="menu()"
 					>
 						<i class="ph-dots-three-outline ph-bold ph-lg"></i>
 					</button>
@@ -137,17 +149,17 @@
 		</div>
 		<template v-if="conversation">
 			<MkNoteSub
-				v-if="replyLevel < 11 && depth < 5"
 				v-for="reply in replies"
+				v-if="replyLevel < 11 && depth < 5"
 				:key="reply.id"
 				:note="reply"
 				class="reply"
 				:class="{ single: replies.length == 1 }"
 				:conversation="conversation"
 				:depth="replies.length == 1 ? depth : depth + 1"
-				:replyLevel="replyLevel + 1"
-				:parentId="appearNote.id"
-				:detailedView="detailedView"
+				:reply-level="replyLevel + 1"
+				:parent-id="appearNote.id"
+				:detailed-view="detailedView"
 			/>
 			<div v-else-if="replies.length > 0" class="more">
 				<div class="line"></div>
@@ -177,9 +189,11 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, ref } from "vue";
+import { computed, inject, ref } from "vue";
 import type { Ref } from "vue";
-import * as misskey from "calckey-js";
+import type * as misskey from "firefish-js";
+import * as mfm from "mfm-js";
+import { detect as detectLanguage_ } from "tinyld";
 import XNoteHeader from "@/components/MkNoteHeader.vue";
 import MkSubNoteContent from "@/components/MkSubNoteContent.vue";
 import XReactionsViewer from "@/components/MkReactionsViewer.vue";
@@ -223,7 +237,7 @@ const props = withDefaults(
 	},
 );
 
-let note = $ref(deepClone(props.note));
+const note = ref(deepClone(props.note));
 
 const softMuteReasonI18nSrc = (what?: string) => {
 	if (what === "note") return i18n.ts.userSaysSomethingReason;
@@ -236,10 +250,10 @@ const softMuteReasonI18nSrc = (what?: string) => {
 };
 
 const isRenote =
-	note.renote != null &&
-	note.text == null &&
-	note.fileIds.length === 0 &&
-	note.poll == null;
+	note.value.renote != null &&
+	note.value.text == null &&
+	note.value.fileIds.length === 0 &&
+	note.value.poll == null;
 
 const el = ref<HTMLElement>();
 const footerEl = ref<HTMLElement>();
@@ -247,11 +261,18 @@ const menuButton = ref<HTMLElement>();
 const starButton = ref<InstanceType<typeof XStarButton>>();
 const renoteButton = ref<InstanceType<typeof XRenoteButton>>();
 const reactButton = ref<HTMLElement>();
-let appearNote = $computed(() =>
-	isRenote ? (note.renote as misskey.entities.Note) : note,
+const appearNote = computed(() =>
+	isRenote ? (note.value.renote as misskey.entities.Note) : note.value,
 );
 const isDeleted = ref(false);
-const muted = ref(getWordSoftMute(note, $i, defaultStore.state.mutedWords));
+const muted = ref(
+	getWordSoftMute(
+		note.value,
+		$i,
+		defaultStore.state.mutedWords,
+		defaultStore.state.mutedLangs,
+	),
+);
 const translation = ref(null);
 const translating = ref(false);
 const replies: misskey.entities.Note[] =
@@ -264,17 +285,68 @@ const replies: misskey.entities.Note[] =
 		.reverse() ?? [];
 const enableEmojiReactions = defaultStore.state.enableEmojiReactions;
 const expandOnNoteClick = defaultStore.state.expandOnNoteClick;
+const lang = localStorage.getItem("lang");
+const translateLang = localStorage.getItem("translateLang");
+
+function detectLanguage(text: string) {
+	const nodes = mfm.parse(text);
+	const filtered = mfm.extract(nodes, (node) => {
+		return node.type === "text" || node.type === "quote";
+	});
+	const purified = mfm.toString(filtered);
+	return detectLanguage_(purified);
+}
+
+const isForeignLanguage: boolean =
+	defaultStore.state.detectPostLanguage &&
+	appearNote.value.text != null &&
+	(() => {
+		const targetLang = (translateLang || lang || navigator.language)?.slice(
+			0,
+			2,
+		);
+		const postLang = detectLanguage(appearNote.value.text);
+		return postLang !== "" && postLang !== targetLang;
+	})();
+
+async function translate_(noteId, targetLang: string) {
+	return await os.api("notes/translate", {
+		noteId,
+		targetLang,
+	});
+}
+
+async function translate() {
+	if (translation.value != null) return;
+	translating.value = true;
+	translation.value = await translate_(
+		appearNote.value.id,
+		translateLang || lang || navigator.language,
+	);
+
+	// use UI language as the second translation language
+	if (
+		translateLang != null &&
+		lang != null &&
+		translateLang !== lang &&
+		(!translation.value ||
+			translation.value.sourceLang.toLowerCase() ===
+				translateLang.slice(0, 2))
+	)
+		translation.value = await translate_(appearNote.value.id, lang);
+	translating.value = false;
+}
 
 useNoteCapture({
 	rootEl: el,
-	note: $$(appearNote),
+	note: appearNote,
 	isDeletedRef: isDeleted,
 });
 
 function reply(viaKeyboard = false): void {
 	pleaseLogin();
 	os.post({
-		reply: appearNote,
+		reply: appearNote.value,
 		animation: !viaKeyboard,
 	}).then(() => {
 		focus();
@@ -288,8 +360,8 @@ function react(viaKeyboard = false): void {
 		reactButton.value,
 		(reaction) => {
 			os.api("notes/reactions/create", {
-				noteId: appearNote.id,
-				reaction: reaction,
+				noteId: appearNote.value.id,
+				reaction,
 			});
 		},
 		() => {
@@ -314,7 +386,7 @@ const currentClipPage = inject<Ref<misskey.entities.Clip> | null>(
 function menu(viaKeyboard = false): void {
 	os.popupMenu(
 		getNoteMenu({
-			note: note,
+			note: note.value,
 			translating,
 			translation,
 			menuButton,
@@ -346,21 +418,24 @@ function onContextmenu(ev: MouseEvent): void {
 			[
 				{
 					type: "label",
-					text: notePage(appearNote),
+					text: notePage(appearNote.value),
 				},
 				{
 					icon: "ph-browser ph-bold ph-lg",
 					text: i18n.ts.openInWindow,
 					action: () => {
-						os.pageWindow(notePage(appearNote));
+						os.pageWindow(notePage(appearNote.value));
 					},
 				},
-				notePage(appearNote) != location.pathname
+				notePage(appearNote.value) != location.pathname
 					? {
 							icon: "ph-arrows-out-simple ph-bold ph-lg",
 							text: i18n.ts.showInPage,
 							action: () => {
-								router.push(notePage(appearNote), "forcePage");
+								router.push(
+									notePage(appearNote.value),
+									"forcePage",
+								);
 							},
 					  }
 					: undefined,
@@ -369,22 +444,22 @@ function onContextmenu(ev: MouseEvent): void {
 					type: "a",
 					icon: "ph-arrow-square-out ph-bold ph-lg",
 					text: i18n.ts.openInNewTab,
-					href: notePage(appearNote),
+					href: notePage(appearNote.value),
 					target: "_blank",
 				},
 				{
 					icon: "ph-link-simple ph-bold ph-lg",
 					text: i18n.ts.copyLink,
 					action: () => {
-						copyToClipboard(`${url}${notePage(appearNote)}`);
+						copyToClipboard(`${url}${notePage(appearNote.value)}`);
 					},
 				},
-				note.user.host != null
+				note.value.user.host != null
 					? {
 							type: "a",
 							icon: "ph-arrow-square-up-right ph-bold ph-lg",
 							text: i18n.ts.showOnRemote,
-							href: note.url ?? note.uri ?? "",
+							href: note.value.url ?? note.value.uri ?? "",
 							target: "_blank",
 					  }
 					: undefined,
@@ -470,18 +545,19 @@ function noteClick(e) {
 				z-index: 2;
 				display: flex;
 				flex-wrap: wrap;
-				pointer-events: none; // Allow clicking anything w/out pointer-events: all; to open post
 
 				> :deep(.button) {
 					position: relative;
 					margin: 0;
 					padding: 8px;
 					opacity: 0.7;
+					&:disabled {
+						opacity: 0.5 !important;
+					}
 					flex-grow: 1;
 					max-width: 3.5em;
 					width: max-content;
 					min-width: max-content;
-					pointer-events: all;
 					height: auto;
 					transition: opacity 0.2s;
 					&::before {

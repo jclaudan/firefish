@@ -28,8 +28,8 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted } from "vue";
-import * as misskey from "calckey-js";
+import { onMounted, ref } from "vue";
+import type * as misskey from "firefish-js";
 import { getStaticImageUrl } from "@/scripts/get-static-image-url";
 import { notePage } from "@/filters/note";
 import * as os from "@/os";
@@ -42,8 +42,8 @@ const props = defineProps<{
 	user: misskey.entities.UserDetailed;
 }>();
 
-let fetching = $ref(true);
-let images = $ref<
+const fetching = ref(true);
+const images = ref<
 	{
 		note: misskey.entities.Note;
 		file: misskey.entities.DriveFile;
@@ -73,13 +73,13 @@ onMounted(() => {
 	}).then((notes) => {
 		for (const note of notes) {
 			for (const file of note.files) {
-				images.push({
+				images.value.push({
 					note,
 					file,
 				});
 			}
 		}
-		fetching = false;
+		fetching.value = false;
 	});
 });
 </script>
@@ -98,6 +98,9 @@ onMounted(() => {
 		grid-gap: 6px;
 
 		> .img {
+			display: flex;
+			justify-content: center;
+			align-items: center;
 			position: relative;
 			height: 128px;
 			border-radius: 6px;

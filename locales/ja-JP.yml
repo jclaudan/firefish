@@ -1,6 +1,6 @@
 _lang_: "日本語"
-headlineMisskey: "ずっと無料でオープンソースの非中央集権型ソーシャルメディアプラットフォーム🚀"
-introMisskey: "ようこそ！Calckeyは、オープンソースの非中央集権型ソーシャルメディアプラットフォームです。\nいま起こっていることを共有したり、あなたについて皆に発信しましょう📡\n\
+headlineFirefish: "ずっと無料でオープンソースの非中央集権型ソーシャルメディアプラットフォーム🚀"
+introFirefish: "ようこそ！Firefishは、オープンソースの非中央集権型ソーシャルメディアプラットフォームです。\nいま起こっていることを共有したり、あなたについて皆に発信したりしましょう📡\n\
   「リアクション」機能で、皆の投稿に素早く反応を追加できます👍\n新しい世界を探検しよう🚀"
 monthAndDay: "{month}月 {day}日"
 search: "検索"
@@ -146,7 +146,7 @@ settingGuide: "おすすめ設定"
 cacheRemoteFiles: "リモートのファイルをキャッシュする"
 cacheRemoteFilesDescription: "この設定を無効にすると、リモートファイルをキャッシュせず直リンクします。サーバーのストレージを節約できますが、サムネイルが生成されないので通信量が増加します。"
 flagAsBot: "Botとして設定"
-flagAsBotDescription: "このアカウントがBotである場合は、この設定をオンにします。オンにすると、反応の連鎖を防ぐためのフラグとして他の開発者に役立ったり、Calckeyのシステム上での扱いがBotに合ったものになります。"
+flagAsBotDescription: "このアカウントがBotである場合は、この設定をオンにします。オンにすると、反応の連鎖を防ぐためのフラグとして他の開発者に役立ったり、Firefishのシステム上での扱いがBotに合ったものになります。"
 flagAsCat: "あなたは…猫？😺"
 flagAsCatDescription: "このアカウントが猫であることを示す猫モードを有効にするには、このフラグをオンにします。"
 flagSpeakAsCat: "猫語で話す"
@@ -156,7 +156,7 @@ flagShowTimelineRepliesDescription: "オンにすると、タイムラインに�
 autoAcceptFollowed: "フォローしているユーザーからのフォロー申請を自動承認"
 addAccount: "アカウントを追加"
 loginFailed: "ログインに失敗しました"
-showOnRemote: "リモートで表示"
+showOnRemote: "オリジナルのページを開く"
 general: "全般"
 accountMoved: "このユーザーは新しいアカウントに移行しました"
 wallpaper: "壁紙"
@@ -213,7 +213,7 @@ noInstances: "サーバーがありません"
 editProfile: "プロフィールを編集"
 noteDeleteConfirm: "この投稿を削除しますか？"
 pinLimitExceeded: "これ以上ピン留めできません"
-intro: "Calckeyのインストールが完了しました！管理者アカウントを作成しましょう。"
+intro: "Firefishのインストールが完了しました！管理者アカウントを作成しましょう。"
 done: "完了"
 processing: "処理中"
 preview: "プレビュー"
@@ -303,7 +303,7 @@ emptyDrive: "ドライブは空です"
 emptyFolder: "フォルダーは空です"
 unableToDelete: "削除できません"
 inputNewFileName: "新しいファイル名を入力してください"
-inputNewDescription: "新しい説明を入力してください"
+inputNewDescription: "新しい説明を入力"
 inputNewFolderName: "新しいフォルダ名を入力してください"
 circularReferenceFolder: "移動先のフォルダーは、移動するフォルダーのサブフォルダーです。"
 hasChildFilesOrFolders: "このフォルダは空でないため、削除できません。"
@@ -396,7 +396,7 @@ exploreFediverse: "Fediverseを探索"
 popularTags: "人気のタグ"
 userList: "リスト"
 about: "情報"
-aboutMisskey: "Calckeyについて"
+aboutFirefish: "Firefishについて"
 administrator: "管理者"
 token: "トークン"
 twoStepAuthentication: "二段階認証"
@@ -517,6 +517,8 @@ objectStorageUseSSLDesc: "API接続にhttpsを使用しない場合はオフに�
 objectStorageUseProxy: "Proxyを利用する"
 objectStorageUseProxyDesc: "API接続にproxyを利用しない場合はオフにしてください"
 objectStorageSetPublicRead: "アップロード時に'public-read'を設定する"
+objectStorageS3ForcePathStyle: "DNS名ではなくてパスを使用する"
+objectStorageS3ForcePathStyleDesc: "EndpointのURLを作る際には、'<bucket>.s3.amazonaws.com'の代わりに's3.amazonaws.com/<bucket>/'のようなスタイルを使用します。"
 serverLogs: "サーバーログ"
 deleteAll: "全て削除"
 showFixedPostForm: "タイムライン上部に投稿フォームを表示する"
@@ -543,7 +545,7 @@ sort: "ソート"
 ascendingOrder: "昇順"
 descendingOrder: "降順"
 scratchpad: "スクラッチパッド"
-scratchpadDescription: "スクラッチパッドは、AiScriptの実験環境を提供します。Calckeyと対話するコードの記述、実行、結果の確認ができます。"
+scratchpadDescription: "スクラッチパッドは、AiScriptの実験環境を提供します。Firefishと対話するコードの記述、実行、結果の確認ができます。"
 output: "出力"
 script: "スクリプト"
 disablePagesScript: "ページのスクリプトを無効にする"
@@ -575,7 +577,7 @@ disablePlayer: "プレイヤーを閉じる"
 expandTweet: "ツイートを展開する"
 themeEditor: "テーマエディター"
 description: "説明"
-describeFile: "説明を付ける"
+describeFile: "説明を追加"
 enterFileDescription: "説明を入力"
 author: "作者"
 leaveConfirm: "未保存の変更があります。破棄しますか？"
@@ -672,7 +674,7 @@ createNewClip: "新しいクリップを作成"
 unclip: "クリップ解除"
 confirmToUnclipAlreadyClippedNote: "この投稿はすでにクリップ「{name}」に含まれています。投稿をこのクリップから除外しますか？"
 public: "公開"
-i18nInfo: "Calckeyは有志によって様々な言語に翻訳されています。{link}で翻訳に協力できます。"
+i18nInfo: "Firefishは有志によって様々な言語に翻訳されています。{link}で翻訳に協力できます。"
 manageAccessTokens: "アクセストークンの管理"
 accountInfo: "アカウント情報"
 notesCount: "投稿の数"
@@ -723,7 +725,7 @@ onlineUsersCount: "{n}人がオンライン"
 nUsers: "{n}ユーザー"
 nNotes: "{n}投稿"
 sendErrorReports: "エラーリポートを送信"
-sendErrorReportsDescription: "オンにすると、問題が発生したときにエラーの詳細情報がCalckeyに共有され、ソフトウェアの品質向上に役立てられます。\n\
+sendErrorReportsDescription: "オンにすると、問題が発生したときにエラーの詳細情報がFirefishに共有され、ソフトウェアの品質向上に役立てられます。\n\
   エラー情報には、OSのバージョン、ブラウザの種類、行動履歴などが含まれます。"
 myTheme: "マイテーマ"
 backgroundColor: "背景"
@@ -794,7 +796,7 @@ gallery: "ギャラリー"
 recentPosts: "最近の投稿"
 popularPosts: "人気の投稿"
 shareWithNote: "投稿で共有"
-ads: "広告"
+ads: "コミュニティバナー"
 expiration: "期限"
 memo: "メモ"
 priority: "優先度"
@@ -824,7 +826,7 @@ hashtags: "ハッシュタグ"
 troubleshooting: "トラブルシューティング"
 useBlurEffect: "UIにぼかし効果を使用"
 learnMore: "詳しく"
-misskeyUpdated: "Calckeyが更新されました！"
+misskeyUpdated: "Firefishが更新されました！"
 whatIsNew: "更新情報を見る"
 translate: "翻訳"
 translatedFrom: "{x}から翻訳"
@@ -847,14 +849,14 @@ filter: "フィルタ"
 controlPanel: "コントロールパネル"
 manageAccounts: "アカウントを管理"
 makeReactionsPublic: "リアクション一覧を公開する"
-makeReactionsPublicDescription: "あなたがしたリアクション一覧を誰でも見れるようにします。"
+makeReactionsPublicDescription: "あなたがしたリアクション一覧を誰でも見られるようにします。"
 classic: "中央寄せ"
 muteThread: "スレッドをミュート"
 unmuteThread: "スレッドのミュートを解除"
 ffVisibility: "つながりの公開範囲"
 ffVisibilityDescription: "自分のフォロー/フォロワー情報の公開範囲を設定できます。"
 continueThread: "さらにスレッドを見る"
-deleteAccountConfirm: "アカウントが削除されます。よろしいですか？"
+deleteAccountConfirm: "このアカウントが削除されます。よろしいですか？"
 incorrectPassword: "パスワードが間違っています。"
 voteConfirm: "「{choice}」に投票しますか？"
 hide: "隠す"
@@ -926,7 +928,7 @@ beta: "ベータ"
 enableAutoSensitive: "自動NSFW判定"
 enableAutoSensitiveDescription: "利用可能な場合は、機械学習を利用して自動でメディアにNSFWフラグを設定します。この機能をオフにしても、サーバーによっては自動で設定されることがあります。"
 activeEmailValidationDescription: "ユーザーのメールアドレスのバリデーションを、捨てアドかどうかや実際に通信可能かどうかなどを判定しより積極的に行います。オフにすると単に文字列として正しいかどうかのみチェックされます。"
-showAds: "広告を表示する"
+showAds: "コミュニティバナーを表示する"
 navbar: "ナビゲーションバー"
 shuffle: "シャッフル"
 account: "アカウント"
@@ -944,15 +946,15 @@ customMOTDDescription: "ユーザがページをロード/リロードするた�
 customSplashIcons: "カスタムスプラッシュスクリーンアイコン"
 customSplashIconsDescription: "ユーザがページをロード/リロードするたびにランダムに表示される、改行で区切られたカスタムスプラッシュスクリーンアイコンの
   URL。画像は静的なURLで、できればすべて192x192にリサイズしてください。"
-showUpdates: "Calckeyの更新時にポップアップを表示する"
+showUpdates: "Firefishの更新時にポップアップを表示する"
 recommendedInstances: "おすすめサーバー"
-recommendedInstancesDescription: "おすすめタイムラインに表示するサーバーを改行区切りで入力してください。`https://`は書かず、ドメインのみを入力してください。"
-caption: "自動キャプション"
+recommendedInstancesDescription: "おすすめタイムラインに表示するサーバーを改行区切りで入力してください。"
+caption: "自動で説明をつける"
 splash: "スプラッシュスクリーン"
 updateAvailable: "アップデートがありますよ！"
 swipeOnDesktop: "デスクトップでモバイルスタイルのスワイプを可能にする"
 logoImageUrl: "ロゴのURL"
-showAdminUpdates: "新しいCalckeyのバージョンが利用可能なときに通知する(管理者のみ)"
+showAdminUpdates: "新しいFirefishのバージョンが利用可能なときに通知する(管理者のみ)"
 replayTutorial: "もう一度チュートリアルを見る"
 migration: "アカウントの引っ越し"
 moveTo: "このアカウントを新しいアカウントに引っ越す"
@@ -977,12 +979,17 @@ customKaTeXMacroDescription: "数式入力を楽にするためのマクロを�
 enableCustomKaTeXMacro: "カスタムKaTeXマクロを有効にする"
 preventAiLearning: "AIによる学習を防止"
 preventAiLearningDescription: "投稿したノート、添付した画像などのコンテンツを学習の対象にしないようAIに要求します。これはnoaiフラグをHTMLレスポンスに含めることによって実現されます。"
-noGraze: "ブラウザの拡張機能「Graze for Mastodon」は、Calckeyの動作を妨げるため、無効にしてください。"
+noGraze: "ブラウザの拡張機能「Graze for Mastodon」は、Firefishの動作を妨げるため、無効にしてください。"
 enableServerMachineStats: "サーバーのマシン情報を公開する"
 enableIdenticonGeneration: "ユーザーごとのIdenticon生成を有効にする"
 showPopup: "ポップアップを表示してユーザーに知らせる"
 showWithSparkles: "タイトルをキラキラさせる"
 youHaveUnreadAnnouncements: "未読のお知らせがあります"
+neverShow: "今後表示しない"
+remindMeLater: "また後で"
+addRe: "閲覧注意の投稿への返信で、注釈の先頭に\"re:\"を追加する"
+languageForTranslation: "投稿翻訳に使用する言語"
+detectPostLanguage: "投稿の言語を自動検出し、外国語の投稿に翻訳ボタンを表示する"
 
 _sensitiveMediaDetection:
   description: "機械学習を使って自動でセンシティブなメディアを検出し、モデレーションに役立てられます。サーバーの負荷が少し増えます。"
@@ -1058,24 +1065,30 @@ _registry:
   keys: "キー"
   domain: "ドメイン"
   createKey: "キーを作成"
-_aboutMisskey:
-  about: "Calckeyは、2022年に生まれたThatOneCalculatorによるMisskeyのforkです。"
+_aboutFirefish:
+  about: "Firefishは、2022年に生まれたThatOneCalculatorによるMisskeyのforkです。"
   contributors: "主なコントリビューター"
   allContributors: "全てのコントリビューター"
+  misskeyContributors: "フォーク元のMisskeyの主なコントリビューター"
   source: "ソースコード"
-  translation: "Calckeyを翻訳"
-  donate: "Calckeyに寄付"
+  translation: "Firefishを翻訳"
+  donate: "Firefishに寄付"
   morePatrons: "他にも多くの方が支援してくれています。ありがとうございます！ 🥰"
   patrons: "支援者"
   patronsList: 寄付額ではなく時系列順に並んでいます。上記のリンクから寄付を行ってここにあなたのIDを載せましょう！
+  pleaseDonateToFirefish: Firefish開発への寄付をご検討ください。
+  pleaseDonateToHost: また、このサーバー {host} の運営者への寄付もご検討ください。
+  donateHost: '{host} に寄付する'
+  donateTitle: Firefishを気に入りましたか？
+  sponsors: Firefish の支援者
 _nsfw:
   respect: "閲覧注意のメディアは隠す"
   ignore: "閲覧注意のメディアを隠さない"
   force: "常にメディアを隠す"
 _mfm:
   cheatSheet: "MFMチートシート"
-  intro: "MFMは、MisskeyやCalckey、Akkomaなどの様々な場所で使用できるマークアップ言語です。ここでは、MFMで使用可能な構文一覧が確認できます。"
-  dummy: "CalckeyでFediverseの世界が広がります"
+  intro: "MFMは、MisskeyやFirefish、Akkomaなどの様々な場所で使用できるマークアップ言語です。ここでは、MFMで使用可能な構文一覧が確認できます。"
+  dummy: "FirefishでFediverseの世界が広がります"
   mention: "メンション"
   mentionDescription: "アットマーク + ユーザー名で、特定のユーザーを示せます。"
   hashtag: "ハッシュタグ"
@@ -1187,11 +1200,16 @@ _menuDisplay:
   hide: "隠す"
 _wordMute:
   muteWords: "ミュートするワード"
+  muteLangs: "ミュートされた言語"
   muteWordsDescription: "スペースで区切るとAND指定になり、改行で区切るとOR指定になります。"
   muteWordsDescription2: "キーワードをスラッシュで囲むと正規表現になります。"
+  muteLangsDescription: "OR 条件の場合はスペースまたは改行で区切ります。"
+  muteLangsDescription2: "言語コードを使用します。例: en, fr, ja, zh."
   softDescription: "指定した条件の投稿をタイムラインから隠します。"
+  langDescription: "設定した言語に一致する投稿をタイムラインから非表示にします。"
   hardDescription: "指定した条件の投稿をタイムラインに追加しないようにします。追加されなかった投稿は、条件を変更しても除外されたままになります。"
   soft: "ソフト"
+  lang: "言語"
   hard: "ハード"
   mutedNotes: "ミュートされた投稿"
 _instanceMute:
@@ -1297,7 +1315,7 @@ _time:
   hour: "時間"
   day: "日"
 _tutorial:
-  title: "Calckeyの使い方"
+  title: "Firefishの使い方"
   step1_1: "ようこそ！"
   step1_2: "使い始める前に、いくつか設定を済ませましょう。すぐできますよ！"
   step2_1: "最初に、あなたのプロフィールを作りましょう。"
@@ -1315,8 +1333,8 @@ _tutorial:
   step5_6: "おすすめ{icon}タイムラインでは、管理人がおすすめするサーバーの投稿を見られます。"
   step5_7: "グローバル{icon}タイムラインでは、接続している他のすべてのサーバーからの投稿を見られます。"
   step6_1: "じゃあ、ここはどんな場所なの？"
-  step6_2: "実は、あなたはただCalckeyに参加しただけではありません。ここは、何千もの相互接続されたサーバーが構成する Fediverse への入口です。"
-  step6_3: "それぞれのサーバーでは必ずしもCalckeyが使われているわけではなく、異なる動作をするサーバーもあります。しかし、あなたは他のサーバーのアカウントもフォローしたり、返信・ブーストができます。一見難しそうですが大丈夫！すぐ慣れます。"
+  step6_2: "実は、あなたはただFirefishに参加しただけではありません。ここは、何千もの相互接続されたサーバーが構成する Fediverse への入口です。"
+  step6_3: "それぞれのサーバーでは必ずしもFirefishが使われているわけではなく、異なる動作をするサーバーもあります。しかし、あなたは他のサーバーのアカウントもフォローしたり、返信・ブーストができます。一見難しそうですが大丈夫！すぐ慣れます。"
   step6_4: "これで完了です。お楽しみください！"
 _2fa:
   alreadyRegistered: "既に設定は完了しています。"
@@ -1485,7 +1503,7 @@ _profile:
   youCanIncludeHashtags: "ハッシュタグを含められます。"
   metadata: "追加情報"
   metadataEdit: "追加情報を編集"
-  metadataDescription: "プロフィールに表として追加情報を表示できます。"
+  metadataDescription: "プロフィールに表として追加情報を表示できます。{a}タグまたは{l}タグを{rel}とともに追加すると、プロフィールのリンクを確認できます。"
   metadataLabel: "ラベル"
   metadataContent: "内容"
   changeAvatar: "アバター画像を変更"
@@ -1896,7 +1914,7 @@ apps: "アプリ"
 _experiments:
   title: 試験的な機能
   postImportsCaption: 
-    ユーザーが過去の投稿をCalckey・Misskey・Mastodon・Akkoma・Pleromaからインポートすることを許可します。キューが溜まっているときにインポートするとサーバーに負荷がかかる可能性があります。
+    ユーザーが過去の投稿をFirefish・Misskey・Mastodon・Akkoma・Pleromaからインポートすることを許可します。キューが溜まっているときにインポートするとサーバーに負荷がかかる可能性があります。
   enablePostImports: 投稿のインポートを有効にする
 sendModMail: モデレーション通知を送る
 deleted: 削除済み
@@ -1911,7 +1929,7 @@ accessibility: アクセシビリティ
 jumpToPrevious: 前に戻る
 cw: 閲覧注意
 silencedWarning: スパムの可能性があるため、これらのユーザーが所属するサーバーは管理者によりサイレンスされています。
-searchPlaceholder: Calckeyを検索
+searchPlaceholder: Firefishを検索
 channelFederationWarn: 現時点では、チャンネルは他のサーバーへ連合しません
 listsDesc: リストでは指定したユーザーだけのタイムラインを作れます。リストには「タイムライン」のページからアクセスできます。
 antennasDesc: "アンテナでは指定した条件に合致する投稿が表示されます。\nアンテナには「タイムライン」のページからアクセスできます。"
@@ -1936,7 +1954,7 @@ video: 動画
 isBot: このアカウントはBotです
 isLocked: このアカウントのフォローは承認制です
 isAdmin: 管理者
-isPatron: Calckey 後援者
+isPatron: Firefish 後援者
 _skinTones:
   light: ペールオレンジ
   mediumLight: ミディアムライト
@@ -1948,3 +1966,25 @@ removeReaction: リアクションを取り消す
 alt: 代替テキスト
 swipeOnMobile: ページ間のスワイプを有効にする
 reactionPickerSkinTone: 優先する絵文字のスキン色
+xl: 特大
+donationLink: 寄付ページへのリンク
+removeMember: メンバーを削除
+removeQuote: 引用を削除
+removeRecipient: 宛先を削除
+verifiedLink: 認証済みリンク
+_feeds:
+  atom: Atom
+  rss: RSS
+  jsonFeed: JSONフィード
+  copyFeed: フィードのURLをコピー
+origin: 元のサーバー
+delete2fa: 2要素認証を無効化
+deletePasskeys: パスキーを削除
+delete2faConfirm: これで、このアカウントの2要素認証は完全に削除されます。続行しますか?
+inputNotMatch: 入力が一致しません
+deletePasskeysConfirm: これで、このアカウントのパスキーは完全に削除されます。続行しますか?
+importZip: ZIPをインポート
+emojiPackCreator: 絵文字パックの作者
+confirm: 確認
+exportZip: ZIPをエクスポート
+openServerInfo: "投稿内のサーバー名をクリックでサーバー情報を開く"

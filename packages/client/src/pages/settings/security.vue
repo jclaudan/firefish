@@ -112,14 +112,10 @@ function regenerateToken() {
 	}).then(({ canceled, result: password }) => {
 		if (canceled) return;
 		os.api("i/regenerate-token", {
-			password: password,
+			password,
 		});
 	});
 }
-
-const headerActions = $computed(() => []);
-
-const headerTabs = $computed(() => []);
 
 definePageMetadata({
 	title: i18n.ts.security,

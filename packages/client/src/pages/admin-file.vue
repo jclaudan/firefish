@@ -11,7 +11,7 @@
 				:round-lengths="true"
 				:touch-angle="25"
 				:threshold="10"
-				:centeredSlides="true"
+				:centered-slides="true"
 				:modules="[Virtual]"
 				:space-between="20"
 				:virtual="true"
@@ -156,8 +156,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, watch } from "vue";
-import { Virtual } from "swiper";
+import { computed, ref, watch } from "vue";
+import { Virtual } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import MkButton from "@/components/MkButton.vue";
 import MkSwitch from "@/components/form/switch.vue";
@@ -172,30 +172,31 @@ import * as os from "@/os";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
 import { deviceKind } from "@/scripts/device-kind";
-import { acct } from "@/filters/user";
 import { iAmAdmin, iAmModerator } from "@/account";
 import { defaultStore } from "@/store";
 import "swiper/scss";
 import "swiper/scss/virtual";
 
-let tabs = ["overview"];
+const tabs = ["overview"];
 if (iAmModerator) tabs.push("ip");
 tabs.push("raw");
-let tab = $ref(tabs[0]);
-watch($$(tab), () => syncSlide(tabs.indexOf(tab)));
+const tab = ref(tabs[0]);
+watch(tab, () => syncSlide(tabs.indexOf(tab.value)));
 
-let file: any = $ref(null);
-let info: any = $ref(null);
-let isSensitive: boolean = $ref(false);
+const file = ref(null);
+const info = ref(null);
+const isSensitive = ref(false);
 
 const props = defineProps<{
 	fileId: string;
 }>();
 
 async function fetch() {
-	file = await os.api("drive/files/show", { fileId: props.fileId });
-	info = await os.api("admin/drive/show-file", { fileId: props.fileId });
-	isSensitive = file.isSensitive;
+	file.value = await os.api("drive/files/show", { fileId: props.fileId });
+	info.value = await os.api("admin/drive/show-file", {
+		fileId: props.fileId,
+	});
+	isSensitive.value = file.value.isSensitive;
 }
 
 fetch();
@@ -203,12 +204,12 @@ fetch();
 async function del() {
 	const { canceled } = await os.confirm({
 		type: "warning",
-		text: i18n.t("removeAreYouSure", { x: file.name }),
+		text: i18n.t("removeAreYouSure", { x: file.value.name }),
 	});
 	if (canceled) return;
 
 	os.apiWithDialog("drive/files/delete", {
-		fileId: file.id,
+		fileId: file.value.id,
 	});
 }
 
@@ -217,20 +218,20 @@ async function toggleIsSensitive(v) {
 		fileId: props.fileId,
 		isSensitive: v,
 	});
-	isSensitive = v;
+	isSensitive.value = v;
 }
 
-const headerActions = $computed(() => [
+const headerActions = computed(() => [
 	{
 		text: i18n.ts.openInNewTab,
 		icon: "ph-arrow-square-out ph-bold ph-lg",
 		handler: () => {
-			window.open(file.url, "_blank");
+			window.open(file.value.url, "_blank");
 		},
 	},
 ]);
 
-const headerTabs = $computed(() => [
+const headerTabs = computed(() => [
 	{
 		key: "overview",
 		title: i18n.ts.overview,
@@ -252,7 +253,9 @@ const headerTabs = $computed(() => [
 
 definePageMetadata(
 	computed(() => ({
-		title: file ? i18n.ts.file + ": " + file.name : i18n.ts.file,
+		title: file.value
+			? i18n.ts.file + ": " + file.value.name
+			: i18n.ts.file,
 		icon: "ph-file ph-bold ph-lg",
 	})),
 );
@@ -261,11 +264,11 @@ let swiperRef = null;
 
 function setSwiperRef(swiper) {
 	swiperRef = swiper;
-	syncSlide(tabs.indexOf(tab));
+	syncSlide(tabs.indexOf(tab.value));
 }
 
 function onSlideChange() {
-	tab = tabs[swiperRef.activeIndex];
+	tab.value = tabs[swiperRef.activeIndex];
 }
 
 function syncSlide(index) {

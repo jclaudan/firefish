@@ -114,14 +114,8 @@ function changeActive(plugin, active) {
 	});
 }
 
-const headerActions = $computed(() => []);
-
-const headerTabs = $computed(() => []);
-
 definePageMetadata({
 	title: i18n.ts.plugins,
 	icon: "ph-plug ph-bold ph-lg",
 });
 </script>
-
-<style lang="scss" scoped></style>

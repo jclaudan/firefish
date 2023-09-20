@@ -145,11 +145,10 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineComponent, inject, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import MkButton from "@/components/MkButton.vue";
 import * as os from "@/os";
 import MkContainer from "@/components/MkContainer.vue";
-import ImgWithBlurhash from "@/components/MkImgWithBlurhash.vue";
 import MkPagination from "@/components/MkPagination.vue";
 import MkGalleryPostPreview from "@/components/MkGalleryPostPreview.vue";
 import MkFollowButton from "@/components/MkFollowButton.vue";
@@ -165,40 +164,40 @@ const props = defineProps<{
 	postId: string;
 }>();
 
-let post = $ref(null);
-let error = $ref(null);
+const post = ref(null);
+const error = ref(null);
 const otherPostsPagination = {
 	endpoint: "users/gallery/posts" as const,
 	limit: 6,
 	params: computed(() => ({
-		userId: post.user.id,
+		userId: post.value.user.id,
 	})),
 };
 
 function fetchPost() {
-	post = null;
+	post.value = null;
 	os.api("gallery/posts/show", {
 		postId: props.postId,
 	})
 		.then((_post) => {
-			post = _post;
+			post.value = _post;
 		})
 		.catch((_error) => {
-			error = _error;
+			error.value = _error;
 		});
 }
 
 function share() {
 	navigator.share({
-		title: post.title,
-		text: post.description,
-		url: `${url}/gallery/${post.id}`,
+		title: post.value.title,
+		text: post.value.description,
+		url: `${url}/gallery/${post.value.id}`,
 	});
 }
 
 function shareWithNote() {
 	os.post({
-		initialText: `${post.title} ${url}/gallery/${post.id}`,
+		initialText: `${post.value.title} ${url}/gallery/${post.value.id}`,
 	});
 }
 
@@ -206,8 +205,8 @@ function like() {
 	os.api("gallery/posts/like", {
 		postId: props.postId,
 	}).then(() => {
-		post.isLiked = true;
-		post.likedCount++;
+		post.value.isLiked = true;
+		post.value.likedCount++;
 	});
 }
 
@@ -215,18 +214,18 @@ async function unlike() {
 	os.api("gallery/posts/unlike", {
 		postId: props.postId,
 	}).then(() => {
-		post.isLiked = false;
-		post.likedCount--;
+		post.value.isLiked = false;
+		post.value.likedCount--;
 	});
 }
 
 function edit() {
-	router.push(`/gallery/${post.id}/edit`);
+	router.push(`/gallery/${post.value.id}/edit`);
 }
 
 watch(() => props.postId, fetchPost, { immediate: true });
 
-const headerActions = $computed(() => [
+const headerActions = computed(() => [
 	{
 		icon: "ph-pencil ph-bold ph-lg",
 		text: i18n.ts.edit,
@@ -234,14 +233,14 @@ const headerActions = $computed(() => [
 	},
 ]);
 
-const headerTabs = $computed(() => []);
+const headerTabs = computed(() => []);
 
 definePageMetadata(
 	computed(() =>
-		post
+		post.value
 			? {
-					title: post.title,
-					avatar: post.user,
+					title: post.value.title,
+					avatar: post.value.user,
 			  }
 			: null,
 	),

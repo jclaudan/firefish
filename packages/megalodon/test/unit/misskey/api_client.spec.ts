@@ -34,7 +34,7 @@ describe('api_client', () => {
             dist: MisskeyNotificationType.Reaction
           },
           {
-            src: MegalodonNotificationType.EmojiReaction,
+            src: MegalodonNotificationType.Reaction,
             dist: MisskeyNotificationType.Reaction
           },
           {
@@ -42,8 +42,8 @@ describe('api_client', () => {
             dist: MisskeyNotificationType.Renote
           },
           {
-            src: MegalodonNotificationType.PollVote,
-            dist: MisskeyNotificationType.PollVote
+            src: MegalodonNotificationType.Poll,
+            dist: MisskeyNotificationType.PollEnded
           },
           {
             src: MegalodonNotificationType.FollowRequest,
@@ -80,11 +80,11 @@ describe('api_client', () => {
           },
           {
             src: MisskeyNotificationType.Reaction,
-            dist: MegalodonNotificationType.EmojiReaction
+            dist: MegalodonNotificationType.Reaction
           },
           {
-            src: MisskeyNotificationType.PollVote,
-            dist: MegalodonNotificationType.PollVote
+            src: MisskeyNotificationType.PollEnded,
+            dist: MegalodonNotificationType.Poll
           },
           {
             src: MisskeyNotificationType.ReceiveFollowRequest,

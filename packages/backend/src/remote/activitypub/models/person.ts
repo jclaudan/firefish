@@ -127,7 +127,7 @@ function validateActor(x: IObject, uri: string): IActor {
 /**
  * Fetch a Person.
  *
- * If the target Person is registered in Calckey, it will be returned.
+ * If the target Person is registered in Firefish, it will be returned.
  */
 export async function fetchPerson(
 	uri: string,
@@ -147,11 +147,11 @@ export async function fetchPerson(
 	}
 
 	//#region Returns if already registered with this server
-	const exist = await Users.findOneBy({ uri });
+	const user = await Users.findOneBy({ uri });
 
-	if (exist) {
-		await uriPersonCache.set(uri, exist);
-		return exist;
+	if (user != null) {
+		await uriPersonCache.set(uri, user);
+		return user;
 	}
 	//#endregion
 
@@ -205,10 +205,10 @@ export async function createPerson(
 
 	if (typeof person.followers === "string") {
 		try {
-			let data = await fetch(person.followers, {
+			const data = await fetch(person.followers, {
 				headers: { Accept: "application/json" },
 			});
-			let json_data = JSON.parse(await data.text());
+			const json_data = JSON.parse(await data.text());
 
 			followersCount = json_data.totalItems;
 		} catch {
@@ -220,14 +220,29 @@ export async function createPerson(
 
 	if (typeof person.following === "string") {
 		try {
-			let data = await fetch(person.following, {
+			const data = await fetch(person.following, {
 				headers: { Accept: "application/json" },
 			});
-			let json_data = JSON.parse(await data.text());
+			const json_data = JSON.parse(await data.text());
 
 			followingCount = json_data.totalItems;
 		} catch (e) {
 			followingCount = undefined;
+		}
+	}
+
+	let notesCount: number | undefined;
+
+	if (typeof person.outbox === "string") {
+		try {
+			const data = await fetch(person.outbox, {
+				headers: { Accept: "application/json" },
+			});
+			const json_data = JSON.parse(await data.text());
+
+			notesCount = json_data.totalItems;
+		} catch (e) {
+			notesCount = undefined;
 		}
 	}
 
@@ -274,11 +289,21 @@ export async function createPerson(
 							  isCollectionOrOrderedCollection(person.following)
 							? person.following.totalItems
 							: undefined,
+					notesCount:
+						notesCount !== undefined
+							? notesCount
+							: person.outbox &&
+							  typeof person.outbox !== "string" &&
+							  isCollectionOrOrderedCollection(person.outbox)
+							? person.outbox.totalItems
+							: undefined,
 					featured: person.featured ? getApId(person.featured) : undefined,
 					uri: person.id,
 					tags,
 					isBot,
 					isCat: (person as any).isCat === true,
+					speakAsCat: person.speakAsCat,
+					isIndexable: person.indexable,
 				}),
 			)) as IRemoteUser;
 
@@ -378,7 +403,7 @@ export async function createPerson(
 
 /**
  * Update Person data from remote.
- * If the target Person is not registered in Calckey, it is ignored.
+ * If the target Person is not registered in Firefish, it is ignored.
  * @param uri URI of Person
  * @param resolver Resolver
  * @param hint Hint of Person object (If this value is a valid Person, it is used for updating without Remote resolve)
@@ -396,9 +421,9 @@ export async function updatePerson(
 	}
 
 	//#region Already registered on this server?
-	const exist = (await Users.findOneBy({ uri })) as IRemoteUser;
+	const user = (await Users.findOneBy({ uri })) as IRemoteUser;
 
-	if (exist == null) {
+	if (user == null) {
 		return;
 	}
 	//#endregion
@@ -416,17 +441,15 @@ export async function updatePerson(
 		[person.icon, person.image].map((img) =>
 			img == null
 				? Promise.resolve(null)
-				: resolveImage(exist, img).catch(() => null),
+				: resolveImage(user, img).catch(() => null),
 		),
 	);
 
 	// Custom pictogram acquisition
-	const emojis = await extractEmojis(person.tag || [], exist.host).catch(
-		(e) => {
-			logger.info(`extractEmojis: ${e}`);
-			return [] as Emoji[];
-		},
-	);
+	const emojis = await extractEmojis(person.tag || [], user.host).catch((e) => {
+		logger.info(`extractEmojis: ${e}`);
+		return [] as Emoji[];
+	});
 
 	const emojiNames = emojis.map((emoji) => emoji.name);
 
@@ -474,6 +497,21 @@ export async function updatePerson(
 		}
 	}
 
+	let notesCount: number | undefined;
+
+	if (typeof person.outbox === "string") {
+		try {
+			let data = await fetch(person.outbox, {
+				headers: { Accept: "application/json" },
+			});
+			let json_data = JSON.parse(await data.text());
+
+			notesCount = json_data.totalItems;
+		} catch (e) {
+			notesCount = undefined;
+		}
+	}
+
 	const updates = {
 		lastFetchedAt: new Date(),
 		inbox: person.inbox,
@@ -497,12 +535,21 @@ export async function updatePerson(
 				  isCollectionOrOrderedCollection(person.following)
 				? person.following.totalItems
 				: undefined,
+		notesCount:
+			notesCount !== undefined
+				? notesCount
+				: person.outbox &&
+				  typeof person.outbox !== "string" &&
+				  isCollectionOrOrderedCollection(person.outbox)
+				? person.outbox.totalItems
+				: undefined,
 		featured: person.featured,
 		emojis: emojiNames,
 		name: truncate(person.name, nameLength),
 		tags,
 		isBot: getApType(object) !== "Person",
 		isCat: (person as any).isCat === true,
+		isIndexable: person.indexable,
 		isLocked: !!person.manuallyApprovesFollowers,
 		movedToUri: person.movedTo || null,
 		alsoKnownAs: person.alsoKnownAs || null,
@@ -518,11 +565,11 @@ export async function updatePerson(
 	}
 
 	// Update user
-	await Users.update(exist.id, updates);
+	await Users.update(user.id, updates);
 
 	if (person.publicKey) {
 		await UserPublickeys.update(
-			{ userId: exist.id },
+			{ userId: user.id },
 			{
 				keyId: person.publicKey.id,
 				keyPem: person.publicKey.publicKeyPem,
@@ -531,7 +578,7 @@ export async function updatePerson(
 	}
 
 	await UserProfiles.update(
-		{ userId: exist.id },
+		{ userId: user.id },
 		{
 			url: url,
 			fields,
@@ -543,31 +590,31 @@ export async function updatePerson(
 		},
 	);
 
-	publishInternalEvent("remoteUserUpdated", { id: exist.id });
+	publishInternalEvent("remoteUserUpdated", { id: user.id });
 
 	// Hashtag Update
-	updateUsertags(exist, tags);
+	updateUsertags(user, tags);
 
 	// If the user in question is a follower, followers will also be updated.
 	await Followings.update(
 		{
-			followerId: exist.id,
+			followerId: user.id,
 		},
 		{
 			followerSharedInbox:
 				person.sharedInbox ||
-				(person.endpoints ? person.endpoints.sharedInbox : undefined),
+				(person.endpoints ? person.endpoints.sharedInbox : null),
 		},
 	);
 
-	await updateFeatured(exist.id, resolver).catch((err) => logger.error(err));
+	await updateFeatured(user.id, resolver).catch((err) => logger.error(err));
 }
 
 /**
  * Resolve Person.
  *
- * If the target person is registered in Calckey, it returns it;
- * otherwise, it fetches it from the remote server, registers it in Calckey, and returns it.
+ * If the target person is registered in Firefish, it returns it;
+ * otherwise, it fetches it from the remote server, registers it in Firefish, and returns it.
  */
 export async function resolvePerson(
 	uri: string,
@@ -576,10 +623,10 @@ export async function resolvePerson(
 	if (typeof uri !== "string") throw new Error("uri is not string");
 
 	//#region If already registered on this server, return it.
-	const exist = await fetchPerson(uri);
+	const user = await fetchPerson(uri);
 
-	if (exist) {
-		return exist;
+	if (user != null) {
+		return user;
 	}
 	//#endregion
 
@@ -665,7 +712,7 @@ export async function updateFeatured(userId: User["id"], resolver?: Resolver) {
 		? collection.items
 		: collection.orderedItems;
 	const items = await Promise.all(
-		toArray(unresolvedItems).map((x) => resolver.resolve(x)),
+		toArray(unresolvedItems).map((x) => resolver?.resolve(x)),
 	);
 
 	// Resolve and regist Notes

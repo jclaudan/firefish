@@ -126,7 +126,11 @@
 				</div>
 			</FormFolder>
 			<template #caption>{{
-				i18n.ts._profile.metadataDescription
+				i18n.t("_profile.metadataDescription", {
+					a: "\<a\>",
+					l: "\<a\>",
+					rel: `rel="me" href="https://${host}/@${$i.username}"`,
+				})
 			}}</template>
 		</FormSlot>
 
@@ -158,7 +162,7 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, watch } from "vue";
+import { reactive, ref, watch } from "vue";
 import MkButton from "@/components/MkButton.vue";
 import FormInput from "@/components/form/input.vue";
 import FormTextarea from "@/components/form/textarea.vue";
@@ -173,6 +177,7 @@ import { i18n } from "@/i18n";
 import { $i } from "@/account";
 import { langmap } from "@/scripts/langmap";
 import { definePageMetadata } from "@/scripts/page-metadata";
+import { host } from "@/config";
 
 const profile = reactive({
 	name: $i?.name,
@@ -192,7 +197,7 @@ const props = withDefaults(
 	{},
 );
 
-let saveButton = $ref(props.saveButton ?? false);
+const saveButton = ref(props.saveButton ?? false);
 
 watch(
 	() => profile,
@@ -289,10 +294,6 @@ function changeBanner(ev) {
 		},
 	);
 }
-
-const headerActions = $computed(() => []);
-
-const headerTabs = $computed(() => []);
 
 definePageMetadata({
 	title: i18n.ts.profile,

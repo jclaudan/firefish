@@ -18,8 +18,8 @@
 					>
 					<small
 						>Powered by
-						<a href="https://calckey.org/" target="_blank"
-							>Calckey</a
+						<a href="https://joinfirefish.org/" target="_blank"
+							>Firefish</a
 						></small
 					>
 				</div>
@@ -57,6 +57,14 @@
 					><i class="ph-image-square ph-bold ph-lg icon"></i
 					>{{ i18n.ts.gallery }}</MkA
 				>
+				<button
+					class="_button link"
+					active-class="active"
+					@click="search()"
+				>
+					<i class="ph-magnifying-glass ph-bold ph-lg icon"></i
+					><span>{{ i18n.ts.search }}</span>
+				</button>
 				<div class="action">
 					<button class="_buttonPrimary" @click="signup()">
 						{{ i18n.ts.signup }}
@@ -71,7 +79,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ComputedRef, onMounted, provide } from "vue";
+import type { ComputedRef } from "vue";
+import { computed, onMounted, provide, ref } from "vue";
 import XHeader from "./header.vue";
 import XKanban from "./kanban.vue";
 import { host, instanceName } from "@/config";
@@ -84,8 +93,8 @@ import XSignupDialog from "@/components/MkSignupDialog.vue";
 import MkButton from "@/components/MkButton.vue";
 import { ColdDeviceStorage, defaultStore } from "@/store";
 import { mainRouter } from "@/router";
+import type { PageMetadata } from "@/scripts/page-metadata";
 import {
-	PageMetadata,
 	provideMetadataReceiver,
 	setPageMetadata,
 } from "@/scripts/page-metadata";
@@ -93,13 +102,13 @@ import { i18n } from "@/i18n";
 
 const DESKTOP_THRESHOLD = 1000;
 
-let pageMetadata = $ref<null | ComputedRef<PageMetadata>>();
+const pageMetadata = ref<null | ComputedRef<PageMetadata>>();
 
 provide("router", mainRouter);
 provideMetadataReceiver((info) => {
-	pageMetadata = info;
-	if (pageMetadata.value) {
-		document.title = `${pageMetadata.value.title} | ${instanceName}`;
+	pageMetadata.value = info;
+	if (pageMetadata.value.value) {
+		document.title = `${pageMetadata.value.value.title} | ${instanceName}`;
 	}
 });
 
@@ -111,12 +120,12 @@ const isTimelineAvailable =
 	!instance.disableLocalTimeline ||
 	!instance.disableRecommendedTimeline ||
 	!instance.disableGlobalTimeline;
-let showMenu = $ref(false);
-let isDesktop = $ref(window.innerWidth >= DESKTOP_THRESHOLD);
-let narrow = $ref(window.innerWidth < 1280);
-let meta = $ref();
+const showMenu = ref(false);
+const isDesktop = ref(window.innerWidth >= DESKTOP_THRESHOLD);
+const narrow = ref(window.innerWidth < 1280);
+const meta = ref();
 
-const keymap = $computed(() => {
+const keymap = computed(() => {
 	return {
 		d: () => {
 			if (ColdDeviceStorage.get("syncDeviceDarkMode")) return;
@@ -126,10 +135,10 @@ const keymap = $computed(() => {
 	};
 });
 
-const root = $computed(() => mainRouter.currentRoute.value.name === "index");
+const root = computed(() => mainRouter.currentRoute.value.name === "index");
 
 os.api("meta", { detail: true }).then((res) => {
-	meta = res;
+	meta.value = res;
 });
 
 function signin() {
@@ -155,11 +164,12 @@ function signup() {
 }
 
 onMounted(() => {
-	if (!isDesktop) {
+	if (!isDesktop.value) {
 		window.addEventListener(
 			"resize",
 			() => {
-				if (window.innerWidth >= DESKTOP_THRESHOLD) isDesktop = true;
+				if (window.innerWidth >= DESKTOP_THRESHOLD)
+					isDesktop.value = true;
 			},
 			{ passive: true },
 		);
@@ -167,7 +177,7 @@ onMounted(() => {
 });
 
 defineExpose({
-	showMenu: $$(showMenu),
+	showMenu,
 });
 </script>
 

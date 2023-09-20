@@ -21,9 +21,11 @@
 </template>
 
 <script lang="ts" setup>
-import {} from "vue";
+import { ref } from "vue";
+
 import XColumn from "./column.vue";
-import { updateColumn, Column } from "./deck-store";
+import type { Column } from "./deck-store";
+import { updateColumn } from "./deck-store";
 import XTimeline from "@/components/MkTimeline.vue";
 import * as os from "@/os";
 import { i18n } from "@/i18n";
@@ -38,7 +40,7 @@ const emit = defineEmits<{
 	(ev: "parent-focus", direction: "up" | "down" | "left" | "right"): void;
 }>();
 
-let timeline = $ref<InstanceType<typeof XTimeline>>();
+const timeline = ref<InstanceType<typeof XTimeline>>();
 
 if (props.column.listId == null) {
 	setList();

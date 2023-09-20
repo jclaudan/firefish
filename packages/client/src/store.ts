@@ -1,6 +1,5 @@
 import { markRaw, ref } from "vue";
 import { Storage } from "./pizzax";
-import { Theme } from "./scripts/theme";
 
 export const postFormActions = [];
 export const userActions = [];
@@ -102,6 +101,10 @@ export const defaultStore = markRaw(
 			where: "account",
 			default: [],
 		},
+		mutedLangs: {
+			where: "account",
+			default: [],
+		},
 		mutedAds: {
 			where: "account",
 			default: [] as string[],
@@ -145,7 +148,7 @@ export const defaultStore = markRaw(
 		tl: {
 			where: "deviceAccount",
 			default: {
-				src: "home" as "home" | "local" | "social" | "global",
+				src: "home" as "home" | "local" | "social" | "global" | "recommended",
 				arg: null,
 			},
 		},
@@ -339,8 +342,20 @@ export const defaultStore = markRaw(
 			default: true,
 		},
 		showTimelineReplies: {
-			where: "device",
+			where: "deviceAccount",
 			default: false,
+		},
+		addRe: {
+			where: "account",
+			default: true,
+		},
+		detectPostLanguage: {
+			where: "deviceAccount",
+			default: true,
+		},
+		openServerInfo: {
+			where: "device",
+			default: true,
 		},
 	}),
 );
@@ -349,14 +364,14 @@ export const defaultStore = markRaw(
 
 const PREFIX = "miux:";
 
-type Plugin = {
+interface Plugin {
 	id: string;
 	name: string;
 	active: boolean;
 	configData: Record<string, any>;
 	token: string;
 	ast: any[];
-};
+}
 
 /**
  * 常にメモリにロードしておく必要がないような設定情報を保管するストレージ(非リアクティブ)
@@ -371,6 +386,7 @@ export class ColdDeviceStorage {
 		syncDeviceDarkMode: true,
 		plugins: [] as Plugin[],
 		mediaVolume: 0.5,
+		vibrate: true,
 		sound_masterVolume: 0.3,
 		sound_note: { type: "none", volume: 0 },
 		sound_noteMy: { type: "syuilo/up", volume: 1 },

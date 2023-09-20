@@ -1,4 +1,4 @@
-import * as Acct from "calckey-js/built/acct";
+import * as Acct from "firefish-js/built/acct";
 import { defineAsyncComponent } from "vue";
 import { i18n } from "@/i18n";
 import copyToClipboard from "@/scripts/copy-to-clipboard";
@@ -7,7 +7,7 @@ import * as os from "@/os";
 import { userActions } from "@/store";
 import { $i, iAmModerator } from "@/account";
 import { mainRouter } from "@/router";
-import { Router } from "@/nirax";
+import type { Router } from "@/nirax";
 
 export function getUserMenu(user, router: Router = mainRouter) {
 	const meId = $i ? $i.id : null;
@@ -31,7 +31,7 @@ export function getUserMenu(user, router: Router = mainRouter) {
 		});
 		if (canceled) return;
 		os.apiWithDialog("users/lists/push", {
-			listId: listId,
+			listId,
 			userId: user.id,
 		});
 	}
@@ -54,7 +54,7 @@ export function getUserMenu(user, router: Router = mainRouter) {
 		});
 		if (canceled) return;
 		os.apiWithDialog("users/groups/invite", {
-			groupId: groupId,
+			groupId,
 			userId: user.id,
 		});
 	}
@@ -197,7 +197,7 @@ export function getUserMenu(user, router: Router = mainRouter) {
 				() => import("@/components/MkAbuseReportWindow.vue"),
 			),
 			{
-				user: user,
+				user,
 			},
 			{},
 			"closed",
@@ -207,7 +207,7 @@ export function getUserMenu(user, router: Router = mainRouter) {
 	async function getConfirmed(text: string): Promise<boolean> {
 		const confirm = await os.confirm({
 			type: "warning",
-			title: "confirm",
+			title: i18n.ts.confirm,
 			text,
 		});
 
@@ -246,6 +246,34 @@ export function getUserMenu(user, router: Router = mainRouter) {
 			},
 		},
 		{
+			icon: "ph-newspaper ph-bold ph-lg",
+			text: i18n.ts._feeds.copyFeed,
+			type: "parent",
+			children: [
+				{
+					icon: "ph-rss ph-bold ph-lg",
+					text: i18n.ts._feeds.rss,
+					action: () => {
+						copyToClipboard(`https://${host}/@${user.username}.rss`);
+					},
+				},
+				{
+					icon: "ph-atom ph-bold ph-lg",
+					text: i18n.ts._feeds.atom,
+					action: () => {
+						copyToClipboard(`https://${host}/@${user.username}.atom`);
+					},
+				},
+				{
+					icon: "ph-brackets-curly ph-bold ph-lg",
+					text: i18n.ts._feeds.jsonFeed,
+					action: () => {
+						copyToClipboard(`https://${host}/@${user.username}.json`);
+					},
+				},
+			],
+		},
+		{
 			icon: "ph-envelope-simple-open ph-bold ph-lg",
 			text: i18n.ts.sendMessage,
 			action: () => {
@@ -258,6 +286,15 @@ export function getUserMenu(user, router: Router = mainRouter) {
 					icon: "ph-chats-teardrop ph-bold ph-lg",
 					text: i18n.ts.startMessaging,
 					to: `/my/messaging/${Acct.toString(user)}`,
+			  }
+			: undefined,
+		user.host != null && user.url
+			? {
+					type: "a",
+					icon: "ph-arrow-square-out ph-bold ph-lg",
+					text: i18n.ts.showOnRemote,
+					href: user.url,
+					target: "_blank",
 			  }
 			: undefined,
 		null,

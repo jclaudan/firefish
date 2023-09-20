@@ -40,6 +40,7 @@
 					v-if="showTicker"
 					class="ticker"
 					:instance="note.user.instance"
+					:host="note.user.host"
 				/>
 			</div>
 		</div>
@@ -47,9 +48,10 @@
 </template>
 
 <script lang="ts" setup>
-import {} from "vue";
-import type * as misskey from "calckey-js";
-import { defaultStore, noteViewInterruptors } from "@/store";
+import { ref } from "vue";
+
+import type * as misskey from "firefish-js";
+import { defaultStore } from "@/store";
 import MkVisibility from "@/components/MkVisibility.vue";
 import MkInstanceTicker from "@/components/MkInstanceTicker.vue";
 import { notePage } from "@/filters/note";
@@ -61,11 +63,12 @@ const props = defineProps<{
 	pinned?: boolean;
 }>();
 
-let note = $ref(props.note);
+const note = ref(props.note);
 
 const showTicker =
 	defaultStore.state.instanceTicker === "always" ||
-	(defaultStore.state.instanceTicker === "remote" && note.user.instance);
+	(defaultStore.state.instanceTicker === "remote" &&
+		note.value.user.instance);
 </script>
 
 <style lang="scss" scoped>

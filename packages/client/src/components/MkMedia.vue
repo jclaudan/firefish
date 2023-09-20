@@ -1,5 +1,5 @@
 <template>
-	<div class="media" v-size="{ max: [350] }">
+	<div v-size="{ max: [350] }" class="media">
 		<button v-if="hide" class="hidden" @click="hide = false">
 			<ImgWithBlurhash
 				:hash="media.blurhash"
@@ -26,6 +26,7 @@
 					:alt="media.comment"
 					:type="media.type"
 					:cover="false"
+					:largest-dimension="largestDimension"
 				/>
 				<div v-if="media.type === 'image/gif'" class="gif">GIF</div>
 			</a>
@@ -52,16 +53,24 @@
 					:aria-label="media.comment"
 					preload="none"
 					controls
+					playsinline
 					@contextmenu.stop
 				>
-					<source :src="media.url" :type="media.type" />
+					<source :src="media.url" :type="mediaType" />
 				</video>
 			</VuePlyr>
 		</template>
 		<div class="buttons">
 			<button
 				v-if="media.comment"
-				v-tooltip="i18n.ts.alt"
+				v-tooltip.noLabel="
+					`${i18n.ts.alt}: ${
+						media.comment.length > 200
+							? media.comment.trim().slice(0, 200) + '...'
+							: media.comment.trim()
+					}`
+				"
+				:aria-label="i18n.ts.alt"
 				class="_button"
 				@click.stop="captionPopup"
 			>
@@ -80,10 +89,10 @@
 </template>
 
 <script lang="ts" setup>
-import { watch, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import VuePlyr from "vue-plyr";
 import "vue-plyr/dist/vue-plyr.css";
-import type * as misskey from "calckey-js";
+import type * as misskey from "firefish-js";
 import { getStaticImageUrl } from "@/scripts/get-static-image-url";
 import ImgWithBlurhash from "@/components/MkImgWithBlurhash.vue";
 import { defaultStore } from "@/store";
@@ -95,7 +104,7 @@ const props = defineProps<{
 	raw?: boolean;
 }>();
 
-let hide = $ref(true);
+const hide = ref(true);
 
 const plyr = ref();
 
@@ -107,6 +116,24 @@ const url =
 		? getStaticImageUrl(props.media.thumbnailUrl)
 		: props.media.thumbnailUrl;
 
+const mediaType = computed(() => {
+	return props.media.type === "video/quicktime"
+		? "video/mp4"
+		: props.media.type;
+});
+
+let largestDimension: "width" | "height";
+
+if (
+	props.media.type.startsWith("image") &&
+	props.media.properties?.width &&
+	props.media.properties?.height
+) {
+	largestDimension =
+		props.media.properties.width > props.media.properties.height
+			? "width"
+			: "height";
+}
 function captionPopup() {
 	os.alert({
 		type: "info",
@@ -118,7 +145,7 @@ function captionPopup() {
 watch(
 	() => props.media,
 	() => {
-		hide =
+		hide.value =
 			defaultStore.state.nsfw === "force"
 				? true
 				: props.media.isSensitive &&
@@ -189,7 +216,7 @@ watch(
 	}
 
 	> a {
-		display: block;
+		display: flex;
 		cursor: zoom-in;
 		overflow: hidden;
 		width: 100%;
@@ -198,6 +225,9 @@ watch(
 		background-size: contain;
 		background-repeat: no-repeat;
 		box-sizing: border-box;
+		justify-content: center;
+		align-items: center;
+
 		&:focus-visible {
 			border: 2px solid var(--accent);
 		}
@@ -226,11 +256,13 @@ watch(
 		display: flex;
 		min-width: max-content;
 		width: 110px;
-		transition: width 0.2s cubic-bezier(0,0,0,1);
+		transition: width 0.2s cubic-bezier(0, 0, 0, 1);
 		[data-plyr="volume"] {
 			width: 0;
 			flex-grow: 1;
-			transition: margin 0.3s, opacity .2s 0.2s;
+			transition:
+				margin 0.3s,
+				opacity 0.2s 0.2s;
 		}
 		&:not(:hover):not(:focus-within) {
 			width: 0px;
@@ -238,7 +270,9 @@ watch(
 			[data-plyr="volume"] {
 				margin-inline: 0px;
 				opacity: 0;
-				transition: margin 0.3s, opacity 0.1s;
+				transition:
+					margin 0.3s,
+					opacity 0.1s;
 			}
 		}
 	}

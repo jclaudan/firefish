@@ -20,11 +20,12 @@
 </template>
 
 <script lang="ts" setup>
-import {} from "vue";
+import { ref, shallowRef } from "vue";
+
 import {
-	useWidgetPropsManager,
 	WidgetComponentEmits,
 	WidgetComponentProps,
+	useWidgetPropsManager,
 } from "./widget";
 import type { Widget, WidgetComponentExpose } from "./widget";
 import type { GetFormResultType } from "@/scripts/form";
@@ -46,8 +47,8 @@ const widgetPropsDef = {
 type WidgetProps = GetFormResultType<typeof widgetPropsDef>;
 
 // 現時点ではvueの制限によりimportしたtypeをジェネリックに渡せない
-//const props = defineProps<WidgetComponentProps<WidgetProps>>();
-//const emit = defineEmits<WidgetComponentEmits<WidgetProps>>();
+// const props = defineProps<WidgetComponentProps<WidgetProps>>();
+// const emit = defineEmits<WidgetComponentEmits<WidgetProps>>();
 const props = defineProps<{ widget?: Widget<WidgetProps> }>();
 const emit = defineEmits<{ (ev: "updateProps", props: WidgetProps) }>();
 
@@ -58,8 +59,8 @@ const { widgetProps, configure } = useWidgetPropsManager(
 	emit,
 );
 
-let cloud = $ref<InstanceType<typeof MkTagCloud> | null>();
-let activeInstances = $shallowRef(null);
+const cloud = ref<InstanceType<typeof MkTagCloud> | null>();
+const activeInstances = shallowRef(null);
 
 function onInstanceClick(i) {
 	os.pageWindow(`/instance-info/${i.host}`);
@@ -71,8 +72,8 @@ useInterval(
 			sort: "+lastCommunicatedAt",
 			limit: 25,
 		}).then((res) => {
-			activeInstances = res;
-			if (cloud) cloud.update();
+			activeInstances.value = res;
+			if (cloud.value) cloud.value.update();
 		});
 	},
 	1000 * 60 * 3,

@@ -26,12 +26,13 @@
 								class="banner"
 								:style="{
 									backgroundImage: `url('${user.bannerUrl}')`,
-									'--backgroundImageStatic': defaultStore
-										.state.useBlurEffect && user.bannerUrl
-										? `url('${getStaticImageUrl(
-												user.bannerUrl,
-										  )}')`
-										: null,
+									'--backgroundImageStatic':
+										defaultStore.state.useBlurEffect &&
+										user.bannerUrl
+											? `url('${getStaticImageUrl(
+													user.bannerUrl,
+											  )}')`
+											: null,
 								}"
 							></div>
 							<div class="fade"></div>
@@ -86,17 +87,13 @@
 										v-if="user.isAdmin"
 										v-tooltip.noDelay="i18n.ts.isAdmin"
 										style="color: var(--badge)"
-										><i
-											class="ph-bookmark-simple ph-fill ph-lg"
-										></i
+										><i class="ph-crown ph-bold ph-lg"></i
 									></span>
 									<span
 										v-if="!user.isAdmin && user.isModerator"
 										v-tooltip.noDelay="i18n.ts.isModerator"
 										style="color: var(--badge)"
-										><i
-											class="ph-bookmark-simple ph-bold ph-lg"
-										></i
+										><i class="ph-gavel ph-bold ph-lg"></i
 									></span>
 									<span
 										v-if="user.isLocked"
@@ -175,9 +172,7 @@
 									v-if="user.isAdmin"
 									v-tooltip.noDelay="i18n.ts.isAdmin"
 									style="color: var(--badge)"
-									><i
-										class="ph-bookmark-simple ph-fill ph-lg"
-									></i
+									><i class="ph-crown ph-bold ph-lg"></i
 								></span>
 								<span
 									v-if="!user.isAdmin && user.isModerator"
@@ -186,9 +181,7 @@
 										color: var(--badge);
 										margin-inline-start: 0.5rem;
 									"
-									><i
-										class="ph-bookmark-simple ph-bold ph-lg"
-									></i
+									><i class="ph-gavel ph-bold ph-lg"></i
 								></span>
 								<span
 									v-if="user.isLocked"
@@ -218,11 +211,11 @@
 							<div class="actions">
 								<MkFollowButton
 									:user="user"
-									@refresh="emit('refresh')"
 									:inline="true"
 									:transparent="false"
 									:full="true"
 									class="koudoku"
+									@refresh="emit('refresh')"
 								/>
 							</div>
 						</div>
@@ -288,9 +281,16 @@
 							<dl
 								v-for="(field, i) in user.fields"
 								:key="i"
+								:class="field.verified ? 'verified' : ''"
 								class="field"
 							>
 								<dt class="name">
+									<i
+										v-if="field.verified"
+										v-tooltip="i18n.ts.verifiedLink"
+										class="ph-bold ph-seal-check ph-lg ph-fw"
+										style="padding: 5px"
+									></i>
 									<Mfm
 										:text="field.name"
 										:plain="true"
@@ -355,11 +355,11 @@
 					>
 					<template v-if="narrow">
 						<XPhotos :key="user.id" :user="user" />
-						<XActivity
+						<!-- <XActivity
 							:key="user.id"
 							:user="user"
 							style="margin-top: var(--margin)"
-						/>
+						/> -->
 					</template>
 				</div>
 				<div>
@@ -379,11 +379,17 @@
 </template>
 
 <script lang="ts" setup>
-import { defineAsyncComponent, onMounted, onUnmounted } from "vue";
+import {
+	computed,
+	defineAsyncComponent,
+	onMounted,
+	onUnmounted,
+	ref,
+} from "vue";
 import calcAge from "s-age";
 import cityTimezones from "city-timezones";
+import type * as misskey from "firefish-js";
 import XUserTimeline from "./index.timeline.vue";
-import type * as misskey from "calckey-js";
 import XNote from "@/components/MkNote.vue";
 import MkFollowButton from "@/components/MkFollowButton.vue";
 import MkRemoteCaution from "@/components/MkRemoteCaution.vue";
@@ -410,16 +416,17 @@ const props = withDefaults(
 	{},
 );
 
-let parallaxAnimationId = $ref<null | number>(null);
-let narrow = $ref<null | boolean>(null);
-let rootEl = $ref<null | HTMLElement>(null);
-let bannerEl = $ref<null | HTMLElement>(null);
+const parallaxAnimationId = ref<null | number>(null);
+const narrow = ref<null | boolean>(null);
+const rootEl = ref<null | HTMLElement>(null);
+const bannerEl = ref<null | HTMLElement>(null);
+const patrons = ref([]);
 
-const age = $computed(() => {
+const age = computed(() => {
 	return calcAge(props.user.birthday);
 });
 
-const timeForThem = $computed(() => {
+const timeForThem = computed(() => {
 	const maybeCityNames = [
 		props.user.location!,
 		props.user
@@ -439,8 +446,8 @@ const timeForThem = $computed(() => {
 	];
 
 	for (const city of maybeCityNames) {
-		let tzInfo = cityTimezones.lookupViaCity(city);
-		if (tzInfo.length == 0) continue;
+		const tzInfo = cityTimezones.lookupViaCity(city);
+		if (tzInfo.length !== 1) continue;
 
 		const tz = tzInfo[0].timezone;
 		if (!tz) continue;
@@ -459,23 +466,19 @@ const timeForThem = $computed(() => {
 	return "";
 });
 
-let patrons = [];
-try {
-	patrons = await os.api("patrons");
-} catch {
-	console.error("Codeberg's down.");
-}
+const patronsResp = await os.api("patrons");
+patrons.value = patronsResp.patrons;
 
 function parallaxLoop() {
-	parallaxAnimationId = window.requestAnimationFrame(parallaxLoop);
+	parallaxAnimationId.value = window.requestAnimationFrame(parallaxLoop);
 	parallax();
 }
 
 function parallax() {
-	const banner = bannerEl as any;
+	const banner = bannerEl.value as any;
 	if (banner == null) return;
 
-	const top = getScrollPosition(rootEl);
+	const top = getScrollPosition(rootEl.value);
 
 	if (top < 0) return;
 
@@ -486,12 +489,12 @@ function parallax() {
 
 onMounted(() => {
 	window.requestAnimationFrame(parallaxLoop);
-	narrow = rootEl!.clientWidth < 1000;
+	narrow.value = rootEl.value!.clientWidth < 1000;
 });
 
 onUnmounted(() => {
-	if (parallaxAnimationId) {
-		window.cancelAnimationFrame(parallaxAnimationId);
+	if (parallaxAnimationId.value) {
+		window.cancelAnimationFrame(parallaxAnimationId.value);
 	}
 });
 </script>
@@ -750,6 +753,12 @@ onUnmounted(() => {
 							margin-bottom: 8px;
 						}
 
+						&.verified {
+							background-color: var(--hover);
+							border-radius: 10px;
+							color: var(--badge) !important;
+						}
+
 						> .name {
 							width: 30%;
 							overflow: hidden;
@@ -766,9 +775,6 @@ onUnmounted(() => {
 							text-overflow: ellipsis;
 							margin: 0;
 						}
-					}
-
-					&.system > .field > .name {
 					}
 				}
 

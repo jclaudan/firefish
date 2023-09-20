@@ -36,8 +36,8 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, watch } from "vue";
-import * as misskey from "calckey-js";
+import { computed, ref, watch } from "vue";
+import type * as misskey from "firefish-js";
 import { getStaticImageUrl } from "@/scripts/get-static-image-url";
 import { extractAvgColorFromBlurhash } from "@/scripts/extract-avg-color-from-blurhash";
 import { acct, userPage } from "@/filters/user";
@@ -64,7 +64,7 @@ const emit = defineEmits<{
 	(ev: "click", v: MouseEvent): void;
 }>();
 
-const url = $computed(() =>
+const url = computed(() =>
 	defaultStore.state.disableShowingAnimatedImages
 		? getStaticImageUrl(props.user.avatarUrl)
 		: props.user.avatarUrl,
@@ -74,12 +74,12 @@ function onClick(ev: MouseEvent) {
 	emit("click", ev);
 }
 
-let color = $ref();
+const color = ref();
 
 watch(
 	() => props.user.avatarBlurhash,
 	() => {
-		color = extractAvgColorFromBlurhash(props.user.avatarBlurhash);
+		color.value = extractAvgColorFromBlurhash(props.user.avatarBlurhash);
 	},
 	{
 		immediate: true,
@@ -176,12 +176,12 @@ watch(
 		}
 
 		&:before {
-			border-radius: 0 75% 75%;
+			border-radius: 25% 75% 75%;
 			transform: rotate(37.5deg) skew(30deg);
 		}
 
 		&:after {
-			border-radius: 75% 0 75% 75%;
+			border-radius: 75% 25% 75% 75%;
 			transform: rotate(-37.5deg) skew(-30deg);
 		}
 

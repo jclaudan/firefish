@@ -28,6 +28,7 @@
 						<button
 							v-tooltip="i18n.ts.remove"
 							class="remove _button"
+							:aria-label="i18n.t('remove')"
 							@click="remove(file)"
 						>
 							<i class="ph-x ph-bold ph-lg"></i>
@@ -62,7 +63,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import FormButton from "@/components/MkButton.vue";
 import FormInput from "@/components/form/input.vue";
 import FormTextarea from "@/components/form/textarea.vue";
@@ -80,38 +81,38 @@ const props = defineProps<{
 	postId?: string;
 }>();
 
-let init = $ref(null);
-let files = $ref([]);
-let description = $ref(null);
-let title = $ref(null);
-let isSensitive = $ref(false);
+const init = ref(null);
+const files = ref([]);
+const description = ref(null);
+const title = ref(null);
+const isSensitive = ref(false);
 
 function selectFile(evt) {
 	selectFiles(evt.currentTarget ?? evt.target, null).then((selected) => {
-		files = files.concat(selected);
+		files.value = files.value.concat(selected);
 	});
 }
 
 function remove(file) {
-	files = files.filter((f) => f.id !== file.id);
+	files.value = files.value.filter((f) => f.id !== file.id);
 }
 
 async function save() {
 	if (props.postId) {
 		await os.apiWithDialog("gallery/posts/update", {
 			postId: props.postId,
-			title: title,
-			description: description,
-			fileIds: files.map((file) => file.id),
-			isSensitive: isSensitive,
+			title: title.value,
+			description: description.value,
+			fileIds: files.value.map((file) => file.id),
+			isSensitive: isSensitive.value,
 		});
 		router.push(`/gallery/${props.postId}`);
 	} else {
 		const created = await os.apiWithDialog("gallery/posts/create", {
-			title: title,
-			description: description,
-			fileIds: files.map((file) => file.id),
-			isSensitive: isSensitive,
+			title: title.value,
+			description: description.value,
+			fileIds: files.value.map((file) => file.id),
+			isSensitive: isSensitive.value,
 		});
 		router.push(`/gallery/${created.id}`);
 	}
@@ -132,26 +133,26 @@ async function del() {
 watch(
 	() => props.postId,
 	() => {
-		init = () =>
+		init.value = () =>
 			props.postId
 				? os
 						.api("gallery/posts/show", {
 							postId: props.postId,
 						})
 						.then((post) => {
-							files = post.files;
-							title = post.title;
-							description = post.description;
-							isSensitive = post.isSensitive;
+							files.value = post.files;
+							title.value = post.title;
+							description.value = post.description;
+							isSensitive.value = post.isSensitive;
 						})
 				: Promise.resolve(null);
 	},
 	{ immediate: true },
 );
 
-const headerActions = $computed(() => []);
+const headerActions = computed(() => []);
 
-const headerTabs = $computed(() => []);
+const headerTabs = computed(() => []);
 
 definePageMetadata(
 	computed(() =>

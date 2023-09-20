@@ -1,10 +1,11 @@
 <template>
 	<button
+		ref="buttonRef"
 		v-tooltip.noDelay.bottom="i18n.ts._gallery.like"
+		v-vibrate="[30, 50, 50]"
 		class="button _button"
 		:class="$style.root"
-		ref="buttonRef"
-		@click="toggleStar($event)"
+		@click.stop="toggleStar($event)"
 	>
 		<span v-if="!reacted">
 			<i
@@ -42,12 +43,11 @@
 
 <script lang="ts" setup>
 import { ref } from "vue";
-import type { Note } from "calckey-js/built/entities";
+import type { Note } from "firefish-js/built/entities";
 import Ripple from "@/components/MkRipple.vue";
 import XDetails from "@/components/MkUsersTooltip.vue";
 import { pleaseLogin } from "@/scripts/please-login";
 import * as os from "@/os";
-import { defaultStore } from "@/store";
 import { i18n } from "@/i18n";
 import { instance } from "@/instance";
 import { useTooltip } from "@/scripts/use-tooltip";

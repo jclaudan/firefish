@@ -5,7 +5,7 @@
 			$style.root,
 			{ yellow: user.isSilenced, red: user.isSuspended, gray: false },
 		]"
-		:to="userPage(user)"
+		:to="props.showAboutPage ? `/user-info/${user.id}` : userPage(user)"
 	>
 		<MkAvatar
 			class="avatar"
@@ -24,7 +24,9 @@
 </template>
 
 <script lang="ts" setup>
-import * as misskey from "calckey-js";
+import { ref } from "vue";
+
+import type * as misskey from "firefish-js";
 import MkMiniChart from "@/components/MkMiniChart.vue";
 import * as os from "@/os";
 import { acct, userPage } from "@/filters/user";
@@ -33,13 +35,15 @@ const props = withDefaults(
 	defineProps<{
 		user: misskey.entities.User;
 		withChart?: boolean;
+		showAboutPage?: boolean;
 	}>(),
 	{
 		withChart: true,
+		showAboutPage: false,
 	},
 );
 
-let chartValues = $ref<number[] | null>(null);
+const chartValues = ref<number[] | null>(null);
 
 if (props.withChart) {
 	os.apiGet("charts/user/notes", {
@@ -49,7 +53,7 @@ if (props.withChart) {
 	}).then((res) => {
 		// 今日のぶんの値はまだ途中の値であり、それも含めると大抵の場合前日よりも下降しているようなグラフになってしまうため今日は弾く
 		res.inc.splice(0, 1);
-		chartValues = res.inc;
+		chartValues.value = res.inc;
 	});
 }
 </script>
@@ -99,6 +103,12 @@ if (props.withChart) {
 			overflow: hidden;
 			text-overflow: ellipsis;
 		}
+
+		// > :global(.moderation) {
+		// 	display: flex;
+		// 	gap: 1rem;
+		// 	margin-right: 1rem;
+		// }
 	}
 
 	> :global(.chart) {

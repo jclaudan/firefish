@@ -14,7 +14,7 @@
 				:round-lengths="true"
 				:touch-angle="25"
 				:threshold="10"
-				:centeredSlides="true"
+				:centered-slides="true"
 				:modules="[Virtual]"
 				:space-between="20"
 				:virtual="true"
@@ -42,8 +42,8 @@
 						</MkInput>
 						<MkRadios
 							v-model="searchType"
-							@update:model-value="search()"
 							class="_gap"
+							@update:model-value="search()"
 						>
 							<option value="nameAndDescription">
 								{{ i18n.ts._channel.nameAndDescription }}
@@ -52,7 +52,7 @@
 								{{ i18n.ts._channel.nameOnly }}
 							</option>
 						</MkRadios>
-						<MkButton large primary @click="search" class="_gap">{{
+						<MkButton large primary class="_gap" @click="search">{{
 							i18n.ts.search
 						}}</MkButton>
 						<MkFoldableSection v-if="channelPagination">
@@ -111,16 +111,13 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, defineComponent, inject, watch } from "vue";
-import { Virtual } from "swiper";
+import { computed, onMounted, ref, watch } from "vue";
+import { Virtual } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/vue";
-import MkChannelPreview from "@/components/MkChannelPreview.vue";
 import MkChannelList from "@/components/MkChannelList.vue";
-import MkPagination from "@/components/MkPagination.vue";
 import MkInput from "@/components/form/input.vue";
 import MkRadios from "@/components/form/radios.vue";
 import MkButton from "@/components/MkButton.vue";
-import MkFolder from "@/components/MkFolder.vue";
 import MkInfo from "@/components/MkInfo.vue";
 import { useRouter } from "@/router";
 import { definePageMetadata } from "@/scripts/page-metadata";
@@ -133,20 +130,20 @@ import "swiper/scss/virtual";
 const router = useRouter();
 
 const tabs = ["search", "featured", "following", "owned"];
-let tab = $ref(tabs[1]);
-watch($$(tab), () => syncSlide(tabs.indexOf(tab)));
+const tab = ref(tabs[1]);
+watch(tab, () => syncSlide(tabs.indexOf(tab.value)));
 
 const props = defineProps<{
 	query: string;
 	type?: string;
 }>();
-let key = $ref("");
-let searchQuery = $ref("");
-let searchType = $ref("nameAndDescription");
-let channelPagination = $ref();
+const key = ref("");
+const searchQuery = ref("");
+const searchType = ref("nameAndDescription");
+const channelPagination = ref();
 onMounted(() => {
-	searchQuery = props.query ?? "";
-	searchType = props.type ?? "nameAndDescription";
+	searchQuery.value = props.query ?? "";
+	searchType.value = props.type ?? "nameAndDescription";
 });
 
 const featuredPagination = {
@@ -164,25 +161,25 @@ const ownedPagination = {
 };
 
 async function search() {
-	const query = searchQuery.toString().trim();
+	const query = searchQuery.value.toString().trim();
 	if (query == null || query === "") return;
-	const type = searchType.toString().trim();
-	channelPagination = {
+	const type = searchType.value.toString().trim();
+	channelPagination.value = {
 		endpoint: "channels/search",
 		limit: 10,
 		params: {
-			query: searchQuery,
-			type: type,
+			query: searchQuery.value,
+			type,
 		},
 	};
-	key = query + type;
+	key.value = query + type;
 }
 
 function create() {
 	router.push("/channels/new");
 }
 
-const headerActions = $computed(() => [
+const headerActions = computed(() => [
 	{
 		icon: "ph-plus ph-bold ph-lg",
 		text: i18n.ts.create,
@@ -190,7 +187,7 @@ const headerActions = $computed(() => [
 	},
 ]);
 
-const headerTabs = $computed(() => [
+const headerTabs = computed(() => [
 	{
 		key: "search",
 		title: i18n.ts.search,
@@ -224,11 +221,11 @@ let swiperRef = null;
 
 function setSwiperRef(swiper) {
 	swiperRef = swiper;
-	syncSlide(tabs.indexOf(tab));
+	syncSlide(tabs.indexOf(tab.value));
 }
 
 function onSlideChange() {
-	tab = tabs[swiperRef.activeIndex];
+	tab.value = tabs[swiperRef.activeIndex];
 }
 
 function syncSlide(index) {

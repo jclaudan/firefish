@@ -1,5 +1,5 @@
 <template>
-	<FocusTrap v-bind:active="isActive">
+	<FocusTrap :active="isActive">
 		<div
 			class="omfetrab"
 			:class="['s' + size, 'w' + width, 'h' + height, { asDrawer }]"
@@ -23,6 +23,7 @@
 						<button
 							v-for="emoji in searchResultCustom"
 							:key="emoji.id"
+							v-vibrate="50"
 							class="_button item"
 							:title="emoji.name"
 							tabindex="0"
@@ -163,14 +164,15 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, onMounted } from "vue";
-import * as Misskey from "calckey-js";
+import { computed, onMounted, ref, watch } from "vue";
+import type * as Misskey from "firefish-js";
+import { FocusTrap } from "focus-trap-vue";
 import XSection from "@/components/MkEmojiPicker.section.vue";
+import type { UnicodeEmojiDef } from "@/scripts/emojilist";
 import {
 	emojilist,
-	unicodeEmojiCategories,
-	UnicodeEmojiDef,
 	getNicelyLabeledCategory,
+	unicodeEmojiCategories,
 } from "@/scripts/emojilist";
 import { getStaticImageUrl } from "@/scripts/get-static-image-url";
 import Ripple from "@/components/MkRipple.vue";
@@ -180,7 +182,6 @@ import { deviceKind } from "@/scripts/device-kind";
 import { emojiCategories, instance } from "@/instance";
 import { i18n } from "@/i18n";
 import { defaultStore } from "@/store";
-import { FocusTrap } from "focus-trap-vue";
 
 const props = withDefaults(
 	defineProps<{
@@ -195,7 +196,7 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-	(ev: "chosen", v: string): void;
+	(ev: "chosen", v: string, ev: MouseEvent): void;
 }>();
 
 const search = ref<HTMLInputElement>();
@@ -436,7 +437,7 @@ function chosen(emoji: any, ev?: MouseEvent) {
 	}
 
 	const key = getKey(emoji);
-	emit("chosen", key);
+	emit("chosen", key, ev);
 
 	// 最近使った絵文字更新
 	if (!pinned.value.includes(key)) {

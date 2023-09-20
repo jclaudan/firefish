@@ -20,14 +20,16 @@
 </template>
 
 <script lang="ts" setup>
-import { ComputedRef, provide } from "vue";
+import type { ComputedRef } from "vue";
+import { provide, ref } from "vue";
 import XColumn from "./column.vue";
-import { deckStore, Column } from "@/ui/deck/deck-store";
+import type { Column } from "@/ui/deck/deck-store";
+import { deckStore } from "@/ui/deck/deck-store";
 import * as os from "@/os";
 import { i18n } from "@/i18n";
 import { mainRouter } from "@/router";
+import type { PageMetadata } from "@/scripts/page-metadata";
 import {
-	PageMetadata,
 	provideMetadataReceiver,
 	setPageMetadata,
 } from "@/scripts/page-metadata";
@@ -41,11 +43,11 @@ const emit = defineEmits<{
 	(ev: "parent-focus", direction: "up" | "down" | "left" | "right"): void;
 }>();
 
-let pageMetadata = $ref<null | ComputedRef<PageMetadata>>();
+const pageMetadata = ref<null | ComputedRef<PageMetadata>>();
 
 provide("router", mainRouter);
 provideMetadataReceiver((info) => {
-	pageMetadata = info;
+	pageMetadata.value = info;
 });
 
 /*
@@ -67,7 +69,7 @@ function onContextmenu(ev: MouseEvent) {
 		["INPUT", "TEXTAREA", "IMG", "VIDEO", "CANVAS"].includes(
 			(ev.target as HTMLElement).tagName,
 		) ||
-		(ev.target as HTMLElement).attributes["contenteditable"]
+		(ev.target as HTMLElement).attributes.contenteditable
 	)
 		return;
 	if (window.getSelection()?.toString() !== "") return;

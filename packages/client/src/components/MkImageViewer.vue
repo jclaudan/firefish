@@ -26,8 +26,9 @@
 </template>
 
 <script lang="ts" setup>
-import {} from "vue";
-import type * as misskey from "calckey-js";
+import { ref } from "vue";
+
+import type * as misskey from "firefish-js";
 import bytes from "@/filters/bytes";
 import number from "@/filters/number";
 import MkModal from "@/components/MkModal.vue";
@@ -43,7 +44,7 @@ const emit = defineEmits<{
 	(ev: "closed"): void;
 }>();
 
-const modal = $ref<InstanceType<typeof MkModal>>();
+const modal = ref<InstanceType<typeof MkModal>>();
 </script>
 
 <style lang="scss" scoped>

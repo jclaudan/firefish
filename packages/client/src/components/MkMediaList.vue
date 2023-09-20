@@ -29,7 +29,7 @@
 
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
-import * as misskey from "calckey-js";
+import type * as misskey from "firefish-js";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
 import PhotoSwipe from "photoswipe";
 import "photoswipe/style.css";
@@ -37,7 +37,6 @@ import XBanner from "@/components/MkMediaBanner.vue";
 import XMedia from "@/components/MkMedia.vue";
 import * as os from "@/os";
 import { FILE_TYPE_BROWSERSAFE } from "@/const";
-import { defaultStore } from "@/store";
 
 const props = defineProps<{
 	mediaList: misskey.entities.DriveFile[];
@@ -75,7 +74,7 @@ onMounted(() => {
 			}),
 		gallery: gallery.value,
 		children: ".image",
-		thumbSelector: ".image",
+		thumbSelector: ".image img",
 		loop: false,
 		padding:
 			window.innerWidth > 500
@@ -126,11 +125,11 @@ onMounted(() => {
 			className: "pwsp__alt-text-container",
 			appendTo: "wrapper",
 			onInit: (el, pwsp) => {
-				let textBox = document.createElement("p");
+				const textBox = document.createElement("p");
 				textBox.className = "pwsp__alt-text";
 				el.appendChild(textBox);
 
-				let preventProp = function (ev: Event): void {
+				const preventProp = function (ev: Event): void {
 					ev.stopPropagation();
 				};
 

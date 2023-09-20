@@ -97,7 +97,7 @@
 				@click="localOnly = !localOnly"
 			>
 				<div :class="$style.icon">
-					<i class="ph-hand-fist ph-bold ph-lg"></i>
+					<i class="ph-users ph-bold ph-lg"></i>
 				</div>
 				<div :class="$style.body">
 					<span :class="$style.itemTitle">{{
@@ -122,12 +122,12 @@
 </template>
 
 <script lang="ts" setup>
-import { nextTick, watch } from "vue";
-import * as misskey from "calckey-js";
+import { nextTick, ref, shallowRef, watch } from "vue";
+import type * as misskey from "firefish-js";
 import MkModal from "@/components/MkModal.vue";
 import { i18n } from "@/i18n";
 
-const modal = $shallowRef<InstanceType<typeof MkModal>>();
+const modal = shallowRef<InstanceType<typeof MkModal>>();
 
 const props = withDefaults(
 	defineProps<{
@@ -147,18 +147,18 @@ const emit = defineEmits<{
 	(ev: "closed"): void;
 }>();
 
-let v = $ref(props.currentVisibility);
-let localOnly = $ref(props.currentLocalOnly);
+const v = ref(props.currentVisibility);
+const localOnly = ref(props.currentLocalOnly);
 
-watch($$(localOnly), () => {
-	emit("changeLocalOnly", localOnly);
+watch(localOnly, () => {
+	emit("changeLocalOnly", localOnly.value);
 });
 
 function choose(visibility: (typeof misskey.noteVisibilities)[number]): void {
-	v = visibility;
+	v.value = visibility;
 	emit("changeVisibility", visibility);
 	nextTick(() => {
-		modal.close();
+		modal.value.close();
 	});
 }
 </script>

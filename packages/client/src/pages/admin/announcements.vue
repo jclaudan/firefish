@@ -65,7 +65,8 @@
 </template>
 
 <script lang="ts" setup>
-import {} from "vue";
+import { computed, ref } from "vue";
+
 import MkButton from "@/components/MkButton.vue";
 import MkInput from "@/components/form/input.vue";
 import MkSwitch from "@/components/form/switch.vue";
@@ -74,14 +75,14 @@ import * as os from "@/os";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
 
-let announcements: any[] = $ref([]);
+const announcements = ref<any[]>([]);
 
 os.api("admin/announcements/list").then((announcementResponse) => {
-	announcements = announcementResponse;
+	announcements.value = announcementResponse;
 });
 
 function add() {
-	announcements.unshift({
+	announcements.value.unshift({
 		id: null,
 		title: "",
 		text: "",
@@ -97,7 +98,9 @@ function remove(announcement) {
 		text: i18n.t("removeAreYouSure", { x: announcement.title }),
 	}).then(({ canceled }) => {
 		if (canceled) return;
-		announcements = announcements.filter((x) => x !== announcement);
+		announcements.value = announcements.value.filter(
+			(x) => x !== announcement,
+		);
 		os.api("admin/announcements/delete", announcement);
 	});
 }
@@ -134,7 +137,7 @@ function save(announcement) {
 	}
 }
 
-const headerActions = $computed(() => [
+const headerActions = computed(() => [
 	{
 		asFullButton: true,
 		icon: "ph-plus ph-bold ph-lg",
@@ -143,7 +146,7 @@ const headerActions = $computed(() => [
 	},
 ]);
 
-const headerTabs = $computed(() => []);
+const headerTabs = computed(() => []);
 
 definePageMetadata({
 	title: i18n.ts.announcements,

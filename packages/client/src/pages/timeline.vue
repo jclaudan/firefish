@@ -30,7 +30,7 @@
 						:round-lengths="true"
 						:touch-angle="25"
 						:threshold="10"
-						:centeredSlides="true"
+						:centered-slides="true"
 						:modules="[Virtual]"
 						:space-between="20"
 						:virtual="true"
@@ -64,8 +64,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, onMounted } from "vue";
-import { Virtual } from "swiper";
+import { computed, onMounted, ref } from "vue";
+import { Virtual } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import XTutorial from "@/components/MkTutorialDialog.vue";
 import XTimeline from "@/components/MkTimeline.vue";
@@ -95,7 +95,7 @@ const keymap = {
 	t: focus,
 };
 
-let timelines = ["home"];
+const timelines = ["home"];
 
 if (isLocalTimelineAvailable) {
 	timelines.push("local");
@@ -121,10 +121,10 @@ window.addEventListener("resize", () => {
 		deviceKind === "smartphone" || window.innerWidth <= MOBILE_THRESHOLD;
 });
 
-const tlComponent = $ref<InstanceType<typeof XTimeline>>();
-const rootEl = $ref<HTMLElement>();
+const tlComponent = ref<InstanceType<typeof XTimeline>>();
+const rootEl = ref<HTMLElement>();
 
-const src = $computed({
+const src = computed({
 	get: () => defaultStore.reactiveState.tl.value.src,
 	set: (x) => {
 		saveSrc(x);
@@ -187,20 +187,11 @@ function saveSrc(
 	});
 }
 
-async function timetravel(): Promise<void> {
-	const { canceled, result: date } = await os.inputDate({
-		title: i18n.ts.date,
-	});
-	if (canceled) return;
-
-	tlComponent.timetravel(date);
-}
-
 function focus(): void {
-	tlComponent.focus();
+	tlComponent.value.focus();
 }
 
-const headerActions = $computed(() => [
+const headerActions = computed(() => [
 	{
 		icon: "ph-list-bullets ph-bold ph-lg",
 		title: i18n.ts.lists,
@@ -219,10 +210,10 @@ const headerActions = $computed(() => [
 	title: i18n.ts.jumpToSpecifiedDate,
 	iconOnly: true,
 	handler: timetravel,
-}*/,
+} */,
 ]);
 
-const headerTabs = $computed(() => [
+const headerTabs = computed(() => [
 	{
 		key: "home",
 		title: i18n.ts._timelines.home,
@@ -275,13 +266,13 @@ definePageMetadata(
 	computed(() => ({
 		title: i18n.ts.timeline,
 		icon:
-			src === "local"
+			src.value === "local"
 				? "ph-users ph-bold ph-lg"
-				: src === "social"
+				: src.value === "social"
 				? "ph-handshake ph-bold ph-lg"
-				: src === "recommended"
+				: src.value === "recommended"
 				? "ph-thumbs-up ph-bold ph-lg"
-				: src === "global"
+				: src.value === "global"
 				? "ph-planet ph-bold ph-lg"
 				: "ph-house ph-bold ph-lg",
 	})),
@@ -291,7 +282,7 @@ let swiperRef: any = null;
 
 function setSwiperRef(swiper) {
 	swiperRef = swiper;
-	syncSlide(timelines.indexOf(src));
+	syncSlide(timelines.indexOf(src.value));
 }
 
 function onSlideChange() {

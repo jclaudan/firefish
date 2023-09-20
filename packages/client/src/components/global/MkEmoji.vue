@@ -21,8 +21,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from "vue";
-import { CustomEmoji } from "calckey-js/built/entities";
+import { computed } from "vue";
+import type { CustomEmoji } from "firefish-js/built/entities";
 import { getStaticImageUrl } from "@/scripts/get-static-image-url";
 import { char2filePath } from "@/scripts/twemoji-base";
 import { defaultStore } from "@/store";
@@ -69,7 +69,7 @@ const alt = computed(() =>
 	vertical-align: -0.25em;
 
 	&.custom {
-		height: 2.5em;
+		height: 2em;
 		vertical-align: middle;
 		transition: transform 0.2s ease;
 

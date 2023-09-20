@@ -105,6 +105,8 @@ export default defineComponent({
 			transparent
 		);
 		padding-inline-end: 90px !important;
+		white-space: nowrap;
+
 		&::-webkit-scrollbar {
 			display: none;
 		}

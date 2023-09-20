@@ -2,6 +2,7 @@ import config from "@/config/index.js";
 import {
 	nativeCreateId,
 	nativeInitIdGenerator,
+	nativeGetTimestamp,
 } from "native-utils/built/index.js";
 
 const length = Math.min(Math.max(config.cuid?.length ?? 16, 16), 24);
@@ -17,5 +18,9 @@ nativeInitIdGenerator(length, fingerprint);
  * Ref: https://github.com/paralleldrive/cuid2#parameterized-length
  */
 export function genId(date?: Date): string {
-	return nativeCreateId(BigInt((date ?? new Date()).getTime()));
+	return nativeCreateId((date ?? new Date()).getTime());
+}
+
+export function getTimestamp(id: string): number {
+	return nativeGetTimestamp(id);
 }

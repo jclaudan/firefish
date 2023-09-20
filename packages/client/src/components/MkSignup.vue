@@ -1,7 +1,7 @@
 <template>
 	<div v-if="instance.disableRegistration" style="margin-bottom: 1rem">
 		<p>{{ i18n.ts.signupsDisabled }}</p>
-		<a href="https://calckey.org/join">
+		<a href="https://joinfirefish.org/join">
 			<MkButton rounded gradate
 				>{{ i18n.ts.findOtherInstance }}
 			</MkButton>
@@ -284,7 +284,8 @@
 </template>
 
 <script lang="ts" setup>
-import {} from "vue";
+import { computed, ref } from "vue";
+
 import getPasswordStrength from "syuilo-password-strength";
 import { toUnicode } from "punycode/";
 import MkButton from "./MkButton.vue";
@@ -313,15 +314,15 @@ const emit = defineEmits<{
 
 const host = toUnicode(config.host);
 
-let hcaptcha = $ref();
-let recaptcha = $ref();
+const hcaptcha = ref();
+const recaptcha = ref();
 
-let username: string = $ref("");
-let password: string = $ref("");
-let retypedPassword: string = $ref("");
-let invitationCode: string = $ref("");
-let email = $ref("");
-let usernameState:
+const username: string = ref("");
+const password: string = ref("");
+const retypedPassword: string = ref("");
+const invitationCode: string = ref("");
+const email = ref("");
+const usernameState:
 	| null
 	| "wait"
 	| "ok"
@@ -329,9 +330,9 @@ let usernameState:
 	| "error"
 	| "invalid-format"
 	| "min-range"
-	| "max-range" = $ref(null);
-let invitationState: null | "entered" = $ref(null);
-let emailState:
+	| "max-range" = ref(null);
+const invitationState: null | "entered" = ref(null);
+const emailState:
 	| null
 	| "wait"
 	| "ok"
@@ -341,79 +342,79 @@ let emailState:
 	| "unavailable:mx"
 	| "unavailable:smtp"
 	| "unavailable"
-	| "error" = $ref(null);
-let passwordStrength: "" | "low" | "medium" | "high" = $ref("");
-let passwordRetypeState: null | "match" | "not-match" = $ref(null);
-let submitting: boolean = $ref(false);
-let ToSAgreement: boolean = $ref(false);
-let hCaptchaResponse = $ref(null);
-let reCaptchaResponse = $ref(null);
+	| "error" = ref(null);
+const passwordStrength: "" | "low" | "medium" | "high" = ref("");
+const passwordRetypeState: null | "match" | "not-match" = ref(null);
+const submitting: boolean = ref(false);
+const ToSAgreement: boolean = ref(false);
+const hCaptchaResponse = ref(null);
+const reCaptchaResponse = ref(null);
 
-const shouldDisableSubmitting = $computed((): boolean => {
+const shouldDisableSubmitting = computed((): boolean => {
 	return (
-		submitting ||
-		(instance.tosUrl && !ToSAgreement) ||
-		(instance.enableHcaptcha && !hCaptchaResponse) ||
-		(instance.enableRecaptcha && !reCaptchaResponse) ||
-		passwordRetypeState === "not-match"
+		submitting.value ||
+		(instance.tosUrl && !ToSAgreement.value) ||
+		(instance.enableHcaptcha && !hCaptchaResponse.value) ||
+		(instance.enableRecaptcha && !reCaptchaResponse.value) ||
+		passwordRetypeState.value === "not-match"
 	);
 });
 
 function onChangeInvitationCode(): void {
-	if (invitationCode === "") {
-		invitationState = null;
+	if (invitationCode.value === "") {
+		invitationState.value = null;
 		return;
 	}
-	invitationState = "entered";
+	invitationState.value = "entered";
 }
 
 function onChangeUsername(): void {
-	if (username === "") {
-		usernameState = null;
+	if (username.value === "") {
+		usernameState.value = null;
 		return;
 	}
 
 	{
-		const err = !username.match(/^[a-zA-Z0-9_]+$/)
+		const err = !username.value.match(/^[a-zA-Z0-9_]+$/)
 			? "invalid-format"
-			: username.length < 1
+			: username.value.length < 1
 			? "min-range"
-			: username.length > 20
+			: username.value.length > 20
 			? "max-range"
 			: null;
 
 		if (err) {
-			usernameState = err;
+			usernameState.value = err;
 			return;
 		}
 	}
 
-	usernameState = "wait";
+	usernameState.value = "wait";
 
 	os.api("username/available", {
-		username,
+		username: username.value,
 	})
 		.then((result) => {
-			usernameState = result.available ? "ok" : "unavailable";
+			usernameState.value = result.available ? "ok" : "unavailable";
 		})
 		.catch(() => {
-			usernameState = "error";
+			usernameState.value = "error";
 		});
 }
 
 function onChangeEmail(): void {
-	if (email === "") {
-		emailState = null;
+	if (email.value === "") {
+		emailState.value = null;
 		return;
 	}
 
-	emailState = "wait";
+	emailState.value = "wait";
 
 	os.api("email-address/available", {
-		emailAddress: email,
+		emailAddress: email.value,
 	})
 		.then((result) => {
-			emailState = result.available
+			emailState.value = result.available
 				? "ok"
 				: result.reason === "used"
 				? "unavailable:used"
@@ -428,54 +429,55 @@ function onChangeEmail(): void {
 				: "unavailable";
 		})
 		.catch(() => {
-			emailState = "error";
+			emailState.value = "error";
 		});
 }
 
 function onChangePassword(): void {
-	if (password === "") {
-		passwordStrength = "";
+	if (password.value === "") {
+		passwordStrength.value = "";
 		return;
 	}
 
-	const strength = getPasswordStrength(password);
-	passwordStrength =
+	const strength = getPasswordStrength(password.value);
+	passwordStrength.value =
 		strength > 0.7 ? "high" : strength > 0.3 ? "medium" : "low";
 }
 
 function onChangePasswordRetype(): void {
-	if (retypedPassword === "") {
-		passwordRetypeState = null;
+	if (retypedPassword.value === "") {
+		passwordRetypeState.value = null;
 		return;
 	}
 
-	passwordRetypeState = password === retypedPassword ? "match" : "not-match";
+	passwordRetypeState.value =
+		password.value === retypedPassword.value ? "match" : "not-match";
 }
 
 function onSubmit(): void {
-	if (submitting) return;
-	submitting = true;
+	if (submitting.value) return;
+	submitting.value = true;
 
 	os.api("signup", {
-		username,
-		password,
-		emailAddress: email,
-		invitationCode,
-		"hcaptcha-response": hCaptchaResponse,
-		"g-recaptcha-response": reCaptchaResponse,
+		username: username.value,
+		password: password.value,
+		emailAddress: email.value,
+		invitationCode: invitationCode.value,
+		"hcaptcha-response": hCaptchaResponse.value,
+		"g-recaptcha-response": reCaptchaResponse.value,
 	})
 		.then(() => {
 			if (instance.emailRequiredForSignup) {
 				os.alert({
 					type: "success",
 					title: i18n.ts._signup.almostThere,
-					text: i18n.t("_signup.emailSent", { email }),
+					text: i18n.t("_signup.emailSent", { email: email.value }),
 				});
 				emit("signupEmailPending");
 			} else {
 				os.api("signin", {
-					username,
-					password,
+					username: username.value,
+					password: password.value,
 				}).then((res) => {
 					emit("signup", res);
 
@@ -486,9 +488,9 @@ function onSubmit(): void {
 			}
 		})
 		.catch(() => {
-			submitting = false;
-			hcaptcha.reset?.();
-			recaptcha.reset?.();
+			submitting.value = false;
+			hcaptcha.value.reset?.();
+			recaptcha.value.reset?.();
 
 			os.alert({
 				type: "error",

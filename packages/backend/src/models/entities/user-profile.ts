@@ -51,6 +51,7 @@ export class UserProfile {
 	public fields: {
 		name: string;
 		value: string;
+		verified?: boolean;
 	}[];
 
 	@Column("varchar", {
@@ -168,6 +169,12 @@ export class UserProfile {
 
 	@Column("boolean", {
 		default: true,
+		comment: "Whether User is indexable.",
+	})
+	public isIndexable: boolean;
+
+	@Column("boolean", {
+		default: true,
 	})
 	public preventAiLearning: boolean;
 
@@ -241,7 +248,7 @@ export class UserProfile {
 	//#region Denormalized fields
 	@Index()
 	@Column("varchar", {
-		length: 128,
+		length: 512,
 		nullable: true,
 		comment: "[Denormalized]",
 	})

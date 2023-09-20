@@ -26,7 +26,7 @@
 					<div v-if="meta" class="about">
 						<div
 							class="desc"
-							v-html="meta.description || i18n.ts.introMisskey"
+							v-html="meta.description || i18n.ts.introFirefish"
 						></div>
 					</div>
 					<div class="action">
@@ -69,8 +69,8 @@
 						>
 						<small
 							>Powered by
-							<a href="https://calckey.org/" target="_blank"
-								>Calckey</a
+							<a href="https://joinfirefish.org/" target="_blank"
+								>Firefish</a
 							></small
 						>
 					</div>
@@ -81,7 +81,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, defineAsyncComponent } from "vue";
+import { defineAsyncComponent, defineComponent } from "vue";
 import { host, instanceName } from "@/config";
 import * as os from "@/os";
 import MkPagination from "@/components/MkPagination.vue";

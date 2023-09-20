@@ -77,10 +77,6 @@ function revoke(token) {
 	});
 }
 
-const headerActions = $computed(() => []);
-
-const headerTabs = $computed(() => []);
-
 definePageMetadata({
 	title: i18n.ts.installedApps,
 	icon: "ph-plug ph-bold ph-lg",

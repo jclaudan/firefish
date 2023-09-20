@@ -9,7 +9,7 @@ import "@/style.scss";
 import "@phosphor-icons/web/bold";
 import "@phosphor-icons/web/fill";
 
-//#region account indexedDB migration
+// #region account indexedDB migration
 import { set } from "@/scripts/idb-proxy";
 
 const accounts = localStorage.getItem("accounts");
@@ -17,15 +17,15 @@ if (accounts) {
 	set("accounts", JSON.parse(accounts));
 	localStorage.removeItem("accounts");
 }
-//#endregion
+// #endregion
 
 import {
 	computed,
 	createApp,
-	watch,
+	defineAsyncComponent,
 	markRaw,
 	version as vueVersion,
-	defineAsyncComponent,
+	watch,
 } from "vue";
 import { compareVersions } from "compare-versions";
 
@@ -37,11 +37,11 @@ import { langmap } from "@/scripts/langmap";
 import { applyTheme } from "@/scripts/theme";
 import { isDeviceDarkmode } from "@/scripts/is-device-darkmode";
 import { i18n } from "@/i18n";
-import { confirm, alert, post, popup, toast, api } from "@/os";
+import { alert, api, confirm, popup, post, toast } from "@/os";
 import { stream } from "@/stream";
 import * as sound from "@/scripts/sound";
-import { $i, refreshAccount, login, updateAccount, signout } from "@/account";
-import { defaultStore, ColdDeviceStorage } from "@/store";
+import { $i, login, refreshAccount, signout, updateAccount } from "@/account";
+import { ColdDeviceStorage, defaultStore } from "@/store";
 import { fetchInstance, instance } from "@/instance";
 import { makeHotkey } from "@/scripts/hotkey";
 import { search } from "@/scripts/search";
@@ -65,7 +65,7 @@ function checkForSplash() {
 }
 
 (async () => {
-	console.info(`Calckey v${version}`);
+	console.info(`Firefish v${version}`);
 
 	if (_DEV_) {
 		console.warn("Development mode!!!");
@@ -107,7 +107,7 @@ function checkForSplash() {
 		else location.reload();
 	});
 
-	//#region SEE: https://css-tricks.com/the-trick-to-viewport-units-on-mobile/
+	// #region SEE: https://css-tricks.com/the-trick-to-viewport-units-on-mobile/
 	// TODO: いつの日にか消したい
 	const vh = window.innerHeight * 0.01;
 	document.documentElement.style.setProperty("--vh", `${vh}px`);
@@ -115,15 +115,15 @@ function checkForSplash() {
 		const vh = window.innerHeight * 0.01;
 		document.documentElement.style.setProperty("--vh", `${vh}px`);
 	});
-	//#endregion
+	// #endregion
 
-	//#region Set lang attr
+	// #region Set lang attr
 	const html = document.documentElement;
 	html.setAttribute("lang", lang || "en-US");
 	html.setAttribute("dir", langmap[lang].rtl ? "rtl" : "ltr");
 	//#endregion
 
-	//#region loginId
+	// #region loginId
 	const params = new URLSearchParams(location.search);
 	const loginId = params.get("loginId");
 
@@ -140,9 +140,9 @@ function checkForSplash() {
 		history.replaceState({ misskey: "loginId" }, "", target);
 	}
 
-	//#endregion
+	// #endregion
 
-	//#region Fetch user
+	// #region Fetch user
 	if ($i?.token) {
 		if (_DEV_) {
 			console.log("account cache found. refreshing...");
@@ -176,7 +176,7 @@ function checkForSplash() {
 			}
 		}
 	}
-	//#endregion
+	// #endregion
 
 	const fetchInstanceMetaPromise = fetchInstance();
 
@@ -218,7 +218,7 @@ function checkForSplash() {
 	// https://github.com/misskey-dev/misskey/pull/8575#issuecomment-1114239210
 	// なぜかinit.tsの内容が2回実行されることがあるため、mountするdivを1つに制限する
 	const rootEl = (() => {
-		const MISSKEY_MOUNT_DIV_ID = "calckey_app";
+		const MISSKEY_MOUNT_DIV_ID = "firefish_app";
 
 		const currentEl = document.getElementById(MISSKEY_MOUNT_DIV_ID);
 
@@ -338,7 +338,7 @@ function checkForSplash() {
 		}
 	});
 
-	//#region Sync dark mode
+	// #region Sync dark mode
 	if (ColdDeviceStorage.get("syncDeviceDarkMode")) {
 		defaultStore.set("darkMode", isDeviceDarkmode());
 	}
@@ -347,7 +347,7 @@ function checkForSplash() {
 			defaultStore.set("darkMode", mql.matches);
 		}
 	};
-	//#endregion
+	// #endregion
 
 	fetchInstanceMetaPromise.then(() => {
 		if (defaultStore.state.themeInitial) {
@@ -409,7 +409,7 @@ function checkForSplash() {
 
 	stream.on("emojiAdded", (emojiData) => {
 		// TODO
-		//store.commit('instance/set', );
+		// store.commit('instance/set', );
 	});
 
 	for (const plugin of ColdDeviceStorage.get("plugins").filter(
@@ -451,6 +451,29 @@ function checkForSplash() {
 			}
 		}
 		localStorage.setItem("lastUsed", Date.now().toString());
+
+		const latestDonationInfoShownAt = localStorage.getItem(
+			"latestDonationInfoShownAt",
+		);
+		const neverShowDonationInfo = localStorage.getItem("neverShowDonationInfo");
+		if (
+			neverShowDonationInfo !== "true" &&
+			new Date($i.createdAt).getTime() < Date.now() - 1000 * 60 * 60 * 24 * 3 &&
+			!location.pathname.startsWith("/miauth")
+		) {
+			if (
+				latestDonationInfoShownAt == null ||
+				new Date(latestDonationInfoShownAt).getTime() <
+					Date.now() - 1000 * 60 * 60 * 24 * 30
+			) {
+				popup(
+					defineAsyncComponent(() => import("@/components/MkDonation.vue")),
+					{},
+					{},
+					"closed",
+				);
+			}
+		}
 
 		if ("Notification" in window) {
 			// 許可を得ていなかったらリクエスト

@@ -71,7 +71,7 @@ const joinedPagination = {
 	limit: 10,
 };
 
-const headerActions = $computed(() => [
+const headerActions = computed(() => [
 	{
 		icon: "ph-plus ph-bold ph-lg",
 		text: i18n.ts.createGroup,
@@ -91,7 +91,7 @@ async function create() {
 		title: i18n.ts.groupName,
 	});
 	if (canceled) return;
-	await os.api("users/groups/create", { name: name });
+	await os.api("users/groups/create", { name });
 	owned.value.reload();
 	os.success();
 }

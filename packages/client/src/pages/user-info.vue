@@ -206,8 +206,9 @@
 						<FormButton
 							v-if="user.host == null && iAmModerator"
 							inline
+							style="margin-bottom: 0.4rem"
 							@click="resetPassword"
-							><i class="ph-key ph-bold ph-lg"></i>
+							><i class="ph-password ph-bold ph-lg"></i>
 							{{ i18n.ts.resetPassword }}</FormButton
 						>
 						<FormButton
@@ -218,8 +219,25 @@
 							{{ i18n.ts.sendModMail }}</FormButton
 						>
 						<FormButton
+							v-if="user.host == null && $i.isAdmin"
+							inline
+							danger
+							@click="delete2fa"
+							><i class="ph-key ph-bold ph-lg"></i>
+							{{ i18n.ts.delete2fa }}</FormButton
+						>
+						<FormButton
+							v-if="user.host == null && $i.isAdmin"
+							inline
+							danger
+							@click="deletePasskeys"
+							><i class="ph-poker-chip ph-bold ph-lg"></i>
+							{{ i18n.ts.deletePasskeys }}</FormButton
+						>
+						<FormButton
 							v-if="$i.isAdmin"
 							inline
+							primary
 							danger
 							@click="deleteAccount"
 							><i class="ph-user-minus ph-bold ph-lg"></i>
@@ -339,8 +357,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, watch } from "vue";
-import * as misskey from "calckey-js";
+import { computed, ref, watch } from "vue";
+import type * as misskey from "firefish-js";
 import MkChart from "@/components/MkChart.vue";
 import MkObjectView from "@/components/MkObjectView.vue";
 import FormTextarea from "@/components/form/textarea.vue";
@@ -349,7 +367,6 @@ import FormLink from "@/components/form/link.vue";
 import FormSection from "@/components/form/section.vue";
 import FormButton from "@/components/MkButton.vue";
 import FormInput from "@/components/form/input.vue";
-import FormSplit from "@/components/form/split.vue";
 import FormFolder from "@/components/form/folder.vue";
 import MkKeyValue from "@/components/MkKeyValue.vue";
 import MkSelect from "@/components/form/select.vue";
@@ -357,10 +374,8 @@ import FormSuspense from "@/components/form/suspense.vue";
 import MkFileListForAdmin from "@/components/MkFileListForAdmin.vue";
 import MkInfo from "@/components/MkInfo.vue";
 import * as os from "@/os";
-import number from "@/filters/number";
-import bytes from "@/filters/bytes";
 import { url } from "@/config";
-import { userPage, acct } from "@/filters/user";
+import { acct, userPage } from "@/filters/user";
 import { definePageMetadata } from "@/scripts/page-metadata";
 import { i18n } from "@/i18n";
 import { iAmAdmin, iAmModerator } from "@/account";
@@ -370,18 +385,18 @@ const props = defineProps<{
 	userId: string;
 }>();
 
-let tab = $ref("overview");
-let chartSrc = $ref("per-user-notes");
-let user = $ref<null | misskey.entities.UserDetailed>();
-let init = $ref<ReturnType<typeof createFetcher>>();
-let info = $ref();
-let ips = $ref(null);
-let ap = $ref(null);
-let moderator = $ref(false);
-let silenced = $ref(false);
-let suspended = $ref(false);
-let driveCapacityOverrideMb: number | null = $ref(0);
-let moderationNote = $ref("");
+const tab = ref("overview");
+const chartSrc = ref("per-user-notes");
+const user = ref<null | misskey.entities.UserDetailed>();
+const init = ref<ReturnType<typeof createFetcher>>();
+const info = ref();
+const ips = ref(null);
+const ap = ref(null);
+const moderator = ref(false);
+const silenced = ref(false);
+const suspended = ref(false);
+const driveCapacityOverrideMb = ref<number | null>(0);
+const moderationNote = ref("");
 const filesPagination = {
 	endpoint: "admin/drive/files" as const,
 	limit: 10,
@@ -406,19 +421,20 @@ function createFetcher() {
 					  })
 					: Promise.resolve(null),
 			]).then(([_user, _info, _ips]) => {
-				user = _user;
-				info = _info;
-				ips = _ips;
-				moderator = info.isModerator;
-				silenced = info.isSilenced;
-				suspended = info.isSuspended;
-				driveCapacityOverrideMb = user.driveCapacityOverrideMb;
-				moderationNote = info.moderationNote;
+				user.value = _user;
+				info.value = _info;
+				ips.value = _ips;
+				moderator.value = info.value.isModerator;
+				silenced.value = info.value.isSilenced;
+				suspended.value = info.value.isSuspended;
+				driveCapacityOverrideMb.value =
+					user.value.driveCapacityOverrideMb;
+				moderationNote.value = info.value.moderationNote;
 
-				watch($$(moderationNote), async () => {
+				watch(moderationNote, async () => {
 					await os.api("admin/update-user-note", {
-						userId: user.id,
-						text: moderationNote,
+						userId: user.value.id,
+						text: moderationNote.value,
 					});
 					await refreshUser();
 				});
@@ -430,25 +446,25 @@ function createFetcher() {
 					userId: props.userId,
 				})
 				.then((res) => {
-					user = res;
+					user.value = res;
 				});
 	}
 }
 
 function refreshUser() {
-	init = createFetcher();
+	init.value = createFetcher();
 }
 
 async function updateRemoteUser() {
 	await os.apiWithDialog("federation/update-remote-user", {
-		userId: user.id,
+		userId: user.value.id,
 	});
 	refreshUser();
 }
 
 async function resetPassword() {
 	const { password } = await os.api("admin/reset-password", {
-		userId: user.id,
+		userId: user.value.id,
 	});
 
 	os.alert({
@@ -463,10 +479,10 @@ async function toggleSilence(v) {
 		text: v ? i18n.ts.silenceConfirm : i18n.ts.unsilenceConfirm,
 	});
 	if (confirm.canceled) {
-		silenced = !v;
+		silenced.value = !v;
 	} else {
 		await os.api(v ? "admin/silence-user" : "admin/unsilence-user", {
-			userId: user.id,
+			userId: user.value.id,
 		});
 		await refreshUser();
 	}
@@ -478,10 +494,10 @@ async function toggleSuspend(v) {
 		text: v ? i18n.ts.suspendConfirm : i18n.ts.unsuspendConfirm,
 	});
 	if (confirm.canceled) {
-		suspended = !v;
+		suspended.value = !v;
 	} else {
 		await os.api(v ? "admin/suspend-user" : "admin/unsuspend-user", {
-			userId: user.id,
+			userId: user.value.id,
 		});
 		await refreshUser();
 	}
@@ -489,7 +505,7 @@ async function toggleSuspend(v) {
 
 async function toggleModerator(v) {
 	await os.api(v ? "admin/moderators/add" : "admin/moderators/remove", {
-		userId: user.id,
+		userId: user.value.id,
 	});
 	await refreshUser();
 }
@@ -500,38 +516,19 @@ async function sendModMail() {
 	});
 	if (canceled) return;
 	await os.apiWithDialog("admin/send-mod-mail", {
-		userId: user.id,
+		userId: user.value.id,
 		comment: result,
 	});
 }
 
-async function deleteAllFiles() {
-	const confirm = await os.confirm({
-		type: "warning",
-		text: i18n.ts.deleteAllFilesConfirm,
-	});
-	if (confirm.canceled) return;
-	const process = async () => {
-		await os.api("admin/delete-all-files-of-a-user", { userId: user.id });
-		os.success();
-	};
-	await process().catch((err) => {
-		os.alert({
-			type: "error",
-			text: err.toString(),
-		});
-	});
-	await refreshUser();
-}
-
 async function applyDriveCapacityOverride() {
-	let driveCapOrMb = driveCapacityOverrideMb;
-	if (driveCapacityOverrideMb && driveCapacityOverrideMb < 0) {
+	let driveCapOrMb = driveCapacityOverrideMb.value;
+	if (driveCapacityOverrideMb.value && driveCapacityOverrideMb.value < 0) {
 		driveCapOrMb = null;
 	}
 	try {
 		await os.apiWithDialog("admin/drive-capacity-override", {
-			userId: user.id,
+			userId: user.value.id,
 			overrideMb: driveCapOrMb,
 		});
 		await refreshUser();
@@ -539,6 +536,54 @@ async function applyDriveCapacityOverride() {
 		os.alert({
 			type: "error",
 			text: err.toString(),
+		});
+	}
+}
+
+async function delete2fa() {
+	const confirm = await os.confirm({
+		type: "warning",
+		text: i18n.ts.delete2faConfirm,
+	});
+	if (confirm.canceled) return;
+
+	const typed = await os.inputText({
+		text: i18n.t("typeToConfirm", { x: user.value?.username }),
+	});
+	if (typed.canceled) return;
+
+	if (typed.result === user.value?.username) {
+		await os.apiWithDialog("admin/delete-2fa", {
+			userId: user.value.id,
+		});
+	} else {
+		os.alert({
+			type: "error",
+			text: i18n.ts.inputNotMatch,
+		});
+	}
+}
+
+async function deletePasskeys() {
+	const confirm = await os.confirm({
+		type: "warning",
+		text: i18n.ts.deletePasskeysConfirm,
+	});
+	if (confirm.canceled) return;
+
+	const typed = await os.inputText({
+		text: i18n.t("typeToConfirm", { x: user.value?.username }),
+	});
+	if (typed.canceled) return;
+
+	if (typed.result === user.value?.username) {
+		await os.apiWithDialog("admin/delete-passkeys", {
+			userId: user.value.id,
+		});
+	} else {
+		os.alert({
+			type: "error",
+			text: i18n.ts.inputNotMatch,
 		});
 	}
 }
@@ -551,18 +596,18 @@ async function deleteAccount() {
 	if (confirm.canceled) return;
 
 	const typed = await os.inputText({
-		text: i18n.t("typeToConfirm", { x: user?.username }),
+		text: i18n.t("typeToConfirm", { x: user.value?.username }),
 	});
 	if (typed.canceled) return;
 
-	if (typed.result === user?.username) {
+	if (typed.result === user.value?.username) {
 		await os.apiWithDialog("admin/delete-account", {
-			userId: user.id,
+			userId: user.value.id,
 		});
 	} else {
 		os.alert({
 			type: "error",
-			text: "input not match",
+			text: i18n.ts.inputNotMatch,
 		});
 	}
 }
@@ -570,24 +615,24 @@ async function deleteAccount() {
 watch(
 	() => props.userId,
 	() => {
-		init = createFetcher();
+		init.value = createFetcher();
 	},
 	{
 		immediate: true,
 	},
 );
 
-watch($$(user), () => {
+watch(user, () => {
 	os.api("ap/get", {
-		uri: user.uri ?? `${url}/users/${user.id}`,
+		uri: user.value.uri ?? `${url}/users/${user.value.id}`,
 	}).then((res) => {
-		ap = res;
+		ap.value = res;
 	});
 });
 
-const headerActions = $computed(() => []);
+const headerActions = computed(() => []);
 
-const headerTabs = $computed(() =>
+const headerTabs = computed(() =>
 	[
 		{
 			key: "overview",
@@ -616,7 +661,7 @@ const headerTabs = $computed(() =>
 
 definePageMetadata(
 	computed(() => ({
-		title: user ? acct(user) : i18n.ts.userInfo,
+		title: user.value ? acct(user.value) : i18n.ts.userInfo,
 		icon: "ph-info ph-bold ph-lg",
 	})),
 );

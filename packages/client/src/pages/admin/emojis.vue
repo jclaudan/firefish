@@ -154,17 +154,10 @@
 </template>
 
 <script lang="ts" setup>
-import {
-	computed,
-	defineAsyncComponent,
-	defineComponent,
-	ref,
-	toRef,
-} from "vue";
+import { computed, defineAsyncComponent, ref } from "vue";
 import MkButton from "@/components/MkButton.vue";
 import MkInput from "@/components/form/input.vue";
 import MkPagination from "@/components/MkPagination.vue";
-import MkTab from "@/components/MkTab.vue";
 import MkSwitch from "@/components/form/switch.vue";
 import FormSplit from "@/components/form/split.vue";
 import { selectFile, selectFiles } from "@/scripts/select-file";
@@ -241,7 +234,7 @@ const edit = (emoji) => {
 	os.popup(
 		defineAsyncComponent(() => import("./emoji-edit-dialog.vue")),
 		{
-			emoji: emoji,
+			emoji,
 		},
 		{
 			done: (result) => {
@@ -294,7 +287,7 @@ const menu = (ev: MouseEvent) => {
 		[
 			{
 				icon: "ph-download-simple ph-bold ph-lg",
-				text: i18n.ts.export,
+				text: i18n.ts.exportZip,
 				action: async () => {
 					os.api("export-custom-emojis", {})
 						.then(() => {
@@ -313,7 +306,7 @@ const menu = (ev: MouseEvent) => {
 			},
 			{
 				icon: "ph-upload-simple ph-bold ph-lg",
-				text: i18n.ts.import,
+				text: i18n.ts.importZip,
 				action: async () => {
 					const file = await selectFile(
 						ev.currentTarget ?? ev.target,
@@ -333,6 +326,16 @@ const menu = (ev: MouseEvent) => {
 								text: err.message,
 							});
 						});
+				},
+			},
+			{
+				icon: "ph-info ph-bold ph-lg",
+				text: i18n.ts.emojiPackCreator,
+				action: () => {
+					window.open(
+						"https://git.joinfirefish.org/firefish/emoji-gen",
+						"_blank",
+					);
 				},
 			},
 		],
@@ -412,7 +415,7 @@ const delBulk = async () => {
 	emojisPaginationComponent.value.reload();
 };
 
-const headerActions = $computed(() => [
+const headerActions = computed(() => [
 	{
 		asFullButton: true,
 		icon: "ph-plus ph-bold ph-lg",
@@ -420,15 +423,15 @@ const headerActions = $computed(() => [
 		handler: add,
 	},
 	{
-		icon: "ph-dots-three-outline ph-bold ph-lg",
+		icon: "ph-file-zip ph-bold ph-lg",
 		handler: menu,
 	},
 ]);
 
-const headerTabs = $computed(() => [
+const headerTabs = computed(() => [
 	{
 		key: "local",
-		icon: "ph-hand-fist ph-bold ph-lg",
+		icon: "ph-users ph-bold ph-lg",
 		title: i18n.ts.local,
 	},
 	{

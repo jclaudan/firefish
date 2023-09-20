@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onBeforeUnmount } from "vue";
+import { onBeforeUnmount, onMounted, ref } from "vue";
 import XPie from "./pie.vue";
 import bytes from "@/filters/bytes";
 
@@ -20,16 +20,16 @@ const props = defineProps<{
 	meta: any;
 }>();
 
-let usage: number = $ref(0);
-let total: number = $ref(0);
-let used: number = $ref(0);
-let free: number = $ref(0);
+const usage: number = ref(0);
+const total: number = ref(0);
+const used: number = ref(0);
+const free: number = ref(0);
 
 function onStats(stats) {
-	usage = stats.mem.active / props.meta.mem.total;
-	total = props.meta.mem.total;
-	used = stats.mem.active;
-	free = total - used;
+	usage.value = stats.mem.active / stats.mem.total;
+	total.value = stats.mem.total;
+	used.value = stats.mem.active;
+	free.value = total.value - used.value;
 }
 
 onMounted(() => {

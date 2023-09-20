@@ -12,7 +12,7 @@
 				:round-lengths="true"
 				:touch-angle="25"
 				:threshold="10"
-				:centeredSlides="true"
+				:centered-slides="true"
 				:modules="[Virtual]"
 				:space-between="20"
 				:virtual="true"
@@ -40,8 +40,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, watch, onMounted } from "vue";
-import { Virtual } from "swiper";
+import { computed, onMounted, ref, watch } from "vue";
+import { Virtual } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import XNotes from "@/components/MkNotes.vue";
 import XUserList from "@/components/MkUserList.vue";
@@ -74,12 +74,12 @@ const usersPagination = {
 };
 
 const tabs = ["notes", "users"];
-let tab = $ref(tabs[0]);
-watch($$(tab), () => syncSlide(tabs.indexOf(tab)));
+const tab = ref(tabs[0]);
+watch(tab, () => syncSlide(tabs.indexOf(tab.value)));
 
-const headerActions = $computed(() => []);
+const headerActions = computed(() => []);
 
-const headerTabs = $computed(() => [
+const headerTabs = computed(() => [
 	{
 		key: "notes",
 		icon: "ph-note ph-bold ph-lg",
@@ -96,11 +96,11 @@ let swiperRef = null;
 
 function setSwiperRef(swiper) {
 	swiperRef = swiper;
-	syncSlide(tabs.indexOf(tab));
+	syncSlide(tabs.indexOf(tab.value));
 }
 
 function onSlideChange() {
-	tab = tabs[swiperRef.activeIndex];
+	tab.value = tabs[swiperRef.activeIndex];
 }
 
 function syncSlide(index) {

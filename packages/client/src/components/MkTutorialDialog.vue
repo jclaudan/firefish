@@ -206,7 +206,7 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, computed } from "vue";
+import { computed, ref } from "vue";
 import XSettings from "@/pages/settings/profile.vue";
 import XModalWindow from "@/components/MkModalWindow.vue";
 import MkButton from "@/components/MkButton.vue";
@@ -230,7 +230,7 @@ const isGlobalTimelineAvailable =
 	!instance.disableGlobalTimeline ||
 	($i != null && ($i.isModerator || $i.isAdmin));
 
-let timelines = ["home"];
+const timelines = ["home"];
 
 if (isLocalTimelineAvailable) {
 	timelines.push("local");
@@ -250,7 +250,7 @@ const emit = defineEmits<{
 	(ev: "closed"): void;
 }>();
 
-const dialog = $ref<InstanceType<typeof XModalWindow>>();
+const dialog = ref<InstanceType<typeof XModalWindow>>();
 
 const tutorial = computed({
 	get() {
@@ -278,7 +278,7 @@ const reduceAnimation = computed(
 
 function close(res) {
 	tutorial.value = -1;
-	dialog.close();
+	dialog.value.close();
 }
 </script>
 

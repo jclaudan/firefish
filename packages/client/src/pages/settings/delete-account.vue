@@ -43,7 +43,7 @@ async function deleteAccount() {
 	if (canceled) return;
 
 	await os.apiWithDialog("i/delete-account", {
-		password: password,
+		password,
 	});
 
 	await os.alert({
@@ -52,10 +52,6 @@ async function deleteAccount() {
 
 	await signout();
 }
-
-const headerActions = $computed(() => []);
-
-const headerTabs = $computed(() => []);
 
 definePageMetadata({
 	title: i18n.ts._accountDelete.accountDelete,

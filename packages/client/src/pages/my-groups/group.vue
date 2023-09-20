@@ -22,6 +22,7 @@
 							<div class="action">
 								<button
 									class="_button"
+									:aria-label="i18n.t('removeMember')"
 									@click="removeUser(user)"
 								>
 									<i class="ph-x ph-bold ph-lg"></i>
@@ -103,7 +104,7 @@ async function renameGroup() {
 
 	await os.api("users/groups/update", {
 		groupId: group.value.id,
-		name: name,
+		name,
 	});
 
 	group.value.name = name;
@@ -138,7 +139,7 @@ definePageMetadata(
 	})),
 );
 
-const headerActions = $computed(() => [
+const headerActions = computed(() => [
 	{
 		icon: "ph-plus ph-bold ph-lg",
 		text: i18n.ts.invite,

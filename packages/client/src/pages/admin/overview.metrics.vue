@@ -54,7 +54,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import XPie from "../../widgets/server-metric/pie.vue";
 import bytes from "@/filters/bytes";
 import { stream } from "@/stream";
@@ -64,35 +64,35 @@ import { i18n } from "@/i18n";
 const meta = await os.api("server-info", {});
 const serverStats = await os.api("stats");
 
-let cpuUsage: number = $ref(0);
+const cpuUsage = ref(0);
 
-let memUsage: number = $ref(0);
-let memTotal: number = $ref(0);
-let memUsed: number = $ref(0);
-let memFree: number = $ref(0);
+const memUsage = ref(0);
+const memTotal = ref(0);
+const memUsed = ref(0);
+const memFree = ref(0);
 
-let meiliProgress: number = $ref(0);
-let meiliTotalSize: number = $ref(0);
-let meiliIndexCount: number = $ref(0);
-let meiliAvailable: string = $ref("unavailable");
+const meiliProgress = ref(0);
+const meiliTotalSize = ref(0);
+const meiliIndexCount = ref(0);
+const meiliAvailable = ref("unavailable");
 
-const diskUsage = $computed(() => meta.fs.used / meta.fs.total);
-const diskTotal = $computed(() => meta.fs.total);
-const diskUsed = $computed(() => meta.fs.used);
-const diskAvailable = $computed(() => meta.fs.total - meta.fs.used);
+const diskUsage = computed(() => meta.fs.used / meta.fs.total);
+const diskTotal = computed(() => meta.fs.total);
+const diskUsed = computed(() => meta.fs.used);
+const diskAvailable = computed(() => meta.fs.total - meta.fs.used);
 
 function onStats(stats) {
-	cpuUsage = stats.cpu;
+	cpuUsage.value = stats.cpu;
 
-	memUsage = stats.mem.active / meta.mem.total;
-	memTotal = meta.mem.total;
-	memUsed = stats.mem.active;
-	memFree = memTotal - memUsed;
+	memUsage.value = stats.mem.active / stats.mem.total;
+	memTotal.value = stats.mem.total;
+	memUsed.value = stats.mem.active;
+	memFree.value = memTotal.value - memUsed.value;
 
-	meiliTotalSize = stats.meilisearch.size;
-	meiliIndexCount = stats.meilisearch.indexed_count;
-	meiliAvailable = stats.meilisearch.health;
-	meiliProgress = meiliIndexCount / serverStats.notesCount;
+	meiliTotalSize.value = stats.meilisearch.size;
+	meiliIndexCount.value = stats.meilisearch.indexed_count;
+	meiliAvailable.value = stats.meilisearch.health;
+	meiliProgress.value = meiliIndexCount.value / serverStats.notesCount;
 }
 
 const connection = stream.useChannel("serverStats");

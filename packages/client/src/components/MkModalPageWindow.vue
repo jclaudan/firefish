@@ -26,7 +26,11 @@
 					></i>
 					<span>{{ pageMetadata?.value.title }}</span>
 				</span>
-				<button class="_button" @click="$refs.modal.close()">
+				<button
+					class="_button"
+					:aria-label="i18n.t('close')"
+					@click="$refs.modal.close()"
+				>
 					<i class="ph-x ph-bold ph-lg"></i>
 				</button>
 			</div>
@@ -48,7 +52,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ComputedRef, provide } from "vue";
+import type { ComputedRef } from "vue";
+import { computed, provide, ref } from "vue";
 import MkModal from "@/components/MkModal.vue";
 import { popout as _popout } from "@/scripts/popout";
 import copyToClipboard from "@/scripts/copy-to-clipboard";
@@ -56,11 +61,8 @@ import { url } from "@/config";
 import * as os from "@/os";
 import { mainRouter, routes } from "@/router";
 import { i18n } from "@/i18n";
-import {
-	PageMetadata,
-	provideMetadataReceiver,
-	setPageMetadata,
-} from "@/scripts/page-metadata";
+import type { PageMetadata } from "@/scripts/page-metadata";
+import { provideMetadataReceiver } from "@/scripts/page-metadata";
 import { Router } from "@/nirax";
 
 const props = defineProps<{
@@ -76,27 +78,27 @@ const router = new Router(routes, props.initialPath);
 
 router.addListener("push", (ctx) => {});
 
-let pageMetadata = $ref<null | ComputedRef<PageMetadata>>();
-let rootEl = $ref();
-let modal = $ref<InstanceType<typeof MkModal>>();
-let path = $ref(props.initialPath);
-let width = $ref(860);
-let height = $ref(660);
+const pageMetadata = ref<null | ComputedRef<PageMetadata>>();
+const rootEl = ref();
+const modal = ref<InstanceType<typeof MkModal>>();
+const path = ref(props.initialPath);
+const width = ref(860);
+const height = ref(660);
 const history = [];
 
 provide("router", router);
 provideMetadataReceiver((info) => {
-	pageMetadata = info;
+	pageMetadata.value = info;
 });
 provide("shouldOmitHeaderTitle", true);
 provide("shouldHeaderThin", true);
 
-const pageUrl = $computed(() => url + path);
-const contextmenu = $computed(() => {
+const pageUrl = computed(() => url + path.value);
+const contextmenu = computed(() => {
 	return [
 		{
 			type: "label",
-			text: path,
+			text: path.value,
 		},
 		{
 			icon: "ph-arrows-out-simple ph-bold ph-lg",
@@ -113,15 +115,15 @@ const contextmenu = $computed(() => {
 			icon: "ph-arrow-square-out ph-bold ph-lg",
 			text: i18n.ts.openInNewTab,
 			action: () => {
-				window.open(pageUrl, "_blank");
-				modal.close();
+				window.open(pageUrl.value, "_blank");
+				modal.value.close();
 			},
 		},
 		{
 			icon: "ph-link-simple ph-bold ph-lg",
 			text: i18n.ts.copyLink,
 			action: () => {
-				copyToClipboard(pageUrl);
+				copyToClipboard(pageUrl.value);
 			},
 		},
 	];
@@ -137,17 +139,17 @@ function back() {
 }
 
 function expand() {
-	mainRouter.push(path);
-	modal.close();
+	mainRouter.push(path.value);
+	modal.value.close();
 }
 
 function popout() {
-	_popout(path, rootEl);
-	modal.close();
+	_popout(path.value, rootEl.value);
+	modal.value.close();
 }
 
 function onContextmenu(ev: MouseEvent) {
-	os.contextMenu(contextmenu, ev);
+	os.contextMenu(contextmenu.value, ev);
 }
 </script>
 

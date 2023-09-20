@@ -5,8 +5,8 @@
 				:is="currentPageComponent"
 				:key="key"
 				v-bind="Object.fromEntries(currentPageProps)"
-				tabindex="-1"
 				v-focus
+				tabindex="-1"
 				style="outline: none"
 			/>
 
@@ -18,16 +18,8 @@
 </template>
 
 <script lang="ts" setup>
-import {
-	inject,
-	nextTick,
-	onBeforeUnmount,
-	onMounted,
-	onUnmounted,
-	provide,
-	watch,
-} from "vue";
-import { Resolved, Router } from "@/nirax";
+import { inject, onBeforeUnmount, provide, ref, shallowRef } from "vue";
+import type { Resolved, Router } from "@/nirax";
 import { defaultStore } from "@/store";
 
 const props = defineProps<{
@@ -56,18 +48,18 @@ function resolveNested(current: Resolved, d = 0): Resolved | null {
 }
 
 const current = resolveNested(router.current)!;
-let currentPageComponent = $shallowRef(current.route.component);
-let currentPageProps = $ref(current.props);
-let key = $ref(
+const currentPageComponent = shallowRef(current.route.component);
+const currentPageProps = ref(current.props);
+const key = ref(
 	current.route.path + JSON.stringify(Object.fromEntries(current.props)),
 );
 
 function onChange({ resolved, key: newKey }) {
 	const current = resolveNested(resolved);
 	if (current == null) return;
-	currentPageComponent = current.route.component;
-	currentPageProps = current.props;
-	key =
+	currentPageComponent.value = current.route.component;
+	currentPageProps.value = current.props;
+	key.value =
 		current.route.path + JSON.stringify(Object.fromEntries(current.props));
 }
 

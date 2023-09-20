@@ -3,8 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import {} from "vue";
-import * as Acct from "calckey-js/built/acct";
+import * as Acct from "firefish-js/built/acct";
 import * as os from "@/os";
 import { mainRouter } from "@/router";
 import { i18n } from "@/i18n";

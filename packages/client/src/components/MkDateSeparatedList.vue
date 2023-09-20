@@ -1,5 +1,6 @@
 <script lang="ts">
-import { defineComponent, h, PropType, TransitionGroup } from "vue";
+import type { PropType } from "vue";
+import { TransitionGroup, defineComponent, h } from "vue";
 import MkAd from "@/components/global/MkAd.vue";
 import { i18n } from "@/i18n";
 import { defaultStore } from "@/store";
@@ -51,7 +52,7 @@ export default defineComponent({
 				if (!slots || !slots.default) return;
 
 				const el = slots.default({
-					item: item,
+					item,
 				})[0];
 				if (el.key == null && item.id) el.key = item.id;
 
@@ -131,7 +132,7 @@ export default defineComponent({
 		display: none;
 	}
 
-	> *:not(:last-child) {
+	&:not(.date-separated-list-nogap) > *:not(:last-child) {
 		margin-bottom: var(--margin);
 	}
 

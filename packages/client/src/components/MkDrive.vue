@@ -69,7 +69,7 @@
 						@dragend="isDragSource = false"
 					/>
 					<!-- SEE: https://stackoverflow.com/questions/18744164/flex-box-align-last-row-to-grid -->
-					<div v-for="(n, i) in 16" :key="i" class="padding"></div>
+					<div v-for="(_, i) in 16" :key="i" class="padding"></div>
 					<MkButton v-if="moreFolders" ref="moreFolders">{{
 						i18n.ts.loadMore
 					}}</MkButton>
@@ -94,7 +94,7 @@
 						@dragend="isDragSource = false"
 					/>
 					<!-- SEE: https://stackoverflow.com/questions/18744164/flex-box-align-last-row-to-grid -->
-					<div v-for="(n, i) in 16" :key="i" class="padding"></div>
+					<div v-for="(_, i) in 16" :key="i" class="padding"></div>
 					<MkButton
 						v-show="moreFiles"
 						ref="loadMoreFiles"
@@ -132,7 +132,6 @@
 
 <script lang="ts" setup>
 import {
-	markRaw,
 	nextTick,
 	onActivated,
 	onBeforeUnmount,
@@ -140,7 +139,7 @@ import {
 	ref,
 	watch,
 } from "vue";
-import * as Misskey from "calckey-js";
+import type * as Misskey from "firefish-js";
 import MkButton from "./MkButton.vue";
 import XNavFolder from "@/components/MkDrive.navFolder.vue";
 import XFolder from "@/components/MkDrive.folder.vue";
@@ -295,7 +294,7 @@ function onDrop(ev: DragEvent): any {
 		return;
 	}
 
-	//#region ドライブのファイル
+	// #region ドライブのファイル
 	const driveFile = ev.dataTransfer.getData(_DATA_TRANSFER_DRIVE_FILE_);
 	if (driveFile != null && driveFile !== "") {
 		const file = JSON.parse(driveFile);
@@ -306,9 +305,9 @@ function onDrop(ev: DragEvent): any {
 			folderId: folder.value ? folder.value.id : null,
 		});
 	}
-	//#endregion
+	// #endregion
 
-	//#region ドライブのフォルダ
+	// #region ドライブのフォルダ
 	const driveFolder = ev.dataTransfer.getData(_DATA_TRANSFER_DRIVE_FOLDER_);
 	if (driveFolder != null && driveFolder !== "") {
 		const droppedFolder = JSON.parse(driveFolder);
@@ -340,7 +339,7 @@ function onDrop(ev: DragEvent): any {
 				}
 			});
 	}
-	//#endregion
+	// #endregion
 }
 
 function selectLocalFile() {
@@ -355,7 +354,7 @@ function urlUpload() {
 	}).then(({ canceled, result: url }) => {
 		if (canceled || !url) return;
 		os.api("drive/files/upload-from-url", {
-			url: url,
+			url,
 			folderId: folder.value ? folder.value.id : undefined,
 		});
 
@@ -373,7 +372,7 @@ function createFolder() {
 	}).then(({ canceled, result: name }) => {
 		if (canceled) return;
 		os.api("drive/folders/create", {
-			name: name,
+			name,
 			parentId: folder.value ? folder.value.id : undefined,
 		}).then((createdFolder) => {
 			addFolder(createdFolder, true);
@@ -390,7 +389,7 @@ function renameFolder(folderToRename: Misskey.entities.DriveFolder) {
 		if (canceled) return;
 		os.api("drive/folders/update", {
 			folderId: folderToRename.id,
-			name: name,
+			name,
 		}).then((updatedFolder) => {
 			// FIXME: 画面を更新するために自分自身に移動
 			move(updatedFolder);
@@ -783,6 +782,8 @@ onBeforeUnmount(() => {
 		overflow: auto;
 		font-size: 0.9em;
 		box-shadow: 0 1px 0 var(--divider);
+		position: fixed;
+		background-color: var(--bg);
 
 		&,
 		* {
@@ -842,6 +843,7 @@ onBeforeUnmount(() => {
 		flex: 1;
 		overflow: auto;
 		padding: var(--margin);
+		margin-top: 40px;
 
 		&,
 		* {

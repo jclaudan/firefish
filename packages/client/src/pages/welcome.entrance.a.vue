@@ -35,8 +35,8 @@
 				<div class="fg">
 					<h1>
 						<img
-							class="logo"
 							v-if="meta.logoImageUrl"
+							class="logo"
 							:src="meta.logoImageUrl"
 							alt="logo"
 						/>
@@ -45,7 +45,9 @@
 					<div class="about">
 						<div
 							class="desc"
-							v-html="meta.description || i18n.ts.headlineMisskey"
+							v-html="
+								meta.description || i18n.ts.headlineFirefish
+							"
 						></div>
 					</div>
 					<div class="action">
@@ -98,50 +100,48 @@
 </template>
 
 <script lang="ts" setup>
-import {} from "vue";
-import { toUnicode } from "punycode/";
+import { ref } from "vue";
+
 import XTimeline from "./welcome.timeline.vue";
 import MarqueeText from "@/components/MkMarquee.vue";
 import XSigninDialog from "@/components/MkSigninDialog.vue";
 import XSignupDialog from "@/components/MkSignupDialog.vue";
 import MkButton from "@/components/MkButton.vue";
-import XNote from "@/components/MkNote.vue";
 import MkFeaturedPhotos from "@/components/MkFeaturedPhotos.vue";
-import { host, instanceName } from "@/config";
+import { instanceName } from "@/config";
 import * as os from "@/os";
-import number from "@/filters/number";
 import { i18n } from "@/i18n";
 
-let meta = $ref();
-let stats = $ref();
-let tags = $ref();
-let onlineUsersCount = $ref();
-let instances = $ref();
+const meta = ref();
+const stats = ref();
+const tags = ref();
+const onlineUsersCount = ref();
+const instances = ref();
 
 os.api("meta", { detail: true }).then((_meta) => {
-	meta = _meta;
+	meta.value = _meta;
 });
 
 os.api("stats").then((_stats) => {
-	stats = _stats;
+	stats.value = _stats;
 });
 
 os.api("get-online-users-count").then((res) => {
-	onlineUsersCount = res.count;
+	onlineUsersCount.value = res.count;
 });
 
 os.api("hashtags/list", {
 	sort: "+mentionedLocalUsers",
 	limit: 8,
 }).then((_tags) => {
-	tags = _tags;
+	tags.value = _tags;
 });
 
 os.api("federation/instances", {
 	sort: "+pubSub",
 	limit: 20,
 }).then((_instances) => {
-	instances = _instances;
+	instances.value = _instances;
 });
 
 function signin() {
@@ -177,10 +177,10 @@ function showMenu(ev) {
 				},
 			},
 			{
-				text: i18n.ts.aboutMisskey,
+				text: i18n.ts.aboutFirefish,
 				icon: "ph-info ph-bold ph-lg",
 				action: () => {
-					os.pageWindow("/about-calckey");
+					os.pageWindow("/about-firefish");
 				},
 			},
 		],
@@ -296,7 +296,6 @@ function showMenu(ev) {
 			> .icon {
 				width: 85px;
 				margin-top: -47px;
-				border-radius: 100%;
 				vertical-align: bottom;
 			}
 

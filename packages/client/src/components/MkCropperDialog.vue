@@ -13,7 +13,9 @@
 		<template #default="{ width, height }">
 			<div
 				class="mk-cropper-dialog"
-				:style="`--vw: ${width}px; --vh: ${height}px;`"
+				:style="`--vw: ${width ? `${width}px` : '100%'}; --vh: ${
+					height ? `${height}px` : '100%'
+				};`"
 			>
 				<Transition name="fade">
 					<div v-if="loading" class="loading">
@@ -34,8 +36,8 @@
 </template>
 
 <script lang="ts" setup>
-import { nextTick, onMounted } from "vue";
-import * as misskey from "calckey-js";
+import { onMounted, ref } from "vue";
+import type * as misskey from "firefish-js";
 import Cropper from "cropperjs";
 import tinycolor from "tinycolor2";
 import XModalWindow from "@/components/MkModalWindow.vue";
@@ -60,10 +62,10 @@ const props = defineProps<{
 const imgUrl = `${url}/proxy/image.webp?${query({
 	url: props.file.url,
 })}`;
-let dialogEl = $ref<InstanceType<typeof XModalWindow>>();
-let imgEl = $ref<HTMLImageElement>();
-let cropper: Cropper | null = null;
-let loading = $ref(true);
+const dialogEl = ref<InstanceType<typeof XModalWindow>>();
+const imgEl = ref<HTMLImageElement>();
+let cropper: Cropper | null = null,
+	loading = ref(true);
 
 const ok = async () => {
 	const promise = new Promise<misskey.entities.DriveFile>(async (res) => {
@@ -94,16 +96,16 @@ const ok = async () => {
 	const f = await promise;
 
 	emit("ok", f);
-	dialogEl.close();
+	dialogEl.value.close();
 };
 
 const cancel = () => {
 	emit("cancel");
-	dialogEl.close();
+	dialogEl.value.close();
 };
 
 const onImageLoad = () => {
-	loading = false;
+	loading.value = false;
 
 	if (cropper) {
 		cropper.getCropperImage()!.$center("contain");
@@ -112,7 +114,7 @@ const onImageLoad = () => {
 };
 
 onMounted(() => {
-	cropper = new Cropper(imgEl, {});
+	cropper = new Cropper(imgEl.value, {});
 
 	const computedStyle = getComputedStyle(document.documentElement);
 

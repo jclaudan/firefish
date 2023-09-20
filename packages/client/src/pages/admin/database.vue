@@ -34,7 +34,8 @@
 </template>
 
 <script lang="ts" setup>
-import {} from "vue";
+import { computed } from "vue";
+
 import FormSuspense from "@/components/form/suspense.vue";
 import FormButton from "@/components/MkButton.vue";
 import MkKeyValue from "@/components/MkKeyValue.vue";
@@ -52,9 +53,9 @@ const databasePromiseFactory = () =>
 			Object.entries(res).sort((a, b) => b[1].size - a[1].size),
 		);
 
-const headerActions = $computed(() => []);
+const headerActions = computed(() => []);
 
-const headerTabs = $computed(() => []);
+const headerTabs = computed(() => []);
 
 definePageMetadata({
 	title: i18n.ts.database,

@@ -3,13 +3,14 @@
 		v-if="count > 0"
 		ref="buttonRef"
 		v-ripple="canToggle"
+		v-vibrate="[10, 30, 40]"
 		class="hkzvhatu _button"
 		:class="{
 			reacted: note.myReaction == reaction,
 			canToggle,
 			newlyAdded: !isInitial,
 		}"
-		@click="toggleReaction()"
+		@click.stop="toggleReaction()"
 	>
 		<XReactionIcon
 			class="icon"
@@ -22,7 +23,7 @@
 
 <script lang="ts" setup>
 import { computed, ref } from "vue";
-import * as misskey from "calckey-js";
+import type * as misskey from "firefish-js";
 import XDetails from "@/components/MkReactionsViewer.details.vue";
 import XReactionIcon from "@/components/MkReactionIcon.vue";
 import * as os from "@/os";
@@ -100,13 +101,20 @@ useTooltip(
 
 <style lang="scss" scoped>
 .hkzvhatu {
+	position: relative;
 	display: inline-block;
 	height: 32px;
-	margin: 2px;
-	padding: 0 6px;
-	border-radius: 4px;
+	margin-block: 2px;
+	padding: 0 8px;
 	pointer-events: all;
 	min-width: max-content;
+	&::before {
+		content: "";
+		position: absolute;
+		inset: 0 2px;
+		border-radius: 4px;
+		z-index: -1;
+	}
 	&.newlyAdded {
 		animation: scaleInSmall 0.3s cubic-bezier(0, 0, 0, 1.2);
 		:deep(.mk-emoji) {
@@ -126,9 +134,10 @@ useTooltip(
 		}
 	}
 	&.canToggle {
-		background: rgba(0, 0, 0, 0.05);
-
-		&:hover {
+		&::before {
+			background: rgba(0, 0, 0, 0.05);
+		}
+		&:hover:not(.reacted)::before {
 			background: rgba(0, 0, 0, 0.1);
 		}
 	}
@@ -139,9 +148,7 @@ useTooltip(
 
 	&.reacted {
 		order: -1;
-		background: var(--accent);
-
-		&:hover {
+		&::before {
 			background: var(--accent);
 		}
 

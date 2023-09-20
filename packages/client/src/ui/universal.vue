@@ -25,6 +25,7 @@
 
 		<button
 			v-if="!isDesktop && !isMobile"
+			v-vibrate="5"
 			class="widgetButton _button"
 			@click="widgetsShowing = true"
 		>
@@ -33,6 +34,7 @@
 
 		<div v-if="isMobile" class="buttons">
 			<button
+				v-vibrate="5"
 				:aria-label="i18n.t('menu')"
 				class="button nav _button"
 				@click="drawerMenuShowing = true"
@@ -48,6 +50,7 @@
 				</div>
 			</button>
 			<button
+				v-vibrate="5"
 				:aria-label="i18n.t('home')"
 				class="button home _button"
 				@click="
@@ -65,6 +68,7 @@
 				</div>
 			</button>
 			<button
+				v-vibrate="5"
 				:aria-label="i18n.t('notifications')"
 				class="button notifications _button"
 				@click="
@@ -73,6 +77,7 @@
 				"
 			>
 				<div
+					v-vibrate="5"
 					class="button-wrapper"
 					:class="buttonAnimIndex === 1 ? 'on' : ''"
 				>
@@ -86,6 +91,7 @@
 				</div>
 			</button>
 			<button
+				v-vibrate="5"
 				:aria-label="i18n.t('messaging')"
 				class="button messaging _button"
 				@click="
@@ -107,6 +113,7 @@
 				</div>
 			</button>
 			<button
+				v-vibrate="5"
 				:aria-label="i18n.t('_deck._columns.widgets')"
 				class="button widget _button"
 				@click="widgetsShowing = true"
@@ -119,6 +126,7 @@
 
 		<button
 			v-if="isMobile && mainRouter.currentRoute.value.name === 'index'"
+			v-vibrate="5"
 			ref="postButton"
 			:aria-label="i18n.t('note')"
 			class="postButton button post _button"
@@ -169,10 +177,10 @@
 </template>
 
 <script lang="ts" setup>
-import { defineAsyncComponent, provide, onMounted, computed, ref } from "vue";
-import XCommon from "./_common_/common.vue";
-import * as Acct from "calckey-js/built/acct";
+import { computed, defineAsyncComponent, onMounted, provide, ref } from "vue";
+import * as Acct from "firefish-js/built/acct";
 import type { ComputedRef } from "vue";
+import XCommon from "./_common_/common.vue";
 import type { PageMetadata } from "@/scripts/page-metadata";
 import { instanceName, ui } from "@/config";
 import XDrawerMenu from "@/ui/_common_/navbar-for-mobile.vue";
@@ -210,29 +218,29 @@ window.addEventListener("resize", () => {
 const buttonAnimIndex = ref(0);
 const drawerMenuShowing = ref(false);
 
-let pageMetadata = $ref<null | ComputedRef<PageMetadata>>();
-const widgetsEl = $ref<HTMLElement>();
-const postButton = $ref<HTMLElement>();
-const widgetsShowing = $ref(false);
+const pageMetadata = ref<null | ComputedRef<PageMetadata>>();
+const widgetsEl = ref<HTMLElement>();
+const postButton = ref<HTMLElement>();
+const widgetsShowing = ref(false);
 
 provide("router", mainRouter);
 provideMetadataReceiver((info) => {
-	pageMetadata = info;
-	if (pageMetadata.value) {
-		document.title = `${pageMetadata.value.title} | ${instanceName}`;
+	pageMetadata.value = info;
+	if (pageMetadata.value.value) {
+		document.title = `${pageMetadata.value.value.title} | ${instanceName}`;
 	}
 });
 
 const menuIndicated = computed(() => {
 	for (const def in navbarItemDef) {
-		if (def === "notifications") continue; // 通知は下にボタンとして表示されてるから
+		if (def === "notifications" || def === "messaging") continue; // Notifications & Messaging are bottom nav buttons and thus shouldn't be highlighted in the sidebar
 		if (navbarItemDef[def].indicated) return true;
 	}
 	return false;
 });
 
 function updateButtonState(): void {
-	let routerState = window.location.pathname;
+	const routerState = window.location.pathname;
 	if (routerState === "/") {
 		buttonAnimIndex.value = 0;
 		return;
@@ -246,7 +254,6 @@ function updateButtonState(): void {
 		return;
 	}
 	buttonAnimIndex.value = 3;
-	return;
 }
 
 updateButtonState();
@@ -358,7 +365,7 @@ const onContextmenu = (ev: MouseEvent) => {
 		["INPUT", "TEXTAREA", "IMG", "VIDEO", "CANVAS"].includes(
 			ev.target.tagName,
 		) ||
-		ev.target.attributes["contenteditable"]
+		ev.target.attributes.contenteditable
 	)
 		return;
 	if (window.getSelection()?.toString() !== "") return;
@@ -387,18 +394,18 @@ const attachSticky = (el: any) => {
 		"scroll",
 		() => {
 			requestAnimationFrame(() => {
-				widgetsEl.scrollTop += window.scrollY - lastScrollTop;
+				widgetsEl.value.scrollTop += window.scrollY - lastScrollTop;
 				lastScrollTop = window.scrollY;
 			});
 		},
 		{ passive: true },
 	);
-	widgetsEl.classList.add("hide-scrollbar");
-	widgetsEl.onmouseenter = () => {
+	widgetsEl.value.classList.add("hide-scrollbar");
+	widgetsEl.value.onmouseenter = () => {
 		if (document.documentElement.scrollHeight <= window.innerHeight) {
-			widgetsEl.classList.remove("hide-scrollbar");
+			widgetsEl.value.classList.remove("hide-scrollbar");
 		} else {
-			widgetsEl.classList.add("hide-scrollbar");
+			widgetsEl.value.classList.add("hide-scrollbar");
 		}
 	};
 };

@@ -92,7 +92,7 @@ export function validateNote(object: any, uri: string) {
 /**
  * Fetch Notes.
  *
- * If the target Note is registered in Calckey, it will be returned.
+ * If the target Note is registered in Firefish, it will be returned.
  */
 export async function fetchNote(
 	object: string | IObject,
@@ -397,8 +397,8 @@ export async function createNote(
 /**
  * Resolve Note.
  *
- * If the target Note is registered in Calckey, return it, otherwise
- * Fetch from remote server, register with Calckey and return it.
+ * If the target Note is registered in Firefish, return it, otherwise
+ * Fetch from remote server, register with Firefish and return it.
  */
 export async function resolveNote(
 	value: string | IObject,
@@ -415,7 +415,7 @@ export async function resolveNote(
 			`host ${extractDbHost(uri)} is blocked`,
 		);
 
-	const unlock = await getApLock(uri);
+	const lock = await getApLock(uri);
 
 	try {
 		//#region Returns if already registered with this server
@@ -439,7 +439,7 @@ export async function resolveNote(
 		// Since the attached Note Object may be disguised, always specify the uri and fetch it from the server.
 		return await createNote(uri, resolver, true);
 	} finally {
-		unlock();
+		await lock.release();
 	}
 }
 

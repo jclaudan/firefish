@@ -28,10 +28,6 @@ onMounted(async () => {
 	router.push("/");
 });
 
-const headerActions = $computed(() => []);
-
-const headerTabs = $computed(() => []);
-
 definePageMetadata({
 	title: "Verify email",
 	icon: "ph-user ph-bold ph-lg",

@@ -36,7 +36,7 @@ function generateToken() {
 				const { name, permissions } = result;
 				const { token } = await os.api("miauth/gen-token", {
 					session: null,
-					name: name,
+					name,
 					permission: permissions,
 				});
 
@@ -50,10 +50,6 @@ function generateToken() {
 		"closed",
 	);
 }
-
-const headerActions = $computed(() => []);
-
-const headerTabs = $computed(() => []);
 
 definePageMetadata({
 	title: "API",

@@ -2,13 +2,13 @@
 	<span v-if="note.visibility !== 'public'" :class="$style.visibility">
 		<i
 			v-if="note.visibility === 'home'"
-			class="ph-house ph-bold ph-lg"
 			v-tooltip="i18n.ts._visibility.home"
+			class="ph-house ph-bold ph-lg"
 		></i>
 		<i
 			v-else-if="note.visibility === 'followers'"
-			class="ph-lock ph-bold ph-lg"
 			v-tooltip="i18n.ts._visibility.followers"
+			class="ph-lock ph-bold ph-lg"
 		></i>
 		<i
 			v-else-if="note.visibility === 'specified'"
@@ -18,14 +18,15 @@
 	</span>
 	<span v-if="note.localOnly" :class="$style.localOnly"
 		><i
-			class="ph-hand-fist ph-bold ph-lg"
 			v-tooltip="i18n.ts._visibility.localOnly"
+			class="ph-users ph-bold ph-lg"
 		></i
 	></span>
 </template>
 
 <script lang="ts" setup>
 import { ref } from "vue";
+
 import XDetails from "@/components/MkUsersTooltip.vue";
 import * as os from "@/os";
 import { useTooltip } from "@/scripts/use-tooltip";
@@ -39,10 +40,10 @@ const props = defineProps<{
 	};
 }>();
 
-const specified = $ref<HTMLElement>();
+const specified = ref<HTMLElement>();
 
 if (props.note.visibility === "specified") {
-	useTooltip($$(specified), async (showing) => {
+	useTooltip(specified, async (showing) => {
 		const users = await os.api("users/show", {
 			userIds: props.note.visibleUserIds,
 			limit: 10,
@@ -54,7 +55,7 @@ if (props.note.visibility === "specified") {
 				showing,
 				users,
 				count: props.note.visibleUserIds.length,
-				targetElement: specified,
+				targetElement: specified.value,
 			},
 			{},
 			"closed",

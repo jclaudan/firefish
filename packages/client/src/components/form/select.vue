@@ -43,15 +43,15 @@
 </template>
 
 <script lang="ts" setup>
+import type { VNode } from "vue";
 import {
-	onMounted,
-	nextTick,
-	ref,
-	watch,
 	computed,
+	nextTick,
+	onMounted,
+	ref,
 	toRefs,
-	VNode,
 	useSlots,
+	watch,
 } from "vue";
 import MkButton from "@/components/MkButton.vue";
 import * as os from "@/os";
@@ -84,7 +84,6 @@ const focused = ref(false);
 const opening = ref(false);
 const changed = ref(false);
 const invalid = ref(false);
-const filled = computed(() => v.value !== "" && v.value != null);
 const inputEl = ref(null);
 const prefixEl = ref(null);
 const suffixEl = ref(null);
@@ -151,7 +150,7 @@ function show(ev: MouseEvent) {
 	opening.value = true;
 
 	const menu = [];
-	let options = slots.default!();
+	const options = slots.default!();
 
 	const pushOption = (option: VNode) => {
 		menu.push({

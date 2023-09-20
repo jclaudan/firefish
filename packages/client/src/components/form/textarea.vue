@@ -39,14 +39,13 @@
 
 <script lang="ts">
 import {
-	defineComponent,
-	onMounted,
-	onUnmounted,
-	nextTick,
-	ref,
-	watch,
 	computed,
+	defineComponent,
+	nextTick,
+	onMounted,
+	ref,
 	toRefs,
+	watch,
 } from "vue";
 import { debounce } from "throttle-debounce";
 import MkButton from "@/components/MkButton.vue";
@@ -157,7 +156,7 @@ export default defineComponent({
 			v.value = newValue;
 		});
 
-		watch($$(v), () => {
+		watch(v, () => {
 			if (!props.manualSave) {
 				if (props.debounce) {
 					debouncedUpdated();

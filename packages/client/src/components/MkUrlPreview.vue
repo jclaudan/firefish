@@ -20,10 +20,10 @@
 					<img :src="thumbnail" loading="lazy" />
 					<button
 						v-if="tweetId"
-						class="_button"
 						v-tooltip="
 							tweetExpanded ? i18n.ts.close : i18n.ts.expandTweet
 						"
+						class="_button"
 						@click.stop.prevent="tweetExpanded = !tweetExpanded"
 					>
 						<i
@@ -34,10 +34,10 @@
 					</button>
 					<button
 						v-else-if="player.url"
-						class="_button"
 						v-tooltip="
 							playerEnabled ? i18n.ts.close : i18n.ts.enablePlayer
 						"
+						class="_button"
 						@click.stop.prevent="playerEnabled = !playerEnabled"
 					>
 						<i
@@ -99,8 +99,8 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted } from "vue";
-import { url as local, lang } from "@/config";
+import { onUnmounted, ref } from "vue";
+import { lang, url as local } from "@/config";
 import { i18n } from "@/i18n";
 import { defaultStore } from "@/store";
 
@@ -117,33 +117,32 @@ const props = withDefaults(
 const self = props.url.startsWith(local);
 const attr = self ? "to" : "href";
 const target = self ? null : "_blank";
-let fetching = $ref(true);
-let title = $ref<string | null>(null);
-let description = $ref<string | null>(null);
-let thumbnail = $ref<string | null>(null);
-let icon = $ref<string | null>(null);
-let sitename = $ref<string | null>(null);
-let player = $ref({
+const fetching = ref(true);
+const title = ref<string | null>(null);
+const description = ref<string | null>(null);
+const thumbnail = ref<string | null>(null);
+const icon = ref<string | null>(null);
+const sitename = ref<string | null>(null);
+const player = ref({
 	url: null,
 	width: null,
 	height: null,
 });
-let playerEnabled = $ref(false);
-let tweetId = $ref<string | null>(null);
-let tweetExpanded = $ref(props.detail);
+const playerEnabled = ref(false);
+const tweetId = ref<string | null>(null);
+const tweetExpanded = ref(props.detail);
 const embedId = `embed${Math.random().toString().replace(/\D/, "")}`;
-let tweetHeight = $ref(150);
+const tweetHeight = ref(150);
 
 const requestUrl = new URL(props.url);
 if (!["http:", "https:"].includes(requestUrl.protocol))
 	throw new Error("invalid url");
 
 if (
-	requestUrl.hostname === "twitter.com" ||
-	requestUrl.hostname === "mobile.twitter.com"
+	["twitter.com", "mobile.twitter.com", "x.com"].includes(requestUrl.hostname)
 ) {
 	const m = requestUrl.pathname.match(/^\/.+\/status(?:es)?\/(\d+)/);
-	if (m) tweetId = m[1];
+	if (m) tweetId.value = m[1];
 }
 
 if (
@@ -162,13 +161,13 @@ fetch(
 ).then((res) => {
 	res.json().then((info) => {
 		if (info.url == null) return;
-		title = info.title;
-		description = info.description;
-		thumbnail = info.thumbnail;
-		icon = info.icon;
-		sitename = info.sitename;
-		fetching = false;
-		player = info.player;
+		title.value = info.title;
+		description.value = info.description;
+		thumbnail.value = info.thumbnail;
+		icon.value = info.icon;
+		sitename.value = info.sitename;
+		fetching.value = false;
+		player.value = info.player;
 	});
 });
 
@@ -178,7 +177,7 @@ function adjustTweetHeight(message: any) {
 	if (embed?.method !== "twttr.private.resize") return;
 	if (embed?.id !== embedId) return;
 	const height = embed?.params[0]?.height;
-	if (height) tweetHeight = height;
+	if (height) tweetHeight.value = height;
 }
 
 (window as any).addEventListener("message", adjustTweetHeight);
@@ -253,6 +252,9 @@ onUnmounted(() => {
 			font-size: 1em;
 			white-space: nowrap;
 			margin-bottom: 0.2em;
+			text-decoration: underline;
+			text-decoration-color: transparent;
+			transition: text-decoration-color 0.2s;
 		}
 		p {
 			margin-bottom: -0.5em;
@@ -279,7 +281,7 @@ onUnmounted(() => {
 		&:focus-within {
 			background: var(--panelHighlight);
 			h3 {
-				text-decoration: underline;
+				text-decoration-color: currentColor;
 			}
 		}
 	}

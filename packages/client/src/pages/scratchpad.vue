@@ -133,10 +133,6 @@ function highlighter(code) {
 	return highlight(code, languages.js, "javascript");
 }
 
-const headerActions = $computed(() => []);
-
-const headerTabs = $computed(() => []);
-
 definePageMetadata({
 	title: i18n.ts.scratchpad,
 	icon: "ph-terminal-window ph-bold ph-lg",

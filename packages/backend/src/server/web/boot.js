@@ -102,7 +102,11 @@
 			localStorage.setItem("fontSize", null);
 			fontSize = localStorage.getItem("fontSize");
 		}
-		document.documentElement.style.fontSize = fontSize + "px";
+		document.documentElement.style.fontSize = `${fontSize}px`;
+	}
+
+	if (["ja-JP", "ja-KS", "ko-KR", "zh-CN", "zh-TW"].includes(lang)) {
+		document.documentElement.classList.add("useCJKFont");
 	}
 
 	const useSystemFont = localStorage.getItem("useSystemFont");
@@ -123,7 +127,7 @@
 	}
 
 	async function addStyle(styleText) {
-		let css = document.createElement("style");
+		const css = document.createElement("style");
 		css.appendChild(document.createTextNode(styleText));
 		document.head.appendChild(css);
 	}
@@ -143,7 +147,7 @@
 				<span class="button-label-big">Refresh</span>
 			</button>
 			<p class="dont-worry">Don't worry, it's (probably) not your fault.</p>
-			<p>Please make sure your browser is up-to-date and any AdBlockers are off.</p>
+			<p>Please make sure your browser is up-to-date and any AdBlockers are off (given they can sometimes errouniously interfere with loading assets).</p>
 			<p>If the problem persists after refreshing, please contact your instance's administrator.<br>You may also try the following options:</p>
 			<a href="/flush">
 				<button class="button-small">
@@ -180,7 +184,7 @@
 			font-family: BIZ UDGothic, Roboto, HelveticaNeue, Arial, sans-serif;
 		}
 
-		#calckey_app,
+		#firefish_app,
 		#splash {
 			display: none !important;
 		}
