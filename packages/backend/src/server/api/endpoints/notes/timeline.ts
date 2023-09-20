@@ -28,6 +28,7 @@ import {
 	InstanceMutingsCache,
 	LocalFollowingsCache,
 	RenoteMutingsCache,
+	SuspendedUsersCache,
 	UserBlockedCache,
 	UserBlockingCache,
 	UserMutingsCache,
@@ -102,6 +103,7 @@ export default define(meta, paramDef, async (ps, user) => {
 			blockerIds,
 			blockingIds,
 			renoteMutedIds,
+			suspendedUserIds,
 		] = await Promise.all([
 			ChannelFollowingsCache.init(user.id).then((cache) => cache.getAll()),
 			followingsCache.getAll(),
@@ -118,28 +120,29 @@ export default define(meta, paramDef, async (ps, user) => {
 			UserBlockedCache.init(user.id).then((cache) => cache.getAll()),
 			UserBlockingCache.init(user.id).then((cache) => cache.getAll()),
 			RenoteMutingsCache.init(user.id).then((cache) => cache.getAll()),
+			SuspendedUsersCache.init().then((cache) => cache.getAll()),
 		]);
 		const validUserIds = [user.id, ...followingUserIds];
 		const optFilter = (n: ScyllaNote) =>
 			!n.renoteId || !!n.text || n.files.length > 0 || n.hasPoll;
 
-		const filter = async (notes: ScyllaNote[]) => {
+		const filter = (notes: ScyllaNote[]) => {
 			let filtered = notes.filter((n) => validUserIds.includes(n.userId));
-			filtered = await filterChannel(filtered, user, followingChannelIds);
-			filtered = await filterReply(filtered, ps.withReplies, user);
-			filtered = await filterVisibility(filtered, user, followingUserIds);
-			filtered = await filterMutedUser(
+			filtered = filterChannel(filtered, user, followingChannelIds);
+			filtered = filterReply(filtered, ps.withReplies, user);
+			filtered = filterVisibility(filtered, user, followingUserIds);
+			filtered = filterMutedUser(
 				filtered,
-				user,
 				mutedUserIds,
 				mutedInstances,
 			);
-			filtered = await filterMutedNote(filtered, user, mutedWords);
-			filtered = await filterBlockUser(filtered, user, [
+			filtered = filterMutedNote(filtered, user, mutedWords);
+			filtered = filterBlockUser(filtered, [
 				...blockerIds,
 				...blockingIds,
+				...suspendedUserIds,
 			]);
-			filtered = await filterMutedRenotes(filtered, user, renoteMutedIds);
+			filtered = filterMutedRenotes(filtered, renoteMutedIds);
 			if (!ps.includeMyRenotes) {
 				filtered = filtered.filter((n) => n.userId !== user.id || optFilter(n));
 			}

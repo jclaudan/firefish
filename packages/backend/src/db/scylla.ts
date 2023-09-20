@@ -404,7 +404,7 @@ export async function execPaginationQuery(
 		userIds?: string[];
 	},
 	filter?: {
-		note?: (_: ScyllaNote[]) => Promise<ScyllaNote[]>;
+		note?: (_: ScyllaNote[]) => ScyllaNote[];
 		reaction?: (_: ScyllaNoteReaction[]) => Promise<ScyllaNoteReaction[]>;
 		notification?: (_: ScyllaNotification[]) => Promise<ScyllaNotification[]>;
 	},
@@ -492,7 +492,7 @@ export async function execPaginationQuery(
 			} else {
 				const notes = result.rows.map(parseScyllaNote);
 				(found as ScyllaNote[]).push(
-					...(filter?.note ? await filter.note(notes) : notes),
+					...(filter?.note ? filter.note(notes) : notes),
 				);
 				untilDate = notes[notes.length - 1].createdAt;
 			}
@@ -517,11 +517,11 @@ export async function execPaginationQuery(
 	return found as ScyllaNote[];
 }
 
-export async function filterVisibility(
+export function filterVisibility(
 	notes: ScyllaNote[],
 	user: { id: User["id"] } | null,
-	followingIds?: User["id"][],
-): Promise<ScyllaNote[]> {
+	followingIds: User["id"][],
+): ScyllaNote[] {
 	let filtered = notes;
 
 	if (!user) {
@@ -529,15 +529,6 @@ export async function filterVisibility(
 			["public", "home"].includes(note.visibility),
 		);
 	} else {
-		let ids: User["id"][];
-		if (followingIds) {
-			ids = followingIds;
-		} else {
-			ids = await LocalFollowingsCache.init(user.id).then((cache) =>
-				cache.getAll(),
-			);
-		}
-
 		filtered = filtered.filter(
 			(note) =>
 				["public", "home"].includes(note.visibility) ||
@@ -545,18 +536,18 @@ export async function filterVisibility(
 				note.visibleUserIds.includes(user.id) ||
 				note.mentions.includes(user.id) ||
 				(note.visibility === "followers" &&
-					(ids.includes(note.userId) || note.replyUserId === user.id)),
+					(followingIds.includes(note.userId) || note.replyUserId === user.id)),
 		);
 	}
 
 	return filtered;
 }
 
-export async function filterChannel(
+export function filterChannel(
 	notes: ScyllaNote[],
 	user: { id: User["id"] } | null,
-	followingIds?: Channel["id"][],
-): Promise<ScyllaNote[]> {
+	followingIds: Channel["id"][],
+): ScyllaNote[] {
 	let filtered = notes;
 
 	if (!user) {
@@ -564,16 +555,8 @@ export async function filterChannel(
 	} else {
 		const channelNotes = filtered.filter((note) => !!note.channelId);
 		if (channelNotes.length > 0) {
-			let followings: Channel["id"][];
-			if (followingIds) {
-				followings = followingIds;
-			} else {
-				followings = await ChannelFollowingsCache.init(user.id).then((cache) =>
-					cache.getAll(),
-				);
-			}
 			filtered = filtered.filter(
-				(note) => !note.channelId || followings.includes(note.channelId),
+				(note) => !note.channelId || followingIds.includes(note.channelId),
 			);
 		}
 	}
@@ -581,11 +564,11 @@ export async function filterChannel(
 	return filtered;
 }
 
-export async function filterReply(
+export function filterReply(
 	notes: ScyllaNote[],
 	withReplies: boolean,
 	user: { id: User["id"] } | null,
-): Promise<ScyllaNote[]> {
+): ScyllaNote[] {
 	let filtered = notes;
 
 	if (!user) {
@@ -605,113 +588,60 @@ export async function filterReply(
 	return filtered;
 }
 
-export async function filterMutedUser(
+export function filterMutedUser(
 	notes: ScyllaNote[],
-	user: { id: User["id"] },
-	mutedIds?: User["id"][],
-	mutedInstances?: UserProfile["mutedInstances"],
+	mutedIds: User["id"][],
+	mutedInstances: UserProfile["mutedInstances"],
 	exclude?: User,
-): Promise<ScyllaNote[]> {
-	let ids: User["id"][];
-	let instances: UserProfile["mutedInstances"];
-
-	if (mutedIds) {
-		ids = mutedIds;
-	} else {
-		ids = await UserMutingsCache.init(user.id).then((cache) => cache.getAll());
-	}
-
-	if (mutedInstances) {
-		instances = mutedInstances;
-	} else {
-		instances = await InstanceMutingsCache.init(user.id).then((cache) =>
-			cache.getAll(),
-		);
-	}
+): ScyllaNote[] {
+	let userIds: User["id"][] = mutedIds;
 
 	if (exclude) {
-		ids = ids.filter((id) => id !== exclude.id);
+		userIds = mutedIds.filter((id) => id !== exclude.id);
 	}
 
 	return notes.filter(
 		(note) =>
-			!ids.includes(note.userId) &&
-			!(note.replyUserId && ids.includes(note.replyUserId)) &&
-			!(note.renoteUserId && ids.includes(note.renoteUserId)) &&
-			!(note.userHost && instances.includes(note.userHost)) &&
-			!(note.replyUserHost && instances.includes(note.replyUserHost)) &&
-			!(note.renoteUserHost && instances.includes(note.renoteUserHost)),
+			!userIds.includes(note.userId) &&
+			!(note.replyUserId && userIds.includes(note.replyUserId)) &&
+			!(note.renoteUserId && userIds.includes(note.renoteUserId)) &&
+			!(note.userHost && mutedInstances.includes(note.userHost)) &&
+			!(note.replyUserHost && mutedInstances.includes(note.replyUserHost)) &&
+			!(note.renoteUserHost && mutedInstances.includes(note.renoteUserHost)),
 	);
 }
 
-export async function filterMutedNote(
+export function filterMutedNote(
 	notes: ScyllaNote[],
 	user: { id: User["id"] },
-	mutedWords?: string[][],
-): Promise<ScyllaNote[]> {
-	let words = mutedWords;
-
-	if (!words) {
-		words = await userWordMuteCache.fetchMaybe(user.id, () =>
-			UserProfiles.findOne({
-				select: ["mutedWords"],
-				where: { userId: user.id },
-			}).then((profile) => profile?.mutedWords),
-		);
-	}
-
-	if (words && words.length > 0) {
+	mutedWords: string[][],
+): ScyllaNote[] {
+	if (mutedWords.length > 0) {
 		return notes.filter(
-			(note) => !getWordHardMute(note, user, words as string[][]),
+			(note) => !getWordHardMute(note, user, mutedWords),
 		);
 	}
 
 	return notes;
 }
 
-export async function filterBlockUser(
+export function filterBlockUser(
 	notes: ScyllaNote[],
-	user: { id: User["id"] },
-	blockIds?: User["id"][],
-): Promise<ScyllaNote[]> {
-	let ids: User["id"][];
-
-	if (blockIds) {
-		ids = blockIds;
-	} else {
-		const blocked = await UserBlockedCache.init(user.id).then((cache) =>
-			cache.getAll(),
-		);
-		const blocking = await UserBlockingCache.init(user.id).then((cache) =>
-			cache.getAll(),
-		);
-		ids = [...blocked, ...blocking];
-	}
-
+	blockIds: User["id"][],
+): ScyllaNote[] {
 	return notes.filter(
 		(note) =>
-			!ids.includes(note.userId) &&
-			!(note.replyUserId && ids.includes(note.replyUserId)) &&
-			!(note.renoteUserId && ids.includes(note.renoteUserId)),
+			!blockIds.includes(note.userId) &&
+			!(note.replyUserId && blockIds.includes(note.replyUserId)) &&
+			!(note.renoteUserId && blockIds.includes(note.renoteUserId)),
 	);
 }
 
-export async function filterMutedRenotes(
+export function filterMutedRenotes(
 	notes: ScyllaNote[],
-	user: { id: User["id"] },
-	muteeIds?: User["id"][],
-): Promise<ScyllaNote[]> {
-	let ids: User["id"][];
-
-	if (muteeIds) {
-		ids = muteeIds;
-	} else {
-		ids = await RenoteMutingsCache.init(user.id).then((cache) =>
-			cache.getAll(),
-		);
-	}
-
+	muteeIds: User["id"][],
+): ScyllaNote[] {
 	return notes.filter(
-		(note) => note.text || !note.renoteId || !ids.includes(note.userId),
+		(note) => note.text || !note.renoteId || !muteeIds.includes(note.userId),
 	);
 }

@@ -79,11 +79,11 @@ export default define(meta, paramDef, async (ps, me) => {
 				const notes = await client
 					.execute(prepared.note.select.byIds, [noteIds], { prepare: true })
 					.then((result) => result.rows.map(parseScyllaNote));
-				const filteredNoteIds = await filterVisibility(
+				const filteredNoteIds = filterVisibility(
 					notes,
 					me,
 					followingUserIds,
-				).then((notes) => notes.map(({ id }) => id));
+				).map(({ id }) => id);
 				noteIds = noteIds.filter((id) => filteredNoteIds.includes(id));
 			}
 

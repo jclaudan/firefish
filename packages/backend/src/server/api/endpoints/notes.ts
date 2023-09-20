@@ -42,7 +42,7 @@ export const paramDef = {
 
 export default define(meta, paramDef, async (ps) => {
 	if (scyllaClient) {
-		const filter = async (notes: ScyllaNote[]) => {
+		const filter = (notes: ScyllaNote[]) => {
 			let filtered = notes.filter((note) => !note.localOnly);
 			if (ps.reply === undefined) {
 				filtered = filtered.filter(

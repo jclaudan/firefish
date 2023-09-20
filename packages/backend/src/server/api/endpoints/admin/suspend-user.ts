@@ -6,6 +6,7 @@ import { insertModerationLog } from "@/services/insert-moderation-log.js";
 import { doPostSuspend } from "@/services/suspend-user.js";
 import { publishUserEvent } from "@/services/stream.js";
 import { scyllaClient } from "@/db/scylla.js";
+import { SuspendedUsersCache } from "@/misc/cache.js";
 
 export const meta = {
 	tags: ["admin"],
@@ -37,6 +38,7 @@ export default define(meta, paramDef, async (ps, me) => {
 		throw new Error("cannot suspend moderator");
 	}
 
+	await SuspendedUsersCache.init().then((cache) => cache.add(user.id));
 	await Users.update(user.id, {
 		isSuspended: true,
 	});

@@ -8,6 +8,7 @@ import {
 	Mutings,
 	RenoteMutings,
 	UserProfiles,
+	Users,
 } from "@/models/index.js";
 import { IsNull } from "typeorm";
 import config from "@/config/index.js";
@@ -474,6 +475,24 @@ export class RenoteMutingsCache extends SetCache {
 
 	public static async init(userId: string): Promise<RenoteMutingsCache> {
 		const cache = new RenoteMutingsCache(userId);
+		await cache.fetch();
+
+		return cache;
+	}
+}
+
+export class SuspendedUsersCache extends SetCache {
+	private constructor() {
+		const fetcher = () => Users.find({
+			select: ["id"],
+			where: { isSuspended: true }
+		}).then((users) => users.map(({ id }) => id));
+
+		super("suspendedUsers", "system", fetcher);
+	}
+
+	public static async init(): Promise<SuspendedUsersCache> {
+		const cache = new SuspendedUsersCache();
 		await cache.fetch();
 
 		return cache;

@@ -10,6 +10,7 @@ import {
 	scyllaClient,
 } from "@/db/scylla.js";
 import { userByIdCache } from "@/services/user-cache.js";
+import { LocalFollowingsCache } from "@/misc/cache.js";
 
 /**
  * Get note for API processing, taking into account visibility.
@@ -28,7 +29,13 @@ export async function getNote(
 		);
 		if (result.rowLength > 0) {
 			const candidate = parseScyllaNote(result.first());
-			const filtered = await filterVisibility([candidate], me, followingIds);
+			let ids: string[] = [];
+			if (followingIds) {
+				ids = followingIds
+			} else if (me) {
+				ids = await LocalFollowingsCache.init(me.id).then((cache) => cache.getAll());
+			}
+			const filtered = filterVisibility([candidate], me, ids);
 			if (filtered.length > 0) {
 				note = filtered[0];
 			}

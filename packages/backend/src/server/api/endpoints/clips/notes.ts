@@ -18,6 +18,7 @@ import {
 import {
 	InstanceMutingsCache,
 	LocalFollowingsCache,
+	SuspendedUsersCache,
 	UserBlockedCache,
 	UserBlockingCache,
 	UserMutingsCache,
@@ -91,6 +92,7 @@ export default define(meta, paramDef, async (ps, user) => {
 		}
 
 		const noteIds = await ClipNotes.find({
+			select: ["noteId"],
 			where: whereOpt,
 			order: { noteId: "DESC" },
 			take: Math.min(ps.limit * 2, config.scylla?.queryLimit ?? 100),
@@ -108,6 +110,8 @@ export default define(meta, paramDef, async (ps, user) => {
 			blockingIds,
 		]: string[][] = [];
 		let mutedWords: string[][];
+		blockerIds = [];
+		blockingIds = [];
 		if (user) {
 			[
 				followingUserIds,
@@ -132,22 +136,22 @@ export default define(meta, paramDef, async (ps, user) => {
 				UserBlockingCache.init(user.id).then((cache) => cache.getAll()),
 			]);
 		}
+		const suspendedUserIds = await SuspendedUsersCache.init().then((cache) => cache.getAll());
 
-		const filter = async (notes: ScyllaNote[]) => {
-			let filtered = notes;
+		const filter = (notes: ScyllaNote[]) => {
+			let filtered = filterBlockUser(notes, [
+				...blockerIds,
+				...blockingIds,
+				...suspendedUserIds,
+			]);
 			if (user) {
-				filtered = await filterVisibility(filtered, user, followingUserIds);
-				filtered = await filterMutedUser(
+				filtered = filterVisibility(filtered, user, followingUserIds);
+				filtered = filterMutedUser(
 					filtered,
-					user,
 					mutedUserIds,
 					mutedInstances,
 				);
-				filtered = await filterMutedNote(filtered, user, mutedWords);
-				filtered = await filterBlockUser(filtered, user, [
-					...blockerIds,
-					...blockingIds,
-				]);
+				filtered = filterMutedNote(filtered, user, mutedWords);
 			}
 			return filtered;
 		};

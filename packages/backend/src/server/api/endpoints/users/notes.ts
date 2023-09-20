@@ -21,6 +21,7 @@ import {
 	InstanceMutingsCache,
 	LocalFollowingsCache,
 	RenoteMutingsCache,
+	SuspendedUsersCache,
 	UserBlockedCache,
 	UserBlockingCache,
 	UserMutingsCache,
@@ -94,6 +95,8 @@ export default define(meta, paramDef, async (ps, me) => {
 			blockingIds,
 		]: string[][] = [];
 		let mutedWords: string[][];
+		blockerIds = [];
+		blockingIds = [];
 		if (me) {
 			[
 				followingUserIds,
@@ -118,6 +121,7 @@ export default define(meta, paramDef, async (ps, me) => {
 				UserBlockingCache.init(me.id).then((cache) => cache.getAll()),
 			]);
 		}
+		const suspendedUserIds = await SuspendedUsersCache.init().then((cache) => cache.getAll());
 
 		if (
 			me &&
@@ -128,21 +132,21 @@ export default define(meta, paramDef, async (ps, me) => {
 			return Notes.packMany([]);
 		}
 
-		const filter = async (notes: ScyllaNote[]) => {
+		const filter = (notes: ScyllaNote[]) => {
 			let filtered = notes.filter((n) => n.userId === ps.userId);
-			filtered = await filterVisibility(filtered, me, followingUserIds);
+			filtered = filterVisibility(filtered, me, followingUserIds);
+			filtered = filterBlockUser(filtered, [
+				...blockerIds,
+				...blockingIds,
+				...suspendedUserIds,
+			]);
 			if (me) {
-				filtered = await filterMutedUser(
+				filtered = filterMutedUser(
 					filtered,
-					me,
 					mutedUserIds,
 					mutedInstances,
 				);
-				filtered = await filterMutedNote(filtered, me, mutedWords);
-				filtered = await filterBlockUser(filtered, me, [
-					...blockerIds,
-					...blockingIds,
-				]);
+				filtered = filterMutedNote(filtered, me, mutedWords);
 			}
 			if (ps.withFiles) {
 				filtered = filtered.filter((n) => n.files.length > 0);

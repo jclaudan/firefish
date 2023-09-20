@@ -21,6 +21,7 @@ import {
 import {
 	InstanceMutingsCache,
 	LocalFollowingsCache,
+	SuspendedUsersCache,
 	UserBlockedCache,
 	UserBlockingCache,
 	UserMutingsCache,
@@ -98,12 +99,14 @@ export default define(meta, paramDef, async (ps, user) => {
 			mutedInstances,
 			blockerIds,
 			blockingIds,
+			suspendedUsers,
 		] = await Promise.all([
 			LocalFollowingsCache.init(user.id).then((cache) => cache.getAll()),
 			UserMutingsCache.init(user.id).then((cache) => cache.getAll()),
 			InstanceMutingsCache.init(user.id).then((cache) => cache.getAll()),
 			UserBlockedCache.init(user.id).then((cache) => cache.getAll()),
 			UserBlockingCache.init(user.id).then((cache) => cache.getAll()),
+			SuspendedUsersCache.init().then((cache) => cache.getAll()),
 		]);
 		const validUserIds = [user.id, ...followingUserIds];
 
@@ -130,7 +133,8 @@ export default define(meta, paramDef, async (ps, user) => {
 						n.notifierId &&
 						(mutedUserIds.includes(n.notifierId) ||
 							blockingIds.includes(n.notifierId) ||
-							blockerIds.includes(n.notifierId))
+							blockerIds.includes(n.notifierId) ||
+							suspendedUsers.includes(n.notifierId))
 					),
 			);
 			if (ps.directOnly) {

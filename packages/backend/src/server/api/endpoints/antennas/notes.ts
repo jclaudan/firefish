@@ -23,6 +23,7 @@ import {
 	InstanceMutingsCache,
 	LocalFollowingsCache,
 	RenoteMutingsCache,
+	SuspendedUsersCache,
 	UserBlockedCache,
 	UserBlockingCache,
 	UserMutingsCache,
@@ -93,6 +94,7 @@ export default define(meta, paramDef, async (ps, user) => {
 			blockerIds,
 			blockingIds,
 			renoteMutedIds,
+			suspendedUsers,
 		] = await Promise.all([
 			LocalFollowingsCache.init(user.id).then((cache) => cache.getAll()),
 			UserMutingsCache.init(user.id).then((cache) => cache.getAll()),
@@ -108,6 +110,7 @@ export default define(meta, paramDef, async (ps, user) => {
 			UserBlockedCache.init(user.id).then((cache) => cache.getAll()),
 			UserBlockingCache.init(user.id).then((cache) => cache.getAll()),
 			RenoteMutingsCache.init(user.id).then((cache) => cache.getAll()),
+			SuspendedUsersCache.init().then((cache) => cache.getAll()),
 		]);
 
 		const userIds: string[] = [];
@@ -139,21 +142,21 @@ export default define(meta, paramDef, async (ps, user) => {
 			.map((xs) => xs.filter((x) => x !== ""))
 			.filter((xs) => xs.length > 0);
 
-		const filter = async (notes: ScyllaNote[]) => {
-			let filtered = await filterVisibility(notes, user, followingUserIds);
-			filtered = await filterReply(filtered, antenna.withReplies, user);
-			filtered = await filterMutedUser(
+		const filter = (notes: ScyllaNote[]) => {
+			let filtered = filterVisibility(notes, user, followingUserIds);
+			filtered = filterReply(filtered, antenna.withReplies, user);
+			filtered = filterMutedUser(
 				filtered,
-				user,
 				mutedUserIds,
 				mutedInstances,
 			);
-			filtered = await filterMutedNote(filtered, user, mutedWords);
-			filtered = await filterBlockUser(filtered, user, [
+			filtered = filterMutedNote(filtered, user, mutedWords);
+			filtered = filterBlockUser(filtered, [
 				...blockerIds,
 				...blockingIds,
+				...suspendedUsers,
 			]);
-			filtered = await filterMutedRenotes(filtered, user, renoteMutedIds);
+			filtered = filterMutedRenotes(filtered, renoteMutedIds);
 			if (antenna.withFile) {
 				filtered = filtered.filter((n) => n.files.length > 0);
 			}

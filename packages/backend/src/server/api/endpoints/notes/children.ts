@@ -19,6 +19,7 @@ import type { Note } from "@/models/entities/note.js";
 import {
 	InstanceMutingsCache,
 	LocalFollowingsCache,
+	SuspendedUsersCache,
 	UserBlockedCache,
 	UserBlockingCache,
 	UserMutingsCache,
@@ -67,6 +68,8 @@ export default define(meta, paramDef, async (ps, user) => {
 			blockingIds,
 		]: string[][] = [];
 		let mutedWords: string[][] = [];
+		blockerIds = [];
+		blockingIds = [];
 		if (user) {
 			[
 				followingUserIds,
@@ -91,6 +94,7 @@ export default define(meta, paramDef, async (ps, user) => {
 				UserBlockingCache.init(user.id).then((cache) => cache.getAll()),
 			]);
 		}
+		const suspendedUserIds = await SuspendedUsersCache.init().then((cache) => cache.getAll());
 
 		const root = await getNote(ps.noteId, user, followingUserIds).catch(
 			() => null,
@@ -99,20 +103,20 @@ export default define(meta, paramDef, async (ps, user) => {
 			return await Notes.packMany([]);
 		}
 
-		const filter = async (notes: ScyllaNote[]) => {
-			let filtered = await filterVisibility(notes, user, followingUserIds);
+		const filter = (notes: ScyllaNote[]) => {
+			let filtered = filterVisibility(notes, user, followingUserIds);
+			filtered = filterBlockUser(filtered, [
+				...blockerIds,
+				...blockingIds,
+				...suspendedUserIds,
+			]);
 			if (user) {
-				filtered = await filterMutedUser(
+				filtered = filterMutedUser(
 					filtered,
-					user,
 					mutedUserIds,
 					mutedInstances,
 				);
-				filtered = await filterMutedNote(filtered, user, mutedWords);
-				filtered = await filterBlockUser(filtered, user, [
-					...blockerIds,
-					...blockingIds,
-				]);
+				filtered = filterMutedNote(filtered, user, mutedWords);
 			}
 			return filtered;
 		};
@@ -123,7 +127,7 @@ export default define(meta, paramDef, async (ps, user) => {
 			[root.id],
 			{ prepare: true },
 		);
-		const foundNotes = await filter(
+		const foundNotes = filter(
 			renoteResult.rows.map(parseScyllaNote).filter((note) => !!note.text),
 		);
 
@@ -140,7 +144,7 @@ export default define(meta, paramDef, async (ps, user) => {
 					[note.id],
 					{ prepare: true },
 				);
-				const replies = await filter(replyResult.rows.map(parseScyllaNote));
+				const replies = filter(replyResult.rows.map(parseScyllaNote));
 				if (replies.length > 0) {
 					foundNotes.push(...replies);
 					queue.push(...replies);

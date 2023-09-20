@@ -91,8 +91,8 @@ export default define(meta, paramDef, async (ps, user) => {
 		);
 		const optFilter = (n: ScyllaNote) =>
 			!n.renoteId || !!n.text || n.files.length > 0 || n.hasPoll;
-		const filter = async (notes: ScyllaNote[]) => {
-			let filtered = await filterVisibility(notes, user, followingUserIds);
+		const filter = (notes: ScyllaNote[]) => {
+			let filtered = filterVisibility(notes, user, followingUserIds);
 			if (!ps.includeMyRenotes) {
 				filtered = filtered.filter((n) => n.userId !== user.id || optFilter(n));
 			}

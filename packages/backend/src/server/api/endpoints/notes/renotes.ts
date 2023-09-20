@@ -17,6 +17,7 @@ import {
 import {
 	InstanceMutingsCache,
 	LocalFollowingsCache,
+	SuspendedUsersCache,
 	UserBlockedCache,
 	UserBlockingCache,
 	UserMutingsCache,
@@ -78,6 +79,8 @@ export default define(meta, paramDef, async (ps, user) => {
 	if (scyllaClient) {
 		let [mutedUserIds, mutedInstances, blockerIds, blockingIds]: string[][] =
 			[];
+		blockerIds = [];
+		blockingIds = [];
 		if (user) {
 			[mutedUserIds, mutedInstances, blockerIds, blockingIds] =
 				await Promise.all([
@@ -87,24 +90,25 @@ export default define(meta, paramDef, async (ps, user) => {
 					UserBlockingCache.init(user.id).then((cache) => cache.getAll()),
 				]);
 		}
+		const suspendedUserIds = await SuspendedUsersCache.init().then((cache) => cache.getAll());
 
-		const filter = async (notes: ScyllaNote[]) => {
+		const filter = (notes: ScyllaNote[]) => {
 			let filtered = notes;
 			if (ps.userId) {
 				filtered = filtered.filter((n) => n.userId === ps.userId);
 			}
-			filtered = await filterVisibility(filtered, user, followingUserIds);
+			filtered = filterVisibility(filtered, user, followingUserIds);
+			filtered = filterBlockUser(filtered, [
+				...blockerIds,
+				...blockingIds,
+				...suspendedUserIds,
+			]);
 			if (user) {
-				filtered = await filterMutedUser(
+				filtered = filterMutedUser(
 					filtered,
-					user,
 					mutedUserIds,
 					mutedInstances,
 				);
-				filtered = await filterBlockUser(filtered, user, [
-					...blockerIds,
-					...blockingIds,
-				]);
 			}
 			return filtered;
 		};

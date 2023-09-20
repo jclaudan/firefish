@@ -13,6 +13,7 @@ import {
 } from "@/db/scylla.js";
 import {
 	InstanceMutingsCache,
+	SuspendedUsersCache,
 	UserBlockedCache,
 	UserBlockingCache,
 	UserMutingsCache,
@@ -63,6 +64,9 @@ export default define(meta, paramDef, async (ps, user) => {
 		let [mutedUserIds, mutedInstances, blockerIds, blockingIds]: string[][] =
 			[];
 		let mutedWords: string[][] = [];
+		blockerIds = [];
+		blockingIds = [];
+		const suspendedUserIds = await SuspendedUsersCache.init().then((cache) => cache.getAll());
 
 		const foundNotes: ScyllaNote[] = [];
 		let searchedDays = 0;
@@ -101,18 +105,19 @@ export default define(meta, paramDef, async (ps, user) => {
 					break;
 			}
 
+			notes = filterBlockUser(notes, [
+				...blockerIds,
+				...blockingIds,
+				...suspendedUserIds,
+			]);
+
 			if (user) {
-				notes = await filterMutedUser(
+				notes = filterMutedUser(
 					notes,
-					user,
 					mutedUserIds,
 					mutedInstances,
 				);
-				notes = await filterMutedNote(notes, user, mutedWords);
-				notes = await filterBlockUser(notes, user, [
-					...blockerIds,
-					...blockingIds,
-				]);
+				notes = filterMutedNote(notes, user, mutedWords);
 			}
 
 			foundNotes.push(...notes);
