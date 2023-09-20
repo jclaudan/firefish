@@ -7,6 +7,11 @@ import { doPostSuspend } from "@/services/suspend-user.js";
 import { publishUserEvent } from "@/services/stream.js";
 import { scyllaClient } from "@/db/scylla.js";
 import { SuspendedUsersCache } from "@/misc/cache.js";
+import {
+	localUserByIdCache,
+	userByIdCache,
+	userDenormalizedCache,
+} from "@/services/user-cache.js";
 
 export const meta = {
 	tags: ["admin"],
@@ -38,6 +43,8 @@ export default define(meta, paramDef, async (ps, me) => {
 		throw new Error("cannot suspend moderator");
 	}
 
+	await userDenormalizedCache.delete(user.id);
+	await userByIdCache.delete(user.id);
 	await SuspendedUsersCache.init().then((cache) => cache.add(user.id));
 	await Users.update(user.id, {
 		isSuspended: true,
@@ -49,6 +56,7 @@ export default define(meta, paramDef, async (ps, me) => {
 
 	// Terminate streaming
 	if (Users.isLocalUser(user)) {
+		await localUserByIdCache.delete(user.id);
 		publishUserEvent(user.id, "terminate", {});
 	}
 

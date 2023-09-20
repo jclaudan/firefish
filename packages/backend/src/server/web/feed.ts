@@ -35,11 +35,26 @@ export default async function (
 		searchCriteria.replyId = IsNull();
 	}
 
-	const notes = await Notes.find({
-		where: searchCriteria,
-		order: { createdAt: -1 },
-		take: history,
-	});
+	let notes: Note[] = [];
+	if (scyllaClient) {
+		const query = [prepared.note.select.byUserId, "LIMIT ?"];
+		notes = await scyllaClient
+			.execute(
+				query.join(" "),
+				[user.id, Math.min(history, config.scylla?.queryLimit ?? 100)],
+				{ prepare: true },
+			)
+			.then((result) => result.rows.map(parseScyllaNote));
+		notes = notes.filter(
+			(note) => !(!renotes && note.renoteId) && !(!replies && note.replyId),
+		);
+	} else {
+		notes = await Notes.find({
+			where: searchCriteria,
+			order: { createdAt: -1 },
+			take: history,
+		});
+	}
 
 	const feed = new Feed({
 		id: author.link,
