@@ -46,7 +46,10 @@ export default async function (
 			)
 			.then((result) => result.rows.map(parseScyllaNote));
 		notes = notes.filter(
-			(note) => !(!renotes && note.renoteId) && !(!replies && note.replyId),
+			(note) =>
+				["public", "home"].includes(note.visibility) &&
+				!(!renotes && note.renoteId) &&
+				!(!replies && note.replyId),
 		);
 	} else {
 		notes = await Notes.find({
