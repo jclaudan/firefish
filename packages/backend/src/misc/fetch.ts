@@ -2,6 +2,7 @@ import * as http from "node:http";
 import * as https from "node:https";
 import { URL } from "node:url";
 import request from "superagent";
+import superagent from "superagent";
 import { HttpProxyAgent, HttpsProxyAgent } from "hpagent";
 import config from "@/config/index.js";
 
@@ -20,6 +21,63 @@ export async function getJson(
 		.agent(getAgentByUrl(new URL(url)));
 
 	return response.body;
+}
+
+export async function getResponse(args: {
+	url: string;
+	method: string;
+	body?: string;
+	headers: Record<string, string>;
+	timeout?: number;
+	size?: number;
+}): Promise<superagent.Response> {
+	const timeout = args.timeout || 10 * 1000;
+	const method = args.method.toUpperCase();
+	const request = superagent(method, args.url);
+	if (args.headers)
+		request.set(args.headers);
+	if (args.body)
+		request.send(args.body);
+	const urlObj = new URL(args.url);
+	if (urlObj.protocol === "http:") {
+		request.agent(httpAgent);
+	} else if (urlObj.protocol === "https:") {
+		request.agent(httpsAgent);
+	}
+
+	request.timeout({
+		response: timeout,
+		deadline: timeout * 6,
+	});
+	request.on("response", (res) => {
+		const contentLength = parseInt(res.header["content-length"] || "0", 10);
+		if (contentLength > (args.size || 10 * 1024 * 1024)) {
+			throw new StatusError(
+				`Response size exceeded: ${contentLength}`,
+				413,
+				"Payload Too Large",
+			);
+		}
+	});
+
+	try {
+		const response = await request;
+		if (!response.ok) {
+			throw new StatusError(
+				`${response.status} ${response.status}`,
+				response.status,
+			);
+		}
+		return response;
+	} catch (error) {
+		if (error.response) {
+			throw new StatusError(
+				`${error.response.status} ${error.response.status}`,
+				error.response.status,
+			);
+		}
+		throw error;
+	}
 }
 
 export async function getHtml(
