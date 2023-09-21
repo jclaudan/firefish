@@ -1,8 +1,7 @@
 import * as http from "node:http";
 import * as https from "node:https";
-import type { URL } from "node:url";
-import CacheableLookup from "cacheable-lookup";
-import fetch from "node-fetch";
+import { URL } from "node:url";
+import request from "superagent";
 import { HttpProxyAgent, HttpsProxyAgent } from "hpagent";
 import config from "@/config/index.js";
 
@@ -12,20 +11,15 @@ export async function getJson(
 	timeout = 10000,
 	headers?: Record<string, string>,
 ) {
-	const res = await getResponse({
-		url,
-		method: "GET",
-		headers: Object.assign(
-			{
-				"User-Agent": config.userAgent,
-				Accept: accept,
-			},
-			headers || {},
-		),
-		timeout,
-	});
+	const response = await request
+		.get(url)
+		.set("User-Agent", config.userAgent)
+		.set("Accept", accept)
+		.set(headers || {})
+		.timeout(timeout)
+		.agent(getAgentByUrl(new URL(url)));
 
-	return await res.json();
+	return response.body;
 }
 
 export async function getHtml(
@@ -34,71 +28,19 @@ export async function getHtml(
 	timeout = 10000,
 	headers?: Record<string, string>,
 ) {
-	const res = await getResponse({
-		url,
-		method: "GET",
-		headers: Object.assign(
-			{
-				"User-Agent": config.userAgent,
-				Accept: accept,
-			},
-			headers || {},
-		),
-		timeout,
-	});
+	const response = await request
+		.get(url)
+		.set("User-Agent", config.userAgent)
+		.set("Accept", accept)
+		.set(headers || {})
+		.timeout(timeout)
+		.agent(getAgentByUrl(new URL(url)));
 
-	return await res.text();
+	return response.text;
 }
-
-export async function getResponse(args: {
-	url: string;
-	method: string;
-	body?: string;
-	headers: Record<string, string>;
-	timeout?: number;
-	size?: number;
-}) {
-	const timeout = args.timeout || 10 * 1000;
-
-	const controller = new AbortController();
-	setTimeout(() => {
-		controller.abort();
-	}, timeout * 6);
-
-	const res = await fetch(args.url, {
-		method: args.method,
-		headers: args.headers,
-		body: args.body,
-		timeout,
-		size: args.size || 10 * 1024 * 1024,
-		agent: getAgentByUrl,
-		signal: controller.signal,
-	});
-
-	if (!res.ok) {
-		throw new StatusError(
-			`${res.status} ${res.statusText}`,
-			res.status,
-			res.statusText,
-		);
-	}
-
-	return res;
-}
-
-const cache = new CacheableLookup({
-	maxTtl: 3600, // 1hours
-	errorTtl: 30, // 30secs
-	lookup: false, // nativeのdns.lookupにfallbackしない
-});
-
-/**
- * Get http non-proxy agent
- */
 const _http = new http.Agent({
 	keepAlive: true,
 	keepAliveMsecs: 30 * 1000,
-	lookup: cache.lookup,
 	localAddress: config.outgoingAddress,
 } as http.AgentOptions);
 
@@ -108,7 +50,6 @@ const _http = new http.Agent({
 const _https = new https.Agent({
 	keepAlive: true,
 	keepAliveMsecs: 30 * 1000,
-	lookup: cache.lookup,
 	localAddress: config.outgoingAddress,
 } as https.AgentOptions);
 
@@ -167,9 +108,6 @@ export class StatusError extends Error {
 		this.name = "StatusError";
 		this.statusCode = statusCode;
 		this.statusMessage = statusMessage;
-		this.isClientError =
-			typeof this.statusCode === "number" &&
-			this.statusCode >= 400 &&
-			this.statusCode < 500;
+		this.isClientError = this.statusCode >= 400 && this.statusCode < 500;
 	}
 }

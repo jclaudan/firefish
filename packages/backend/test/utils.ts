@@ -6,13 +6,13 @@ import * as childProcess from "child_process";
 import * as http from "node:http";
 import { SIGKILL } from "constants";
 import WebSocket from "ws";
-import * as misskey from "firefish-js";
+import * as firefish from "firefish-js";
 import fetch from "node-fetch";
 import FormData from "form-data";
 import { DataSource } from "typeorm";
 import loadConfig from "../src/config/load.js";
 import { entities } from "../src/db/postgre.js";
-import got from "got";
+import superagent from "superagent";
 
 const _filename = fileURLToPath(import.meta.url);
 const _dirname = dirname(_filename);
@@ -34,39 +34,24 @@ export const async = (fn: Function) => (done: Function) => {
 export const api = async (endpoint: string, params: any, me?: any) => {
 	endpoint = endpoint.replace(/^\//, "");
 
-	const auth = me
-		? {
-				i: me.token,
-		  }
-		: {};
+	const auth = me ? { i: me.token } : {};
 
-	const res = await got<string>(`http://localhost:${port}/api/${endpoint}`, {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify(Object.assign(auth, params)),
-		retry: {
-			limit: 0,
-		},
-		hooks: {
-			beforeError: [
-				(error) => {
-					const { response } = error;
-					if (response && response.body) console.warn(response.body);
-					return error;
-				},
-			],
-		},
-	});
+	try {
+		const res = await superagent
+			.post(`http://localhost:${port}/api/${endpoint}`)
+			.set("Content-Type", "application/json")
+			.send(Object.assign(auth, params));
 
-	const status = res.statusCode;
-	const body = res.statusCode !== 204 ? await JSON.parse(res.body) : null;
+		const status = res.status;
+		const body = res.status !== 204 ? res.body : null;
 
-	return {
-		status,
-		body,
-	};
+		return { status, body };
+	} catch (error) {
+		if (error.response?.body) {
+			console.warn(error.response.body);
+		}
+		throw error;
+	}
 };
 
 export const request = async (
@@ -113,8 +98,8 @@ export const signup = async (params?: any): Promise<any> => {
 
 export const post = async (
 	user: any,
-	params?: misskey.Endpoints["notes/create"]["req"],
-): Promise<misskey.entities.Note> => {
+	params?: firefish.Endpoints["notes/create"]["req"],
+): Promise<firefish.entities.Note> => {
 	const q = Object.assign(
 		{
 			text: "test",
@@ -150,30 +135,27 @@ export const react = async (
 export const uploadFile = async (user: any, _path?: string): Promise<any> => {
 	const absPath =
 		_path == null
-			? `${_dirname}/resources/Lenna.jpg`
+			? path.join(__dirname, "resources", "Lenna.jpg")
 			: path.isAbsolute(_path)
 			? _path
-			: `${_dirname}/resources/${_path}`;
+			: path.join(__dirname, "resources", _path);
 
-	const formData = new FormData() as any;
-	formData.append("i", user.token);
-	formData.append("file", fs.createReadStream(absPath));
-	formData.append("force", "true");
+	try {
+		const res = await superagent
+			.post(`http://localhost:${port}/api/drive/files/create`)
+			.attach("file", absPath)
+			.field("i", user.token)
+			.field("force", "true");
 
-	const res = await got<string>(
-		`http://localhost:${port}/api/drive/files/create`,
-		{
-			method: "POST",
-			body: formData,
-			retry: {
-				limit: 0,
-			},
-		},
-	);
+		const body = res.status !== 204 ? res.body : null;
 
-	const body = res.statusCode !== 204 ? await JSON.parse(res.body) : null;
-
-	return body;
+		return body;
+	} catch (error) {
+		if (error.response?.body) {
+			console.warn(error.response.body);
+		}
+		throw error;
+	}
 };
 
 export const uploadUrl = async (user: any, url: string) => {
