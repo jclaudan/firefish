@@ -1,4 +1,5 @@
 import { In, IsNull } from "typeorm";
+import { detect as detectLanguage } from "tinyld";
 import config from "@/config/index.js";
 import type { Note, IMentionedRemoteUsers } from "@/models/entities/note.js";
 import type { DriveFile } from "@/models/entities/drive-file.js";
@@ -157,6 +158,11 @@ export default async function renderNote(
 		}),
 	);
 
+	const lang = detectLanguage(text);
+	const contentMap = lang ? {
+		[lang]: content
+	} : null;
+
 	const emojis = await getEmojis(note.emojis);
 	const apemojis = emojis.map((emoji) => renderEmoji(emoji));
 
@@ -221,12 +227,11 @@ export default async function renderNote(
 		attributedTo,
 		summary,
 		content,
-		_misskey_content: text,
+		contentMap,
 		source: {
 			content: text,
 			mediaType: "text/x.misskeymarkdown",
 		},
-		_misskey_quote: quote,
 		quoteUri: quote,
 		quoteUrl: quote,
 		published: note.createdAt.toISOString(),

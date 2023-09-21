@@ -306,7 +306,7 @@ export async function createPerson(
 					tags,
 					isBot,
 					isCat: (person as any).isCat === true,
-					speakAsCat: person.speakAsCat,
+					speakAsCat: (person as any).speakAsCat === true,
 					isIndexable: person.indexable,
 				}),
 			)) as IRemoteUser;
@@ -557,6 +557,7 @@ export async function updatePerson(
 		tags,
 		isBot: getApType(object) !== "Person",
 		isCat: (person as any).isCat === true,
+		speakAsCat: (person as any).speakAsCat === true,
 		isIndexable: person.indexable,
 		isLocked: !!person.manuallyApprovesFollowers,
 		movedToUri: person.movedTo || null,

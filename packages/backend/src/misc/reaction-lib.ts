@@ -6,21 +6,7 @@ import { IsNull } from "typeorm";
 import { EmojiCache } from "@/misc/populate-emojis.js";
 import type { Emoji } from "@/models/entities/emoji.js";
 
-const legacies = new Map([
-	["like", "👍"],
-	["love", "❤️"],
-	["laugh", "😆"],
-	["hmm", "🤔"],
-	["surprise", "😮"],
-	["congrats", "🎉"],
-	["angry", "💢"],
-	["confused", "😥"],
-	["rip", "😇"],
-	["pudding", "🍮"],
-	["star", "⭐"],
-]);
-
-async function getFallbackReaction() {
+export async function getFallbackReaction() {
 	const meta = await fetchMeta();
 	const name = meta.defaultReaction;
 
@@ -40,39 +26,17 @@ async function getFallbackReaction() {
 	return { name, emoji };
 }
 
-export function convertLegacyReactions(reactions: Record<string, number>) {
-	const _reactions = new Map();
-	const decodedReactions = new Map();
+export function convertReactions(reactions: Record<string, number>) {
+	const result = new Map();
 
 	for (const reaction in reactions) {
 		if (reactions[reaction] <= 0) continue;
 
-		let decodedReaction;
-		if (decodedReactions.has(reaction)) {
-			decodedReaction = decodedReactions.get(reaction);
-		} else {
-			decodedReaction = decodeReaction(reaction);
-			decodedReactions.set(reaction, decodedReaction);
-		}
-
-		const emoji = legacies.get(decodedReaction.reaction);
-		if (emoji) {
-			_reactions.set(emoji, (_reactions.get(emoji) || 0) + reactions[reaction]);
-		} else {
-			_reactions.set(
-				reaction,
-				(_reactions.get(reaction) || 0) + reactions[reaction],
-			);
-		}
+		const decoded = decodeReaction(reaction).reaction;
+		result.set(decoded, (result.get(decoded) || 0) + reactions[reaction]);
 	}
 
-	const _reactions2 = new Map();
-	for (const [reaction, count] of _reactions) {
-		const decodedReaction = decodedReactions.get(reaction);
-		_reactions2.set(decodedReaction.reaction, count);
-	}
-
-	return Object.fromEntries(_reactions2);
+	return Object.fromEntries(result);
 }
 
 export async function toDbReaction(
@@ -83,9 +47,7 @@ export async function toDbReaction(
 
 	const _reacterHost = toPunyNullable(reacterHost);
 
-	// Convert string-type reactions to unicode
-	const emoji = legacies.get(reaction) || (reaction === "♥️" ? "❤️" : null);
-	if (emoji) return { name: emoji, emoji: null };
+	if (reaction === "♥️") return { name: "❤️", emoji: null };
 
 	// Allow unicode reactions
 	const match = emojiRegex.exec(reaction);
@@ -151,10 +113,4 @@ export function decodeReaction(str: string): DecodedReaction {
 		name: undefined,
 		host: undefined,
 	};
-}
-
-export function convertLegacyReaction(reaction: string): string {
-	const decoded = decodeReaction(reaction).reaction;
-	if (legacies.has(decoded)) return legacies.get(decoded)!;
-	return decoded;
 }

@@ -258,7 +258,7 @@ export async function createNote(
 	// Quote
 	let quote: Note | undefined | null;
 
-	if (note._misskey_quote || note.quoteUrl || note.quoteUri) {
+	if (note.quoteUrl || note.quoteUri) {
 		const tryResolveNote = async (
 			uri: string,
 		): Promise<
@@ -295,7 +295,7 @@ export async function createNote(
 		};
 
 		const uris = unique(
-			[note._misskey_quote, note.quoteUrl, note.quoteUri].filter(
+			[note.quoteUrl, note.quoteUri].filter(
 				(x): x is string => typeof x === "string",
 			),
 		);
@@ -321,8 +321,6 @@ export async function createNote(
 		typeof note.source?.content === "string"
 	) {
 		text = note.source.content;
-	} else if (typeof note._misskey_content !== "undefined") {
-		text = note._misskey_content;
 	} else if (typeof note.content === "string") {
 		text = htmlToMfm(note.content, note.tag);
 	}
@@ -624,8 +622,6 @@ export async function updateNote(value: string | IObject, resolver?: Resolver) {
 		typeof post.source?.content === "string"
 	) {
 		text = post.source.content;
-	} else if (typeof post._misskey_content !== "undefined") {
-		text = post._misskey_content;
 	} else if (typeof post.content === "string") {
 		text = htmlToMfm(post.content, post.tag);
 	}
