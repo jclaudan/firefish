@@ -1,7 +1,6 @@
 import * as http from "node:http";
 import * as https from "node:https";
 import { URL } from "node:url";
-import request from "superagent";
 import superagent from "superagent";
 import { HttpProxyAgent, HttpsProxyAgent } from "hpagent";
 import config from "@/config/index.js";
@@ -12,7 +11,7 @@ export async function getJson(
 	timeout = 10000,
 	headers?: Record<string, string>,
 ) {
-	const response = await request
+	const response = await superagent
 		.get(url)
 		.set("User-Agent", config.userAgent)
 		.set("Accept", accept)
@@ -86,7 +85,7 @@ export async function getHtml(
 	timeout = 10000,
 	headers?: Record<string, string>,
 ) {
-	const response = await request
+	const response = await superagent
 		.get(url)
 		.set("User-Agent", config.userAgent)
 		.set("Accept", accept)
