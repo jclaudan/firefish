@@ -81,6 +81,8 @@ import {
 	ScyllaPoll,
 } from "@/db/scylla.js";
 import { userByIdCache, userDenormalizedCache } from "../user-cache.js";
+import { detect as detectLanguage } from "tinyld";
+import { langmap } from "@/misc/langmap.js";
 
 export const mutedWordsCache = new Cache<
 	{ userId: UserProfile["userId"]; mutedWords: UserProfile["mutedWords"] }[]
@@ -153,6 +155,7 @@ type Option = {
 	createdAt?: Date | null;
 	name?: string | null;
 	text?: string | null;
+	lang?: string | null;
 	reply?: Note | null;
 	renote?: Note | null;
 	files?: DriveFile[] | null;
@@ -288,6 +291,16 @@ export default async (
 			data.text = data.text.trim();
 		} else {
 			data.text = null;
+		}
+
+		if (data.lang) {
+			if (!Object.keys(langmap).includes(data.lang.trim()))
+				throw new Error("invalid param");
+			data.lang = data.lang.trim().split("-")[0].split("@")[0];
+		} else if (data.text) {
+			data.lang = detectLanguage(data.text);
+		} else {
+			data.lang = null;
 		}
 
 		let tags = data.apHashtags;
@@ -772,6 +785,7 @@ async function insertNote(
 			: null,
 		name: data.name,
 		text: data.text,
+		lang: data.lang,
 		hasPoll: data.poll != null,
 		cw: data.cw == null ? null : data.cw,
 		tags: tags.map((tag) => normalizeForSearch(tag)),

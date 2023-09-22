@@ -64,6 +64,7 @@ import {
 	parseHomeTimeline,
 } from "@/db/scylla.js";
 import type { Client } from "cassandra-driver";
+import { langmap } from "@/misc/langmap.js";
 
 const logger = apLogger;
 
@@ -316,11 +317,24 @@ export async function createNote(
 
 	// Text parsing
 	let text: string | null = null;
+	let lang: string | null = null;
 	if (
 		note.source?.mediaType === "text/x.misskeymarkdown" &&
 		typeof note.source?.content === "string"
 	) {
 		text = note.source.content;
+		if (note.contentMap != null) {
+			const key = Object.keys(note.contentMap)[0];
+			lang = Object.keys(langmap).includes(key)
+				? key.trim().split("-")[0].split("@")[0]
+				: null;
+		}
+	} else if (note.contentMap != null) {
+		const entry = Object.entries(note.contentMap)[0];
+		lang = Object.keys(langmap).includes(entry[0])
+			? entry[0].trim().split("-")[0].split("@")[0]
+			: null;
+		text = htmlToMfm(entry[1], note.tag);
 	} else if (typeof note.content === "string") {
 		text = htmlToMfm(note.content, note.tag);
 	}
@@ -417,6 +431,7 @@ export async function createNote(
 			name: note.name,
 			cw,
 			text,
+			lang,
 			localOnly: false,
 			visibility,
 			visibleUsers,
@@ -617,11 +632,24 @@ export async function updateNote(value: string | IObject, resolver?: Resolver) {
 
 	// Text parsing
 	let text: string | null = null;
+	let lang: string | null = null;
 	if (
 		post.source?.mediaType === "text/x.misskeymarkdown" &&
 		typeof post.source?.content === "string"
 	) {
 		text = post.source.content;
+		if (post.contentMap != null) {
+			const key = Object.keys(post.contentMap)[0];
+			lang = Object.keys(langmap).includes(key)
+				? key.trim().split("-")[0].split("@")[0]
+				: null;
+		}
+	} else if (post.contentMap != null) {
+		const entry = Object.entries(post.contentMap)[0];
+		lang = Object.keys(langmap).includes(entry[0])
+			? entry[0].trim().split("-")[0].split("@")[0]
+			: null;
+		text = htmlToMfm(entry[1], post.tag);
 	} else if (typeof post.content === "string") {
 		text = htmlToMfm(post.content, post.tag);
 	}
@@ -716,6 +744,9 @@ export async function updateNote(value: string | IObject, resolver?: Resolver) {
 	const update = {} as Partial<Note>;
 	if (text && text !== note.text) {
 		update.text = text;
+	}
+	if (lang && lang !== note.lang) {
+		update.lang = lang;
 	}
 	if (cw !== note.cw) {
 		update.cw = cw ? cw : null;

@@ -1,5 +1,5 @@
 import { In } from "typeorm";
-import create, { index } from "@/services/note/create.js";
+import { index } from "@/services/note/create.js";
 import type { IRemoteUser, User } from "@/models/entities/user.js";
 import {
 	Users,
@@ -46,6 +46,8 @@ import {
 	parseHomeTimeline,
 } from "@/db/scylla.js";
 import type { Client } from "cassandra-driver";
+import { detect as detectLanguage } from "tinyld";
+import { langmap } from "@/misc/langmap.js";
 
 export const meta = {
 	tags: ["notes"],
@@ -180,6 +182,7 @@ export const paramDef = {
 			},
 		},
 		text: { type: "string", maxLength: MAX_NOTE_TEXT_LENGTH, nullable: true },
+		lang: { type: "string", nullable: true, maxLength: 10 },
 		cw: { type: "string", nullable: true, maxLength: 250 },
 		localOnly: { type: "boolean", default: false },
 		noExtractMentions: { type: "boolean", default: false },
@@ -398,6 +401,16 @@ export default define(meta, paramDef, async (ps, user) => {
 		ps.text = null;
 	}
 
+	if (ps.lang) {
+		if (!Object.keys(langmap).includes(ps.lang.trim()))
+			throw new Error("invalid param");
+		ps.lang = ps.lang.trim().split("-")[0].split("@")[0];
+	} else if (ps.text) {
+		ps.lang = detectLanguage(ps.text);
+	} else {
+		ps.lang = null;
+	}
+
 	let tags = [];
 	let emojis = [];
 	let mentionedUsers = [];
@@ -584,6 +597,9 @@ export default define(meta, paramDef, async (ps, user) => {
 	const update: Partial<Note> = {};
 	if (ps.text !== note.text) {
 		update.text = ps.text;
+	}
+	if (ps.lang !== note.lang) {
+		update.lang = ps.lang;
 	}
 	if (ps.cw !== note.cw || (ps.cw && !note.cw)) {
 		update.cw = ps.cw;

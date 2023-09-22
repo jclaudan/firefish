@@ -40,7 +40,7 @@
 					v-if="showTicker"
 					class="ticker"
 					:instance="note.user.instance"
-					:host="note.user.host"
+					@click.stop="openServerInfo"
 				/>
 			</div>
 		</div>
@@ -57,10 +57,12 @@ import MkInstanceTicker from "@/components/MkInstanceTicker.vue";
 import { notePage } from "@/filters/note";
 import { userPage } from "@/filters/user";
 import { i18n } from "@/i18n";
+import { pageWindow } from "@/os";
 
 const props = defineProps<{
 	note: misskey.entities.Note;
 	pinned?: boolean;
+	canOpenServerInfo?: boolean;
 }>();
 
 const note = ref(props.note);
@@ -69,6 +71,15 @@ const showTicker =
 	defaultStore.state.instanceTicker === "always" ||
 	(defaultStore.state.instanceTicker === "remote" &&
 		note.value.user.instance);
+
+function openServerInfo() {
+	if (!props.canOpenServerInfo || !defaultStore.state.openServerInfo) return;
+	const instanceInfoUrl =
+		note.value.user.host == null
+			? "/about"
+			: `/instance-info/${note.value.user.host}`;
+	pageWindow(instanceInfoUrl);
+}
 </script>
 
 <style lang="scss" scoped>
