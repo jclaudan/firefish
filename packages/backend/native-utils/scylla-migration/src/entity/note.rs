@@ -16,6 +16,7 @@ pub struct Model {
     pub renote_id: Option<String>,
     #[sea_orm(column_type = "Text", nullable)]
     pub text: Option<String>,
+    pub lang: Option<String>,
     pub name: Option<String>,
     pub cw: Option<String>,
     #[sea_orm(column_name = "userId")]

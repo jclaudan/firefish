@@ -33,8 +33,6 @@ import { renderActivity } from "@/remote/activitypub/renderer/index.js";
 import renderNote from "@/remote/activitypub/renderer/note.js";
 import renderUpdate from "@/remote/activitypub/renderer/update.js";
 import { deliverToRelays } from "@/services/relay.js";
-// import { deliverQuestionUpdate } from "@/services/note/polls/update.js";
-import { fetchMeta } from "@/misc/fetch-meta.js";
 import {
 	type ScyllaNote,
 	type ScyllaPoll,
@@ -690,6 +688,7 @@ export default define(meta, paramDef, async (ps, user) => {
 				newScyllaNote.id,
 				scyllaNote.visibility,
 				newScyllaNote.text,
+				newScyllaNote.lang,
 				newScyllaNote.name,
 				newScyllaNote.cw,
 				newScyllaNote.localOnly,

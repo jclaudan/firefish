@@ -369,6 +369,7 @@ impl Initializer {
             id: note.id.clone(),
             visibility: note.visibility.to_value(),
             content: note.text,
+            lang: note.lang,
             name: note.name,
             cw: note.cw,
             local_only: note.local_only,
@@ -419,6 +420,7 @@ impl Initializer {
             id: s_note.id,
             visibility: s_note.visibility,
             content: s_note.content,
+            lang: s_note.lang,
             name: s_note.name,
             cw: s_note.cw,
             local_only: s_note.local_only,
@@ -658,6 +660,7 @@ struct NoteTable {
     id: String,
     visibility: String,
     content: Option<String>,
+    lang: Option<String>,
     name: Option<String>,
     cw: Option<String>,
     local_only: bool,
@@ -702,6 +705,7 @@ INSERT INTO note (
 "id",
 "visibility",
 "content",
+"lang",
 "name",
 "cw",
 "localOnly",
@@ -737,7 +741,7 @@ INSERT INTO note (
 "reactions",
 "noteEdit",
 "updatedAt"
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 "#;
 
 #[derive(Clone, ValueList)]
@@ -748,6 +752,7 @@ struct HomeTimelineTable {
     id: String,
     visibility: String,
     content: Option<String>,
+    lang: Option<String>,
     name: Option<String>,
     cw: Option<String>,
     local_only: bool,
@@ -793,6 +798,7 @@ INSERT INTO home_timeline (
 "id",
 "visibility",
 "content",
+"lang",
 "name",
 "cw",
 "localOnly",
@@ -828,7 +834,7 @@ INSERT INTO home_timeline (
 "reactions",
 "noteEdit",
 "updatedAt"
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 "#;
 
 #[derive(ValueList)]

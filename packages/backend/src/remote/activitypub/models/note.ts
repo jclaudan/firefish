@@ -7,7 +7,6 @@ import { extractMentionedUsers } from "@/services/note/create.js";
 import { resolvePerson } from "./person.js";
 import { resolveImage } from "./image.js";
 import type {
-	ILocalUser,
 	CacheableRemoteUser,
 } from "@/models/entities/user.js";
 import { htmlToMfm } from "../misc/html-to-mfm.js";
@@ -52,7 +51,6 @@ import { In } from "typeorm";
 import { DB_MAX_IMAGE_COMMENT_LENGTH } from "@/misc/hard-limits.js";
 import { truncate } from "@/misc/truncate.js";
 import { type Size, getEmojiSize } from "@/misc/emoji-meta.js";
-import { fetchMeta } from "@/misc/fetch-meta.js";
 import {
 	type ScyllaNote,
 	type ScyllaPoll,
@@ -878,6 +876,7 @@ export async function updateNote(value: string | IObject, resolver?: Resolver) {
 				newScyllaNote.id,
 				scyllaNote.visibility,
 				newScyllaNote.text,
+				newScyllaNote.lang,
 				newScyllaNote.name,
 				newScyllaNote.cw,
 				newScyllaNote.localOnly,

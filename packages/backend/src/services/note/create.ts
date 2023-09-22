@@ -360,6 +360,8 @@ export default async (
 
 		const note = await insertNote(user, data, tags, emojis, mentionedUsers);
 
+		if (!note) return rej("empty note");
+
 		res(note);
 
 		// 統計を更新
@@ -877,12 +879,24 @@ async function insertNote(
 				};
 			}
 
+			// Skip insertion if the post is empty
+			if (
+				!insert.text && // no content
+				!insert.hasPoll && // no poll
+				(!data.files || data.files.length === 0) && // no files
+				!insert.replyId && // no reply
+				!insert.renoteId // no boost
+			) {
+				return null;
+			}
+
 			const params = [
 				insert.createdAt,
 				insert.createdAt,
 				insert.id,
 				insert.visibility,
 				insert.text,
+				insert.lang,
 				insert.name,
 				insert.cw,
 				insert.localOnly,

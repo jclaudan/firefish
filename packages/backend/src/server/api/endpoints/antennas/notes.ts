@@ -143,7 +143,8 @@ export default define(meta, paramDef, async (ps, user) => {
 			.filter((xs) => xs.length > 0);
 
 		const filter = (notes: ScyllaNote[]) => {
-			let filtered = filterVisibility(notes, user, followingUserIds);
+			let filtered = notes.filter(note => note.visibility !== "home");
+			filtered = filterVisibility(filtered, user, followingUserIds);
 			filtered = filterReply(filtered, antenna.withReplies, user);
 			filtered = filterMutedUser(
 				filtered,
