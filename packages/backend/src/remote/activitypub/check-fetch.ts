@@ -1,5 +1,5 @@
 import { URL } from "url";
-import httpSignature from "@peertube/http-signature";
+import httpSignature from "@joinfirefish/http-signature";
 import config from "@/config/index.js";
 import { fetchMeta } from "@/misc/fetch-meta.js";
 import { toPuny } from "@/misc/convert-host.js";

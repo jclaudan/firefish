@@ -3,7 +3,7 @@ import type { Note } from "@/models/entities/note";
 import type { User } from "@/models/entities/user.js";
 import type { Webhook } from "@/models/entities/webhook";
 import type { IActivity } from "@/remote/activitypub/type.js";
-import type httpSignature from "@peertube/http-signature";
+import type httpSignature from "@joinfirefish/http-signature";
 
 export type DeliverJobData = {
 	/** Actor */

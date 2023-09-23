@@ -1,6 +1,6 @@
 import { URL } from "node:url";
 import type Bull from "bull";
-import httpSignature from "@peertube/http-signature";
+import httpSignature from "@joinfirefish/http-signature";
 import perform from "@/remote/activitypub/perform.js";
 import Logger from "@/services/logger.js";
 import { registerOrFetchInstanceDoc } from "@/services/register-or-fetch-instance-doc.js";

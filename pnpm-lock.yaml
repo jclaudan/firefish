@@ -111,6 +111,9 @@ importers:
       '@elastic/elasticsearch':
         specifier: 7.17.0
         version: 7.17.0
+      '@joinfirefish/http-signature':
+        specifier: 1.8.3
+        version: 1.8.3
       '@koa/cors':
         specifier: 3.4.3
         version: 3.4.3
@@ -120,9 +123,6 @@ importers:
       '@koa/router':
         specifier: 9.0.1
         version: 9.0.1
-      '@peertube/http-signature':
-        specifier: 1.7.0
-        version: 1.7.0
       '@redocly/openapi-core':
         specifier: 1.0.2
         version: 1.0.2
@@ -742,7 +742,7 @@ importers:
         version: 2.30.0
       emojilib:
         specifier: github:thatonecalculator/emojilib
-        version: github.com/thatonecalculator/emojilib/d3c8c6a77d4362b3b3180099f1d2eac344ce245c
+        version: github.com/thatonecalculator/emojilib/c3c82a3c8f360e1ec567c61012b95d23f0d22175
       escape-regexp:
         specifier: 0.0.1
         version: 0.0.1
@@ -2740,6 +2740,15 @@ packages:
       chalk: 4.1.2
     dev: true
 
+  /@joinfirefish/http-signature@1.8.3:
+    resolution: {integrity: sha512-x3YOhg1Phq2aTml5n+8jTpBcKKI0ArgL7xNvaBBby6E+is2lHQYHvlzWIHrDsCM9Fu9VtMBCvlqEcjuoA59K0A==}
+    engines: {node: '>=4.1.6'}
+    dependencies:
+      assert-plus: 1.0.0
+      jsprim: 2.0.2
+      sshpk: 1.17.0
+    dev: false
+
   /@jridgewell/gen-mapping@0.3.3:
     resolution: {integrity: sha512-HLhSWOLRi875zjjMG/r+Nv0oCW8umGb0BgEhyX3dDX3egwZtB8PqLnjz3yedt8R5StBrzcg4aBpnh8UA9D1BoQ==}
     engines: {node: '>=6.0.0'}
@@ -3038,15 +3047,6 @@ packages:
 
   /@one-ini/wasm@0.1.1:
     resolution: {integrity: sha512-XuySG1E38YScSJoMlqovLru4KTUNSjgVTIjyh7qMX6aNN5HY5Ct5LhRJdxO79JtTzKfzV/bnWpz+zquYrISsvw==}
-
-  /@peertube/http-signature@1.7.0:
-    resolution: {integrity: sha512-aGQIwo6/sWtyyqhVK4e1MtxYz4N1X8CNt6SOtCc+Wnczs5S5ONaLHDDR8LYaGn0MgOwvGgXyuZ5sJIfd7iyoUw==}
-    engines: {node: '>=0.10'}
-    dependencies:
-      assert-plus: 1.0.0
-      jsprim: 1.4.2
-      sshpk: 1.17.0
-    dev: false
 
   /@phc/format@1.0.0:
     resolution: {integrity: sha512-m7X9U6BG2+J+R1lSOdCiITLLrxm+cWlNI3HUFA92oLO77ObGNzaKdh8pMLqdZcshtkKuV84olNNXDfMc4FezBQ==}
@@ -12891,7 +12891,6 @@ packages:
       extsprintf: 1.3.0
       json-schema: 0.4.0
       verror: 1.10.0
-    dev: true
 
   /jsrsasign@10.8.6:
     resolution: {integrity: sha512-bQmbVtsfbgaKBTWCKiDCPlUPbdlRIK/FzSwT3BzIgZl/cU6TqXu6pZJsCI/dJVrZ9Gir5GC4woqw9shH/v7MBw==}
@@ -19461,8 +19460,8 @@ packages:
       url-polyfill: 1.1.12
     dev: true
 
-  github.com/thatonecalculator/emojilib/d3c8c6a77d4362b3b3180099f1d2eac344ce245c:
-    resolution: {tarball: https://codeload.github.com/thatonecalculator/emojilib/tar.gz/d3c8c6a77d4362b3b3180099f1d2eac344ce245c}
+  github.com/thatonecalculator/emojilib/c3c82a3c8f360e1ec567c61012b95d23f0d22175:
+    resolution: {tarball: https://codeload.github.com/thatonecalculator/emojilib/tar.gz/c3c82a3c8f360e1ec567c61012b95d23f0d22175}
     name: emojilib
     version: 3.0.10
     dev: true

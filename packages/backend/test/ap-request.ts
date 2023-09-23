@@ -1,5 +1,5 @@
 import * as assert from "assert";
-import httpSignature from "@peertube/http-signature";
+import httpSignature from "@joinfirefish/http-signature";
 import { genRsaKeyPair } from "../src/misc/gen-key-pair.js";
 import {
 	createSignedPost,

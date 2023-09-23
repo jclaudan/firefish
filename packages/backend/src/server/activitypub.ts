@@ -1,6 +1,6 @@
 import Router from "@koa/router";
 import json from "koa-json-body";
-import httpSignature from "@peertube/http-signature";
+import httpSignature from "@joinfirefish/http-signature";
 
 import { In, IsNull, Not } from "typeorm";
 import { renderActivity } from "@/remote/activitypub/renderer/index.js";

@@ -1,4 +1,4 @@
-import type httpSignature from "@peertube/http-signature";
+import type httpSignature from "@joinfirefish/http-signature";
 import { v4 as uuid } from "uuid";
 
 import config from "@/config/index.js";

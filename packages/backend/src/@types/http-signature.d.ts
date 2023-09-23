@@ -1,4 +1,4 @@
-declare module "@peertube/http-signature" {
+declare module "@joinfirefish/http-signature" {
 	import type { IncomingMessage, ClientRequest } from "node:http";
 
 	interface ISignature {
