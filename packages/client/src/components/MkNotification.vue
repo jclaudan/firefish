@@ -41,7 +41,7 @@
 				></i>
 				<i
 					v-else-if="notification.type === 'renote'"
-					class="ph-repeat ph-bold"
+					class="ph-rocket-launch ph-bold"
 				></i>
 				<i
 					v-else-if="notification.type === 'reply'"
@@ -274,7 +274,7 @@
 
 <script lang="ts" setup>
 import { onMounted, onUnmounted, ref, watch } from "vue";
-import type * as misskey from "firefish-js";
+import type * as firefish from "firefish-js";
 import XReactionIcon from "@/components/MkReactionIcon.vue";
 import MkFollowButton from "@/components/MkFollowButton.vue";
 import XReactionTooltip from "@/components/MkReactionTooltip.vue";
@@ -290,7 +290,7 @@ import { instance } from "@/instance";
 
 const props = withDefaults(
 	defineProps<{
-		notification: misskey.entities.Notification;
+		notification: firefish.entities.Notification;
 		withTime?: boolean;
 		full?: boolean;
 	}>(),
