@@ -36,7 +36,9 @@
 						<div v-else>{{ i18n.ts.system }}</div>
 					</div>
 					<div>
-						<span style="margin-inline-end: 1em">{{ file.type }}</span>
+						<span style="margin-inline-end: 1em">{{
+							file.type
+						}}</span>
 						<span>{{ bytes(file.size) }}</span>
 					</div>
 					<div>

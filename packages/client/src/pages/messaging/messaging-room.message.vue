@@ -293,7 +293,9 @@ function del(): void {
 	&.isMe {
 		flex-direction: row-reverse;
 		padding-inline-end: var(--margin);
-		inset-inline-end: var(--margin); // 削除時にposition: absoluteになったときに使う
+		inset-inline-end: var(
+			--margin
+		); // 削除時にposition: absoluteになったときに使う
 
 		> .content {
 			padding-inline-end: 16px;

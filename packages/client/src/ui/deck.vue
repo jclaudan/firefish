@@ -454,7 +454,8 @@ async function deleteProfile() {
 				border-inline-end: solid var(--deckDividerThickness) var(--bg);
 
 				&:first-of-type {
-					border-inline-start: solid var(--deckDividerThickness) var(--bg);
+					border-inline-start: solid var(--deckDividerThickness)
+						var(--bg);
 				}
 
 				&.folder {

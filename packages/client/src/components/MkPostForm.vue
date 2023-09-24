@@ -93,7 +93,9 @@
 				</button>
 			</div>
 			<div v-if="visibility === 'specified'" class="to-specified">
-				<span style="margin-inline-end: 8px">{{ i18n.ts.recipient }}</span>
+				<span style="margin-inline-end: 8px">{{
+					i18n.ts.recipient
+				}}</span>
 				<div class="visibleUsers">
 					<span v-for="u in visibleUsers" :key="u.id">
 						<MkAcct :user="u" />
