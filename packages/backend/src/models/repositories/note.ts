@@ -34,7 +34,7 @@ import {
 } from "@/db/scylla.js";
 import { LocalFollowingsCache } from "@/misc/cache.js";
 import { userByIdCache } from "@/services/user-cache.js";
-import { detect as detectLanguage } from "tinyld";
+// import detectLanguage from "@/misc/detect-language.js";
 
 export async function populatePoll(
 	note: Note | ScyllaNote,
@@ -279,7 +279,7 @@ export const NoteRepository = db.getRepository(Note).extend({
 		let text = note.text;
 
 		if (note.name && (note.url ?? note.uri)) {
-			text = `【${note.name}】\n${(note.text || "").trim()}\n\n${
+			text = `${note.name}\n${(note.text || "").trim()}\n\n${
 				note.url ?? note.uri
 			}`;
 		}
@@ -381,7 +381,8 @@ export const NoteRepository = db.getRepository(Note).extend({
 			const tokens = packed.text ? mfm.parse(packed.text) : [];
 			function nyaizeNode(node: mfm.MfmNode) {
 				if (node.type === "quote") return;
-				if (node.type === "text") node.props.text = nyaize(node.props.text);
+				if (node.type === "text")
+					node.props.text = nyaize(node.props.text, packed.lang);
 
 				if (node.children) {
 					for (const child of node.children) {

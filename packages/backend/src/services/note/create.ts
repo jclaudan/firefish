@@ -70,7 +70,7 @@ import type { UserProfile } from "@/models/entities/user-profile.js";
 import { db } from "@/db/postgre.js";
 import { getActiveWebhooks } from "@/misc/webhook-cache.js";
 import { shouldSilenceInstance } from "@/misc/should-block-instance.js";
-import meilisearch from "../../db/meilisearch.js";
+import meilisearch from "@/db/meilisearch.js";
 import { redisClient } from "@/db/redis.js";
 import { Mutex } from "redis-semaphore";
 import {
@@ -81,8 +81,8 @@ import {
 	ScyllaPoll,
 } from "@/db/scylla.js";
 import { userByIdCache, userDenormalizedCache } from "../user-cache.js";
-import { detect as detectLanguage } from "tinyld";
 import { langmap } from "@/misc/langmap.js";
+import detectLanguage from "@/misc/detect-language.js";
 
 export const mutedWordsCache = new Cache<
 	{ userId: UserProfile["userId"]; mutedWords: UserProfile["mutedWords"] }[]

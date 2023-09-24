@@ -191,9 +191,8 @@
 <script lang="ts" setup>
 import { computed, inject, ref } from "vue";
 import type { Ref } from "vue";
-import type * as misskey from "firefish-js";
+import type * as firefish from "firefish-js";
 import * as mfm from "mfm-js";
-import { detect as detectLanguage_ } from "tinyld";
 import XNoteHeader from "@/components/MkNoteHeader.vue";
 import MkSubNoteContent from "@/components/MkSubNoteContent.vue";
 import XReactionsViewer from "@/components/MkReactionsViewer.vue";
@@ -202,6 +201,7 @@ import XStarButtonNoEmoji from "@/components/MkStarButtonNoEmoji.vue";
 import XRenoteButton from "@/components/MkRenoteButton.vue";
 import XQuoteButton from "@/components/MkQuoteButton.vue";
 import copyToClipboard from "@/scripts/copy-to-clipboard";
+import detectLanguage from "@/scripts/detect-language";
 import { url } from "@/config";
 import { pleaseLogin } from "@/scripts/please-login";
 import { getNoteMenu } from "@/scripts/get-note-menu";
@@ -221,8 +221,8 @@ const router = useRouter();
 
 const props = withDefaults(
 	defineProps<{
-		note: misskey.entities.Note;
-		conversation?: misskey.entities.Note[];
+		note: firefish.entities.Note;
+		conversation?: firefish.entities.Note[];
 		parentId?;
 		detailedView?;
 
@@ -262,7 +262,7 @@ const starButton = ref<InstanceType<typeof XStarButton>>();
 const renoteButton = ref<InstanceType<typeof XRenoteButton>>();
 const reactButton = ref<HTMLElement>();
 const appearNote = computed(() =>
-	isRenote ? (note.value.renote as misskey.entities.Note) : note.value,
+	isRenote ? (note.value.renote as firefish.entities.Note) : note.value,
 );
 const isDeleted = ref(false);
 const muted = ref(
@@ -275,7 +275,7 @@ const muted = ref(
 );
 const translation = ref(null);
 const translating = ref(false);
-const replies: misskey.entities.Note[] =
+const replies: firefish.entities.Note[] =
 	props.conversation
 		?.filter(
 			(item) =>
@@ -287,15 +287,6 @@ const enableEmojiReactions = defaultStore.state.enableEmojiReactions;
 const expandOnNoteClick = defaultStore.state.expandOnNoteClick;
 const lang = localStorage.getItem("lang");
 const translateLang = localStorage.getItem("translateLang");
-
-function detectLanguage(text: string) {
-	const nodes = mfm.parse(text);
-	const filtered = mfm.extract(nodes, (node) => {
-		return node.type === "text" || node.type === "quote";
-	});
-	const purified = mfm.toString(filtered);
-	return detectLanguage_(purified);
-}
 
 const isForeignLanguage: boolean =
 	defaultStore.state.detectPostLanguage &&
@@ -378,7 +369,7 @@ function undoReact(note): void {
 	});
 }
 
-const currentClipPage = inject<Ref<misskey.entities.Clip> | null>(
+const currentClipPage = inject<Ref<firefish.entities.Clip> | null>(
 	"currentClipPage",
 	null,
 );

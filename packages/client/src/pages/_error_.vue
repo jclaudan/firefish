@@ -3,7 +3,7 @@
 	<transition :name="$store.state.animation ? 'zoom' : ''" appear>
 		<div v-show="loaded" class="mjndxjch">
 			<img
-				src="/static-assets/badges/error.png"
+				src="/static-assets/badges/error.avif"
 				class="_ghost"
 				alt="Error"
 			/>
@@ -37,7 +37,7 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 
-import type * as misskey from "firefish-js";
+import type * as firefish from "firefish-js";
 import MkButton from "@/components/MkButton.vue";
 import { version } from "@/config";
 import * as os from "@/os";
@@ -54,7 +54,7 @@ const props = withDefaults(
 
 const loaded = ref(false);
 const serverIsDead = ref(false);
-const meta = ref<misskey.entities.LiteInstanceMetadata | null>(null);
+const meta = ref<firefish.entities.LiteInstanceMetadata | null>(null);
 
 os.api("meta", {
 	detail: false,

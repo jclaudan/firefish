@@ -44,8 +44,10 @@ import {
 	parseHomeTimeline,
 } from "@/db/scylla.js";
 import type { Client } from "cassandra-driver";
-import { detect as detectLanguage } from "tinyld";
+// import { deliverQuestionUpdate } from "@/services/note/polls/update.js";
+import { fetchMeta } from "@/misc/fetch-meta.js";
 import { langmap } from "@/misc/langmap.js";
+import detectLanguage from "@/misc/detect-language.js";
 
 export const meta = {
 	tags: ["notes"],
