@@ -14,11 +14,7 @@ import {
 import type { Packed } from "@/misc/schema.js";
 import { nyaize } from "@/misc/nyaize.js";
 import { awaitAll } from "@/prelude/await-all.js";
-import {
-	convertLegacyReaction,
-	convertLegacyReactions,
-	decodeReaction,
-} from "@/misc/reaction-lib.js";
+import { convertReactions, decodeReaction } from "@/misc/reaction-lib.js";
 import type { NoteReaction } from "@/models/entities/note-reaction.js";
 import {
 	aggregateNoteEmojis,
@@ -27,7 +23,7 @@ import {
 } from "@/misc/populate-emojis.js";
 import { db } from "@/db/postgre.js";
 import { IdentifiableError } from "@/misc/identifiable-error.js";
-import { detect as detectLanguage_ } from "tinyld";
+import { detect as detectLanguage } from "tinyld";
 
 export async function populatePoll(note: Note, meId: User["id"] | null) {
 	const poll = await Polls.findOneByOrFail({ noteId: note.id });
@@ -77,7 +73,7 @@ async function populateMyReaction(
 	if (_hint_?.myReactions) {
 		const reaction = _hint_.myReactions.get(note.id);
 		if (reaction) {
-			return convertLegacyReaction(reaction.reaction);
+			return decodeReaction(reaction.reaction).reaction;
 		} else if (reaction === null) {
 			return undefined;
 		}
@@ -90,7 +86,7 @@ async function populateMyReaction(
 	});
 
 	if (reaction) {
-		return convertLegacyReaction(reaction.reaction);
+		return decodeReaction(reaction.reaction).reaction;
 	}
 
 	return undefined;
@@ -203,8 +199,6 @@ export const NoteRepository = db.getRepository(Note).extend({
 			host,
 		);
 
-		const lang =
-			detectLanguage_(`${note.cw ?? ""}\n${note.text ?? ""}`) ?? "unknown";
 		const reactionEmoji = await populateEmojis(reactionEmojiNames, host);
 		const packed: Packed<"Note"> = await awaitAll({
 			id: note.id,
@@ -221,7 +215,7 @@ export const NoteRepository = db.getRepository(Note).extend({
 				note.visibility === "specified" ? note.visibleUserIds : undefined,
 			renoteCount: note.renoteCount,
 			repliesCount: note.repliesCount,
-			reactions: convertLegacyReactions(note.reactions),
+			reactions: convertReactions(note.reactions),
 			reactionEmojis: reactionEmoji,
 			emojis: noteEmoji,
 			tags: note.tags.length > 0 ? note.tags : undefined,
@@ -264,7 +258,7 @@ export const NoteRepository = db.getRepository(Note).extend({
 							: undefined,
 				  }
 				: {}),
-			lang: lang,
+			lang: note.lang,
 		});
 
 		if (packed.user.isCat && packed.user.speakAsCat && packed.text) {
