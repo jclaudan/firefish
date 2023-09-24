@@ -84,6 +84,12 @@ db:
 #   # if you want to set this value larger than 100.
 #   # (default 100, max 5000, min 1)
 #   queryLimit: 100
+#
+#   # Credentials for authentication (leave blank if not needed)
+#   #credentials:
+#   #  username: username
+#   #  password: password
+
 
 #   ┌─────────────────────┐
 #───┘ Redis configuration └─────────────────────────────────────

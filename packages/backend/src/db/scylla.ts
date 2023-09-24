@@ -34,6 +34,7 @@ function newClient(): Client | null {
 			},
 		},
 		requestTracker,
+		credentials: config.scylla.credentials,
 	});
 
 	const logger = new Logger("scylla");

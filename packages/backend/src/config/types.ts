@@ -24,6 +24,10 @@ export type Source = {
 		localDataCentre: string;
 		sparseTimelineDays?: number;
 		queryLimit?: number;
+		credentials?: {
+			username: string;
+			password: string;
+		}
 	};
 	redis: {
 		host: string;
