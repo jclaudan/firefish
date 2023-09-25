@@ -59,7 +59,12 @@ impl Initializer {
         })
     }
 
-    pub(crate) async fn setup(&self, threads: u32, since: Option<String>) -> Result<(), Error> {
+    pub(crate) async fn setup(
+        &self,
+        threads: u32,
+        skip: u64,
+        since: Option<String>,
+    ) -> Result<(), Error> {
         println!("Several tables in PostgreSQL are going to be moved to ScyllaDB.");
 
         let pool = Database::connect(&self.postgres_url).await?;
@@ -84,7 +89,7 @@ impl Initializer {
         }
 
         println!("Copying data from PostgreSQL to ScyllaDB.");
-        self.copy(pool.clone(), threads.try_into().unwrap_or(1), since)
+        self.copy(pool.clone(), threads.try_into().unwrap_or(1), skip, since)
             .await?;
 
         println!("Dropping constraints from PostgreSQL.");
@@ -131,6 +136,7 @@ impl Initializer {
         &self,
         db: DatabaseConnection,
         threads: usize,
+        note_skip: u64,
         note_since: Option<String>,
     ) -> Result<(), Error> {
         let note_prepared = Arc::new(self.scylla.prepare(INSERT_NOTE).await?);
@@ -209,7 +215,13 @@ impl Initializer {
         }
         let mut notes = notes.stream(&db).await?;
 
+        let mut copied: u64 = 0;
+
         while let Some(note) = notes.try_next().await? {
+            copied += 1;
+            if copied <= note_skip {
+                continue;
+            }
             if let Ok(permit) = Arc::clone(&sem).acquire_owned().await {
                 let (s, d, n, h, p) = (
                     self.clone(),
