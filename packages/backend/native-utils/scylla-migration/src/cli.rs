@@ -140,7 +140,7 @@ pub(crate) enum MigrationCommand {
             value_parser,
             long,
             default_value = "0",
-            help = "Tne number of notes to be skipped",
+            help = "The number of notes to be skipped while copying",
             display_order = 43
         )]
         note_skip: u64,
