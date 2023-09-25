@@ -32,10 +32,18 @@ impl Initializer {
         scylla_conf: &ScyllaConfig,
         postgres_conf: &DbConfig,
     ) -> Result<Self, Error> {
-        let session = SessionBuilder::new()
-            .known_nodes(&scylla_conf.nodes)
-            .build()
-            .await?;
+
+        let mut builder = SessionBuilder::new()
+            .known_nodes(&scylla_conf.nodes);
+
+        match &scylla_conf.credentials {
+            Some(credentials) => {
+                builder = builder.user(&credentials.username, &credentials.password);
+            },
+            None => {}
+        }
+
+        let session = builder.build().await?;
         session.use_keyspace(&scylla_conf.keyspace, true).await?;
 
         let conn_url = format!(

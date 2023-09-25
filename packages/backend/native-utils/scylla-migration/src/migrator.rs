@@ -39,10 +39,14 @@ impl Migrator {
     }
 
     pub(crate) async fn new(dir: PathBuf, config: &ScyllaConfig) -> Result<Self, Error> {
-        let session = SessionBuilder::new()
-            .known_nodes(&config.nodes)
-            .build()
-            .await?;
+        let mut builder = SessionBuilder::new()
+            .known_nodes(&config.nodes);
+
+        if let Some(credentials) = &config.credentials {
+            builder = builder.user(&credentials.username, &credentials.password);
+        }
+
+        let session = builder.build().await?;
 
         session
             .query(
