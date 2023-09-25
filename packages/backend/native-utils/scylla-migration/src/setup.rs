@@ -62,7 +62,7 @@ impl Initializer {
     pub(crate) async fn setup(
         &self,
         threads: u32,
-        skip: i64,
+        skip: u64,
         since: Option<String>,
     ) -> Result<(), Error> {
         println!("Several tables in PostgreSQL are going to be moved to ScyllaDB.");
