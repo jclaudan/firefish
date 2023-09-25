@@ -146,13 +146,18 @@ impl Initializer {
         let vote_select_prepared = Arc::new(self.scylla.prepare(SELECT_POLL_VOTE).await?);
         let notification_prepared = Arc::new(self.scylla.prepare(INSERT_NOTIFICATION).await?);
 
-        let num_notes: i64 = note::Entity::find()
-            .select_only()
-            .column_as(note::Column::Id.count(), "count")
+        let mut num_notes = note::Entity::find();
+
+        if let Some(since) = note_since.clone() {
+            num_notes = num_notes.filter(note::Column::Id.gt(&since));
+        }
+
+        let mut num_notes: u64 = num_notes.select_only().column_as(note::Column::Id.count(), "count")
             .into_tuple()
             .one(&db)
             .await?
             .unwrap_or_default();
+        num_notes -= note_skip;
         println!("Posts: {num_notes}");
         let num_reactions: i64 = note_reaction::Entity::find()
             .select_only()
