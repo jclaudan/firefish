@@ -222,7 +222,7 @@ impl Initializer {
         }
         let mut notes = notes.stream(&db).await?;
 
-        let mut copied: i64 = 0;
+        let mut copied: u64 = 0;
 
         while let Some(note) = notes.try_next().await? {
             copied += 1;
