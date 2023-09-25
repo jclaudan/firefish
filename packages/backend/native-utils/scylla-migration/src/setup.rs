@@ -62,7 +62,7 @@ impl Initializer {
     pub(crate) async fn setup(
         &self,
         threads: u32,
-        skip: u64,
+        skip: i64,
         since: Option<String>,
     ) -> Result<(), Error> {
         println!("Several tables in PostgreSQL are going to be moved to ScyllaDB.");
@@ -152,12 +152,14 @@ impl Initializer {
             num_notes = num_notes.filter(note::Column::Id.gt(&since));
         }
 
-        let mut num_notes: u64 = num_notes.select_only().column_as(note::Column::Id.count(), "count")
+        let mut num_notes: i64 = num_notes
+            .select_only()
+            .column_as(note::Column::Id.count(), "count")
             .into_tuple()
             .one(&db)
             .await?
             .unwrap_or_default();
-        num_notes -= note_skip;
+        num_notes -= note_skip as i64;
         println!("Posts: {num_notes}");
         let num_reactions: i64 = note_reaction::Entity::find()
             .select_only()
@@ -220,7 +222,7 @@ impl Initializer {
         }
         let mut notes = notes.stream(&db).await?;
 
-        let mut copied: u64 = 0;
+        let mut copied: i64 = 0;
 
         while let Some(note) = notes.try_next().await? {
             copied += 1;
