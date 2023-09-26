@@ -29,8 +29,9 @@ export type Source = {
 			password: string;
 		};
 		connections?: {
-			local: number;
-			remote: number;
+			local?: number;
+			remote?: number;
+			maxRequestsPerConnection?: number;
 		};
 	};
 	redis: {

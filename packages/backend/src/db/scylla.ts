@@ -32,6 +32,7 @@ function newClient(): Client | null {
 				[types.distance.local]: config.scylla.connections?.local || 2,
 				[types.distance.remote]: config.scylla.connections?.remote || 1,
 			},
+			maxRequestsPerConnection: config.scylla.connections?.maxRequestsPerConnection || 2048,
 		},
 		requestTracker,
 		credentials: config.scylla.credentials,
