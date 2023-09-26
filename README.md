@@ -200,6 +200,7 @@ Flags for `pnpm run scylla:setup`:
 - `-t <num>`: increase the number of threads used, especially useful if your cluster has more than one node
 - `--note-since <id>`: start at a certain note ID
 - `--note-skip <num>`: skip a certain number of notes (from the oldest onward)
+- `--no-confirm`: skip a confirmation before the setup process begins (for scripting)
 
 ## 🔎 Set up search
 
