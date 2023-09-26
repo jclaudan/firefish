@@ -74,15 +74,10 @@ impl Initializer {
         let pool = Database::connect(&self.postgres_url).await?;
         let db_backend = pool.get_database_backend();
 
-        println!(
-            "{}",
-            dialoguer::console::style(
-                "This is irreversible! Please backup your PostgreSQL database before you proceed."
-            )
-            .bold()
-        );
-
         if !self.no_confirm {
+            println!("{}",
+                dialoguer::console::style("This is irreversible! Please backup your PostgreSQL database before you proceed.").bold()
+            );
             let confirm = Confirm::with_theme(&ColorfulTheme::default())
                 .with_prompt("This process may take a while. Do you want to continue?")
                 .interact()
