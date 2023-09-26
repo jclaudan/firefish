@@ -44,10 +44,13 @@ pub async fn run_cli() -> Result<(), Error> {
         MigrationCommand::Setup {
             threads,
             note_since,
-            note_skip
+            note_skip,
+            no_confirm,
         } => {
-            let initializer = Initializer::new(&scylla_conf, &config.db).await?;
-            initializer.setup(threads, note_skip, note_since).await?;
+            let initializer =
+                Initializer::new(&scylla_conf, &config.db, note_since, note_skip, no_confirm)
+                    .await?;
+            initializer.setup(threads).await?;
         }
         _ => {}
     };
@@ -144,5 +147,13 @@ pub(crate) enum MigrationCommand {
             display_order = 43
         )]
         note_skip: u64,
+        #[clap(
+            value_parser,
+            long,
+            default_value = "false",
+            help = "Does not confirm before the process begins",
+            display_order = 44
+        )]
+        no_confirm: bool,
     },
 }
