@@ -39,7 +39,7 @@
   - Backfill user information
   - Advanced search
   - Many more user and admin settings
-  - Many bug fixes and performance improvements 
+  - Many bug fixes and performance improvements
   - Link verification
   - So much more!
 
@@ -107,6 +107,7 @@ If you have access to a server that supports one of the sources below, I recomme
 ### 😗 Optional dependencies
 
 - [FFmpeg](https://ffmpeg.org/) for video transcoding
+- 👽 At least [ScyllaDB](https://scylladb.com) v5 for a high performance database for storing posts and notifications
 - Full text search (one of the following)
   - 🦔 [Sonic](https://crates.io/crates/sonic-server)
   - [MeiliSearch](https://www.meilisearch.com/)
@@ -129,10 +130,14 @@ If you have access to a server that supports one of the sources below, I recomme
 ```sh
 git clone https://git.joinfirefish.org/firefish/firefish.git
 cd firefish/
+cp ./.config/example.yml ./.config/default.yml
 ```
 
 > **Note**
 > By default, you're on the develop branch. Run `git checkout main` or `git checkout beta` to switch to the Main/Beta branches.
+
+> **Note**
+> The configuration file you'll be filling out is `.config/default.yml`. You need to enter at minimum the `url`, `port` or `bind`, `db`, and `redis`.
 
 ## 📩 Install dependencies
 
@@ -174,7 +179,27 @@ In Firefish's directory, fill out the `db` section of `.config/default.yml` with
 
 ## 💰 Caching server
 
-If you experience a lot of traffic, it's a good idea to set up another Redis-compatible caching server. If you don't set one one up, it'll fall back to the mandatory Redis server. DragonflyDB is the recommended option due to its unrivaled performance and ease of use.
+If you experience a lot of traffic, it's a good idea to set up another Redis-compatible caching server. If you don't set one one up, it'll fall back to the mandatory Redis server. DragonflyDB is the recommended option due to its unrivaled performance and ease of use. In the configuration file, uncomment and fill out the `cacheServer` section.
+
+## 👽 ScyllaDB
+
+If you experience a lot of traffic, it may be a good idea to set up ScyllaDB to store posts (and their reactions), notifications, and poll votes. ScyllaDB does use more storage and resources, but in turn, performs significantly better than PostgreSQL on its own. In the configuration file, uncomment and fill out the `scylla` section. While you can run on a single node, it's reccomended you have at least one other node in the cluster for replication (to be used for `replicationFactor`).
+
+You can set up ScyllaDB after running your server for a while, but you cannot go back to only PostgreSQL. You also need to shut off your server during the migration. The more posts you have, the longer it will take, so if you want to go with ScyllaDB, it's better to do it sooner than later. **Backup everything on PostgreSQL and Redis before performing the migration.**
+
+```sh
+# Shut down Firefish
+pnpm run migrate # to make sure there aren't any pending migrations
+pnpm run scylla:migrate
+pnpm run scylla:setup
+```
+
+`pnpm run scylla:setup` is the command that handles the actual setting up of ScyllaDB.
+Flags for `pnpm run scylla:setup`:
+
+- `-t <num>`: increase the number of threads used, especially useful if your cluster has more than one node
+- `--note_since <id>`: start at a certain note ID
+- `--note_skip <num>`: skip a certain number of notes (from the oldest onward)
 
 ## 🔎 Set up search
 
@@ -259,6 +284,7 @@ example.tld {
 # git pull
 pnpm install
 NODE_ENV=production pnpm run build && pnpm run migrate
+# pnpm run scylla:migrate # if you use ScyllaDB
 pm2 start "NODE_ENV=production pnpm run start" --name Firefish
 ```
 
