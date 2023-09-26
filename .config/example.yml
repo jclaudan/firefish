@@ -90,8 +90,10 @@ db:
 #   #  username: username
 #   #  password: password
 #
-#   # Number of pooled connections per host
 #   #connections:
+#   #  # Number of maximum requests that one connection can handle
+#   #  maxRequestsPerConnection: 2048
+#   #  # Number of pooled connections per host (recommended to leave as default values)
 #   #  local: 2
 #   #  remote: 1
 
