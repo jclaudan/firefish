@@ -198,8 +198,8 @@ pnpm run scylla:setup
 Flags for `pnpm run scylla:setup`:
 
 - `-t <num>`: increase the number of threads used, especially useful if your cluster has more than one node
-- `--note_since <id>`: start at a certain note ID
-- `--note_skip <num>`: skip a certain number of notes (from the oldest onward)
+- `--note-since <id>`: start at a certain note ID
+- `--note-skip <num>`: skip a certain number of notes (from the oldest onward)
 
 ## 🔎 Set up search
 
