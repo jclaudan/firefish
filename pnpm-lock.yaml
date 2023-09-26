@@ -172,8 +172,8 @@ importers:
         specifier: TheEssem/cacheable-lookup
         version: github.com/TheEssem/cacheable-lookup/dd2fb616366a3c68dcf321a57a67295967b204bf
       cassandra-driver:
-        specifier: 4.6.4
-        version: 4.6.4
+        specifier: 4.7.1
+        version: 4.7.1
       chalk:
         specifier: 5.3.0
         version: 5.3.0
@@ -745,7 +745,7 @@ importers:
         version: 2.30.0
       emojilib:
         specifier: github:thatonecalculator/emojilib
-        version: github.com/thatonecalculator/emojilib/d3c8c6a77d4362b3b3180099f1d2eac344ce245c
+        version: github.com/thatonecalculator/emojilib/c3c82a3c8f360e1ec567c61012b95d23f0d22175
       escape-regexp:
         specifier: 0.0.1
         version: 0.0.1
@@ -4193,6 +4193,13 @@ packages:
     resolution: {integrity: sha512-MqTGEo5bj5t157U6fA/BiDynNkn0YknVdh48CMPkTSpFTVmvao5UQmm7uEF6xBEo7qIMAlY/JSleYaE6VOdpaA==}
     dev: false
 
+  /@types/long@5.0.0:
+    resolution: {integrity: sha512-eQs9RsucA/LNjnMoJvWG/nXa7Pot/RbBzilF/QRIU/xRl+0ApxrSUFsV5lmf01SvSlqMzJ7Zwxe440wmz2SJGA==}
+    deprecated: This is a stub types definition. long provides its own type definitions, so you do not need this installed.
+    dependencies:
+      long: 5.2.3
+    dev: false
+
   /@types/matter-js@0.19.0:
     resolution: {integrity: sha512-SqgYUc8j68n/R2p8rVgpxTVC6gwCby+93dd5eWqjQdpL3l3JUqxzhbEJH/X0NXv+pmoAeWheH1kPvFIgC904Bw==}
     dev: true
@@ -6509,14 +6516,14 @@ packages:
   /caseless@0.12.0:
     resolution: {integrity: sha512-4tYFyifaFfGacoiObjJegolkwSU4xQNGbVgUiNYVUxbQ2x2lUsFvY4hVgVzGiIe6WLOPqycWXA40l+PWsxthUw==}
 
-  /cassandra-driver@4.6.4:
-    resolution: {integrity: sha512-SksbIK0cZ2QZRx8ti7w+PnLqldyY+6kU2gRWFChwXFTtrD/ce8cQICDEHxyPwx+DeILwRnMrPf9cjUGizYw9Vg==}
+  /cassandra-driver@4.7.1:
+    resolution: {integrity: sha512-n2XCzkOpC1D+xJB/D8AgsQoOmlc3XuKRzB0gRzn6C9eEqMI8JUPAIP5X2G48cXZd+tW/cTeSCuH+fEOcmF+kgQ==}
     engines: {node: '>=8'}
     dependencies:
-      '@types/long': 4.0.2
+      '@types/long': 5.0.0
       '@types/node': 20.5.8
       adm-zip: 0.5.10
-      long: 2.4.0
+      long: 5.2.3
     dev: false
 
   /cbor@8.1.0:
@@ -13511,13 +13518,12 @@ packages:
       wrap-ansi: 6.2.0
     dev: true
 
-  /long@2.4.0:
-    resolution: {integrity: sha512-ijUtjmO/n2A5PaosNG9ZGDsQ3vxJg7ZW8vsY8Kp0f2yIZWhSJvjmegV7t+9RPQKxKrvj8yKGehhS+po14hPLGQ==}
-    engines: {node: '>=0.6'}
-    dev: false
-
   /long@4.0.0:
     resolution: {integrity: sha512-XsP+KhQif4bjX1kbuSiySJFNAehNxgLb6hPRGJ9QsUr8ajHkuXGdrHmFUTUUXhDwVX2R5bY4JNZEwbUiMhV+MA==}
+    dev: false
+
+  /long@5.2.3:
+    resolution: {integrity: sha512-lcHwpNoggQTObv5apGNCTdJrO69eHOZMi4BNC+rTLER8iHAqGrUVeLh/irVIM7zTw2bOXA8T6uNPeujwOLg/2Q==}
     dev: false
 
   /lowercase-keys@2.0.0:
@@ -19479,8 +19485,8 @@ packages:
       url-polyfill: 1.1.12
     dev: true
 
-  github.com/thatonecalculator/emojilib/d3c8c6a77d4362b3b3180099f1d2eac344ce245c:
-    resolution: {tarball: https://codeload.github.com/thatonecalculator/emojilib/tar.gz/d3c8c6a77d4362b3b3180099f1d2eac344ce245c}
+  github.com/thatonecalculator/emojilib/c3c82a3c8f360e1ec567c61012b95d23f0d22175:
+    resolution: {tarball: https://codeload.github.com/thatonecalculator/emojilib/tar.gz/c3c82a3c8f360e1ec567c61012b95d23f0d22175}
     name: emojilib
     version: 3.0.10
     dev: true
