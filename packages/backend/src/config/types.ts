@@ -27,7 +27,11 @@ export type Source = {
 		credentials?: {
 			username: string;
 			password: string;
-		}
+		};
+		connections?: {
+			local: number;
+			remote: number;
+		};
 	};
 	redis: {
 		host: string;

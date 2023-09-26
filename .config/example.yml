@@ -77,18 +77,23 @@ db:
 #   # appear in their home timeline.
 #   #
 #   # (default 14)
-#   sparseTimelineDays: 14
+#   #sparseTimelineDays: 14
 #
 #   # <queryLimit> determines the number of maximum rows read within one pagination.
 #   # You may need to make [max_clustering_key_restrictions_per_query] larger for ScyllaDB
 #   # if you want to set this value larger than 100.
 #   # (default 100, max 5000, min 1)
-#   queryLimit: 100
+#   #queryLimit: 100
 #
 #   # Credentials for authentication (leave blank if not needed)
 #   #credentials:
 #   #  username: username
 #   #  password: password
+#
+#   # Number of pooled connections per host
+#   #connections:
+#   #  local: 2
+#   #  remote: 1
 
 
 #   ┌─────────────────────┐

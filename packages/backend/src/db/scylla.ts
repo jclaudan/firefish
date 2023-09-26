@@ -29,8 +29,8 @@ function newClient(): Client | null {
 		keyspace: config.scylla.keyspace,
 		pooling: {
 			coreConnectionsPerHost: {
-				[types.distance.local]: 2,
-				[types.distance.remote]: 1,
+				[types.distance.local]: config.scylla.connections?.local || 2,
+				[types.distance.remote]: config.scylla.connections?.remote || 1,
 			},
 		},
 		requestTracker,
