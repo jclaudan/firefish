@@ -41,9 +41,13 @@ pub async fn run_cli() -> Result<(), Error> {
                 .down(num)
                 .await?
         }
-        MigrationCommand::Setup { threads } => {
+        MigrationCommand::Setup {
+            threads,
+            note_since,
+            note_skip
+        } => {
             let initializer = Initializer::new(&scylla_conf, &config.db).await?;
-            initializer.setup(threads).await?;
+            initializer.setup(threads, note_skip, note_since).await?;
         }
         _ => {}
     };
@@ -125,5 +129,20 @@ pub(crate) enum MigrationCommand {
             display_order = 41
         )]
         threads: u32,
+        #[clap(
+            value_parser,
+            long,
+            help = "Note ID to begin copying",
+            display_order = 42
+        )]
+        note_since: Option<String>,
+        #[clap(
+            value_parser,
+            long,
+            default_value = "0",
+            help = "The number of notes to be skipped while copying",
+            display_order = 43
+        )]
+        note_skip: u64,
     },
 }
