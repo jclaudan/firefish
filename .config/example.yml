@@ -91,10 +91,13 @@ db:
 #   #  password: password
 #
 #   # Number of pooled connections per host
+#   # <maxRequestsPerConnection> has a theoretical maximum of 32768
+#   # It's recommended not to adjust <local> and <remote> unless you know what you're doing
+#   # All values below are optional.
 #   #connections:
+#   #  maxRequestsPerConnection: 2048
 #   #  local: 2
 #   #  remote: 1
-
 
 #   ┌─────────────────────┐
 #───┘ Redis configuration └─────────────────────────────────────
