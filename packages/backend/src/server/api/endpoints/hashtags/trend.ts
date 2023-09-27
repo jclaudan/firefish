@@ -107,7 +107,7 @@ export default define(meta, paramDef, async () => {
 	if (scyllaClient) {
 		const stats = hots.map((tag, i) => ({
 			tag,
-			chart: new Array<number>(20).fill(0, 0, 20), // FIXME: generate chart
+			chart: new Array<number>(20).fill(0), // FIXME: generate chart
 			usersCount: tags[i].users.size,
 		}));
 
