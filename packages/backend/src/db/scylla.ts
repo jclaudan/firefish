@@ -14,6 +14,8 @@ import type { UserProfile } from "@/models/entities/user-profile.js";
 import { scyllaQueries } from "@/db/cql.js";
 import { notificationTypes } from "@/types.js";
 
+export const scyllaLogger = new Logger("scylla");
+
 function newClient(): Client | null {
 	if (!config.scylla) {
 		return null;
@@ -38,26 +40,25 @@ function newClient(): Client | null {
 		credentials: config.scylla.credentials,
 	});
 
-	const logger = new Logger("scylla");
 	client.on("log", (level, loggerName, message, _furtherInfo) => {
 		const msg = `${loggerName} - ${message}`;
 		switch (level) {
 			case "info":
-				logger.info(msg);
+				scyllaLogger.info(msg);
 				break;
 			case "warning":
-				logger.warn(msg);
+				scyllaLogger.warn(msg);
 				break;
 			case "error":
-				logger.error(msg);
+				scyllaLogger.error(msg);
 				break;
 		}
 	});
 	client.on("slow", (message) => {
-		logger.warn(message);
+		scyllaLogger.warn(message);
 	});
 	client.on("large", (message) => {
-		logger.warn(message);
+		scyllaLogger.warn(message);
 	});
 
 	return client;

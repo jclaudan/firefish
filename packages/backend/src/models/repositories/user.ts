@@ -37,7 +37,12 @@ import {
 } from "../index.js";
 import type { Instance } from "../entities/instance.js";
 import { userDenormalizedCache } from "@/services/user-cache.js";
-import { parseScyllaNote, prepared, scyllaClient } from "@/db/scylla.js";
+import {
+	parseScyllaNote,
+	prepared,
+	scyllaClient,
+	scyllaLogger,
+} from "@/db/scylla.js";
 import type { UserNotePining } from "@/models/entities/user-note-pining.js";
 import type { Note } from "@/models/entities/note.js";
 
@@ -423,15 +428,23 @@ export const UserRepository = db.getRepository(User).extend({
 			}).then((notes) => notes.map(({ noteId }) => noteId));
 
 			if (pinnedNoteIds.length > 0) {
-				if (scyllaClient) {
-					const result = await scyllaClient.execute(
-						prepared.note.select.byIds,
-						[pinnedNoteIds],
-						{ prepare: true },
-					);
-					pinnedNotes = result.rows.map(parseScyllaNote);
-				} else {
-					pinnedNotes = await Notes.findBy({ id: In(pinnedNoteIds) });
+				try {
+					if (scyllaClient) {
+						const result = await scyllaClient.execute(
+							prepared.note.select.byIds,
+							[pinnedNoteIds],
+							{ prepare: true },
+						);
+						pinnedNotes = result.rows.map(parseScyllaNote);
+					} else {
+						pinnedNotes = await Notes.findBy({ id: In(pinnedNoteIds) });
+					}
+				} catch (e) {
+					scyllaLogger.error("Failed to fetch pinned notes", {
+						pinnedNoteIds,
+						error: e,
+					});
+					pinnedNotes = [];
 				}
 			}
 		}
