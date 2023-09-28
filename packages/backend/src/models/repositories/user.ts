@@ -446,6 +446,7 @@ export const UserRepository = db.getRepository(User).extend({
 						error: e,
 					});
 					pinnedNotes = [];
+					pinnedNoteIds = [];
 				}
 			}
 		}
