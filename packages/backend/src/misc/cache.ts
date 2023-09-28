@@ -60,7 +60,7 @@ export class Cache<T> {
 		if (keys.length === 0) {
 			return map;
 		}
-		keys = keys.map((key) => key.slice(redisPrefix?.length));
+		keys = keys.map((key) => key.slice(redisPrefix.length));
 		const values = await redisClient.mgetBuffer(keys);
 
 		for (const [i, key] of keys.entries()) {

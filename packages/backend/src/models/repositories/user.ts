@@ -422,15 +422,17 @@ export const UserRepository = db.getRepository(User).extend({
 				},
 			}).then((notes) => notes.map(({ noteId }) => noteId));
 
-			if (scyllaClient) {
-				const result = await scyllaClient.execute(
-					prepared.note.select.byIds,
-					[pinnedNoteIds],
-					{ prepare: true },
-				);
-				pinnedNotes = result.rows.map(parseScyllaNote);
-			} else {
-				pinnedNotes = await Notes.findBy({ id: In(pinnedNoteIds) });
+			if (pinnedNoteIds.length > 0) {
+				if (scyllaClient) {
+					const result = await scyllaClient.execute(
+						prepared.note.select.byIds,
+						[pinnedNoteIds],
+						{ prepare: true },
+					);
+					pinnedNotes = result.rows.map(parseScyllaNote);
+				} else {
+					pinnedNotes = await Notes.findBy({ id: In(pinnedNoteIds) });
+				}
 			}
 		}
 
