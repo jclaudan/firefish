@@ -442,6 +442,7 @@ export const UserRepository = db.getRepository(User).extend({
 				} catch (e) {
 					scyllaLogger.error("Failed to fetch pinned notes", {
 						pinnedNoteIds,
+						userId: user.id,
 						error: e,
 					});
 					pinnedNotes = [];
