@@ -972,6 +972,8 @@ async function insertNote(
 				renoteCw,
 				renoteFiles: renoteFiles ?? [],
 				noteEdit: [],
+				mentions: insert.mentions ?? [],
+				tags: insert.tags ?? [],
 			};
 
 			return scyllaNote;
