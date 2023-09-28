@@ -352,7 +352,7 @@ function more(ev: MouseEvent) {
 					}
 
 					> .text {
-						margin-left: 1rem;
+						margin-inline-start: 1rem;
 					}
 				}
 
@@ -410,7 +410,7 @@ function more(ev: MouseEvent) {
 					> .icon {
 						position: relative;
 						width: 32px;
-						margin-right: 8px;
+						margin-inline-end: 8px;
 					}
 
 					> .indicator {

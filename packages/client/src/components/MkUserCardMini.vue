@@ -107,7 +107,7 @@ if (props.withChart) {
 		// > :global(.moderation) {
 		// 	display: flex;
 		// 	gap: 1rem;
-		// 	margin-right: 1rem;
+		// 	margin-inline-end: 1rem;
 		// }
 	}
 

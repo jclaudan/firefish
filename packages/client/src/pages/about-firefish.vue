@@ -170,7 +170,7 @@
 								:key="sponsor"
 								style="
 									margin-bottom: 0.5rem;
-									margin-right: 0.5rem;
+									margin-inline-end: 0.5rem;
 									font-size: 1.7rem;
 								"
 							>
