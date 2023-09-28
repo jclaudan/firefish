@@ -75,10 +75,10 @@ import { redisClient } from "@/db/redis.js";
 import { Mutex } from "redis-semaphore";
 import {
 	parseHomeTimeline,
-	parseScyllaNote,
 	prepared,
 	scyllaClient,
-	ScyllaPoll,
+	type ScyllaNote,
+	type ScyllaPoll,
 } from "@/db/scylla.js";
 import { userByIdCache, userDenormalizedCache } from "../user-cache.js";
 import { langmap } from "@/misc/langmap.js";
@@ -843,6 +843,7 @@ async function insertNote(
 				width: file.properties.width ?? null,
 				height: file.properties.height ?? null,
 			});
+			const files = data.files?.map(fileMapper);
 			const replyText = data.reply?.text ?? null;
 			const replyCw = data.reply?.cw ?? null;
 			// TODO: move drive files to scylla or cache in redis/dragonfly
@@ -905,7 +906,7 @@ async function insertNote(
 				insert.uri,
 				insert.url,
 				insert.score ?? 0,
-				data.files?.map(fileMapper),
+				files,
 				insert.visibleUserIds,
 				insert.mentions,
 				insert.mentionedRemoteUsers,
@@ -957,6 +958,22 @@ async function insertNote(
 					},
 				);
 			}
+
+			const scyllaNote: ScyllaNote = {
+				...insert,
+				createdAtDate: insert.createdAt,
+				files: files ?? [],
+				poll,
+				replyText,
+				replyCw,
+				replyFiles: replyFiles ?? [],
+				renoteText,
+				renoteCw,
+				renoteFiles: renoteFiles ?? [],
+				noteEdit: [],
+			};
+
+			return scyllaNote;
 		} else {
 			if (insert.hasPoll) {
 				// Start transaction
@@ -987,17 +1004,6 @@ async function insertNote(
 				});
 			} else {
 				await Notes.insert(insert);
-			}
-		}
-
-		if (scyllaClient) {
-			const result = await scyllaClient.execute(
-				prepared.note.select.byId,
-				[insert.id],
-				{ prepare: true },
-			);
-			if (result.rowLength > 0) {
-				return parseScyllaNote(result.first());
 			}
 		}
 
