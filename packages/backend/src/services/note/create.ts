@@ -961,6 +961,7 @@ async function insertNote(
 
 			const scyllaNote: ScyllaNote = {
 				...insert,
+				reactions: {},
 				createdAtDate: insert.createdAt,
 				files: files ?? [],
 				poll,
