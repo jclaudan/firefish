@@ -428,25 +428,25 @@ export const UserRepository = db.getRepository(User).extend({
 			}).then((notes) => notes.map(({ noteId }) => noteId));
 
 			if (pinnedNoteIds.length > 0) {
-				try {
-					if (scyllaClient) {
+				if (scyllaClient) {
+					try {
 						const result = await scyllaClient.execute(
 							prepared.note.select.byIds,
 							[pinnedNoteIds],
 							{ prepare: true },
 						);
 						pinnedNotes = result.rows.map(parseScyllaNote);
-					} else {
-						pinnedNotes = await Notes.findBy({ id: In(pinnedNoteIds) });
+					} catch (e) {
+						scyllaLogger.error("Failed to fetch pinned notes", {
+							pinnedNoteIds,
+							userId: user.id,
+							error: e,
+						});
+						pinnedNotes = [];
+						pinnedNoteIds = [];
 					}
-				} catch (e) {
-					scyllaLogger.error("Failed to fetch pinned notes", {
-						pinnedNoteIds,
-						userId: user.id,
-						error: e,
-					});
-					pinnedNotes = [];
-					pinnedNoteIds = [];
+				} else {
+					pinnedNotes = await Notes.findBy({ id: In(pinnedNoteIds) });
 				}
 			}
 		}
