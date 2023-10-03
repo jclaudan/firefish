@@ -17,18 +17,15 @@
 					height ? `${height}px` : '100%'
 				};`"
 			>
-				<Transition name="fade">
-					<div v-if="loading" class="loading">
-						<MkLoading />
-					</div>
-				</Transition>
 				<div class="container">
-					<img
-						ref="imgEl"
-						:src="imgUrl"
-						style="display: none"
-						@load="onImageLoad"
-					/>
+					<VueCropper
+						ref="cropper"
+						:img="imgUrl"
+						:auto-crop="true"
+						:fixed="aspectRatio ? true : false"
+						:fixed-number="aspectRatio ?? null"
+						output-type="webp"
+					></VueCropper>
 				</div>
 			</div>
 		</template>
@@ -36,10 +33,9 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 import type * as firefish from "firefish-js";
-import Cropper from "cropperjs";
-import tinycolor from "tinycolor2";
+import { VueCropper } from "vue-cropper";
 import XModalWindow from "@/components/MkModalWindow.vue";
 import * as os from "@/os";
 import { $i } from "@/account";
@@ -47,6 +43,7 @@ import { defaultStore } from "@/store";
 import { apiUrl, url } from "@/config";
 import { query } from "@/scripts/url";
 import { i18n } from "@/i18n";
+import "vue-cropper/dist/index.css";
 
 const emit = defineEmits<{
 	(ev: "ok", cropped: firefish.entities.DriveFile): void;
@@ -56,21 +53,18 @@ const emit = defineEmits<{
 
 const props = defineProps<{
 	file: firefish.entities.DriveFile;
-	aspectRatio: number;
+	aspectRatio?: Array<number>;
 }>();
 
 const imgUrl = `${url}/proxy/image.webp?${query({
 	url: props.file.url,
 })}`;
 const dialogEl = ref<InstanceType<typeof XModalWindow>>();
-const imgEl = ref<HTMLImageElement>();
-let cropper: Cropper | null = null,
-	loading = ref(true);
+const cropper = ref<InstanceType<typeof VueCropper>>();
 
 const ok = async () => {
 	const promise = new Promise<firefish.entities.DriveFile>(async (res) => {
-		const croppedCanvas = await cropper?.getCropperSelection()?.$toCanvas();
-		croppedCanvas.toBlob((blob) => {
+		cropper.getCropBlob(blob => {
 			const formData = new FormData();
 			formData.append("file", blob);
 			if (defaultStore.state.uploadFolder) {
@@ -103,40 +97,6 @@ const cancel = () => {
 	emit("cancel");
 	dialogEl.value.close();
 };
-
-const onImageLoad = () => {
-	loading.value = false;
-
-	if (cropper) {
-		cropper.getCropperImage()!.$center("contain");
-		cropper.getCropperSelection()!.$center();
-	}
-};
-
-onMounted(() => {
-	cropper = new Cropper(imgEl.value, {});
-
-	const computedStyle = getComputedStyle(document.documentElement);
-
-	const selection = cropper.getCropperSelection()!;
-	selection.themeColor = tinycolor(
-		computedStyle.getPropertyValue("--accent"),
-	).toHexString();
-	selection.aspectRatio = props.aspectRatio;
-	selection.initialAspectRatio = props.aspectRatio;
-	selection.outlined = true;
-
-	window.setTimeout(() => {
-		cropper.getCropperImage()!.$center("contain");
-		selection.$center();
-	}, 100);
-
-	// モーダルオープンアニメーションが終わったあとで再度調整
-	window.setTimeout(() => {
-		cropper.getCropperImage()!.$center("contain");
-		selection.$center();
-	}, 500);
-});
 </script>
 
 <style lang="scss" scoped>
@@ -156,34 +116,10 @@ onMounted(() => {
 	height: var(--vh);
 	position: relative;
 
-	> .loading {
-		position: absolute;
-		z-index: 10;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		-webkit-backdrop-filter: var(--blur, blur(10px));
-		backdrop-filter: var(--blur, blur(10px));
-		background: rgba(0, 0, 0, 0.5);
-	}
-
 	> .container {
 		flex: 1;
 		width: 100%;
 		height: 100%;
-
-		> ::v-deep(cropper-canvas) {
-			width: 100%;
-			height: 100%;
-
-			> cropper-selection > cropper-handle[action="move"] {
-				background: transparent;
-			}
-		}
 	}
 }
 </style>

@@ -257,7 +257,7 @@ function changeAvatar(ev) {
 
 			if (!canceled) {
 				originalOrCropped = await os.cropImage(file, {
-					aspectRatio: 1,
+					aspectRatio: [1, 1],
 				});
 			}
 
@@ -282,7 +282,7 @@ function changeBanner(ev) {
 
 			if (!canceled) {
 				originalOrCropped = await os.cropImage(file, {
-					aspectRatio: 2,
+					aspectRatio: [16, 9],
 				});
 			}
 

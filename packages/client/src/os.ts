@@ -747,7 +747,7 @@ export async function pickEmoji(src: HTMLElement | null, opts) {
 export async function cropImage(
 	image: firefish.entities.DriveFile,
 	options: {
-		aspectRatio: number;
+		aspectRatio?: Array<number>;
 	},
 ): Promise<firefish.entities.DriveFile> {
 	return new Promise((resolve, reject) => {
