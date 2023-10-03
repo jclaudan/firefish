@@ -23,7 +23,6 @@
 						:img="imgUrl"
 						:options="{
 							aspectRatio: aspectRatio ? aspectRatio[0] / aspectRatio[1] : null,
-							dragMode: "crop",
 							viewMode: 1,
 						}"
 					></VuePictureCropper>
