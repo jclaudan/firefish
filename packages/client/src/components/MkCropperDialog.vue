@@ -64,7 +64,7 @@ const cropper = ref<InstanceType<typeof VueCropper>>();
 
 const ok = async () => {
 	const promise = new Promise<firefish.entities.DriveFile>(async (res) => {
-		cropper.getCropBlob(blob => {
+		cropper.getCropBlob((blob) => {
 			const formData = new FormData();
 			formData.append("file", blob);
 			if (defaultStore.state.uploadFolder) {
