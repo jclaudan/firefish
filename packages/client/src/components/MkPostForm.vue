@@ -155,6 +155,7 @@
 				@detach="detachFile"
 				@changeSensitive="updateFileSensitive"
 				@changeName="updateFileName"
+				@cropImage="useCroppedImage"
 			/>
 			<XPollEditor v-if="poll" v-model="poll" @destroyed="poll = null" />
 			<XNotePreview v-if="showPreview" class="preview" :text="text" />
@@ -650,6 +651,10 @@ function updateFileSensitive(file, sensitive) {
 
 function updateFileName(file, name) {
 	files.value[files.value.findIndex((x) => x.id === file.id)].name = name;
+}
+
+function useCroppedImage(file, cropped) {
+	files.value[files.value.findIndex((x) => x.id === file.id)] = cropped;
 }
 
 function upload(file: File, name?: string) {

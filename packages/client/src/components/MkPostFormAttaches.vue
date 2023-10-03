@@ -52,6 +52,7 @@ const emits = defineEmits([
 	"detach",
 	"changeSensitive",
 	"changeName",
+	"cropImage",
 ]);
 
 const _files = computed({
@@ -73,6 +74,13 @@ function toggleSensitive(file) {
 		isSensitive: !file.isSensitive,
 	}).then(() => {
 		emits("changeSensitive", file, !file.isSensitive);
+	});
+}
+
+function cropImage(file) {
+	if (file.type !== "image") return;
+	os.cropImage(file).then((newFile) => {
+		emits("cropImage", newFile);
 	});
 }
 
@@ -147,6 +155,13 @@ function showFileMenu(file, ev: MouseEvent) {
 					describe(file);
 				},
 			},
+			file.type === "image" ? {
+				text: i18n.ts.cropImage,
+				icon: "ph-crop ph-bold ph-lg",
+				action: () => {
+					cropImage(file);
+				},
+			} : null,
 			{
 				text: i18n.ts.attachCancel,
 				icon: "ph-x ph-bold ph-lg",
