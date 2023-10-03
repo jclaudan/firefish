@@ -18,14 +18,15 @@
 				};`"
 			>
 				<div class="container">
-					<VueCropper
+					<VuePictureCropper
 						ref="cropper"
 						:img="imgUrl"
-						:auto-crop="true"
-						:fixed="aspectRatio ? true : false"
-						:fixed-number="aspectRatio ?? null"
-						output-type="webp"
-					></VueCropper>
+						:options="{
+							aspectRatio: aspectRatio ? aspectRatio[0] / aspectRatio[1] : null,
+							dragMode: "crop",
+							viewMode: 1,
+						}"
+					></VuePictureCropper>
 				</div>
 			</div>
 		</template>
@@ -35,7 +36,7 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import type * as firefish from "firefish-js";
-import { VueCropper } from "vue-cropper";
+import VuePictureCropper, { cropper } from "vue-picture-cropper";
 import XModalWindow from "@/components/MkModalWindow.vue";
 import * as os from "@/os";
 import { $i } from "@/account";
@@ -43,7 +44,6 @@ import { defaultStore } from "@/store";
 import { apiUrl, url } from "@/config";
 import { query } from "@/scripts/url";
 import { i18n } from "@/i18n";
-import "vue-cropper/dist/index.css";
 
 const emit = defineEmits<{
 	(ev: "ok", cropped: firefish.entities.DriveFile): void;
@@ -60,11 +60,10 @@ const imgUrl = `${url}/proxy/image.webp?${query({
 	url: props.file.url,
 })}`;
 const dialogEl = ref<InstanceType<typeof XModalWindow>>();
-const cropper = ref<InstanceType<typeof VueCropper>>();
 
 const ok = async () => {
 	const promise = new Promise<firefish.entities.DriveFile>(async (res) => {
-		cropper.getCropBlob((blob) => {
+		await cropper?.getBlob((blob) => {
 			const formData = new FormData();
 			formData.append("file", blob);
 			if (defaultStore.state.uploadFolder) {

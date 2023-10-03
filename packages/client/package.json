@@ -92,9 +92,9 @@
 		"vite": "4.4.9",
 		"vite-plugin-compression": "^0.5.1",
 		"vue": "3.3.4",
-		"vue-cropper": "^1.1.1",
 		"vue-draggable-plus": "^0.2.6",
 		"vue-isyourpasswordsafe": "^2.0.0",
+		"vue-picture-cropper": "^0.6.2",
 		"vue-plyr": "^7.0.0",
 		"vue-prism-editor": "2.0.0-alpha.2"
 	}

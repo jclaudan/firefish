@@ -875,15 +875,15 @@ importers:
       vue:
         specifier: 3.3.4
         version: 3.3.4
-      vue-cropper:
-        specifier: ^1.1.1
-        version: 1.1.1
       vue-draggable-plus:
         specifier: ^0.2.6
         version: 0.2.6(@types/sortablejs@1.15.1)
       vue-isyourpasswordsafe:
         specifier: ^2.0.0
         version: 2.0.0
+      vue-picture-cropper:
+        specifier: ^0.6.2
+        version: 0.6.2(vue@3.3.4)
       vue-plyr:
         specifier: ^7.0.0
         version: 7.0.0
@@ -1463,6 +1463,16 @@ packages:
       '@babel/helper-string-parser': 7.22.5
       '@babel/helper-validator-identifier': 7.22.5
       to-fast-properties: 2.0.0
+
+  /@bassist/utils@0.11.2:
+    resolution: {integrity: sha512-qybnYCrh/7AYrch4r+sjgrMgUlUIXJ1xmJwnx486nOD9ishFDlel7p6n8uitH6cygNW4n+/AJm5nAKRVSq3yng==}
+    dev: true
+
+  /@bassist/utils@0.4.0:
+    resolution: {integrity: sha512-aoFTl0jUjm8/tDZodP41wnEkvB+C5O9NFCuYN/ztL6jSUSsuBkXq90/1ifBm1XhV/zySHgLYlU1+tgo3XtQ+nA==}
+    dependencies:
+      '@withtypes/mime': 0.1.2
+    dev: true
 
   /@bcoe/v8-coverage@0.2.3:
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
@@ -4909,6 +4919,19 @@ packages:
     resolution: {integrity: sha512-7OjdcV8vQ74eiz1TZLzZP4JwqM5fA94K6yntPS5Z25r9HDuGNzaGdgvwKYq6S+MxwF0TFRwe50fIR/MYnakdkQ==}
     dev: true
 
+  /@web-analytics/core@0.1.5:
+    resolution: {integrity: sha512-oJCaAe7zj1X365ZvNQrso9yE+kszPQD2plbP5/J0EjgppZCmHSpkvqtY+T2lArGNcHezzPDjwBEkmYge6d+fIQ==}
+    dependencies:
+      '@bassist/utils': 0.11.2
+    dev: true
+
+  /@web-analytics/vue@0.2.2:
+    resolution: {integrity: sha512-becl9OFlEUYD+0x7ats72FVOvMk+kAXHc3tla2makSGOO2UDu69tGMv5WPExuTg9CqSFHd/a5aUGqmFq4sualQ==}
+    dependencies:
+      '@bassist/utils': 0.11.2
+      '@web-analytics/core': 0.1.5
+    dev: true
+
   /@webassemblyjs/ast@1.11.6:
     resolution: {integrity: sha512-IN1xI7PwOvLPgjcf180gC1bqn3q/QaOCwYUahIOhbYUu8KA/3tw2RT/T0Gidi1l7Hhj5D/INhJxiICObqpMu4Q==}
     dependencies:
@@ -5064,6 +5087,12 @@ packages:
     dependencies:
       webpack: 5.88.1(@swc/core@1.3.78)(webpack-cli@5.1.3)
       webpack-cli: 5.1.3(webpack@5.88.1)
+    dev: true
+
+  /@withtypes/mime@0.1.2:
+    resolution: {integrity: sha512-PB9BfZGzwblUONJY0LiOwsHCA6uV3DIPj/w9ReekdHxPOl0VdUFgI5s4avKycuuq9Gf5Nz2ZPA2O36GAUzlMPA==}
+    dependencies:
+      mime: 3.0.0
     dev: true
 
   /@xtuc/ieee754@1.2.0:
@@ -7304,6 +7333,10 @@ packages:
     dependencies:
       luxon: 3.3.0
     dev: false
+
+  /cropperjs@1.6.1:
+    resolution: {integrity: sha512-F4wsi+XkDHCOMrHMYjrTEE4QBOrsHHN5/2VsVAaRq8P7E5z7xQpT75S+f/9WikmBEailas3+yo+6zPIomW+NOA==}
+    dev: true
 
   /cross-env@7.0.3:
     resolution: {integrity: sha512-+/HKd6EgcQCJGh2PSjZuUitQBQynKor4wrFbRg4DtAgS1aWO+gU52xpH7M9ScGgXSYmAVS9bIJ8EzuaGw0oNAw==}
@@ -13723,6 +13756,12 @@ packages:
     dependencies:
       mime-db: 1.52.0
 
+  /mime@3.0.0:
+    resolution: {integrity: sha512-jSCU7/VB1loIWBZe14aEYHU/+1UMEHoaO7qxCOVJOw9GgH72VAWppxNcjU+x9a2k3GSIBXNKxXQFqRvvZ7vr3A==}
+    engines: {node: '>=10.0.0'}
+    hasBin: true
+    dev: true
+
   /mimic-fn@2.1.0:
     resolution: {integrity: sha512-OqbOk5oEQeAZ8WXWydlu9HJjz9WVdEIvamMCcXmuqUYjTknH/sqsWvhQ3vgwKFRR1HpjvNBKQ37nbJgYzGqGcg==}
     engines: {node: '>=6'}
@@ -18593,10 +18632,6 @@ packages:
     resolution: {integrity: sha512-AFbieoL7a5LMqcnOF04ji+rpXadgOXnZsxQr//r83kLPr7biP7am3g9zbaZIaBGwBRWeSvoMD4mgPdX3e4NWBg==}
     dev: true
 
-  /vue-cropper@1.1.1:
-    resolution: {integrity: sha512-WsqKMpaBf9Osi1LQlE/5AKdD0nHWOy1asLXocaG8NomOWO07jiZi968+/PbMmnD0QbPJOumDQaGuGa13qys85A==}
-    dev: true
-
   /vue-draggable-plus@0.2.6(@types/sortablejs@1.15.1):
     resolution: {integrity: sha512-d+0omKIBIfLiJFggc6H4ePRaifbX+33+OiCMsxn8rG59yWXlJGrobexxgXetnSo/1NLTd0TkYZKNc4CA6iwJZw==}
     peerDependencies:
@@ -18631,6 +18666,17 @@ packages:
     resolution: {integrity: sha512-j3ORj18R9AgFiP2UOM35KuZbSeJAUiwCSyeRBFN3CGFYTJSKsxqU9qGqOHOz6OhLAYKMTin8JOmqugAbF9O+Bg==}
     dependencies:
       sha1: 1.1.1
+    dev: true
+
+  /vue-picture-cropper@0.6.2(vue@3.3.4):
+    resolution: {integrity: sha512-rULhkXdAofzYSn5K7icbOnWxgaN/UrY12DJ6ncIiS85wlfVB9HPZN/gIHoVQ4Kjz70IQonvP603BT7IaAJ+0DQ==}
+    peerDependencies:
+      vue: '>=3.2.13'
+    dependencies:
+      '@bassist/utils': 0.4.0
+      '@web-analytics/vue': 0.2.2
+      cropperjs: 1.6.1
+      vue: 3.3.4
     dev: true
 
   /vue-plyr@7.0.0:
