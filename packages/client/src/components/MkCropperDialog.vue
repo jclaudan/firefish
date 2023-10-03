@@ -62,9 +62,9 @@ const dialogEl = ref<InstanceType<typeof XModalWindow>>();
 
 const ok = async () => {
 	const promise = new Promise<firefish.entities.DriveFile>(async (res) => {
-		await cropper?.getBlob((blob) => {
+		await cropper?.getFile((croppedFile) => {
 			const formData = new FormData();
-			formData.append("file", blob);
+			formData.append("file", croppedFile);
 			if (defaultStore.state.uploadFolder) {
 				formData.append("folderId", defaultStore.state.uploadFolder);
 			}
@@ -119,5 +119,9 @@ const cancel = () => {
 		width: 100%;
 		height: 100%;
 	}
+}
+
+.cropper-line, .cropper-point {
+	background-color: var(--accent) !important;
 }
 </style>
