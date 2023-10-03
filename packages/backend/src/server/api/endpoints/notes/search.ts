@@ -63,6 +63,7 @@ export const paramDef = {
 			type: "string",
 			default: "chronological",
 			nullable: true,
+			description: "Either 'chronological' or 'relevancy'",
 		},
 	},
 	required: ["query"],
@@ -76,9 +77,11 @@ export default define(meta, paramDef, async (ps, me) => {
 			ps.untilId,
 		);
 
-		if (ps.userId) {
+		if (ps.userId != null) {
 			query.andWhere("note.userId = :userId", { userId: ps.userId });
-		} else if (ps.channelId) {
+		}
+
+		if (ps.channelId != null) {
 			query.andWhere("note.channelId = :channelId", {
 				channelId: ps.channelId,
 			});

@@ -47,7 +47,7 @@ export async function toDbReaction(
 
 	const _reacterHost = toPunyNullable(reacterHost);
 
-	if (reaction === "♥️") return { name: "❤️", emoji: null };
+	if (reaction.includes("❤") || reaction.includes("♥️")) return { name: "❤️", emoji: null };
 
 	// Allow unicode reactions
 	const match = emojiRegex.exec(reaction);
