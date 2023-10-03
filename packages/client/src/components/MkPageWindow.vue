@@ -42,6 +42,7 @@ import { Router } from "@/nirax";
 import { i18n } from "@/i18n";
 import type { PageMetadata } from "@/scripts/page-metadata";
 import { provideMetadataReceiver } from "@/scripts/page-metadata";
+import { defaultStore } from "@/store";
 
 const props = defineProps<{
 	initialPath: string;
@@ -66,7 +67,7 @@ const buttonsLeft = computed(() => {
 
 	if (history.value.length > 1) {
 		buttons.push({
-			icon: "ph-caret-left ph-bold ph-lg",
+			icon: `${defaultStore.state.iconSet} ph-caret-left ph-lg`,
 			onClick: back,
 		});
 	}
@@ -76,7 +77,7 @@ const buttonsLeft = computed(() => {
 const buttonsRight = computed(() => {
 	const buttons = [
 		{
-			icon: "ph-arrows-out-simple ph-bold ph-lg",
+			icon: `${defaultStore.state.iconSet} ph-arrows-out-simple ph-lg`,
 			title: i18n.ts.showInPage,
 			onClick: expand,
 		},
@@ -99,17 +100,17 @@ provide("shouldHeaderThin", true);
 
 const contextmenu = computed(() => [
 	{
-		icon: "ph-arrows-out-simple ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-arrows-out-simple ph-lg`,
 		text: i18n.ts.showInPage,
 		action: expand,
 	},
 	{
-		icon: "ph-arrow-square-out ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-arrow-square-out ph-lg`,
 		text: i18n.ts.popout,
 		action: popout,
 	},
 	{
-		icon: "ph-arrow-square-out ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-arrow-square-out ph-lg`,
 		text: i18n.ts.openInNewTab,
 		action: () => {
 			window.open(url + router.getCurrentPath(), "_blank");
@@ -117,7 +118,7 @@ const contextmenu = computed(() => [
 		},
 	},
 	{
-		icon: "ph-link-simple ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-link-simple ph-lg`,
 		text: i18n.ts.copyLink,
 		action: () => {
 			copyToClipboard(url + router.getCurrentPath());

@@ -1,7 +1,7 @@
 <template>
 	<MkContainer :show-header="widgetProps.showHeader" class="mkw-trends">
 		<template #header
-			><i class="ph-hash ph-bold ph-lg"></i
+			><i :class="defaultStore.state.iconSet" class="ph-hash ph-lg"></i
 			>{{ i18n.ts._widgets.trends }}</template
 		>
 
@@ -10,7 +10,7 @@
 			<transition-group
 				v-else
 				tag="div"
-				:name="$store.state.animation ? 'chart' : ''"
+				:name="defaultStore.state.iconSetanimation ? 'chart' : ''"
 				class="tags"
 			>
 				<div v-for="stat in stats" :key="stat.tag">
@@ -50,6 +50,7 @@ import MkMiniChart from "@/components/MkMiniChart.vue";
 import * as os from "@/os";
 import { useInterval } from "@/scripts/use-interval";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 const name = "hashtags";
 

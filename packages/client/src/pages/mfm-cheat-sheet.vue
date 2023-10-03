@@ -448,6 +448,7 @@ import MkTextarea from "@/components/form/textarea.vue";
 import { definePageMetadata } from "@/scripts/page-metadata";
 import { i18n } from "@/i18n";
 import { instance } from "@/instance";
+import { defaultStore } from "@/store";
 
 defineProps<{
 	popup?: boolean;
@@ -534,7 +535,7 @@ const preview_fade = ref(
 
 definePageMetadata({
 	title: i18n.ts._mfm.cheatSheet,
-	icon: "ph-question ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-question ph-lg`,
 });
 </script>
 

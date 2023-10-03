@@ -14,9 +14,10 @@
 <script lang="ts" setup>
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
+import { defaultStore } from "@/store";
 
 definePageMetadata({
 	title: i18n.ts.notFound,
-	icon: "ph-warning ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-warning ph-lg`,
 });
 </script>

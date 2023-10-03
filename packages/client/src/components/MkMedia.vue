@@ -9,7 +9,10 @@
 			<div class="text">
 				<div class="wrapper">
 					<b style="display: block"
-						><i class="ph-warning ph-bold ph-lg"></i>
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-warning ph-lg"
+						></i>
 						{{ i18n.ts.sensitive }}</b
 					>
 					<span style="display: block">{{
@@ -74,7 +77,10 @@
 				class="_button"
 				@click.stop="captionPopup"
 			>
-				<i class="ph-subtitles ph-bold ph-lg"></i>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-subtitles ph-lg"
+				></i>
 			</button>
 			<button
 				v-if="!hide"
@@ -82,7 +88,10 @@
 				class="_button"
 				@click.stop="hide = true"
 			>
-				<i class="ph-eye-slash ph-bold ph-lg"></i>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-eye-slash ph-lg"
+				></i>
 			</button>
 		</div>
 	</div>

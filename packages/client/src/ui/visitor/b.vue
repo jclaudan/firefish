@@ -26,7 +26,9 @@
 			</div>
 		</div>
 
-		<transition :name="$store.state.animation ? 'tray-back' : ''">
+		<transition
+			:name="defaultStore.state.iconSetanimation ? 'tray-back' : ''"
+		>
 			<div
 				v-if="showMenu"
 				class="menu-back _modalBg"
@@ -35,26 +37,41 @@
 			></div>
 		</transition>
 
-		<transition :name="$store.state.animation ? 'tray' : ''">
+		<transition :name="defaultStore.state.iconSetanimation ? 'tray' : ''">
 			<div v-if="showMenu" class="menu">
 				<MkA to="/" class="link" active-class="active"
-					><i class="ph-house ph-bold ph-lg icon"></i
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-house ph-lg icon"
+					></i
 					>{{ i18n.ts.home }}</MkA
 				>
 				<MkA to="/explore" class="link" active-class="active"
-					><i class="ph-compass ph-bold ph-lg icon"></i
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-compass ph-lg icon"
+					></i
 					>{{ i18n.ts.explore }}</MkA
 				>
 				<MkA to="/channels" class="link" active-class="active"
-					><i class="ph-television ph-bold ph-lg icon"></i
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-television ph-lg icon"
+					></i
 					>{{ i18n.ts.channel }}</MkA
 				>
 				<MkA to="/pages" class="link" active-class="active"
-					><i class="ph-file-text ph-bold ph-lg icon"></i
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-file-text ph-lg icon"
+					></i
 					>{{ i18n.ts.pages }}</MkA
 				>
 				<MkA to="/gallery" class="link" active-class="active"
-					><i class="ph-image-square ph-bold ph-lg icon"></i
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-image-square ph-lg icon"
+					></i
 					>{{ i18n.ts.gallery }}</MkA
 				>
 				<button
@@ -62,7 +79,10 @@
 					active-class="active"
 					@click="search()"
 				>
-					<i class="ph-magnifying-glass ph-bold ph-lg icon"></i
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-magnifying-glass ph-lg icon"
+					></i
 					><span>{{ i18n.ts.search }}</span>
 				</button>
 				<div class="action">

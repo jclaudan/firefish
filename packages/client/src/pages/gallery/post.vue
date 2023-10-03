@@ -6,7 +6,7 @@
 		<MkSpacer :content-max="1000" :margin-min="16" :margin-max="32">
 			<div class="_root">
 				<transition
-					:name="$store.state.animation ? 'fade' : ''"
+					:name="defaultStore.state.iconSetanimation ? 'fade' : ''"
 					mode="out-in"
 				>
 					<div v-if="post" class="rkxwuolj">
@@ -25,7 +25,10 @@
 								<Mfm :text="post.description" />
 							</div>
 							<div class="info">
-								<i class="ph-clock ph-bold ph-lg"></i>
+								<i
+									:class="defaultStore.state.iconSet"
+									class="ph-clock ph-lg"
+								></i>
 								<MkTime :time="post.createdAt" mode="detail" />
 							</div>
 							<div class="actions">
@@ -36,7 +39,10 @@
 										class="button"
 										primary
 										@click="unlike()"
-										><i class="ph-heart ph-fill ph-lg"></i
+										><i
+											:class="defaultStore.state.iconSet"
+											class="ph-heart ph-fill ph-lg"
+										></i
 										><span
 											v-if="post.likedCount > 0"
 											class="count"
@@ -48,7 +54,10 @@
 										v-tooltip="i18n.ts._gallery.like"
 										class="button"
 										@click="like()"
-										><i class="ph-heart ph-bold"></i
+										><i
+											:class="defaultStore.state.iconSet"
+											class="ph-heart"
+										></i
 										><span
 											v-if="post.likedCount > 0"
 											class="count"
@@ -65,7 +74,8 @@
 										@click="edit"
 									>
 										<i
-											class="ph-pencil ph-bold ph-lg ph-fw ph-lg"
+											:class="defaultStore.state.iconSet"
+											class="ph-pencil ph-lg ph-fw ph-lg"
 										></i>
 									</button>
 									<button
@@ -75,7 +85,8 @@
 										@click="shareWithNote"
 									>
 										<i
-											class="ph-rocket-launch ph-bold ph-lg ph-fw ph-lg"
+											:class="defaultStore.state.iconSet"
+											class="ph-rocket-launch ph-lg ph-fw ph-lg"
 										></i>
 									</button>
 									<button
@@ -86,7 +97,8 @@
 										@click="share"
 									>
 										<i
-											class="ph-share-network ph-bold ph-lg ph-fw ph-lg"
+											:class="defaultStore.state.iconSet"
+											class="ph-share-network ph-lg ph-fw ph-lg"
 										></i>
 									</button>
 								</div>
@@ -118,7 +130,10 @@
 							class="other"
 						>
 							<template #header
-								><i class="ph-clock ph-bold ph-lg"></i>
+								><i
+									:class="defaultStore.state.iconSet"
+									class="ph-clock ph-lg"
+								></i>
 								{{ i18n.ts.recentPosts }}</template
 							>
 							<MkPagination
@@ -157,6 +172,7 @@ import { useRouter } from "@/router";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
 import { shareAvailable } from "@/scripts/share-available";
+import { defaultStore } from "@/store";
 
 const router = useRouter();
 
@@ -227,7 +243,7 @@ watch(() => props.postId, fetchPost, { immediate: true });
 
 const headerActions = computed(() => [
 	{
-		icon: "ph-pencil ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-pencil ph-lg`,
 		text: i18n.ts.edit,
 		handler: edit,
 	},

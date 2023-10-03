@@ -1,3 +1,4 @@
+import { defaultStore } from "@/store";
 <template>
 	<details class="dwzlatin" :open="defaultOpen">
 		<summary class="header _button">
@@ -5,8 +6,16 @@
 			<span class="text"><slot name="label"></slot></span>
 			<span class="right">
 				<span class="text"><slot name="suffix"></slot></span>
-				<i v-if="opened" class="ph-caret-up ph-bold ph-lg icon"></i>
-				<i v-else class="ph-caret-down ph-bold ph-lg icon"></i>
+				<i
+					v-if="opened"
+					:class="defaultStore.state.iconSet"
+					class="ph-caret-up ph-lg icon"
+				></i>
+				<i
+					v-else
+					:class="defaultStore.state.iconSet"
+					class="ph-caret-down ph-lg icon"
+				></i>
 			</span>
 		</summary>
 		<div class="body">

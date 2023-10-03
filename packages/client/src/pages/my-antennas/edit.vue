@@ -15,6 +15,7 @@ import * as os from "@/os";
 import { i18n } from "@/i18n";
 import { useRouter } from "@/router";
 import { definePageMetadata } from "@/scripts/page-metadata";
+import { defaultStore } from "@/store";
 
 const router = useRouter();
 
@@ -36,6 +37,6 @@ os.api("antennas/show", { antennaId: props.antennaId }).then(
 
 definePageMetadata({
 	title: i18n.ts.manageAntennas,
-	icon: "ph-flying-saucer ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-flying-saucer ph-lg`,
 });
 </script>

@@ -34,7 +34,10 @@
 				</FormTextarea>
 
 				<FormButton primary class="_formBlock" @click="save"
-					><i class="ph-floppy-disk-back ph-bold ph-lg"></i>
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-floppy-disk-back ph-lg"
+					></i>
 					{{ i18n.ts.save }}</FormButton
 				>
 			</FormSuspense>
@@ -53,6 +56,7 @@ import * as os from "@/os";
 import { fetchInstance } from "@/instance";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
+import { defaultStore } from "@/store";
 
 const blockedHosts = ref("");
 const silencedHosts = ref("");
@@ -82,6 +86,6 @@ const headerTabs = computed(() => []);
 
 definePageMetadata({
 	title: i18n.ts.instanceBlocking,
-	icon: "ph-prohibit ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-prohibit ph-lg`,
 });
 </script>

@@ -15,7 +15,10 @@
 						to="/my/antennas/create"
 						primary
 						class="add"
-						><i class="ph-plus ph-bold ph-lg"></i>
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-plus ph-lg"
+						></i>
 						{{ i18n.ts.add }}</MkButton
 					>
 				</MkInfo>
@@ -29,7 +32,8 @@
 									:to="`/timeline/antenna/${antenna.id}`"
 								>
 									<i
-										class="ph-flying-saucer ph-bold ph-lg"
+										:class="defaultStore.state.iconSet"
+										class="ph-flying-saucer ph-lg"
 									></i
 									><i
 										:class="`${
@@ -61,6 +65,7 @@ import MkButton from "@/components/MkButton.vue";
 import MkInfo from "@/components/MkInfo.vue";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
+import { defaultStore } from "@/store";
 
 const pagination = {
 	endpoint: "antennas/list" as const,
@@ -98,7 +103,7 @@ onDeactivated(() => {
 
 definePageMetadata({
 	title: i18n.ts.manageAntennas,
-	icon: "ph-flying-saucer ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-flying-saucer ph-lg`,
 });
 </script>
 

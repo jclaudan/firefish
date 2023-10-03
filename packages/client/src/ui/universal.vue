@@ -29,7 +29,7 @@
 			class="widgetButton _button"
 			@click="widgetsShowing = true"
 		>
-			<i class="ph-stack ph-bold ph-lg"></i>
+			<i :class="defaultStore.state.iconSet" class="ph-stack ph-lg"></i>
 		</button>
 
 		<div v-if="isMobile" class="buttons">
@@ -40,12 +40,21 @@
 				@click="drawerMenuShowing = true"
 			>
 				<div class="button-wrapper">
-					<i class="ph-list ph-bold ph-lg"></i
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-list ph-lg"
+					></i
 					><span
 						v-if="menuIndicated"
 						class="indicator"
-						:class="{ animateIndicator: $store.state.animation }"
-						><i class="ph-circle ph-fill"></i
+						:class="{
+							animateIndicator:
+								defaultStore.state.iconSetanimation,
+						}"
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-circle ph-fill"
+						></i
 					></span>
 				</div>
 			</button>
@@ -64,7 +73,10 @@
 					class="button-wrapper"
 					:class="buttonAnimIndex === 0 ? 'on' : ''"
 				>
-					<i class="ph-house ph-bold ph-lg"></i>
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-house ph-lg"
+					></i>
 				</div>
 			</button>
 			<button
@@ -81,12 +93,21 @@
 					class="button-wrapper"
 					:class="buttonAnimIndex === 1 ? 'on' : ''"
 				>
-					<i class="ph-bell ph-bold ph-lg"></i
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-bell ph-lg"
+					></i
 					><span
 						v-if="$i?.hasUnreadNotification"
 						class="indicator"
-						:class="{ animateIndicator: $store.state.animation }"
-						><i class="ph-circle ph-fill"></i
+						:class="{
+							animateIndicator:
+								defaultStore.state.iconSetanimation,
+						}"
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-circle ph-fill"
+						></i
 					></span>
 				</div>
 			</button>
@@ -103,12 +124,21 @@
 					class="button-wrapper"
 					:class="buttonAnimIndex === 2 ? 'on' : ''"
 				>
-					<i class="ph-chats-teardrop ph-bold ph-lg"></i
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-chats-teardrop ph-lg"
+					></i
 					><span
 						v-if="$i?.hasUnreadMessagingMessage"
 						class="indicator"
-						:class="{ animateIndicator: $store.state.animation }"
-						><i class="ph-circle ph-fill"></i
+						:class="{
+							animateIndicator:
+								defaultStore.state.iconSetanimation,
+						}"
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-circle ph-fill"
+						></i
 					></span>
 				</div>
 			</button>
@@ -119,7 +149,10 @@
 				@click="widgetsShowing = true"
 			>
 				<div class="button-wrapper">
-					<i class="ph-stack ph-bold ph-lg"></i>
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-stack ph-lg"
+					></i>
 				</div>
 			</button>
 		</div>
@@ -132,7 +165,7 @@
 			class="postButton button post _button"
 			@click="os.post()"
 		>
-			<i class="ph-pencil ph-bold ph-lg"></i>
+			<i :class="defaultStore.state.iconSet" class="ph-pencil ph-lg"></i>
 		</button>
 		<button
 			v-if="
@@ -143,10 +176,15 @@
 			:aria-label="i18n.t('startMessaging')"
 			@click="messagingStart"
 		>
-			<i class="ph-user-plus ph-bold ph-lg"></i>
+			<i
+				:class="defaultStore.state.iconSet"
+				class="ph-user-plus ph-lg"
+			></i>
 		</button>
 
-		<transition :name="$store.state.animation ? 'menuDrawer-back' : ''">
+		<transition
+			:name="defaultStore.state.iconSetanimation ? 'menuDrawer-back' : ''"
+		>
 			<div
 				v-if="drawerMenuShowing"
 				class="menuDrawer-back _modalBg"
@@ -155,11 +193,17 @@
 			></div>
 		</transition>
 
-		<transition :name="$store.state.animation ? 'menuDrawer' : ''">
+		<transition
+			:name="defaultStore.state.iconSetanimation ? 'menuDrawer' : ''"
+		>
 			<XDrawerMenu v-if="drawerMenuShowing" class="menuDrawer" />
 		</transition>
 
-		<transition :name="$store.state.animation ? 'widgetsDrawer-back' : ''">
+		<transition
+			:name="
+				defaultStore.state.iconSetanimation ? 'widgetsDrawer-back' : ''
+			"
+		>
 			<div
 				v-if="widgetsShowing"
 				class="widgetsDrawer-back _modalBg"
@@ -168,7 +212,9 @@
 			></div>
 		</transition>
 
-		<transition :name="$store.state.animation ? 'widgetsDrawer' : ''">
+		<transition
+			:name="defaultStore.state.iconSetanimation ? 'widgetsDrawer' : ''"
+		>
 			<XWidgets v-if="widgetsShowing" class="widgetsDrawer" />
 		</transition>
 
@@ -291,21 +337,21 @@ function messagingStart(ev) {
 		[
 			{
 				text: i18n.ts.messagingWithUser,
-				icon: "ph-user ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-user ph-lg`,
 				action: () => {
 					startUser();
 				},
 			},
 			{
 				text: i18n.ts.messagingWithGroup,
-				icon: "ph-users-three ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-users-three ph-lg`,
 				action: () => {
 					startGroup();
 				},
 			},
 			{
 				text: i18n.ts.manageGroups,
-				icon: "ph-user-circle-gear ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-user-circle-gear ph-lg`,
 				action: () => {
 					mainRouter.push("/my/groups");
 				},
@@ -377,7 +423,7 @@ const onContextmenu = (ev: MouseEvent) => {
 				text: path,
 			},
 			{
-				icon: "ph-browser ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-browser ph-lg`,
 				text: i18n.ts.openInWindow,
 				action: () => {
 					os.pageWindow(path);

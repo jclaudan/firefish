@@ -82,12 +82,12 @@ const headerActions = computed(() => []);
 const headerTabs = computed(() => [
 	{
 		key: "notes",
-		icon: "ph-note ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-note ph-lg`,
 		title: i18n.ts.notes,
 	},
 	{
 		key: "users",
-		icon: "ph-users ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-users ph-lg`,
 		title: i18n.ts.users,
 	},
 ]);
@@ -114,7 +114,7 @@ onMounted(() => {
 definePageMetadata(
 	computed(() => ({
 		title: props.tag,
-		icon: "ph-hash ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-hash ph-lg`,
 	})),
 );
 </script>

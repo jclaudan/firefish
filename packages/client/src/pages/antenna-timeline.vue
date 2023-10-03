@@ -30,6 +30,7 @@ import * as os from "@/os";
 import { useRouter } from "@/router";
 import { definePageMetadata } from "@/scripts/page-metadata";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 const router = useRouter();
 
@@ -78,7 +79,7 @@ const headerActions = computed(() =>
 	antenna.value
 		? [
 				{
-					icon: "ph-gear-six ph-bold ph-lg",
+					icon: `${defaultStore.state.iconSet} ph-gear-six ph-lg`,
 					text: i18n.ts.settings,
 					handler: settings,
 				},
@@ -93,7 +94,7 @@ definePageMetadata(
 		antenna.value
 			? {
 					title: antenna.value.name,
-					icon: "ph-flying-saucer ph-bold ph-lg",
+					icon: `${defaultStore.state.iconSet} ph-flying-saucer ph-lg`,
 			  }
 			: null,
 	),

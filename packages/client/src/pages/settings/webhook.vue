@@ -16,10 +16,12 @@
 						<template #icon>
 							<i
 								v-if="webhook.active === false"
-								class="ph-pause-circle ph-bold ph-lg"
+								:class="defaultStore.state.iconSet"
+								class="ph-pause-circle ph-lg"
 							></i>
 							<i
 								v-else-if="webhook.latestStatus === null"
+								:class="defaultStore.state.iconSet"
 								class="ph-circle ph-fill"
 							></i>
 							<i
@@ -28,12 +30,14 @@
 										webhook.latestStatus,
 									)
 								"
-								class="ph-check ph-bold ph-lg"
+								:class="defaultStore.state.iconSet"
+								class="ph-check ph-lg"
 								:style="{ color: 'var(--success)' }"
 							></i>
 							<i
 								v-else
-								class="ph-warning ph-bold ph-lg"
+								:class="defaultStore.state.iconSet"
+								class="ph-warning ph-lg"
 								:style="{ color: 'var(--error)' }"
 							></i>
 						</template>
@@ -56,6 +60,7 @@ import MkPagination from "@/components/MkPagination.vue";
 import FormSection from "@/components/form/section.vue";
 import FormLink from "@/components/form/link.vue";
 import { definePageMetadata } from "@/scripts/page-metadata";
+import { defaultStore } from "@/store";
 
 const pagination = {
 	endpoint: "i/webhooks/list" as const,
@@ -64,6 +69,6 @@ const pagination = {
 
 definePageMetadata({
 	title: "Webhook",
-	icon: "ph-webhooks-logo ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-webhooks-logo ph-lg`,
 });
 </script>

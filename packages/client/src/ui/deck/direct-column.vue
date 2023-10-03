@@ -6,7 +6,8 @@
 	>
 		<template #header
 			><i
-				class="ph-envelope-simple-open ph-bold ph-lg"
+				:class="defaultStore.state.iconSet"
+				class="ph-envelope-simple-open ph-lg"
 				style="margin-right: 8px"
 			></i
 			>{{ column.name }}</template
@@ -21,6 +22,7 @@ import {} from "vue";
 import XColumn from "./column.vue";
 import type { Column } from "./deck-store";
 import XNotes from "@/components/MkNotes.vue";
+import { defaultStore } from "@/store";
 
 defineProps<{
 	column: Column;

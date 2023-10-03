@@ -12,16 +12,16 @@
 	<div v-if="queue > 0" class="new">
 		<button
 			class="_buttonPrimary _shadow"
-			:class="{ instant: !$store.state.animation }"
+			:class="{ instant: !defaultStore.state.iconSetanimation }"
 			@click="tlComponent.scrollTop()"
 		>
 			{{ i18n.ts.newNoteRecived }}
-			<i class="ph-arrow-up ph-bold"></i>
+			<i :class="defaultStore.state.iconSet" class="ph-arrow-up"></i>
 		</button>
 	</div>
 	<XNotes
 		ref="tlComponent"
-		:no-gap="!$store.state.showGapBetweenNotesInTimeline"
+		:no-gap="!defaultStore.state.iconSetshowGapBetweenNotesInTimeline"
 		:pagination="pagination"
 		@queue="(x) => (queue = x)"
 	/>

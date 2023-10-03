@@ -40,7 +40,8 @@
 							"
 						>
 							<i
-								class="ph-shield-warning ph-bold ph-xl"
+								:class="defaultStore.state.iconSet"
+								class="ph-shield-warning ph-xl"
 								style="margin-right: 0.5rem"
 							></i>
 							{{ i18n.ts._permissions.allPermissions }}

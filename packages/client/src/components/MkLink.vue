@@ -12,7 +12,8 @@
 		<slot></slot>
 		<i
 			v-if="target === '_blank'"
-			class="ph-arrow-square-out ph-bold ph-lg icon"
+			:class="defaultStore.state.iconSet"
+			class="ph-arrow-square-out ph-lg icon"
 		></i>
 	</component>
 </template>
@@ -22,6 +23,7 @@ import { defineAsyncComponent, ref } from "vue";
 import { url as local } from "@/config";
 import { useTooltip } from "@/scripts/use-tooltip";
 import * as os from "@/os";
+import { defaultStore } from "@/store";
 
 const props = withDefaults(
 	defineProps<{

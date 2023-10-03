@@ -14,7 +14,10 @@
 					inline
 					link
 					:to="`/@${author.username}/pages/${currentName}`"
-					><i class="ph-arrow-square-out ph-bold ph-lg"></i>
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-arrow-square-out ph-lg"
+					></i>
 					{{ i18n.ts._pages.viewPage }}</MkButton
 				>
 				<MkButton
@@ -23,11 +26,17 @@
 					primary
 					class="button"
 					@click="save"
-					><i class="ph-floppy-disk-back ph-bold ph-lg"></i>
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-floppy-disk-back ph-lg"
+					></i>
 					{{ i18n.ts.save }}</MkButton
 				>
 				<MkButton v-if="pageId" inline class="button" @click="duplicate"
-					><i class="ph-clipboard-text ph-bold ph-lg"></i>
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-clipboard-text ph-lg"
+					></i>
 					{{ i18n.ts.duplicate }}</MkButton
 				>
 				<MkButton
@@ -36,7 +45,10 @@
 					class="button"
 					danger
 					@click="del"
-					><i class="ph-trash ph-bold ph-lg"></i>
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-trash ph-lg"
+					></i>
 					{{ i18n.ts.delete }}</MkButton
 				>
 			</div>
@@ -85,7 +97,10 @@
 						<MkButton
 							v-if="eyeCatchingImageId == null && !readonly"
 							@click="setEyeCatchingImage"
-							><i class="ph-plus ph-bold ph-lg"></i>
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-plus ph-lg"
+							></i>
 							{{ i18n.ts._pages.eyeCatchingImageSet }}</MkButton
 						>
 						<div v-else-if="eyeCatchingImage">
@@ -97,7 +112,10 @@
 							<MkButton
 								v-if="!readonly"
 								@click="removeEyeCatchingImage()"
-								><i class="ph-trash ph-bold ph-lg"></i>
+								><i
+									:class="defaultStore.state.iconSet"
+									class="ph-trash ph-lg"
+								></i>
 								{{
 									i18n.ts._pages.eyeCatchingImageRemove
 								}}</MkButton
@@ -111,7 +129,10 @@
 				<div>
 					<XBlocks v-model="content" class="content" :hpml="hpml" />
 					<MkButton v-if="!readonly" @click="add()"
-						><i class="ph-plus ph-bold ph-lg"></i
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-plus ph-lg"
+						></i
 					></MkButton>
 				</div>
 			</div>
@@ -145,7 +166,10 @@
 						v-if="!readonly"
 						class="add"
 						@click="addVariable()"
-						><i class="ph-plus ph-bold ph-lg"></i
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-plus ph-lg"
+						></i
 					></MkButton>
 				</div>
 			</div>
@@ -180,6 +204,7 @@ import { mainRouter } from "@/router";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
 import { $i } from "@/account";
+import { defaultStore } from "@/store";
 
 const props = defineProps<{
 	initPageId?: string;
@@ -517,22 +542,22 @@ const headerTabs = computed(() => [
 	{
 		key: "settings",
 		title: i18n.ts._pages.pageSetting,
-		icon: "ph-gear-six ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-gear-six ph-lg`,
 	},
 	{
 		key: "contents",
 		title: i18n.ts._pages.contents,
-		icon: "ph-sticker ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-sticker ph-lg`,
 	},
 	{
 		key: "variables",
 		title: i18n.ts._pages.variables,
-		icon: "ph-magic-wand ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-magic-wand ph-lg`,
 	},
 	{
 		key: "script",
 		title: i18n.ts.script,
-		icon: "ph-code ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-code ph-lg`,
 	},
 ]);
 
@@ -546,7 +571,7 @@ definePageMetadata(
 		}
 		return {
 			title,
-			icon: "ph-pencil ph-bold ph-lg",
+			icon: `${defaultStore.state.iconSet} ph-pencil ph-lg`,
 		};
 	}),
 );

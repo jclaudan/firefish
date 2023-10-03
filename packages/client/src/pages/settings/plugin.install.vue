@@ -10,7 +10,10 @@
 
 		<div class="_formBlock">
 			<FormButton :disabled="code == null" primary inline @click="install"
-				><i class="ph-check ph-bold ph-lg"></i>
+				><i
+					:class="defaultStore.state.iconSet"
+					class="ph-check ph-lg"
+				></i>
 				{{ i18n.ts.install }}</FormButton
 			>
 		</div>
@@ -146,6 +149,6 @@ async function install() {
 
 definePageMetadata({
 	title: i18n.ts._plugin.install,
-	icon: "ph-download-simple ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-download-simple ph-lg`,
 });
 </script>

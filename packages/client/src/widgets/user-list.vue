@@ -1,7 +1,10 @@
 <template>
 	<MkContainer :show-header="widgetProps.showHeader" class="mkw-userList">
 		<template #header
-			><i class="ph-user-list ph-bold ph-lg"></i>
+			><i
+				:class="defaultStore.state.iconSet"
+				class="ph-user-list ph-lg"
+			></i>
 			{{ list ? list.name : i18n.ts._widgets.userList }}</template
 		>
 		<template #func="{ buttonStyleClass }"
@@ -10,7 +13,10 @@
 				:class="buttonStyleClass"
 				@click="configure()"
 			>
-				<i class="ph-gear-six ph-bold ph-lg"></i></button
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-gear-six ph-lg"
+				></i></button
 		></template>
 
 		<div class="wsdlkfj">
@@ -39,6 +45,7 @@ import * as os from "@/os";
 import { useInterval } from "@/scripts/use-interval";
 import { i18n } from "@/i18n";
 import MkButton from "@/components/MkButton.vue";
+import { defaultStore } from "@/store";
 
 const name = "userList";
 const widgetPropsDef = {

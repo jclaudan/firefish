@@ -119,6 +119,7 @@ const defaultStoreSaveKeys: (keyof (typeof defaultStore)["state"])[] = [
 	"showTimelineReplies",
 	"detectPostLanguage",
 	"openServerInfo",
+	"iconSet",
 ];
 const coldDeviceStorageSaveKeys: (keyof typeof ColdDeviceStorage.default)[] = [
 	"lightTheme",
@@ -450,13 +451,13 @@ function menu(ev: MouseEvent, profileId: string) {
 		[
 			{
 				text: ts._preferencesBackups.apply,
-				icon: "ph-caret-circle-down ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-caret-circle-down ph-lg`,
 				action: () => applyProfile(profileId),
 			},
 			{
 				type: "a",
 				text: ts.download,
-				icon: "ph-download-simple ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-download-simple ph-lg`,
 				href: URL.createObjectURL(
 					new Blob(
 						[JSON.stringify(profiles.value[profileId], null, 2)],
@@ -470,18 +471,18 @@ function menu(ev: MouseEvent, profileId: string) {
 			null,
 			{
 				text: ts.rename,
-				icon: "ph-cursor-text ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-cursor-text ph-lg`,
 				action: () => rename(profileId),
 			},
 			{
 				text: ts._preferencesBackups.save,
-				icon: "ph-floppy-disk ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-floppy-disk ph-lg`,
 				action: () => save(profileId),
 			},
 			null,
 			{
 				text: ts._preferencesBackups.delete,
-				icon: "ph-trash ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-trash ph-lg`,
 				action: () => deleteProfile(profileId),
 				danger: true,
 			},
@@ -515,7 +516,7 @@ onUnmounted(() => {
 definePageMetadata(
 	computed(() => ({
 		title: ts.preferencesBackups,
-		icon: "ph-floppy-disk ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-floppy-disk ph-lg`,
 		bg: "var(--bg)",
 	})),
 );

@@ -1,7 +1,9 @@
 <template>
 	<div class="wbrkwale">
 		<Transition
-			:name="$store.state.animation ? '_transition_zoom' : ''"
+			:name="
+				defaultStore.state.iconSetanimation ? '_transition_zoom' : ''
+			"
 			mode="out-in"
 		>
 			<MkLoading v-if="fetching" />
@@ -27,6 +29,7 @@ import { ref } from "vue";
 import * as os from "@/os";
 import { useInterval } from "@/scripts/use-interval";
 import MkInstanceCardMini from "@/components/MkInstanceCardMini.vue";
+import { defaultStore } from "@/store";
 
 const instances = ref([]);
 const fetching = ref(true);

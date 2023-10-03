@@ -42,7 +42,7 @@ async function add() {
 
 definePageMetadata({
 	title: i18n.ts.statusbar,
-	icon: "ph-list-bullets ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-list-bullets ph-lg`,
 	bg: "var(--bg)",
 });
 </script>

@@ -1,7 +1,10 @@
 <template>
 	<XContainer :draggable="true" @remove="() => $emit('remove')">
 		<template #header
-			><i class="ph-align-left ph-bold ph-lg"></i>
+			><i
+				:class="defaultStore.state.iconSet"
+				class="ph-align-left ph-lg"
+			></i>
 			{{ i18n.ts._pages.blocks.text }}</template
 		>
 
@@ -14,6 +17,7 @@
 <script lang="ts" setup>
 import XContainer from "../page-editor.container.vue";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 withDefaults(
 	defineProps<{

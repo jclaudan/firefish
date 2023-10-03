@@ -2,7 +2,10 @@
 	<div class="_formRoot">
 		<FormSuspense :p="init">
 			<FormButton primary @click="addAccount"
-				><i class="ph-plus ph-bold ph-lg"></i>
+				><i
+					:class="defaultStore.state.iconSet"
+					class="ph-plus ph-lg"
+				></i>
 				{{ i18n.ts.addAccount }}</FormButton
 			>
 
@@ -42,6 +45,7 @@ import {
 } from "@/account";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
+import { defaultStore } from "@/store";
 
 const storedAccounts = ref<any>(null);
 const accounts = ref<any>(null);
@@ -68,12 +72,12 @@ function menu(account, ev) {
 		[
 			{
 				text: i18n.ts.switch,
-				icon: "ph-swap ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-swap ph-lg`,
 				action: () => switchAccount(account),
 			},
 			{
 				text: i18n.ts.remove,
-				icon: "ph-trash ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-trash ph-lg`,
 				danger: true,
 				action: () => removeAccount(account),
 			},
@@ -146,7 +150,7 @@ function switchAccountWithToken(token: string) {
 
 definePageMetadata({
 	title: i18n.ts.accounts,
-	icon: "ph-users ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-users ph-lg`,
 });
 </script>
 

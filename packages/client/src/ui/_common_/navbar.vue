@@ -31,7 +31,7 @@
 					to="/"
 					exact
 				>
-					<i class="icon ph-house ph-bold ph-fw ph-lg"></i
+					<i class="icon ph-house ph-fw ph-lg"></i
 					><span class="text">{{ i18n.ts.timeline }}</span>
 				</MkA>
 				<template v-for="item in menu">
@@ -89,7 +89,7 @@
 						"
 						class="indicator"
 					></span
-					><i class="icon ph-door ph-bold ph-fw ph-lg"></i
+					><i class="icon ph-door ph-fw ph-lg"></i
 					><span class="text">{{ i18n.ts.controlPanel }}</span>
 				</MkA>
 				<button
@@ -98,9 +98,7 @@
 					class="item _button"
 					@click="more"
 				>
-					<i
-						class="icon ph-dots-three-outline ph-bold ph-fw ph-lg"
-					></i
+					<i class="icon ph-dots-three-outline ph-fw ph-lg"></i
 					><span class="text">{{ i18n.ts.more }}</span>
 					<span v-if="otherMenuItemIndicated" class="indicator"
 						><i class="icon ph-circle ph-fill"></i
@@ -113,7 +111,7 @@
 					active-class="active"
 					to="/settings"
 				>
-					<i class="icon ph-gear-six ph-bold ph-fw ph-lg"></i
+					<i class="icon ph-gear-six ph-fw ph-lg"></i
 					><span class="text">{{ i18n.ts.settings }}</span>
 				</MkA>
 			</nav>
@@ -124,7 +122,7 @@
 					data-cy-open-post-form
 					@click="os.post"
 				>
-					<i class="icon ph-pencil ph-bold ph-fw ph-lg"></i
+					<i class="icon ph-pencil ph-fw ph-lg"></i
 					><span class="text">{{ i18n.ts.note }}</span>
 				</button>
 				<button
@@ -132,7 +130,7 @@
 					class="item _button help"
 					@click="openHelpMenu"
 				>
-					<i class="help icon ph-info ph-bold ph-xl ph-fw"></i>
+					<i class="help icon ph-info ph-xl ph-fw"></i>
 				</button>
 				<!-- <button v-click-anime v-tooltip.noDelay.right="$instance.name ?? i18n.ts.instance" class="item _button instance" @click="openInstanceMenu">
 				<img :src="$instance.iconUrl || $instance.faviconUrl || '/favicon.ico'" alt="" class="icon"/>

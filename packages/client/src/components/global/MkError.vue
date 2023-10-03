@@ -1,5 +1,8 @@
 <template>
-	<transition :name="$store.state.animation ? 'zoom' : ''" appear>
+	<transition
+		:name="defaultStore.state.iconSetanimation ? 'zoom' : ''"
+		appear
+	>
 		<div class="mjndxjcg">
 			<img
 				src="/static-assets/badges/error.webp"
@@ -7,7 +10,10 @@
 				alt="Error"
 			/>
 			<p>
-				<i class="ph-warning ph-bold ph-lg"></i>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-warning ph-lg"
+				></i>
 				{{ i18n.ts.somethingHappened }}
 			</p>
 			<MkButton class="button" @click="() => $emit('retry')">{{
@@ -20,6 +26,7 @@
 <script lang="ts" setup>
 import MkButton from "@/components/MkButton.vue";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 </script>
 
 <style lang="scss" scoped>

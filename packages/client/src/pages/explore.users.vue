@@ -10,7 +10,8 @@
 				<MkFolder class="_gap" persist-key="explore-pinned-users">
 					<template #header
 						><i
-							class="ph-bookmark ph-bold ph-lg ph-fw"
+							:class="defaultStore.state.iconSet"
+							class="ph-bookmark ph-lg ph-fw"
 							style="margin-right: 0.5em"
 						></i
 						>{{ i18n.ts.pinnedUsers }}</template
@@ -24,7 +25,8 @@
 				>
 					<template #header
 						><i
-							class="ph-chart-line-up ph-bold ph-lg ph-fw"
+							:class="defaultStore.state.iconSet"
+							class="ph-chart-line-up ph-lg ph-fw"
 							style="margin-right: 0.5em"
 						></i
 						>{{ i18n.ts.popularUsers }}</template
@@ -38,7 +40,8 @@
 				>
 					<template #header
 						><i
-							class="ph-activity ph-bold ph-lg ph-fw"
+							:class="defaultStore.state.iconSet"
+							class="ph-activity ph-lg ph-fw"
 							style="margin-right: 0.5em"
 						></i
 						>{{ i18n.ts.recentlyUpdatedUsers }}</template
@@ -52,7 +55,8 @@
 				>
 					<template #header
 						><i
-							class="ph-butterfly ph-bold ph-lg ph-fw"
+							:class="defaultStore.state.iconSet"
+							class="ph-butterfly ph-lg ph-fw"
 							style="margin-right: 0.5em"
 						></i
 						>{{ i18n.ts.recentlyRegisteredUsers }}</template
@@ -70,7 +74,8 @@
 			>
 				<template #header
 					><i
-						class="ph-compass ph-bold ph-lg ph-fw"
+						:class="defaultStore.state.iconSet"
+						class="ph-compass ph-lg ph-fw"
 						style="margin-right: 0.5em"
 					></i
 					>{{ i18n.ts.popularTags }}</template
@@ -96,7 +101,8 @@
 			<MkFolder v-if="tag != null" :key="`${tag}`" class="_gap">
 				<template #header
 					><i
-						class="ph-hash ph-bold ph-lg ph-fw"
+						:class="defaultStore.state.iconSet"
+						class="ph-hash ph-lg ph-fw"
 						style="margin-right: 0.5em"
 					></i
 					>{{ tag }}</template
@@ -108,7 +114,8 @@
 				<MkFolder class="_gap">
 					<template #header
 						><i
-							class="ph-chart-line-up ph-bold ph-lg ph-fw"
+							:class="defaultStore.state.iconSet"
+							class="ph-chart-line-up ph-lg ph-fw"
 							style="margin-right: 0.5em"
 						></i
 						>{{ i18n.ts.popularUsers }}</template
@@ -118,7 +125,8 @@
 				<MkFolder class="_gap">
 					<template #header
 						><i
-							class="ph-activity ph-bold ph-lg ph-fw"
+							:class="defaultStore.state.iconSet"
+							class="ph-activity ph-lg ph-fw"
 							style="margin-right: 0.5em"
 						></i
 						>{{ i18n.ts.recentlyUpdatedUsers }}</template
@@ -128,7 +136,8 @@
 				<MkFolder class="_gap">
 					<template #header
 						><i
-							class="ph-rocket-launch ph-bold ph-lg ph-fw"
+							:class="defaultStore.state.iconSet"
+							class="ph-rocket-launch ph-lg ph-fw"
 							style="margin-right: 0.5em"
 						></i
 						>{{ i18n.ts.recentlyDiscoveredUsers }}</template
@@ -148,6 +157,7 @@ import MkTab from "@/components/MkTab.vue";
 import * as os from "@/os";
 import { i18n } from "@/i18n";
 import { $i } from "@/account";
+import { defaultStore } from "@/store";
 
 const props = defineProps<{
 	tag?: string;

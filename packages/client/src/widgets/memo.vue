@@ -1,7 +1,7 @@
 <template>
 	<MkContainer :show-header="widgetProps.showHeader" class="mkw-memo">
 		<template #header
-			><i class="ph-sticker ph-bold ph-lg"></i
+			><i :class="defaultStore.state.iconSet" class="ph-sticker ph-lg"></i
 			>{{ i18n.ts._widgets.memo }}</template
 		>
 

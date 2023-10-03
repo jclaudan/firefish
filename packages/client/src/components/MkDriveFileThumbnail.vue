@@ -10,31 +10,49 @@
 		/>
 		<i
 			v-else-if="is === 'image'"
-			class="ph-file-image ph-bold ph-lg icon"
+			:class="defaultStore.state.iconSet"
+			class="ph-file-image ph-lg icon"
 		></i>
 		<i
 			v-else-if="is === 'video'"
-			class="ph-file-video ph-bold ph-lg icon"
+			:class="defaultStore.state.iconSet"
+			class="ph-file-video ph-lg icon"
 		></i>
 		<i
 			v-else-if="is === 'audio' || is === 'midi'"
-			class="ph-file-audio ph-bold ph-lg icon"
+			:class="defaultStore.state.iconSet"
+			class="ph-file-audio ph-lg icon"
 		></i>
-		<i v-else-if="is === 'csv'" class="ph-file-csv ph-bold ph-lg icon"></i>
-		<i v-else-if="is === 'pdf'" class="ph-file-pdf ph-bold ph-lg icon"></i>
+		<i
+			v-else-if="is === 'csv'"
+			:class="defaultStore.state.iconSet"
+			class="ph-file-csv ph-lg icon"
+		></i>
+		<i
+			v-else-if="is === 'pdf'"
+			:class="defaultStore.state.iconSet"
+			class="ph-file-pdf ph-lg icon"
+		></i>
 		<i
 			v-else-if="is === 'textfile'"
-			class="ph-file-text ph-bold ph-lg icon"
+			:class="defaultStore.state.iconSet"
+			class="ph-file-text ph-lg icon"
 		></i>
 		<i
 			v-else-if="is === 'archive'"
-			class="ph-file-zip ph-bold ph-lg icon"
+			:class="defaultStore.state.iconSet"
+			class="ph-file-zip ph-lg icon"
 		></i>
-		<i v-else class="ph-file ph-bold ph-lg icon"></i>
+		<i
+			v-else
+			:class="defaultStore.state.iconSet"
+			class="ph-file ph-lg icon"
+		></i>
 
 		<i
 			v-if="isThumbnailAvailable && is === 'video'"
-			class="ph-file-video ph-bold ph-lg icon-sub"
+			:class="defaultStore.state.iconSet"
+			class="ph-file-video ph-lg icon-sub"
 		></i>
 	</button>
 </template>
@@ -43,6 +61,7 @@
 import { computed } from "vue";
 import type * as firefish from "firefish-js";
 import ImgWithBlurhash from "@/components/MkImgWithBlurhash.vue";
+import { defaultStore } from "@/store";
 
 const props = defineProps<{
 	file: firefish.entities.DriveFile;

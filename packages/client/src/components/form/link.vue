@@ -1,3 +1,4 @@
+import { defaultStore } from "@/store";
 <template>
 	<div class="ffcbddfc" :class="{ inline }">
 		<a v-if="external" class="main _button" :href="to" target="_blank">
@@ -5,7 +6,10 @@
 			<span class="text"><slot></slot></span>
 			<span class="right">
 				<span class="text"><slot name="suffix"></slot></span>
-				<i class="ph-arrow-square-out ph-bold ph-lg icon"></i>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-arrow-square-out ph-lg icon"
+				></i>
 			</span>
 		</a>
 		<MkA
@@ -19,7 +23,10 @@
 			<span class="text"><slot></slot></span>
 			<span class="right">
 				<span class="text"><slot name="suffix"></slot></span>
-				<i class="ph-caret-right ph-bold ph-lg icon"></i>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-caret-right ph-lg icon"
+				></i>
 			</span>
 		</MkA>
 	</div>

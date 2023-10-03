@@ -47,7 +47,10 @@
 				class="_formBlock"
 				danger
 				@click="uninstall()"
-				><i class="ph-trash ph-bold ph-lg"></i>
+				><i
+					:class="defaultStore.state.iconSet"
+					class="ph-trash ph-lg"
+				></i>
 				{{ i18n.ts.uninstall }}</FormButton
 			>
 		</template>
@@ -68,6 +71,7 @@ import * as os from "@/os";
 import { getThemes, removeTheme } from "@/theme-store";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
+import { defaultStore } from "@/store";
 
 const installedThemes = ref(getThemes());
 const builtinThemes = getBuiltinThemesRef();
@@ -104,6 +108,6 @@ function uninstall() {
 
 definePageMetadata({
 	title: i18n.ts._theme.manage,
-	icon: "ph-folder-notch-open ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-folder-notch-open ph-lg`,
 });
 </script>

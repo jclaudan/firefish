@@ -15,20 +15,29 @@
 
 				<div class="banner">
 					<MkButton v-if="bannerId == null" @click="setBannerImage"
-						><i class="ph-plus ph-bold ph-lg"></i>
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-plus ph-lg"
+						></i>
 						{{ i18n.ts._channel.setBanner }}</MkButton
 					>
 					<div v-else-if="bannerUrl">
 						<img :src="bannerUrl" style="width: 100%" />
 						<MkButton @click="removeBannerImage()"
-							><i class="ph-trash ph-bold ph-lg"></i>
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-trash ph-lg"
+							></i>
 							{{ i18n.ts._channel.removeBanner }}</MkButton
 						>
 					</div>
 				</div>
 				<div class="_formBlock">
 					<MkButton primary @click="save()"
-						><i class="ph-floppy-disk-back ph-bold ph-lg"></i>
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-floppy-disk-back ph-lg"
+						></i>
 						{{
 							channelId ? i18n.ts.save : i18n.ts.create
 						}}</MkButton
@@ -49,6 +58,7 @@ import * as os from "@/os";
 import { useRouter } from "@/router";
 import { definePageMetadata } from "@/scripts/page-metadata";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 const router = useRouter();
 
@@ -131,11 +141,11 @@ definePageMetadata(
 		props.channelId
 			? {
 					title: i18n.ts._channel.edit,
-					icon: "ph-television ph-bold ph-lg",
+					icon: `${defaultStore.state.iconSet} ph-television ph-lg`,
 			  }
 			: {
 					title: i18n.ts._channel.create,
-					icon: "ph-television ph-bold ph-lg",
+					icon: `${defaultStore.state.iconSet} ph-television ph-lg`,
 			  },
 	),
 );

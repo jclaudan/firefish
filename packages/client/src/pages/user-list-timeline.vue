@@ -25,6 +25,7 @@ import * as os from "@/os";
 import { useRouter } from "@/router";
 import { definePageMetadata } from "@/scripts/page-metadata";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 const router = useRouter();
 
@@ -63,12 +64,12 @@ const headerActions = computed(() =>
 	list.value
 		? [
 				{
-					icon: "ph-calendar-blank ph-bold ph-lg",
+					icon: `${defaultStore.state.iconSet} ph-calendar-blank ph-lg`,
 					text: i18n.ts.jumpToSpecifiedDate,
 					handler: timetravel,
 				},
 				{
-					icon: "ph-gear-six ph-bold ph-lg",
+					icon: `${defaultStore.state.iconSet} ph-gear-six ph-lg`,
 					text: i18n.ts.settings,
 					handler: settings,
 				},
@@ -83,7 +84,7 @@ definePageMetadata(
 		list.value
 			? {
 					title: list.value.name,
-					icon: "ph-list-bullets ph-bold ph-lg",
+					icon: `${defaultStore.state.iconSet} ph-list-bullets ph-lg`,
 			  }
 			: null,
 	),

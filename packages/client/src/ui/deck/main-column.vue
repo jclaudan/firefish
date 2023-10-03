@@ -33,6 +33,7 @@ import {
 	provideMetadataReceiver,
 	setPageMetadata,
 } from "@/scripts/page-metadata";
+import { defaultStore } from "@/store";
 
 defineProps<{
 	column: Column;
@@ -81,7 +82,7 @@ function onContextmenu(ev: MouseEvent) {
 				text: path,
 			},
 			{
-				icon: "ph-browser ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-browser ph-lg`,
 				text: i18n.ts.openInWindow,
 				action: () => {
 					os.pageWindow(path);

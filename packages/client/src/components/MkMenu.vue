@@ -57,9 +57,13 @@
 							v-if="item.indicate"
 							class="indicator"
 							:class="{
-								animateIndicator: $store.state.animation,
+								animateIndicator:
+									defaultStore.state.iconSetanimation,
 							}"
-							><i class="ph-circle ph-fill"></i
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-circle ph-fill"
+							></i
 						></span>
 					</MkA>
 					<a
@@ -84,9 +88,13 @@
 							v-if="item.indicate"
 							class="indicator"
 							:class="{
-								animateIndicator: $store.state.animation,
+								animateIndicator:
+									defaultStore.state.iconSetanimation,
 							}"
-							><i class="ph-circle ph-fill"></i
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-circle ph-fill"
+							></i
 						></span>
 					</a>
 					<button
@@ -107,9 +115,13 @@
 							v-if="item.indicate"
 							class="indicator"
 							:class="{
-								animateIndicator: $store.state.animation,
+								animateIndicator:
+									defaultStore.state.iconSetanimation,
 							}"
-							><i class="ph-circle ph-fill"></i
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-circle ph-fill"
+							></i
 						></span>
 					</button>
 					<span
@@ -143,7 +155,8 @@
 						}}</span>
 						<span class="caret"
 							><i
-								class="ph-caret-right ph-bold ph-lg ph-fw ph-lg"
+								:class="defaultStore.state.iconSet"
+								class="ph-caret-right ph-lg ph-fw ph-lg"
 							></i
 						></span>
 					</button>
@@ -178,9 +191,13 @@
 							v-if="item.indicate"
 							class="indicator"
 							:class="{
-								animateIndicator: $store.state.animation,
+								animateIndicator:
+									defaultStore.state.iconSetanimation,
 							}"
-							><i class="ph-circle ph-fill"></i
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-circle ph-fill"
+							></i
 						></span>
 					</button>
 				</template>
@@ -221,6 +238,7 @@ import type {
 } from "@/types/menu";
 import * as os from "@/os";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 const XChild = defineAsyncComponent(() => import("./MkMenu.child.vue"));
 const focusTrap = ref();

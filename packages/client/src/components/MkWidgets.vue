@@ -21,7 +21,10 @@
 					primary
 					class="mk-widget-add"
 					@click="addWidget"
-					><i class="ph-plus ph-bold ph-lg"></i>
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-plus ph-lg"
+					></i>
 					{{ i18n.ts.add }}</MkButton
 				>
 				<MkButton inline @click="$emit('exit')">{{
@@ -35,14 +38,20 @@
 							class="config _button"
 							@click.prevent.stop="configWidget(element.id)"
 						>
-							<i class="ph-gear-six ph-bold ph-lg"></i>
+							<i
+								:class="defaultStore.state.iconSet"
+								class="ph-gear-six ph-lg"
+							></i>
 						</button>
 						<button
 							class="remove _button"
 							:aria-label="i18n.t('close')"
 							@click.prevent.stop="removeWidget(element)"
 						>
-							<i class="ph-x ph-bold ph-lg"></i>
+							<i
+								:class="defaultStore.state.iconSet"
+								class="ph-x ph-lg"
+							></i>
 						</button>
 						<div class="handle">
 							<component
@@ -80,6 +89,7 @@ import MkButton from "@/components/MkButton.vue";
 import { widgets as widgetDefs } from "@/widgets";
 import * as os from "@/os";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 interface Widget {
 	name: string;
@@ -153,7 +163,7 @@ function onContextmenu(widget: Widget, ev: MouseEvent) {
 				text: i18n.t(`_widgets.${widget.name}`),
 			},
 			{
-				icon: "ph-gear-six ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-gear-six ph-lg`,
 				text: i18n.ts.settings,
 				action: () => {
 					configWidget(widget.id);

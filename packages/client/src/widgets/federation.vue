@@ -6,7 +6,7 @@
 		class="mkw-federation"
 	>
 		<template #header
-			><i class="ph-planet ph-bold ph-lg"></i
+			><i :class="defaultStore.state.iconSet" class="ph-planet ph-lg"></i
 			>{{ i18n.ts._widgets.federation }}</template
 		>
 
@@ -15,7 +15,7 @@
 			<transition-group
 				v-else
 				tag="div"
-				:name="$store.state.animation ? 'chart' : ''"
+				:name="defaultStore.state.iconSetanimation ? 'chart' : ''"
 				class="instances"
 			>
 				<div
@@ -62,6 +62,7 @@ import * as os from "@/os";
 import { useInterval } from "@/scripts/use-interval";
 import { i18n } from "@/i18n";
 import { getProxiedImageUrlNullable } from "@/scripts/media-proxy";
+import { defaultStore } from "@/store";
 
 const name = "federation";
 

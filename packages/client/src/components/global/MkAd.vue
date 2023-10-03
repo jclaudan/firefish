@@ -15,7 +15,10 @@
 			<a :href="chosen.url" target="_blank">
 				<img :src="chosen.imageUrl" />
 				<button class="_button menu" @click.prevent.stop="toggleMenu">
-					<span class="ph-info ph-bold ph-lg info-circle"></span>
+					<span
+						:class="defaultStore.state.iconSet"
+						class="ph-info ph-lg info-circle"
+					></span>
 				</button>
 			</a>
 		</div>

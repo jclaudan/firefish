@@ -3,7 +3,10 @@
 		<div v-if="narrow === false" class="wide">
 			<div class="content">
 				<MkA to="/" class="link" active-class="active"
-					><i class="ph-house ph-bold ph-lg icon"></i
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-house ph-lg icon"
+					></i
 					>{{ i18n.ts.home }}</MkA
 				>
 				<!-- <MkA
@@ -11,23 +14,35 @@
 					to="/timeline"
 					class="link"
 					active-class="active"
-					><i class="ph-chats-circle ph-bold ph-lg icon"></i
+					><i :class="defaultStore.state.iconSet" class="ph-chats-circle ph-lg icon"></i
 					>{{ i18n.ts.timeline }}</MkA
 				> -->
 				<MkA to="/explore" class="link" active-class="active"
-					><i class="ph-compass ph-bold ph-lg icon"></i
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-compass ph-lg icon"
+					></i
 					>{{ i18n.ts.explore }}</MkA
 				>
 				<MkA to="/channels" class="link" active-class="active"
-					><i class="ph-television ph-bold ph-lg icon"></i
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-television ph-lg icon"
+					></i
 					>{{ i18n.ts.channel }}</MkA
 				>
 				<MkA to="/pages" class="link" active-class="active"
-					><i class="ph-file-text ph-bold ph-lg icon"></i
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-file-text ph-lg icon"
+					></i
 					>{{ i18n.ts.pages }}</MkA
 				>
 				<MkA to="/gallery" class="link" active-class="active"
-					><i class="ph-image-square ph-bold ph-lg icon"></i
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-image-square ph-lg icon"
+					></i
 					>{{ i18n.ts.gallery }}</MkA
 				>
 				<div v-if="info" class="page active link">
@@ -60,7 +75,10 @@
 				</div>
 				<div class="right">
 					<button class="_button search" @click="search()">
-						<i class="ph-magnifying-glass ph-bold ph-lg icon"></i
+						<i
+							:class="defaultStore.state.iconSet"
+							class="ph-magnifying-glass ph-lg icon"
+						></i
 						><span>{{ i18n.ts.search }}</span>
 					</button>
 					<button class="_buttonPrimary signup" @click="signup()">
@@ -74,7 +92,10 @@
 		</div>
 		<div v-else-if="narrow === true" class="narrow">
 			<button class="menu _button" @click="$parent.showMenu = true">
-				<i class="ph-list ph-bold ph-lg icon"></i>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-list ph-lg icon"
+				></i>
 			</button>
 			<div v-if="info" class="title">
 				<i v-if="info.icon" class="icon" :class="info.icon"></i>
@@ -112,6 +133,7 @@ import * as os from "@/os";
 import { instance } from "@/instance";
 import { search } from "@/scripts/search";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 export default defineComponent({
 	props: {

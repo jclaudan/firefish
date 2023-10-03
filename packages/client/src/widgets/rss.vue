@@ -5,10 +5,16 @@
 		:scrollable="true"
 		:style="`height: ${widgetProps.height}px;`"
 	>
-		<template #header><i class="ph-rss ph-bold ph-lg"></i>RSS</template>
+		<template #header
+			><i :class="defaultStore.state.iconSet" class="ph-rss ph-lg"></i
+			>RSS</template
+		>
 		<template #func
 			><button class="_button" @click="configure">
-				<i class="ph-gear-six ph-bold ph-lg"></i></button
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-gear-six ph-lg"
+				></i></button
 		></template>
 
 		<div class="ekmkgxbj">
@@ -40,6 +46,7 @@ import type { GetFormResultType } from "@/scripts/form";
 import * as os from "@/os";
 import MkContainer from "@/components/MkContainer.vue";
 import { useInterval } from "@/scripts/use-interval";
+import { defaultStore } from "@/store";
 
 const name = "rss";
 

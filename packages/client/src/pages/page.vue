@@ -8,7 +8,7 @@
 		/></template>
 		<MkSpacer :content-max="800">
 			<transition
-				:name="$store.state.animation ? 'fade' : ''"
+				:name="defaultStore.state.iconSetanimation ? 'fade' : ''"
 				mode="out-in"
 			>
 				<div
@@ -19,12 +19,18 @@
 				>
 					<div class="footer">
 						<div>
-							<i class="ph-alarm ph-bold" />
+							<i
+								:class="defaultStore.state.iconSet"
+								class="ph-alarm"
+							/>
 							{{ i18n.ts.createdAt }}:
 							<MkTime :time="page.createdAt" mode="detail" />
 						</div>
 						<div v-if="page.createdAt != page.updatedAt">
-							<i class="ph-alarm ph-bold"></i>
+							<i
+								:class="defaultStore.state.iconSet"
+								class="ph-alarm"
+							></i>
 							{{ i18n.ts.updatedAt }}:
 							<MkTime :time="page.updatedAt" mode="detail" />
 						</div>
@@ -42,7 +48,8 @@
 										@click="copyUrl"
 									>
 										<i
-											class="ph-link-simple ph-bold ph-lg"
+											:class="defaultStore.state.iconSet"
+											class="ph-link-simple ph-lg"
 										/>
 									</button>
 									<MkA
@@ -50,7 +57,9 @@
 										:to="`/@${username}/pages/${pageName}/view-source`"
 										class="menu _button"
 										style="transform: translateY(2px)"
-										><i class="ph-code ph-bold ph-lg"
+										><i
+											:class="defaultStore.state.iconSet"
+											class="ph-code ph-lg"
 									/></MkA>
 									<template
 										v-if="$i && $i.id === page.userId"
@@ -60,7 +69,14 @@
 											class="menu _button"
 											:to="`/pages/edit/${page.id}`"
 											style="transform: translateY(2px)"
-											><i class="ph-pencil ph-bold ph-lg"
+											><i
+												:class="
+													defaultStore.state.iconSet
+												"
+												:class="
+													defaultStore.state.iconSet
+												"
+												class="ph-pencil ph-lg"
 										/></MkA>
 										<button
 											v-if="$i.pinnedPageId === page.id"
@@ -69,7 +85,10 @@
 											@click="pin(false)"
 										>
 											<i
-												class="ph-push-pin-slash ph-bold ph-lg"
+												:class="
+													defaultStore.state.iconSet
+												"
+												class="ph-push-pin-slash ph-lg"
 											/>
 										</button>
 										<button
@@ -79,7 +98,10 @@
 											@click="pin(true)"
 										>
 											<i
-												class="ph-push-pin ph-bold ph-lg"
+												:class="
+													defaultStore.state.iconSet
+												"
+												class="ph-push-pin ph-lg"
 											/>
 										</button>
 									</template>
@@ -97,7 +119,10 @@
 									class="button"
 									primary
 									@click="unlike()"
-									><i class="ph-heart ph-fill ph-lg"></i
+									><i
+										:class="defaultStore.state.iconSet"
+										class="ph-heart ph-fill ph-lg"
+									></i
 									><span
 										v-if="page.likedCount > 0"
 										class="count"
@@ -109,7 +134,10 @@
 									v-tooltip="i18n.ts._pages.like"
 									class="button"
 									@click="like()"
-									><i class="ph-heart ph-bold"></i
+									><i
+										:class="defaultStore.state.iconSet"
+										class="ph-heart"
+									></i
 									><span
 										v-if="page.likedCount > 0"
 										class="count"
@@ -125,7 +153,8 @@
 									@click="shareWithNote"
 								>
 									<i
-										class="ph-rocket-launch ph-bold ph-lg ph-fw ph-lg"
+										:class="defaultStore.state.iconSet"
+										class="ph-rocket-launch ph-lg ph-fw ph-lg"
 									></i>
 								</button>
 								<button
@@ -136,7 +165,8 @@
 									@click="share"
 								>
 									<i
-										class="ph-share-network ph-bold ph-lg ph-fw ph-lg"
+										:class="defaultStore.state.iconSet"
+										class="ph-share-network ph-lg ph-fw ph-lg"
 									></i>
 								</button>
 							</div>
@@ -176,7 +206,10 @@
 						class="other"
 					>
 						<template #header
-							><i class="ph-clock ph-bold ph-lg"></i>
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-clock ph-lg"
+							></i>
 							{{ i18n.ts.recentPosts }}</template
 						>
 						<MkPagination
@@ -213,6 +246,7 @@ import { i18n } from "@/i18n";
 import copyToClipboard from "@/scripts/copy-to-clipboard";
 import { definePageMetadata } from "@/scripts/page-metadata";
 import { shareAvailable } from "@/scripts/share-available";
+import { defaultStore } from "@/store";
 
 const props = defineProps<{
 	pageName: string;

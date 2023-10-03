@@ -1,6 +1,6 @@
 <template>
 	<div v-if="visible" class="info" :class="{ warn, card }">
-		<i v-if="warn" class="ph-warning ph-bold ph-lg"></i>
+		<i v-if="warn" class="ph-warning ph-lg"></i>
 		<i
 			v-else
 			class="ph-bold ph-lg"
@@ -14,7 +14,7 @@
 			:aria-label="i18n.t('close')"
 			@click.stop="close"
 		>
-			<i class="ph-x ph-bold ph-lg"></i>
+			<i :class="defaultStore.state.iconSet" class="ph-x ph-lg"></i>
 		</button>
 	</div>
 </template>
@@ -22,6 +22,7 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 const visible = ref(true);
 

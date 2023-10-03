@@ -25,7 +25,10 @@
 									:aria-label="i18n.t('removeMember')"
 									@click="removeUser(user)"
 								>
-									<i class="ph-x ph-bold ph-lg"></i>
+									<i
+										:class="defaultStore.state.iconSet"
+										class="ph-x ph-lg"
+									></i>
 								</button>
 							</div>
 						</div>
@@ -42,6 +45,7 @@ import { definePageMetadata } from "@/scripts/page-metadata";
 import { i18n } from "@/i18n";
 import { useRouter } from "@/router";
 import * as os from "@/os";
+import { defaultStore } from "@/store";
 
 const props = defineProps<{
 	groupId: {
@@ -135,28 +139,28 @@ async function deleteGroup() {
 definePageMetadata(
 	computed(() => ({
 		title: i18n.ts.members,
-		icon: "ph-users-three ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-users-three ph-lg`,
 	})),
 );
 
 const headerActions = computed(() => [
 	{
-		icon: "ph-plus ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-plus ph-lg`,
 		text: i18n.ts.invite,
 		handler: invite,
 	},
 	{
-		icon: "ph-cursor-text ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-cursor-text ph-lg`,
 		text: i18n.ts.rename,
 		handler: renameGroup,
 	},
 	{
-		icon: "ph-arrows-left-right ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-arrows-left-right ph-lg`,
 		text: i18n.ts.transfer,
 		handler: transfer,
 	},
 	{
-		icon: "ph-trash ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-trash ph-lg`,
 		text: i18n.ts.delete,
 		handler: deleteGroup,
 	},

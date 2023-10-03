@@ -44,7 +44,10 @@
 					data-cy-signin-password
 				>
 					<template #prefix
-						><i class="ph-lock ph-bold ph-lg"></i
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-lock ph-lg"
+						></i
 					></template>
 					<template #caption
 						><button
@@ -96,7 +99,10 @@
 					>
 						<template #label>{{ i18n.ts.password }}</template>
 						<template #prefix
-							><i class="ph-lock ph-bold ph-lg"></i
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-lock ph-lg"
+							></i
 						></template>
 					</MkInput>
 					<MkInput
@@ -109,7 +115,10 @@
 					>
 						<template #label>{{ i18n.ts._2fa.token }}</template>
 						<template #prefix
-							><i class="ph-poker-chip ph-bold ph-lg"></i
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-poker-chip ph-lg"
+							></i
 						></template>
 					</MkInput>
 					<MkButton
@@ -130,7 +139,8 @@
 				class="_borderButton _gap"
 				:href="`${apiUrl}/signin/twitter`"
 				><i
-					class="ph-twitter-logo ph-bold ph-lg"
+					:class="defaultStore.state.iconSet"
+					class="ph-twitter-logo ph-lg"
 					style="margin-right: 4px"
 				></i
 				>{{ i18n.t("signinWith", { x: "Twitter" }) }}</a
@@ -140,7 +150,8 @@
 				class="_borderButton _gap"
 				:href="`${apiUrl}/signin/github`"
 				><i
-					class="ph-github-logo ph-bold ph-lg"
+					:class="defaultStore.state.iconSet"
+					class="ph-github-logo ph-lg"
 					style="margin-right: 4px"
 				></i
 				>{{ i18n.t("signinWith", { x: "GitHub" }) }}</a
@@ -150,7 +161,8 @@
 				class="_borderButton _gap"
 				:href="`${apiUrl}/signin/discord`"
 				><i
-					class="ph-discord-logo ph-bold ph-lg"
+					:class="defaultStore.state.iconSet"
+					class="ph-discord-logo ph-lg"
 					style="margin-right: 4px"
 				></i
 				>{{ i18n.t("signinWith", { x: "Discord" }) }}</a
@@ -171,6 +183,7 @@ import * as os from "@/os";
 import { login } from "@/account";
 import { instance } from "@/instance";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 const signing = ref(false);
 const user = ref(null);

@@ -11,7 +11,11 @@
 	>
 		<header>
 			<button v-if="!fixed" class="cancel _button" @click="cancel">
-				<i class="ph-x ph-bold ph-lg" :aria-label="i18n.t('close')"></i>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-x ph-lg"
+					:aria-label="i18n.t('close')"
+				></i>
 			</button>
 			<button
 				v-if="$props.editId == null"
@@ -29,7 +33,10 @@
 					>{{ maxTextLength - textLength }}</span
 				>
 				<span v-if="localOnly" class="local-only"
-					><i class="ph-users ph-bold ph-lg"></i
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-users ph-lg"
+					></i
 				></span>
 				<button
 					ref="visibilityButton"
@@ -39,16 +46,28 @@
 					@click="setVisibility"
 				>
 					<span v-if="visibility === 'public'"
-						><i class="ph-planet ph-bold ph-lg"></i
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-planet ph-lg"
+						></i
 					></span>
 					<span v-if="visibility === 'home'"
-						><i class="ph-house ph-bold ph-lg"></i
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-house ph-lg"
+						></i
 					></span>
 					<span v-if="visibility === 'followers'"
-						><i class="ph-lock ph-bold ph-lg"></i
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-lock ph-lg"
+						></i
 					></span>
 					<span v-if="visibility === 'specified'"
-						><i class="ph-envelope-simple-open ph-bold ph-lg"></i
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-envelope-simple-open ph-lg"
+						></i
 					></span>
 				</button>
 				<button
@@ -57,7 +76,10 @@
 					:class="{ active: showPreview }"
 					@click="showPreview = !showPreview"
 				>
-					<i class="ph-binoculars ph-bold ph-lg"></i>
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-binoculars ph-lg"
+					></i>
 				</button>
 				<button
 					class="submit _buttonGradate"
@@ -67,13 +89,14 @@
 				>
 					{{ submitText
 					}}<i
-						:class="
+						:class="[
 							reply
-								? 'ph-arrow-u-up-left ph-bold ph-lg'
+								? 'ph-arrow-u-up-left ph-lg'
 								: renote
-								? 'ph-quotes ph-bold ph-lg'
-								: 'ph-paper-plane-tilt ph-bold ph-lg'
-						"
+								? 'ph-quotes ph-lg'
+								: 'ph-paper-plane-tilt ph-lg',
+							defaultStore.state.iconSet,
+						]"
 					></i>
 				</button>
 			</div>
@@ -82,14 +105,20 @@
 			<XNoteSimple v-if="reply" class="preview" :note="reply" />
 			<XNoteSimple v-if="renote" class="preview" :note="renote" />
 			<div v-if="quoteId" class="with-quote">
-				<i class="ph-quotes ph-bold ph-lg"></i>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-quotes ph-lg"
+				></i>
 				{{ i18n.ts.quoteAttached
 				}}<button
 					class="_button"
 					:aria-label="i18n.t('removeQuote')"
 					@click="quoteId = null"
 				>
-					<i class="ph-x ph-bold ph-lg"></i>
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-x ph-lg"
+					></i>
 				</button>
 			</div>
 			<div v-if="visibility === 'specified'" class="to-specified">
@@ -102,11 +131,17 @@
 							:aria-label="i18n.t('removeRecipient')"
 							@click="removeVisibleUser(u)"
 						>
-							<i class="ph-x ph-bold ph-lg"></i>
+							<i
+								:class="defaultStore.state.iconSet"
+								class="ph-x ph-lg"
+							></i>
 						</button>
 					</span>
 					<button class="_button" @click="addVisibleUser">
-						<i class="ph-plus ph-bold ph-md ph-fw ph-lg"></i>
+						<i
+							:class="defaultStore.state.iconSet"
+							class="ph-plus ph-md ph-fw ph-lg"
+						></i>
 					</button>
 				</div>
 			</div>
@@ -164,7 +199,10 @@
 					class="_button"
 					@click="chooseFileFrom"
 				>
-					<i class="ph-upload ph-bold ph-lg"></i>
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-upload ph-lg"
+					></i>
 				</button>
 				<button
 					v-tooltip="i18n.ts.poll"
@@ -172,7 +210,10 @@
 					:class="{ active: poll }"
 					@click="togglePoll"
 				>
-					<i class="ph-microphone-stage ph-bold ph-lg"></i>
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-microphone-stage ph-lg"
+					></i>
 				</button>
 				<button
 					v-tooltip="i18n.ts.useCw"
@@ -180,14 +221,20 @@
 					:class="{ active: useCw }"
 					@click="useCw = !useCw"
 				>
-					<i class="ph-eye-slash ph-bold ph-lg"></i>
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-eye-slash ph-lg"
+					></i>
 				</button>
 				<button
 					v-tooltip="i18n.ts.mention"
 					class="_button"
 					@click="insertMention"
 				>
-					<i class="ph-at ph-bold ph-lg"></i>
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-at ph-lg"
+					></i>
 				</button>
 				<button
 					v-tooltip="i18n.ts.hashtags"
@@ -195,14 +242,20 @@
 					:class="{ active: withHashtags }"
 					@click="withHashtags = !withHashtags"
 				>
-					<i class="ph-hash ph-bold ph-lg"></i>
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-hash ph-lg"
+					></i>
 				</button>
 				<button
 					v-tooltip="i18n.ts.emoji"
 					class="_button"
 					@click="insertEmoji"
 				>
-					<i class="ph-smiley ph-bold ph-lg"></i>
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-smiley ph-lg"
+					></i>
 				</button>
 				<button
 					v-if="postFormActions.length > 0"
@@ -210,7 +263,10 @@
 					class="_button"
 					@click="showActions"
 				>
-					<i class="ph-plug ph-bold ph-lg"></i>
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-plug ph-lg"
+					></i>
 				</button>
 				<!--	v-if="showMfmCheatsheet" -->
 				<button
@@ -218,7 +274,10 @@
 					class="_button right"
 					@click="openCheatSheet"
 				>
-					<i class="ph-question ph-bold ph-lg"></i>
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-question ph-lg"
+					></i>
 				</button>
 			</footer>
 			<datalist id="hashtags">

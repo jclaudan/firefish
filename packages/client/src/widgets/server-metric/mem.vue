@@ -2,7 +2,13 @@
 	<div class="zlxnikvl">
 		<XPie class="pie" :value="usage" />
 		<div>
-			<p><i class="ph-microchip ph-bold ph-lg"></i>RAM</p>
+			<p>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-microchip ph-lg"
+				></i
+				>RAM
+			</p>
 			<p>Total: {{ bytes(total, 1) }}</p>
 			<p>Used: {{ bytes(used, 1) }}</p>
 			<p>Free: {{ bytes(free, 1) }}</p>
@@ -14,6 +20,7 @@
 import { onBeforeUnmount, onMounted, ref } from "vue";
 import XPie from "./pie.vue";
 import bytes from "@/filters/bytes";
+import { defaultStore } from "@/store";
 
 const props = defineProps<{
 	connection: any;

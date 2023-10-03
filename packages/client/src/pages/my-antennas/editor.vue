@@ -98,7 +98,10 @@
 		</div>
 		<div class="actions">
 			<MkButton inline primary @click="saveAntenna()"
-				><i class="ph-floppy-disk-back ph-bold ph-lg"></i>
+				><i
+					:class="defaultStore.state.iconSet"
+					class="ph-floppy-disk-back ph-lg"
+				></i>
 				{{ i18n.ts.save }}</MkButton
 			>
 			<MkButton
@@ -106,7 +109,10 @@
 				inline
 				danger
 				@click="deleteAntenna()"
-				><i class="ph-trash ph-bold ph-lg"></i>
+				><i
+					:class="defaultStore.state.iconSet"
+					class="ph-trash ph-lg"
+				></i>
 				{{ i18n.ts.delete }}</MkButton
 			>
 		</div>
@@ -123,6 +129,7 @@ import MkSelect from "@/components/form/select.vue";
 import MkSwitch from "@/components/form/switch.vue";
 import * as os from "@/os";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 const props = defineProps<{
 	antenna: any;

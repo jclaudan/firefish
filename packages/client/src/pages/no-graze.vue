@@ -1,5 +1,8 @@
 <template>
-	<transition :name="$store.state.animation ? 'zoom' : ''" appear>
+	<transition
+		:name="defaultStore.state.iconSetanimation ? 'zoom' : ''"
+		appear
+	>
 		<div :class="$style.root">
 			<img
 				src="/static-assets/badges/info.webp"
@@ -7,7 +10,10 @@
 				alt="Error"
 			/>
 			<p>
-				<i class="ph-warning ph-bold ph-lg"></i>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-warning ph-lg"
+				></i>
 				{{ i18n.ts.noGraze }}
 			</p>
 		</div>
@@ -16,6 +22,7 @@
 
 <script lang="ts" setup>
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 </script>
 
 <style lang="scss" module>

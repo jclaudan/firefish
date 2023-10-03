@@ -16,6 +16,7 @@
 				>
 					<i
 						style="color: var(--accentLighten)"
+						:class="defaultStore.state.iconSet"
 						class="ph-x-circle ph-fill ph-lg"
 					></i>
 				</button>
@@ -74,7 +75,10 @@
 				</template>
 				<MkTime :time="message.createdAt" />
 				<template v-if="message.is_edited"
-					><i class="ph-pencil ph-bold ph-lg"></i
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-pencil ph-lg"
+					></i
 				></template>
 			</footer>
 		</div>
@@ -92,6 +96,7 @@ import MkUrlPreview from "@/components/MkUrlPreview.vue";
 import * as os from "@/os";
 import { $i } from "@/account";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 const props = defineProps<{
 	message: firefish.entities.MessagingMessage;

@@ -28,9 +28,14 @@
 					>
 						<i
 							v-if="!tweetExpanded"
-							class="ph-twitter-logo ph-bold ph-lg"
+							:class="defaultStore.state.iconSet"
+							class="ph-twitter-logo ph-lg"
 						></i>
-						<i v-else class="ph-x ph-bold ph-lg"></i>
+						<i
+							v-else
+							:class="defaultStore.state.iconSet"
+							class="ph-x ph-lg"
+						></i>
 					</button>
 					<button
 						v-else-if="player.url"
@@ -42,9 +47,14 @@
 					>
 						<i
 							v-if="!playerEnabled"
-							class="ph-play ph-bold ph-lg"
+							:class="defaultStore.state.iconSet"
+							class="ph-play ph-lg"
 						></i>
-						<i v-else class="ph-x ph-bold ph-lg"></i>
+						<i
+							v-else
+							:class="defaultStore.state.iconSet"
+							class="ph-x ph-lg"
+						></i>
 					</button>
 				</div>
 				<div v-if="fetching">

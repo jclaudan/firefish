@@ -18,6 +18,7 @@ import { url } from "@/config";
 // import { popout as popout_ } from "@/scripts/popout";
 import { i18n } from "@/i18n";
 import { useRouter } from "@/router";
+import { defaultStore } from "@/store";
 
 const props = withDefaults(
 	defineProps<{
@@ -53,14 +54,14 @@ function onContextmenu(ev) {
 				text: props.to,
 			},
 			{
-				icon: "ph-browser ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-browser ph-lg`,
 				text: i18n.ts.openInWindow,
 				action: () => {
 					os.pageWindow(props.to);
 				},
 			},
 			{
-				icon: "ph-arrows-out-simple ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-arrows-out-simple ph-lg`,
 				text: i18n.ts.showInPage,
 				action: () => {
 					router.push(props.to, "forcePage");
@@ -68,14 +69,14 @@ function onContextmenu(ev) {
 			},
 			null,
 			{
-				icon: "ph-arrow-square-out ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-arrow-square-out ph-lg`,
 				text: i18n.ts.openInNewTab,
 				action: () => {
 					window.open(props.to, "_blank");
 				},
 			},
 			{
-				icon: "ph-link-simple ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-link-simple ph-lg`,
 				text: i18n.ts.copyLink,
 				action: () => {
 					copyToClipboard(`${url}${props.to}`);

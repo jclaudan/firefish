@@ -59,7 +59,10 @@
 		<FormInput v-model="profile.location" manual-save class="_formBlock">
 			<template #label>{{ i18n.ts.location }}</template>
 			<template #prefix
-				><i class="ph-map-pin ph-bold ph-lg"></i
+				><i
+					:class="defaultStore.state.iconSet"
+					class="ph-map-pin ph-lg"
+				></i
 			></template>
 			<template #caption>{{
 				i18n.ts._profile.locationDescription
@@ -73,7 +76,12 @@
 			class="_formBlock"
 		>
 			<template #label>{{ i18n.ts.birthday }}</template>
-			<template #prefix><i class="ph-cake ph-bold ph-lg"></i></template>
+			<template #prefix
+				><i
+					:class="defaultStore.state.iconSet"
+					class="ph-cake ph-lg"
+				></i
+			></template>
 		</FormInput>
 
 		<FormSelect v-model="profile.lang" class="_formBlock">
@@ -86,7 +94,10 @@
 		<FormSlot class="_formBlock">
 			<FormFolder>
 				<template #icon
-					><i class="ph-table ph-bold ph-lg"></i
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-table ph-lg"
+					></i
 				></template>
 				<template #label>{{ i18n.ts._profile.metadataEdit }}</template>
 
@@ -116,11 +127,17 @@
 						inline
 						style="margin-right: 8px"
 						@click="addField"
-						><i class="ph-plus ph-bold ph-lg"></i>
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-plus ph-lg"
+						></i>
 						{{ i18n.ts.add }}</MkButton
 					>
 					<MkButton inline primary @click="saveFields"
-						><i class="ph-check ph-bold ph-lg"></i>
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-check ph-lg"
+						></i>
 						{{ i18n.ts.save }}</MkButton
 					>
 				</div>
@@ -178,6 +195,7 @@ import { $i } from "@/account";
 import { langmap } from "@/scripts/langmap";
 import { definePageMetadata } from "@/scripts/page-metadata";
 import { host } from "@/config";
+import { defaultStore } from "@/store";
 
 const profile = reactive({
 	name: $i?.name,
@@ -297,7 +315,7 @@ function changeBanner(ev) {
 
 definePageMetadata({
 	title: i18n.ts.profile,
-	icon: "ph-user ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-user ph-lg`,
 });
 </script>
 

@@ -31,11 +31,17 @@
 							:aria-label="i18n.t('remove')"
 							@click="remove(file)"
 						>
-							<i class="ph-x ph-bold ph-lg"></i>
+							<i
+								:class="defaultStore.state.iconSet"
+								class="ph-x ph-lg"
+							></i>
 						</button>
 					</div>
 					<FormButton primary @click="selectFile"
-						><i class="ph-plus ph-bold ph-lg"></i>
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-plus ph-lg"
+						></i>
 						{{ i18n.ts.attachFile }}</FormButton
 					>
 				</div>
@@ -45,16 +51,25 @@
 				}}</FormSwitch>
 
 				<FormButton v-if="postId" primary @click="save"
-					><i class="ph-floppy-disk-back ph-bold ph-lg"></i>
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-floppy-disk-back ph-lg"
+					></i>
 					{{ i18n.ts.save }}</FormButton
 				>
 				<FormButton v-else primary @click="save"
-					><i class="ph-floppy-disk-back ph-bold ph-lg"></i>
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-floppy-disk-back ph-lg"
+					></i>
 					{{ i18n.ts.publish }}</FormButton
 				>
 
 				<FormButton v-if="postId" danger @click="del"
-					><i class="ph-trash ph-bold ph-lg"></i>
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-trash ph-lg"
+					></i>
 					{{ i18n.ts.delete }}</FormButton
 				>
 			</FormSuspense>
@@ -74,6 +89,7 @@ import * as os from "@/os";
 import { useRouter } from "@/router";
 import { definePageMetadata } from "@/scripts/page-metadata";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 const router = useRouter();
 
@@ -159,11 +175,11 @@ definePageMetadata(
 		props.postId
 			? {
 					title: i18n.ts.edit,
-					icon: "ph-pencil ph-bold ph-lg",
+					icon: `${defaultStore.state.iconSet} ph-pencil ph-lg`,
 			  }
 			: {
 					title: i18n.ts.postToGallery,
-					icon: "ph-pencil ph-bold ph-lg",
+					icon: `${defaultStore.state.iconSet} ph-pencil ph-lg`,
 			  },
 	),
 );

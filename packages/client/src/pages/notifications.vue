@@ -106,7 +106,7 @@ function setFilter(ev) {
 		includeTypes.value != null
 			? [
 					{
-						icon: "ph-x ph-bold ph-lg",
+						icon: `${defaultStore.state.iconSet} ph-x ph-lg`,
 						text: i18n.ts.clear,
 						action: () => {
 							includeTypes.value = null;
@@ -124,7 +124,7 @@ const headerActions = computed(() =>
 		tab.value === "all"
 			? {
 					text: i18n.ts.filter,
-					icon: "ph-funnel ph-bold ph-lg",
+					icon: `${defaultStore.state.iconSet} ph-funnel ph-lg`,
 					highlighted: includeTypes.value != null,
 					handler: setFilter,
 			  }
@@ -132,7 +132,7 @@ const headerActions = computed(() =>
 		tab.value === "all"
 			? {
 					text: i18n.ts.markAllAsRead,
-					icon: "ph-check ph-bold ph-lg",
+					icon: `${defaultStore.state.iconSet} ph-check ph-lg`,
 					handler: () => {
 						os.apiWithDialog("notifications/mark-all-as-read");
 					},
@@ -145,29 +145,29 @@ const headerTabs = computed(() => [
 	{
 		key: "all",
 		title: i18n.ts.all,
-		icon: "ph-bell ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-bell ph-lg`,
 	},
 	{
 		key: "unread",
 		title: i18n.ts.unread,
-		icon: "ph-circle-wavy-warning ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-circle-wavy-warning ph-lg`,
 	},
 	{
 		key: "mentions",
 		title: i18n.ts.mentions,
-		icon: "ph-at ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-at ph-lg`,
 	},
 	{
 		key: "directNotes",
 		title: i18n.ts.directNotes,
-		icon: "ph-envelope-simple-open ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-envelope-simple-open ph-lg`,
 	},
 ]);
 
 definePageMetadata(
 	computed(() => ({
 		title: i18n.ts.notifications,
-		icon: "ph-bell ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-bell ph-lg`,
 	})),
 );
 

@@ -1,7 +1,11 @@
 <template>
 	<div class="_formRoot">
 		<FormButton class="_formBlock" @click="configure"
-			><template #icon><i class="ph-gear-six ph-bold ph-lg"></i></template
+			><template #icon
+				><i
+					:class="defaultStore.state.iconSet"
+					class="ph-gear-six ph-lg"
+				></i></template
 			>{{ i18n.ts.notificationSetting }}</FormButton
 		>
 		<FormSection>
@@ -58,6 +62,7 @@ import { $i } from "@/account";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
 import MkPushNotificationAllowButton from "@/components/MkPushNotificationAllowButton.vue";
+import { defaultStore } from "@/store";
 
 const allowButton =
 	shallowRef<InstanceType<typeof MkPushNotificationAllowButton>>();
@@ -124,6 +129,6 @@ function onChangeSendReadMessage(v: boolean) {
 
 definePageMetadata({
 	title: i18n.ts.notifications,
-	icon: "ph-bell ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-bell ph-lg`,
 });
 </script>

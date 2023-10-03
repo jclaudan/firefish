@@ -12,7 +12,10 @@
 				/>
 				<template v-for="f in hierarchyFolders">
 					<span class="separator"
-						><i class="ph-caret-right ph-bold ph-lg"></i
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-caret-right ph-lg"
+						></i
 					></span>
 					<XNavFolder
 						:folder="f"
@@ -24,14 +27,20 @@
 					/>
 				</template>
 				<span v-if="folder != null" class="separator"
-					><i class="ph-caret-right ph-bold ph-lg"></i
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-caret-right ph-lg"
+					></i
 				></span>
 				<span v-if="folder != null" class="folder current">{{
 					folder.name
 				}}</span>
 			</div>
 			<button class="menu _button" @click="showMenu">
-				<i class="ph-dots-three-outline ph-bold ph-lg"></i>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-dots-three-outline ph-lg"
+				></i>
 			</button>
 		</nav>
 		<div
@@ -677,14 +686,14 @@ function getMenu() {
 		},
 		{
 			text: i18n.ts.upload,
-			icon: "ph-upload-simple ph-bold ph-lg",
+			icon: `${defaultStore.state.iconSet} ph-upload-simple ph-lg`,
 			action: () => {
 				selectLocalFile();
 			},
 		},
 		{
 			text: i18n.ts.fromUrl,
-			icon: "ph-link-simple ph-bold ph-lg",
+			icon: `${defaultStore.state.iconSet} ph-link-simple ph-lg`,
 			action: () => {
 				urlUpload();
 			},
@@ -697,7 +706,7 @@ function getMenu() {
 		folder.value
 			? {
 					text: i18n.ts.renameFolder,
-					icon: "ph-cursor-text ph-bold ph-lg",
+					icon: `${defaultStore.state.iconSet} ph-cursor-text ph-lg`,
 					action: () => {
 						renameFolder(folder.value);
 					},
@@ -706,7 +715,7 @@ function getMenu() {
 		folder.value
 			? {
 					text: i18n.ts.deleteFolder,
-					icon: "ph-trash ph-bold ph-lg",
+					icon: `${defaultStore.state.iconSet} ph-trash ph-lg`,
 					action: () => {
 						deleteFolder(
 							folder.value as firefish.entities.DriveFolder,
@@ -716,7 +725,7 @@ function getMenu() {
 			: undefined,
 		{
 			text: i18n.ts.createFolder,
-			icon: "ph-folder-notch-plus ph-bold ph-lg",
+			icon: `${defaultStore.state.iconSet} ph-folder-notch-plus ph-lg`,
 			action: () => {
 				createFolder();
 			},

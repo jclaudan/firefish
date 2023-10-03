@@ -2,7 +2,10 @@
 	<div class="_formRoot">
 		<FormLink to="/settings/plugin/install"
 			><template #icon
-				><i class="ph-download-simple ph-bold ph-lg"></i></template
+				><i
+					:class="defaultStore.state.iconSet"
+					class="ph-download-simple ph-lg"
+				></i></template
 			>{{ i18n.ts._plugin.install }}</FormLink
 		>
 
@@ -46,11 +49,17 @@
 						v-if="plugin.config"
 						inline
 						@click="config(plugin)"
-						><i class="ph-gear-six ph-bold ph-lg"></i>
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-gear-six ph-lg"
+						></i>
 						{{ i18n.ts.settings }}</MkButton
 					>
 					<MkButton inline danger @click="uninstall(plugin)"
-						><i class="ph-trash ph-bold ph-lg"></i>
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-trash ph-lg"
+						></i>
 						{{ i18n.ts.uninstall }}</MkButton
 					>
 				</div>
@@ -116,6 +125,6 @@ function changeActive(plugin, active) {
 
 definePageMetadata({
 	title: i18n.ts.plugins,
-	icon: "ph-plug ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-plug ph-lg`,
 });
 </script>

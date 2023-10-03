@@ -20,16 +20,24 @@
 					@click="() => (showBody = !showBody)"
 				>
 					<template v-if="showBody"
-						><i class="ph-caret-up ph-bold ph-lg"></i
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-caret-up ph-lg"
+						></i
 					></template>
 					<template v-else
-						><i class="ph-caret-down ph-bold ph-lg"></i
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-caret-down ph-lg"
+						></i
 					></template>
 				</button>
 			</div>
 		</header>
 		<transition
-			:name="$store.state.animation ? 'container-toggle' : ''"
+			:name="
+				defaultStore.state.iconSetanimation ? 'container-toggle' : ''
+			"
 			@enter="enter"
 			@after-enter="afterEnter"
 			@leave="leave"
@@ -62,6 +70,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 export default defineComponent({
 	props: {

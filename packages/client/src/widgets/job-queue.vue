@@ -7,7 +7,8 @@
 			<div class="label">
 				Inbox queue<i
 					v-if="current.inbox.waiting > 0"
-					class="ph-warning ph-bold ph-lg icon"
+					:class="defaultStore.state.iconSet"
+					class="ph-warning ph-lg icon"
 				></i>
 			</div>
 			<div class="values">
@@ -65,7 +66,8 @@
 			<div class="label">
 				Deliver queue<i
 					v-if="current.deliver.waiting > 0"
-					class="ph-warning ph-bold ph-lg icon"
+					:class="defaultStore.state.iconSet"
+					class="ph-warning ph-lg icon"
 				></i>
 			</div>
 			<div class="values">

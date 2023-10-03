@@ -15,20 +15,20 @@ export function openHelpMenu_(ev: MouseEvent) {
 			{
 				type: "link",
 				text: i18n.ts.instanceInfo,
-				icon: "ph-info ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-info ph-lg`,
 				to: "/about",
 			},
 			{
 				type: "link",
 				text: i18n.ts.aboutFirefish,
-				icon: "ph-lightbulb ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-lightbulb ph-lg`,
 				to: "/about-firefish",
 			},
 			instance.tosUrl
 				? {
 						type: "button",
 						text: i18n.ts.tos,
-						icon: "ph-scroll ph-bold ph-lg",
+						icon: `${defaultStore.state.iconSet} ph-scroll ph-lg`,
 						action: () => {
 							window.open(instance.tosUrl, "_blank");
 						},
@@ -37,7 +37,7 @@ export function openHelpMenu_(ev: MouseEvent) {
 			{
 				type: "button",
 				text: i18n.ts.apps,
-				icon: "ph-device-mobile ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-device-mobile ph-lg`,
 				action: () => {
 					window.open("https://joinfirefish.org/apps", "_blank");
 				},
@@ -49,23 +49,23 @@ export function openHelpMenu_(ev: MouseEvent) {
 					os.popup(XTutorial, {}, {}, "closed");
 				},
 				text: i18n.ts.replayTutorial,
-				icon: "ph-circle-wavy-question ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-circle-wavy-question ph-lg`,
 			},
 			null,
 			{
 				type: "parent",
 				text: i18n.ts.developer,
-				icon: "ph-code ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-code ph-lg`,
 				children: [
 					{
 						type: "link",
 						to: "/api-console",
 						text: "API Console",
-						icon: "ph-terminal-window ph-bold ph-lg",
+						icon: `${defaultStore.state.iconSet} ph-terminal-window ph-lg`,
 					},
 					{
 						text: i18n.ts.document,
-						icon: "ph-file-doc ph-bold ph-lg",
+						icon: `${defaultStore.state.iconSet} ph-file-doc ph-lg`,
 						action: () => {
 							window.open("/api-doc", "_blank");
 						},
@@ -74,7 +74,7 @@ export function openHelpMenu_(ev: MouseEvent) {
 						type: "link",
 						to: "/scratchpad",
 						text: "AiScript Scratchpad",
-						icon: "ph-scribble-loop ph-bold ph-lg",
+						icon: `${defaultStore.state.iconSet} ph-scribble-loop ph-lg`,
 					},
 				],
 			},

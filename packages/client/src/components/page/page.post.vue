@@ -7,8 +7,16 @@
 			:disabled="posting || posted"
 			@click="post()"
 		>
-			<i v-if="posted" class="ph-check ph-bold ph-lg"></i>
-			<i v-else class="ph-paper-plane-tilt ph-bold ph-lg"></i>
+			<i
+				v-if="posted"
+				:class="defaultStore.state.iconSet"
+				class="ph-check ph-lg"
+			></i>
+			<i
+				v-else
+				:class="defaultStore.state.iconSet"
+				class="ph-paper-plane-tilt ph-lg"
+			></i>
 		</MkButton>
 	</div>
 </template>
@@ -22,6 +30,7 @@ import { apiUrl } from "@/config";
 import * as os from "@/os";
 import type { PostBlock } from "@/scripts/hpml/block";
 import type { Hpml } from "@/scripts/hpml/evaluator";
+import { defaultStore } from "@/store";
 
 export default defineComponent({
 	components: {
@@ -60,10 +69,10 @@ export default defineComponent({
 				canvas.toBlob((blob) => {
 					const formData = new FormData();
 					formData.append("file", blob);
-					if (this.$store.state.uploadFolder) {
+					if (this.defaultStore.state.iconSetuploadFolder) {
 						formData.append(
 							"folderId",
-							this.$store.state.uploadFolder,
+							this.defaultStore.state.iconSetuploadFolder,
 						);
 					}
 

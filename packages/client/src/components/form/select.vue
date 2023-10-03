@@ -25,7 +25,7 @@
 			</select>
 			<div ref="suffixEl" class="suffix">
 				<i
-					class="ph-caret-down ph-bold ph-lg"
+					class="ph-caret-down ph-lg"
 					:class="[
 						$style.chevron,
 						{ [$style.chevronOpening]: opening },
@@ -36,7 +36,10 @@
 		<div class="caption"><slot name="caption"></slot></div>
 
 		<MkButton v-if="manualSave && changed" primary @click="updated"
-			><i class="ph-floppy-disk-back ph-bold ph-lg"></i>
+			><i
+				:class="defaultStore.state.iconSet"
+				class="ph-floppy-disk-back ph-lg"
+			></i>
 			{{ i18n.ts.save }}</MkButton
 		>
 	</div>
@@ -57,6 +60,7 @@ import MkButton from "@/components/MkButton.vue";
 import * as os from "@/os";
 import { useInterval } from "@/scripts/use-interval";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 const props = defineProps<{
 	modelValue: string | null;

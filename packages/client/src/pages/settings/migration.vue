@@ -7,7 +7,10 @@
 			}}</FormInfo>
 			<FormInput v-model="moveToAccount" class="_formBlock">
 				<template #prefix
-					><i class="ph-airplane-takeoff ph-bold ph-lg"></i
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-airplane-takeoff ph-lg"
+					></i
 				></template>
 				<template #label>{{ i18n.ts.moveToLabel }}</template>
 			</FormInput>
@@ -27,7 +30,10 @@
 				class="_formBlock"
 			>
 				<template #prefix
-					><i class="ph-airplane-landing ph-bold ph-lg"></i
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-airplane-landing ph-lg"
+					></i
 				></template>
 				<template #label>{{
 					`#${i + 1} ${i18n.ts.moveFromLabel}`
@@ -39,11 +45,17 @@
 				inline
 				style="margin-right: 8px"
 				@click="add"
-				><i class="ph-plus ph-bold ph-lg"></i>
+				><i
+					:class="defaultStore.state.iconSet"
+					class="ph-plus ph-lg"
+				></i>
 				{{ i18n.ts.add }}</FormButton
 			>
 			<FormButton class="button" inline primary @click="save">
-				<i class="ph-floppy-disk-back ph-bold ph-lg"></i>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-floppy-disk-back ph-lg"
+				></i>
 				{{ i18n.ts.save }}
 			</FormButton>
 		</FormSection>
@@ -62,6 +74,7 @@ import * as os from "@/os";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
 import { $i } from "@/account";
+import { defaultStore } from "@/store";
 
 const moveToAccount = ref("");
 const accountAlias = ref([""]);
@@ -107,6 +120,6 @@ async function move(account): Promise<void> {
 
 definePageMetadata({
 	title: i18n.ts.security,
-	icon: "ph-lock ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-lock ph-lg`,
 });
 </script>

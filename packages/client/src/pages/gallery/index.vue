@@ -27,7 +27,10 @@
 				<swiper-slide>
 					<MkFolder class="_gap">
 						<template #header
-							><i class="ph-clock ph-bold ph-lg"></i>
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-clock ph-lg"
+							></i>
 							{{ i18n.ts.recentPosts }}</template
 						>
 						<MkPagination
@@ -47,7 +50,10 @@
 					</MkFolder>
 					<MkFolder class="_gap">
 						<template #header
-							><i class="ph-fire-simple ph-bold ph-lg"></i>
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-fire-simple ph-lg"
+							></i>
 							{{ i18n.ts.popularPosts }}</template
 						>
 						<MkPagination
@@ -83,7 +89,10 @@
 				</swiper-slide>
 				<swiper-slide>
 					<MkA to="/gallery/new" class="_link" style="margin: 16px"
-						><i class="ph-plus ph-bold ph-lg"></i>
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-plus ph-lg"
+						></i>
 						{{ i18n.ts.postToGallery }}</MkA
 					>
 					<MkPagination
@@ -158,7 +167,7 @@ watch(
 
 const headerActions = computed(() => [
 	{
-		icon: "ph-plus ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-plus ph-lg`,
 		text: i18n.ts.create,
 		handler: () => {
 			router.push("/gallery/new");
@@ -170,23 +179,23 @@ const headerTabs = computed(() => [
 	{
 		key: "explore",
 		title: i18n.ts.gallery,
-		icon: "ph-image-square ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-image-square ph-lg`,
 	},
 	{
 		key: "liked",
 		title: i18n.ts._gallery.liked,
-		icon: "ph-heart ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-heart ph-lg`,
 	},
 	{
 		key: "my",
 		title: i18n.ts._gallery.my,
-		icon: "ph-crown-simple ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-crown-simple ph-lg`,
 	},
 ]);
 
 definePageMetadata({
 	title: i18n.ts.gallery,
-	icon: "ph-image-square ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-image-square ph-lg`,
 });
 
 let swiperRef = null;

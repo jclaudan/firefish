@@ -17,15 +17,18 @@
 				<div class="status">
 					<i
 						v-if="relay.status === 'accepted'"
-						class="ph-check ph-bold ph-lg icon accepted"
+						:class="defaultStore.state.iconSet"
+						class="ph-check ph-lg icon accepted"
 					></i>
 					<i
 						v-else-if="relay.status === 'rejected'"
-						class="ph-prohibit ph-bold ph-lg icon rejected"
+						:class="defaultStore.state.iconSet"
+						class="ph-prohibit ph-lg icon rejected"
 					></i>
 					<i
 						v-else
-						class="ph-clock ph-bold ph-lg icon requesting"
+						:class="defaultStore.state.iconSet"
+						class="ph-clock ph-lg icon requesting"
 					></i>
 					<span>{{ i18n.t(`_relayStatus.${relay.status}`) }}</span>
 				</div>
@@ -34,7 +37,10 @@
 					inline
 					danger
 					@click="remove(relay.inbox)"
-					><i class="ph-trash ph-bold ph-lg"></i>
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-trash ph-lg"
+					></i>
 					{{ i18n.ts.remove }}</MkButton
 				>
 			</div>
@@ -49,6 +55,7 @@ import MkButton from "@/components/MkButton.vue";
 import * as os from "@/os";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
+import { defaultStore } from "@/store";
 
 const relays = ref([]);
 
@@ -99,7 +106,7 @@ refresh();
 const headerActions = computed(() => [
 	{
 		asFullButton: true,
-		icon: "ph-plus ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-plus ph-lg`,
 		text: i18n.ts.addRelay,
 		handler: addRelay,
 	},
@@ -109,7 +116,7 @@ const headerTabs = computed(() => []);
 
 definePageMetadata({
 	title: i18n.ts.relays,
-	icon: "ph-arrows-merge ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-arrows-merge ph-lg`,
 });
 </script>
 

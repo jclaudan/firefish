@@ -3,11 +3,10 @@
 		<header class="_acrylic" @click="shown = !shown">
 			<i
 				class="toggle ph-fw ph-lg"
-				:class="
-					shown
-						? 'ph-caret-down ph-bold ph-lg'
-						: 'ph-caret-up ph-bold ph-lg'
-				"
+				:class="[
+					shown ? 'ph-caret-down ph-lg' : 'ph-caret-up ph-lg',
+					defaultStore.state.iconSet,
+				]"
 			></i>
 			<slot></slot> ({{ emojis.length }})
 			<span v-if="props.skinToneSelector && props.skinTones">
@@ -21,6 +20,7 @@
 					"
 				>
 					<i
+						:class="defaultStore.state.iconSet"
 						class="ph-circle ph-fill ph-fw ph-lg"
 						:style="{ color: skinTone + ' !important' }"
 						:aria-label="
@@ -50,6 +50,7 @@
 <script lang="ts" setup>
 import { onMounted, ref, watch } from "vue";
 import { addSkinTone } from "@/scripts/emojilist";
+import { defaultStore } from "@/store";
 
 const props = defineProps<{
 	emojis: string[];

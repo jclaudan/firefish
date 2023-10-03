@@ -7,7 +7,7 @@
 		class="mkw-photos"
 	>
 		<template #header
-			><i class="ph-camera ph-bold ph-lg"></i
+			><i :class="defaultStore.state.iconSet" class="ph-camera ph-lg"></i
 			>{{ i18n.ts._widgets.photos }}</template
 		>
 

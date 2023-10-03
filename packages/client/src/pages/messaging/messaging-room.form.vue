@@ -22,14 +22,20 @@
 					:aria-label="i18n.t('attachFile')"
 					@click="chooseFile"
 				>
-					<i class="ph-upload ph-bold ph-lg"></i>
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-upload ph-lg"
+					></i>
 				</button>
 				<button
 					class="_button"
 					:aria-label="i18n.t('chooseEmoji')"
 					@click="insertEmoji"
 				>
-					<i class="ph-smiley ph-bold ph-lg"></i>
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-smiley ph-lg"
+					></i>
 				</button>
 				<button
 					class="send _button"
@@ -40,11 +46,13 @@
 				>
 					<template v-if="!sending"
 						><i
-							class="ph-paper-plane-tilt ph-bold ph-lg"
+							:class="defaultStore.state.iconSet"
+							class="ph-paper-plane-tilt ph-lg"
 						></i></template
 					><template v-if="sending"
 						><i
-							class="ph-circle-notch ph-bold ph-lg fa-pulse ph-fw ph-lg"
+							:class="defaultStore.state.iconSet"
+							class="ph-circle-notch ph-lg fa-pulse ph-fw ph-lg"
 						></i
 					></template>
 				</button>

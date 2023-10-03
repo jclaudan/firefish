@@ -92,7 +92,7 @@ const router = useRouter();
 
 const indexInfo = {
 	title: i18n.ts.controlPanel,
-	icon: "ph-gear-six ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-gear-six ph-lg`,
 	hideHeader: true,
 };
 
@@ -141,7 +141,7 @@ const menuDef = computed(() => [
 		items: [
 			{
 				type: "button",
-				icon: "ph-magnifying-glass ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-magnifying-glass ph-lg`,
 				text: i18n.ts.lookup,
 				action: lookup,
 			},
@@ -149,7 +149,7 @@ const menuDef = computed(() => [
 				? [
 						{
 							type: "button",
-							icon: "ph-user-plus ph-bold ph-lg",
+							icon: `${defaultStore.state.iconSet} ph-user-plus ph-lg`,
 							text: i18n.ts.invite,
 							action: invite,
 						},
@@ -159,7 +159,7 @@ const menuDef = computed(() => [
 				? [
 						{
 							type: "button",
-							icon: "ph-list-magnifying-glass ph-bold ph-lg",
+							icon: `${defaultStore.state.iconSet} ph-list-magnifying-glass ph-lg`,
 							text: i18n.ts.indexPosts,
 							action: indexPosts,
 						},
@@ -171,55 +171,55 @@ const menuDef = computed(() => [
 		title: i18n.ts.administration,
 		items: [
 			{
-				icon: "ph-gauge ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-gauge ph-lg`,
 				text: i18n.ts.dashboard,
 				to: "/admin/overview",
 				active: currentPage.value?.route.name === "overview",
 			},
 			{
-				icon: "ph-users ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-users ph-lg`,
 				text: i18n.ts.users,
 				to: "/admin/users",
 				active: currentPage.value?.route.name === "users",
 			},
 			{
-				icon: "ph-smiley ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-smiley ph-lg`,
 				text: i18n.ts.customEmojis,
 				to: "/admin/emojis",
 				active: currentPage.value?.route.name === "emojis",
 			},
 			{
-				icon: "ph-planet ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-planet ph-lg`,
 				text: i18n.ts.federation,
 				to: "/admin/federation",
 				active: currentPage.value?.route.name === "federation",
 			},
 			{
-				icon: "ph-queue ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-queue ph-lg`,
 				text: i18n.ts.jobQueue,
 				to: "/admin/queue",
 				active: currentPage.value?.route.name === "queue",
 			},
 			{
-				icon: "ph-cloud ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-cloud ph-lg`,
 				text: i18n.ts.files,
 				to: "/admin/files",
 				active: currentPage.value?.route.name === "files",
 			},
 			{
-				icon: "ph-megaphone-simple ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-megaphone-simple ph-lg`,
 				text: i18n.ts.announcements,
 				to: "/admin/announcements",
 				active: currentPage.value?.route.name === "announcements",
 			},
 			{
-				icon: "ph-money ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-money ph-lg`,
 				text: i18n.ts.ads,
 				to: "/admin/ads",
 				active: currentPage.value?.route.name === "ads",
 			},
 			{
-				icon: "ph-warning-circle ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-warning-circle ph-lg`,
 				text: i18n.ts.abuseReports,
 				to: "/admin/abuses",
 				active: currentPage.value?.route.name === "abuses",
@@ -232,14 +232,14 @@ const menuDef = computed(() => [
 					title: i18n.ts.settings,
 					items: [
 						{
-							icon: "ph-gear-six ph-bold ph-lg",
+							icon: `${defaultStore.state.iconSet} ph-gear-six ph-lg`,
 							text: i18n.ts.general,
 							to: "/admin/settings",
 							active:
 								currentPage.value?.route.name === "settings",
 						},
 						{
-							icon: "ph-envelope-simple-open ph-bold ph-lg",
+							icon: `${defaultStore.state.iconSet} ph-envelope-simple-open ph-lg`,
 							text: i18n.ts.emailServer,
 							to: "/admin/email-settings",
 							active:
@@ -247,7 +247,7 @@ const menuDef = computed(() => [
 								"email-settings",
 						},
 						{
-							icon: "ph-cloud ph-bold ph-lg",
+							icon: `${defaultStore.state.iconSet} ph-cloud ph-lg`,
 							text: i18n.ts.objectStorage,
 							to: "/admin/object-storage",
 							active:
@@ -255,20 +255,20 @@ const menuDef = computed(() => [
 								"object-storage",
 						},
 						{
-							icon: "ph-lock ph-bold ph-lg",
+							icon: `${defaultStore.state.iconSet} ph-lock ph-lg`,
 							text: i18n.ts.security,
 							to: "/admin/security",
 							active:
 								currentPage.value?.route.name === "security",
 						},
 						{
-							icon: "ph-arrows-merge ph-bold ph-lg",
+							icon: `${defaultStore.state.iconSet} ph-arrows-merge ph-lg`,
 							text: i18n.ts.relays,
 							to: "/admin/relays",
 							active: currentPage.value?.route.name === "relays",
 						},
 						{
-							icon: "ph-plug ph-bold ph-lg",
+							icon: `${defaultStore.state.iconSet} ph-plug ph-lg`,
 							text: i18n.ts.integration,
 							to: "/admin/integrations",
 							active:
@@ -276,7 +276,7 @@ const menuDef = computed(() => [
 								"integrations",
 						},
 						{
-							icon: "ph-prohibit ph-bold ph-lg",
+							icon: `${defaultStore.state.iconSet} ph-prohibit ph-lg`,
 							text: i18n.ts.instanceBlocking,
 							to: "/admin/instance-block",
 							active:
@@ -284,14 +284,14 @@ const menuDef = computed(() => [
 								"instance-block",
 						},
 						{
-							icon: "ph-hash ph-bold ph-lg",
+							icon: `${defaultStore.state.iconSet} ph-hash ph-lg`,
 							text: i18n.ts.hiddenTags,
 							to: "/admin/hashtags",
 							active:
 								currentPage.value?.route.name === "hashtags",
 						},
 						{
-							icon: "ph-ghost ph-bold ph-lg",
+							icon: `${defaultStore.state.iconSet} ph-ghost ph-lg`,
 							text: i18n.ts.proxyAccount,
 							to: "/admin/proxy-account",
 							active:
@@ -299,14 +299,14 @@ const menuDef = computed(() => [
 								"proxy-account",
 						},
 						{
-							icon: "ph-database ph-bold ph-lg",
+							icon: `${defaultStore.state.iconSet} ph-database ph-lg`,
 							text: i18n.ts.database,
 							to: "/admin/database",
 							active:
 								currentPage.value?.route.name === "database",
 						},
 						{
-							icon: "ph-flask ph-bold ph-lg",
+							icon: `${defaultStore.state.iconSet} ph-flask ph-lg`,
 							text: i18n.ts._experiments.title,
 							to: "/admin/experiments",
 							active:
@@ -409,28 +409,28 @@ const lookup = (ev) => {
 		[
 			{
 				text: i18n.ts.user,
-				icon: "ph-user ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-user ph-lg`,
 				action: () => {
 					lookupUser();
 				},
 			},
 			{
 				text: i18n.ts.note,
-				icon: "ph-pencil ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-pencil ph-lg`,
 				action: () => {
 					lookupNote();
 				},
 			},
 			{
 				text: i18n.ts.file,
-				icon: "ph-cloud ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-cloud ph-lg`,
 				action: () => {
 					lookupFile();
 				},
 			},
 			{
 				text: i18n.ts.instance,
-				icon: "ph-planet ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-planet ph-lg`,
 				action: () => {
 					lookupInstance();
 				},

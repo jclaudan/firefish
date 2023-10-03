@@ -8,16 +8,25 @@
 		<template v-if="!wait">
 			<template v-if="isFollowing">
 				<span v-if="full">{{ i18n.ts.unfollow }}</span
-				><i class="ph-minus ph-bold ph-lg"></i>
+				><i
+					:class="defaultStore.state.iconSet"
+					class="ph-minus ph-lg"
+				></i>
 			</template>
 			<template v-else>
 				<span v-if="full">{{ i18n.ts.follow }}</span
-				><i class="ph-plus ph-bold ph-lg"></i>
+				><i
+					:class="defaultStore.state.iconSet"
+					class="ph-plus ph-lg"
+				></i>
 			</template>
 		</template>
 		<template v-else>
 			<span v-if="full">{{ i18n.ts.processing }}</span
-			><i class="ph-circle-notch ph-bold ph-lg fa-pulse ph-fw ph-lg"></i>
+			><i
+				:class="defaultStore.state.iconSet"
+				class="ph-circle-notch ph-lg fa-pulse ph-fw ph-lg"
+			></i>
 		</template>
 	</button>
 </template>
@@ -26,6 +35,7 @@
 import { ref } from "vue";
 import * as os from "@/os";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 const props = withDefaults(
 	defineProps<{

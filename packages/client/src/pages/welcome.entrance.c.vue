@@ -78,7 +78,10 @@
 							</I18n>
 						</div>
 						<button class="_button _acrylic menu" @click="showMenu">
-							<i class="ph-dots-three-outline ph-bold ph-lg"></i>
+							<i
+								:class="defaultStore.state.iconSet"
+								class="ph-dots-three-outline ph-lg"
+							></i>
 						</button>
 					</div>
 				</div>
@@ -106,6 +109,7 @@ import { host, instanceName } from "@/config";
 import * as os from "@/os";
 import number from "@/filters/number";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 export default defineComponent({
 	components: {
@@ -176,14 +180,14 @@ export default defineComponent({
 				[
 					{
 						text: i18n.t("aboutX", { x: instanceName }),
-						icon: "ph-info ph-bold ph-lg",
+						icon: `${defaultStore.state.iconSet} ph-info ph-lg`,
 						action: () => {
 							os.pageWindow("/about");
 						},
 					},
 					{
 						text: i18n.ts.aboutFirefish,
-						icon: "ph-info ph-bold ph-lg",
+						icon: `${defaultStore.state.iconSet} ph-info ph-lg`,
 						action: () => {
 							os.pageWindow("/about-firefish");
 						},

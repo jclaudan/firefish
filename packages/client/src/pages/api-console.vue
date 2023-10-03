@@ -28,7 +28,10 @@
 					>
 						<template v-if="sending"><MkEllipsis /></template>
 						<template v-else
-							><i class="ph-paper-plane-tilt ph-bold ph-lg"></i>
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-paper-plane-tilt ph-lg"
+							></i>
 							Send</template
 						>
 					</MkButton>
@@ -53,6 +56,7 @@ import MkTextarea from "@/components/form/textarea.vue";
 import MkSwitch from "@/components/form/switch.vue";
 import * as os from "@/os";
 import { definePageMetadata } from "@/scripts/page-metadata";
+import { defaultStore } from "@/store";
 
 const body = ref("{}");
 const endpoint = ref("");
@@ -115,6 +119,6 @@ const headerTabs = computed(() => []);
 
 definePageMetadata({
 	title: "API console",
-	icon: "ph-terminal-window ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-terminal-window ph-lg`,
 });
 </script>

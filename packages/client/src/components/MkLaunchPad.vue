@@ -33,9 +33,13 @@
 							v-if="item.indicate"
 							class="indicator"
 							:class="{
-								animateIndicator: $store.state.animation,
+								animateIndicator:
+									defaultStore.state.iconSetanimation,
 							}"
-							><i class="ph-circle ph-fill"></i
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-circle ph-fill"
+							></i
 						></span>
 					</button>
 					<MkA
@@ -50,9 +54,13 @@
 							v-if="item.indicate"
 							class="indicator"
 							:class="{
-								animateIndicator: $store.state.animation,
+								animateIndicator:
+									defaultStore.state.iconSetanimation,
 							}"
-							><i class="ph-circle ph-fill"></i
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-circle ph-fill"
+							></i
 						></span>
 					</MkA>
 				</template>

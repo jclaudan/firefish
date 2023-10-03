@@ -36,7 +36,8 @@
 						>
 							<template #prefix
 								><i
-									class="ph-magnifying-glass ph-bold ph-lg"
+									:class="defaultStore.state.iconSet"
+									class="ph-magnifying-glass ph-lg"
 								></i
 							></template>
 						</MkInput>
@@ -97,7 +98,10 @@
 				<swiper-slide>
 					<div class="_content grwlizim owned">
 						<MkButton class="new" @click="create()"
-							><i class="ph-plus ph-bold ph-lg"></i
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-plus ph-lg"
+							></i
 						></MkButton>
 						<MkChannelList
 							key="owned"
@@ -181,7 +185,7 @@ function create() {
 
 const headerActions = computed(() => [
 	{
-		icon: "ph-plus ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-plus ph-lg`,
 		text: i18n.ts.create,
 		handler: create,
 	},
@@ -191,29 +195,29 @@ const headerTabs = computed(() => [
 	{
 		key: "search",
 		title: i18n.ts.search,
-		icon: "ph-magnifying-glass ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-magnifying-glass ph-lg`,
 	},
 	{
 		key: "featured",
 		title: i18n.ts._channel.featured,
-		icon: "ph-fire-simple ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-fire-simple ph-lg`,
 	},
 	{
 		key: "following",
 		title: i18n.ts._channel.following,
-		icon: "ph-heart ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-heart ph-lg`,
 	},
 	{
 		key: "owned",
 		title: i18n.ts._channel.owned,
-		icon: "ph-crown-simple ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-crown-simple ph-lg`,
 	},
 ]);
 
 definePageMetadata(
 	computed(() => ({
 		title: i18n.ts.channel,
-		icon: "ph-television ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-television ph-lg`,
 	})),
 );
 

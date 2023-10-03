@@ -35,29 +35,29 @@
 
 		<MkTab v-model="tab" :style="'underline'" @update:modelValue="loadTab">
 			<option value="replies">
-				<!-- <i class="ph-arrow-u-up-left ph-bold ph-lg"></i> -->
+				<!-- <i :class="defaultStore.state.iconSet" class="ph-arrow-u-up-left ph-lg"></i> -->
 				<span v-if="note.repliesCount > 0" class="count">{{
 					note.repliesCount
 				}}</span>
 				{{ i18n.ts._notification._types.reply }}
 			</option>
 			<option v-if="note.renoteCount > 0" value="renotes">
-				<!-- <i class="ph-rocket-launch ph-bold ph-lg"></i> -->
+				<!-- <i :class="defaultStore.state.iconSet" class="ph-rocket-launch ph-lg"></i> -->
 				<span class="count">{{ note.renoteCount }}</span>
 				{{ i18n.ts._notification._types.renote }}
 			</option>
 			<option v-if="reactionsCount > 0" value="reactions">
-				<!-- <i class="ph-smiley ph-bold ph-lg"></i> -->
+				<!-- <i :class="defaultStore.state.iconSet" class="ph-smiley ph-lg"></i> -->
 				<span class="count">{{ reactionsCount }}</span>
 				{{ i18n.ts.reaction }}
 			</option>
 			<option v-if="directQuotes?.length > 0" value="quotes">
-				<!-- <i class="ph-quotes ph-bold ph-lg"></i> -->
+				<!-- <i :class="defaultStore.state.iconSet" class="ph-quotes ph-lg"></i> -->
 				<span class="count">{{ directQuotes.length }}</span>
 				{{ i18n.ts._notification._types.quote }}
 			</option>
 			<option v-if="clips?.length > 0" value="clips">
-				<!-- <i class="ph-paperclip ph-bold ph-lg"></i> -->
+				<!-- <i :class="defaultStore.state.iconSet" class="ph-paperclip ph-lg"></i> -->
 				<span class="count">{{ clips.length }}</span>
 				{{ i18n.ts.clips }}
 			</option>

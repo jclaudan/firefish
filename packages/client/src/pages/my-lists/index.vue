@@ -11,7 +11,10 @@
 				<MkInfo class="_gap" :icon="'list-bullets'" :card="true">
 					<p>{{ i18n.ts.listsDesc }}</p>
 					<MkButton primary class="add" @click="create"
-						><i class="ph-plus ph-bold ph-lg"></i>
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-plus ph-lg"
+						></i>
 						{{ i18n.ts.createList }}</MkButton
 					>
 				</MkInfo>
@@ -32,7 +35,10 @@
 						<MkAvatars :user-ids="list.userIds" />
 					</MkA>
 					<MkButton @click="deleteAll"
-						><i class="ph-trash ph-bold ph-lg"></i>
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-trash ph-lg"
+						></i>
 						{{ i18n.ts.deleteAll }}</MkButton
 					>
 				</MkPagination>
@@ -51,6 +57,7 @@ import MkInfo from "@/components/MkInfo.vue";
 import * as os from "@/os";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
+import { defaultStore } from "@/store";
 
 const pagingComponent = ref<InstanceType<typeof MkPagination>>();
 
@@ -85,9 +92,9 @@ const headerTabs = computed(() => []);
 
 definePageMetadata({
 	title: i18n.ts.manageLists,
-	icon: "ph-list-bullets ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-list-bullets ph-lg`,
 	action: {
-		icon: "ph-plus ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-plus ph-lg`,
 		handler: create,
 	},
 });

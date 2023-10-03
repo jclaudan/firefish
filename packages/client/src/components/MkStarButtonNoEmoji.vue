@@ -10,30 +10,32 @@
 		<span v-if="!reacted">
 			<i
 				v-if="instance.defaultReaction === '👍'"
-				class="ph-thumbs-up ph-bold ph-lg"
+				:class="defaultStore.state.iconSet"
+				class="ph-thumbs-up ph-lg"
 			></i>
 			<i
 				v-else-if="instance.defaultReaction === '❤️'"
-				class="ph-heart ph-bold ph-lg"
+				:class="defaultStore.state.iconSet"
+				class="ph-heart ph-lg"
 			></i>
-			<i v-else class="ph-star ph-bold ph-lg"></i>
+			<i
+				v-else
+				:class="defaultStore.state.iconSet"
+				class="ph-star ph-lg"
+			></i>
 		</span>
 		<span v-else>
 			<i
 				v-if="instance.defaultReaction === '👍'"
-				class="ph-thumbs-up ph-bold ph-lg ph-fill"
+				class="ph-thumbs-up ph-lg ph-fill"
 				:class="$style.yellow"
 			></i>
 			<i
 				v-else-if="instance.defaultReaction === '❤️'"
-				class="ph-heart ph-bold ph-lg ph-fill"
+				class="ph-heart ph-lg ph-fill"
 				:class="$style.red"
 			></i>
-			<i
-				v-else
-				class="ph-star ph-bold ph-lg ph-fill"
-				:class="$style.yellow"
-			></i>
+			<i v-else class="ph-star ph-lg ph-fill" :class="$style.yellow"></i>
 		</span>
 		<template v-if="count > 0"
 			><p class="count">{{ count }}</p></template

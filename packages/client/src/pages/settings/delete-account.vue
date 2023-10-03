@@ -26,6 +26,7 @@ import * as os from "@/os";
 import { signout } from "@/account";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
+import { defaultStore } from "@/store";
 
 async function deleteAccount() {
 	{
@@ -55,6 +56,6 @@ async function deleteAccount() {
 
 definePageMetadata({
 	title: i18n.ts._accountDelete.accountDelete,
-	icon: "ph-warning ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-warning ph-lg`,
 });
 </script>

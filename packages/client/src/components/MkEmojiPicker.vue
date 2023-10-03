@@ -75,7 +75,10 @@
 
 					<section>
 						<header class="_acrylic">
-							<i class="ph-alarm ph-bold ph-fw ph-lg"></i>
+							<i
+								:class="defaultStore.state.iconSet"
+								class="ph-alarm ph-fw ph-lg"
+							></i>
 							{{ i18n.ts.recentUsed }}
 						</header>
 						<div class="body">
@@ -135,28 +138,40 @@
 					:class="{ active: tab === 'index' }"
 					@click="tab = 'index'"
 				>
-					<i class="ph-asterisk ph-bold ph-lg ph-fw ph-lg"></i>
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-asterisk ph-lg ph-fw ph-lg"
+					></i>
 				</button>
 				<button
 					class="_button tab"
 					:class="{ active: tab === 'custom' }"
 					@click="tab = 'custom'"
 				>
-					<i class="ph-smiley ph-bold ph-lg ph-fw ph-lg"></i>
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-smiley ph-lg ph-fw ph-lg"
+					></i>
 				</button>
 				<button
 					class="_button tab"
 					:class="{ active: tab === 'unicode' }"
 					@click="tab = 'unicode'"
 				>
-					<i class="ph-leaf ph-bold ph-lg ph-fw ph-lg"></i>
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-leaf ph-lg ph-fw ph-lg"
+					></i>
 				</button>
 				<button
 					class="_button tab"
 					:class="{ active: tab === 'tags' }"
 					@click="tab = 'tags'"
 				>
-					<i class="ph-hash ph-bold ph-lg ph-fw ph-lg"></i>
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-hash ph-lg ph-fw ph-lg"
+					></i>
 				</button>
 			</div>
 		</div>

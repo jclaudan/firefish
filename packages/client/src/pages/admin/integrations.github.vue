@@ -12,21 +12,30 @@
 
 				<FormInput v-model="githubClientId" class="_formBlock">
 					<template #prefix
-						><i class="ph-key ph-bold ph-lg"></i
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-key ph-lg"
+						></i
 					></template>
 					<template #label>Client ID</template>
 				</FormInput>
 
 				<FormInput v-model="githubClientSecret" class="_formBlock">
 					<template #prefix
-						><i class="ph-key ph-bold ph-lg"></i
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-key ph-lg"
+						></i
 					></template>
 					<template #label>Client Secret</template>
 				</FormInput>
 			</template>
 
 			<FormButton primary class="_formBlock" @click="save"
-				><i class="ph-floppy-disk-back ph-bold ph-lg"></i>
+				><i
+					:class="defaultStore.state.iconSet"
+					class="ph-floppy-disk-back ph-lg"
+				></i>
 				{{ i18n.ts.save }}</FormButton
 			>
 		</div>
@@ -44,6 +53,7 @@ import FormSuspense from "@/components/form/suspense.vue";
 import * as os from "@/os";
 import { fetchInstance } from "@/instance";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 const uri = ref("");
 const enableGithubIntegration = ref(false);

@@ -31,13 +31,15 @@
 		</svg>
 		<i
 			v-else-if="instance.defaultReaction === '👍'"
-			class="ph-thumbs-up ph-bold ph-lg"
+			:class="defaultStore.state.iconSet"
+			class="ph-thumbs-up ph-lg"
 		></i>
 		<i
 			v-else-if="instance.defaultReaction === '❤️'"
-			class="ph-heart ph-bold ph-lg"
+			:class="defaultStore.state.iconSet"
+			class="ph-heart ph-lg"
 		></i>
-		<i v-else class="ph-star ph-bold ph-lg"></i>
+		<i v-else :class="defaultStore.state.iconSet" class="ph-star ph-lg"></i>
 	</button>
 </template>
 

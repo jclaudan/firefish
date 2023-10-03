@@ -57,7 +57,10 @@
 					<div class="rknalgpo my">
 						<div class="buttoncontainer">
 							<MkButton class="new primary" @click="create()"
-								><i class="ph-plus ph-bold ph-lg"></i>
+								><i
+									:class="defaultStore.state.iconSet"
+									class="ph-plus ph-lg"
+								></i>
 								{{ i18n.ts._pages.newPage }}</MkButton
 							>
 						</div>
@@ -119,7 +122,7 @@ function create() {
 
 const headerActions = computed(() => [
 	{
-		icon: "ph-plus ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-plus ph-lg`,
 		text: i18n.ts.create,
 		handler: create,
 	},
@@ -129,24 +132,24 @@ const headerTabs = computed(() => [
 	{
 		key: "featured",
 		title: i18n.ts._pages.featured,
-		icon: "ph-fire-simple ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-fire-simple ph-lg`,
 	},
 	{
 		key: "liked",
 		title: i18n.ts._pages.liked,
-		icon: "ph-heart ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-heart ph-lg`,
 	},
 	{
 		key: "my",
 		title: i18n.ts._pages.my,
-		icon: "ph-crown-simple ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-crown-simple ph-lg`,
 	},
 ]);
 
 definePageMetadata(
 	computed(() => ({
 		title: i18n.ts.pages,
-		icon: "ph-file-text ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-file-text ph-lg`,
 	})),
 );
 

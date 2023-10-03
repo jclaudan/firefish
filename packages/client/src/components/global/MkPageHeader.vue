@@ -17,7 +17,10 @@
 					@click.stop="goBack()"
 					@touchstart="preventDrag"
 				>
-					<i class="ph-caret-left ph-bold ph-lg"></i>
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-caret-left ph-lg"
+					></i>
 				</button>
 				<MkAvatar
 					v-if="narrow && props.displayMyAvatar && $i"
@@ -140,6 +143,7 @@ import { scrollToTop } from "@/scripts/scroll";
 import { injectPageMetadata } from "@/scripts/page-metadata";
 import { $i, openAccountMenu as openAccountMenu_ } from "@/account";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 interface Tab {
 	key?: string | null;

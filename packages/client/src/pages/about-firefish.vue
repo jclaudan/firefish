@@ -61,7 +61,10 @@
 								external
 							>
 								<template #icon
-									><i class="ph-code ph-bold ph-lg"></i
+									><i
+										:class="defaultStore.state.iconSet"
+										class="ph-code ph-lg"
+									></i
 								></template>
 								{{ i18n.ts._aboutFirefish.source }}
 								<template #suffix>GitLab</template>
@@ -71,7 +74,10 @@
 								external
 							>
 								<template #icon
-									><i class="ph-money ph-bold ph-lg"></i
+									><i
+										:class="defaultStore.state.iconSet"
+										class="ph-money ph-lg"
+									></i
 								></template>
 								{{ i18n.ts._aboutFirefish.donate }}
 								<template #suffix>Donate</template>
@@ -81,7 +87,10 @@
 								external
 							>
 								<template #icon
-									><i class="ph-translate ph-bold ph-lg"></i
+									><i
+										:class="defaultStore.state.iconSet"
+										class="ph-translate ph-lg"
+									></i
 								></template>
 								{{ i18n.ts._aboutFirefish.translation }}
 								<template #suffix>Translate</template>

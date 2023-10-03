@@ -25,7 +25,8 @@
 		<span class="hash">{{ hash }}</span>
 		<i
 			v-if="target === '_blank'"
-			class="ph-arrow-square-out ph-bold ph-lg icon"
+			class="ph-arrow-square-out ph-lg icon"
+			:class="defaultStore.state.iconSet"
 		></i>
 	</component>
 </template>
@@ -37,6 +38,7 @@ import { url as local } from "@/config";
 import * as os from "@/os";
 import { useTooltip } from "@/scripts/use-tooltip";
 import { safeURIDecode } from "@/scripts/safe-uri-decode";
+import { defaultStore } from "@/store";
 
 const props = defineProps<{
 	url: string;

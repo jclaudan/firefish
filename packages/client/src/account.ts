@@ -5,6 +5,7 @@ import { del, get, set } from "@/scripts/idb-proxy";
 import { apiUrl } from "@/config";
 import { alert, api, popup, popupMenu, success, waiting } from "@/os";
 import { reloadChannel, unisonReload } from "@/scripts/unison-reload";
+import { defaultStore } from "@/store";
 
 // TODO: 他のタブと永続化されたstateを同期
 
@@ -249,7 +250,7 @@ export async function openAccountMenu(
 					...accountItemPromises,
 					{
 						type: "parent",
-						icon: "ph-plus ph-bold ph-lg",
+						icon: `${defaultStore.state.iconSet} ph-plus ph-lg`,
 						text: i18n.ts.addAccount,
 						children: [
 							{
@@ -268,13 +269,13 @@ export async function openAccountMenu(
 					},
 					{
 						type: "link",
-						icon: "ph-users ph-bold ph-lg",
+						icon: `${defaultStore.state.iconSet} ph-users ph-lg`,
 						text: i18n.ts.manageAccounts,
 						to: "/settings/accounts",
 					},
 					{
 						type: "button",
-						icon: "ph-sign-out ph-bold ph-lg",
+						icon: `${defaultStore.state.iconSet} ph-sign-out ph-lg`,
 						text: i18n.ts.logout,
 						action: () => {
 							signout();

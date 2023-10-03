@@ -67,7 +67,10 @@
 						class="button _button"
 						@click.stop="reply()"
 					>
-						<i class="ph-arrow-u-up-left ph-bold ph-lg"></i>
+						<i
+							:class="defaultStore.state.iconSet"
+							class="ph-arrow-u-up-left ph-lg"
+						></i>
 						<template v-if="appearNote.repliesCount > 0">
 							<p class="count">{{ appearNote.repliesCount }}</p>
 						</template>
@@ -109,7 +112,10 @@
 						class="button _button"
 						@click.stop="react()"
 					>
-						<i class="ph-smiley ph-bold ph-lg"></i>
+						<i
+							:class="defaultStore.state.iconSet"
+							class="ph-smiley ph-lg"
+						></i>
 					</button>
 					<button
 						v-if="
@@ -121,7 +127,10 @@
 						class="button _button reacted"
 						@click.stop="undoReact(appearNote)"
 					>
-						<i class="ph-minus ph-bold ph-lg"></i>
+						<i
+							:class="defaultStore.state.iconSet"
+							class="ph-minus ph-lg"
+						></i>
 					</button>
 					<XQuoteButton class="button" :note="appearNote" />
 					<button
@@ -134,7 +143,10 @@
 						class="button _button"
 						@click.stop="translate"
 					>
-						<i class="ph-translate ph-bold ph-lg"></i>
+						<i
+							:class="defaultStore.state.iconSet"
+							class="ph-translate ph-lg"
+						></i>
 					</button>
 					<button
 						ref="menuButton"
@@ -142,7 +154,10 @@
 						class="button _button"
 						@click.stop="menu()"
 					>
-						<i class="ph-dots-three-outline ph-bold ph-lg"></i>
+						<i
+							:class="defaultStore.state.iconSet"
+							class="ph-dots-three-outline ph-lg"
+						></i>
 					</button>
 				</footer>
 			</div>
@@ -165,7 +180,10 @@
 				<div class="line"></div>
 				<MkA class="text _link" :to="notePage(note)"
 					>{{ i18n.ts.continueThread }}
-					<i class="ph-caret-double-right ph-bold ph-lg"></i
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-caret-double-right ph-lg"
+					></i
 				></MkA>
 			</div>
 		</template>
@@ -412,7 +430,7 @@ function onContextmenu(ev: MouseEvent): void {
 					text: notePage(appearNote.value),
 				},
 				{
-					icon: "ph-browser ph-bold ph-lg",
+					icon: `${defaultStore.state.iconSet} ph-browser ph-lg`,
 					text: i18n.ts.openInWindow,
 					action: () => {
 						os.pageWindow(notePage(appearNote.value));
@@ -420,7 +438,7 @@ function onContextmenu(ev: MouseEvent): void {
 				},
 				notePage(appearNote.value) != location.pathname
 					? {
-							icon: "ph-arrows-out-simple ph-bold ph-lg",
+							icon: `${defaultStore.state.iconSet} ph-arrows-out-simple ph-lg`,
 							text: i18n.ts.showInPage,
 							action: () => {
 								router.push(
@@ -433,13 +451,13 @@ function onContextmenu(ev: MouseEvent): void {
 				null,
 				{
 					type: "a",
-					icon: "ph-arrow-square-out ph-bold ph-lg",
+					icon: `${defaultStore.state.iconSet} ph-arrow-square-out ph-lg`,
 					text: i18n.ts.openInNewTab,
 					href: notePage(appearNote.value),
 					target: "_blank",
 				},
 				{
-					icon: "ph-link-simple ph-bold ph-lg",
+					icon: `${defaultStore.state.iconSet} ph-link-simple ph-lg`,
 					text: i18n.ts.copyLink,
 					action: () => {
 						copyToClipboard(`${url}${notePage(appearNote.value)}`);
@@ -448,7 +466,7 @@ function onContextmenu(ev: MouseEvent): void {
 				note.value.user.host != null
 					? {
 							type: "a",
-							icon: "ph-arrow-square-up-right ph-bold ph-lg",
+							icon: `${defaultStore.state.iconSet} ph-arrow-square-up-right ph-lg`,
 							text: i18n.ts.showOnRemote,
 							href: note.value.url ?? note.value.uri ?? "",
 							target: "_blank",

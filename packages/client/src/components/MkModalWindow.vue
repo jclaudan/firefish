@@ -30,7 +30,10 @@
 						class="_button"
 						@click="$emit('close')"
 					>
-						<i class="ph-x ph-bold ph-lg"></i>
+						<i
+							:class="defaultStore.state.iconSet"
+							class="ph-x ph-lg"
+						></i>
 					</button>
 					<span class="title">
 						<slot name="header"></slot>
@@ -41,7 +44,10 @@
 						class="_button"
 						@click="$emit('close')"
 					>
-						<i class="ph-x ph-bold ph-lg"></i>
+						<i
+							:class="defaultStore.state.iconSet"
+							class="ph-x ph-lg"
+						></i>
 					</button>
 					<button
 						v-if="props.withOkButton"
@@ -50,7 +56,10 @@
 						:disabled="props.okButtonDisabled"
 						@click="$emit('ok')"
 					>
-						<i class="ph-check ph-bold ph-lg"></i>
+						<i
+							:class="defaultStore.state.iconSet"
+							class="ph-check ph-lg"
+						></i>
 					</button>
 				</div>
 				<div class="body">
@@ -67,6 +76,7 @@ import { shallowRef } from "vue";
 import { FocusTrap } from "focus-trap-vue";
 import MkModal from "./MkModal.vue";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 const props = withDefaults(
 	defineProps<{

@@ -5,7 +5,11 @@
 		@parent-focus="($event) => emit('parent-focus', $event)"
 	>
 		<template #header
-			><i class="ph-at ph-bold ph-lg" style="margin-right: 8px"></i
+			><i
+				:class="defaultStore.state.iconSet"
+				class="ph-at ph-lg"
+				style="margin-right: 8px"
+			></i
 			>{{ column.name }}</template
 		>
 
@@ -18,6 +22,7 @@ import {} from "vue";
 import XColumn from "./column.vue";
 import type { Column } from "./deck-store";
 import XNotes from "@/components/MkNotes.vue";
+import { defaultStore } from "@/store";
 
 defineProps<{
 	column: Column;

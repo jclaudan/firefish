@@ -1,7 +1,10 @@
 <template>
 	<MkContainer :show-header="widgetProps.showHeader" class="mkw-aiscript">
 		<template #header
-			><i class="ph-terminal-window ph-bold ph-lg"></i
+			><i
+				:class="defaultStore.state.iconSet"
+				class="ph-terminal-window ph-lg"
+			></i
 			>{{ i18n.ts._widgets.aiscript }}</template
 		>
 
@@ -40,6 +43,7 @@ import MkContainer from "@/components/MkContainer.vue";
 import { createAiScriptEnv } from "@/scripts/aiscript/api";
 import { $i } from "@/account";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 const name = "aiscript";
 

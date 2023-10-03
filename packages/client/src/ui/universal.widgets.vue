@@ -16,7 +16,8 @@
 			style="font-size: 0.9em"
 			@click="editMode = false"
 		>
-			<i class="ph-check ph-bold ph-lg"></i> {{ i18n.ts.editWidgetsExit }}
+			<i :class="defaultStore.state.iconSet" class="ph-check ph-lg"></i>
+			{{ i18n.ts.editWidgetsExit }}
 		</button>
 		<button
 			v-else
@@ -24,7 +25,8 @@
 			style="font-size: 0.9em"
 			@click="editMode = true"
 		>
-			<i class="ph-pencil ph-bold ph-lg"></i> {{ i18n.ts.editWidgets }}
+			<i :class="defaultStore.state.iconSet" class="ph-pencil ph-lg"></i>
+			{{ i18n.ts.editWidgets }}
 		</button>
 	</aside>
 </template>

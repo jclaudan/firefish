@@ -2,7 +2,13 @@
 	<div class="zbwaqsat">
 		<XPie class="pie" :value="usage" />
 		<div>
-			<p><i class="ph-hard-drives ph-bold ph-lg"></i>Disk</p>
+			<p>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-hard-drives ph-lg"
+				></i
+				>Disk
+			</p>
 			<p>Total: {{ bytes(total, 1) }}</p>
 			<p>Free: {{ bytes(available, 1) }}</p>
 			<p>Used: {{ bytes(used, 1) }}</p>
@@ -15,6 +21,7 @@ import { computed } from "vue";
 
 import XPie from "./pie.vue";
 import bytes from "@/filters/bytes";
+import { defaultStore } from "@/store";
 
 const props = defineProps<{
 	meta: any; // TODO

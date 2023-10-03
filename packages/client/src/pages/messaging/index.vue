@@ -31,7 +31,10 @@
 								primary
 								class="start"
 								@click="startUser"
-								><i class="ph-plus ph-bold ph-lg"></i>
+								><i
+									:class="defaultStore.state.iconSet"
+									class="ph-plus ph-lg"
+								></i>
 								{{ i18n.ts.startMessaging }}</MkButton
 							>
 							<MkPagination
@@ -56,7 +59,8 @@
 									:link="true"
 									to="/my/groups"
 									><i
-										class="ph-user-circle-gear ph-bold ph-lg"
+										:class="defaultStore.state.iconSet"
+										class="ph-user-circle-gear ph-lg"
 									></i>
 									{{ i18n.ts.manageGroups }}</MkButton
 								>
@@ -64,7 +68,10 @@
 									primary
 									class="start"
 									@click="startGroup"
-									><i class="ph-plus ph-bold ph-lg"></i>
+									><i
+										:class="defaultStore.state.iconSet"
+										class="ph-plus ph-lg"
+									></i>
 									{{ i18n.ts.startMessaging }}</MkButton
 								>
 							</div>
@@ -130,7 +137,7 @@ async function readAllMessagingMessages() {
 
 const headerActions = computed(() => [
 	{
-		icon: "ph-check ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-check ph-lg`,
 		text: i18n.ts.markAllAsRead,
 		handler: readAllMessagingMessages,
 	},
@@ -140,18 +147,18 @@ const headerTabs = computed(() => [
 	{
 		key: "dms",
 		title: i18n.ts._messaging.dms,
-		icon: "ph-user ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-user ph-lg`,
 	},
 	{
 		key: "groups",
 		title: i18n.ts._messaging.groups,
-		icon: "ph-users-three ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-users-three ph-lg`,
 	},
 ]);
 
 definePageMetadata({
 	title: i18n.ts.messaging,
-	icon: "ph-chats-teardrop ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-chats-teardrop ph-lg`,
 });
 
 const dmsPagination = {

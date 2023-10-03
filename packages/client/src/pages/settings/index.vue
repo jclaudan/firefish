@@ -54,10 +54,11 @@ import {
 	provideMetadataReceiver,
 } from "@/scripts/page-metadata";
 import * as os from "@/os";
+import { defaultStore } from "@/store";
 
 const indexInfo = {
 	title: i18n.ts.settings,
-	icon: "ph-gear-six ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-gear-six ph-lg`,
 	hideHeader: true,
 };
 const INFO = ref(indexInfo);
@@ -81,49 +82,49 @@ const menuDef = computed(() => [
 		title: i18n.ts.basicSettings,
 		items: [
 			{
-				icon: "ph-user ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-user ph-lg`,
 				text: i18n.ts.profile,
 				to: "/settings/profile",
 				active: currentPage.value?.route.name === "profile",
 			},
 			{
-				icon: "ph-keyhole ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-keyhole ph-lg`,
 				text: i18n.ts.privacy,
 				to: "/settings/privacy",
 				active: currentPage.value?.route.name === "privacy",
 			},
 			{
-				icon: "ph-smiley ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-smiley ph-lg`,
 				text: i18n.ts.reaction,
 				to: "/settings/reaction",
 				active: currentPage.value?.route.name === "reaction",
 			},
 			{
-				icon: "ph-cloud ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-cloud ph-lg`,
 				text: i18n.ts.drive,
 				to: "/settings/drive",
 				active: currentPage.value?.route.name === "drive",
 			},
 			{
-				icon: "ph-bell ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-bell ph-lg`,
 				text: i18n.ts.notifications,
 				to: "/settings/notifications",
 				active: currentPage.value?.route.name === "notifications",
 			},
 			{
-				icon: "ph-envelope-simple-open ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-envelope-simple-open ph-lg`,
 				text: i18n.ts.email,
 				to: "/settings/email",
 				active: currentPage.value?.route.name === "email",
 			},
 			{
-				icon: "ph-share-network ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-share-network ph-lg`,
 				text: i18n.ts.integration,
 				to: "/settings/integration",
 				active: currentPage.value?.route.name === "integration",
 			},
 			{
-				icon: "ph-lock ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-lock ph-lg`,
 				text: i18n.ts.security,
 				to: "/settings/security",
 				active: currentPage.value?.route.name === "security",
@@ -134,37 +135,37 @@ const menuDef = computed(() => [
 		title: i18n.ts.clientSettings,
 		items: [
 			{
-				icon: "ph-gear-six ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-gear-six ph-lg`,
 				text: i18n.ts.general,
 				to: "/settings/general",
 				active: currentPage.value?.route.name === "general",
 			},
 			{
-				icon: "ph-palette ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-palette ph-lg`,
 				text: i18n.ts.theme,
 				to: "/settings/theme",
 				active: currentPage.value?.route.name === "theme",
 			},
 			{
-				icon: "ph-list ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-list ph-lg`,
 				text: i18n.ts.navbar,
 				to: "/settings/navbar",
 				active: currentPage.value?.route.name === "navbar",
 			},
 			{
-				icon: "ph-traffic-signal ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-traffic-signal ph-lg`,
 				text: i18n.ts.statusbar,
 				to: "/settings/statusbar",
 				active: currentPage.value?.route.name === "statusbar",
 			},
 			{
-				icon: "ph-speaker-high ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-speaker-high ph-lg`,
 				text: i18n.ts.sounds,
 				to: "/settings/sounds",
 				active: currentPage.value?.route.name === "sounds",
 			},
 			{
-				icon: "ph-plug ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-plug ph-lg`,
 				text: i18n.ts.plugins,
 				to: "/settings/plugin",
 				active: currentPage.value?.route.name === "plugin",
@@ -175,49 +176,49 @@ const menuDef = computed(() => [
 		title: i18n.ts.otherSettings,
 		items: [
 			{
-				icon: "ph-airplane-takeoff ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-airplane-takeoff ph-lg`,
 				text: i18n.ts.migration,
 				to: "/settings/migration",
 				active: currentPage.value?.route.name === "migration",
 			},
 			{
-				icon: "ph-package ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-package ph-lg`,
 				text: i18n.ts.importAndExport,
 				to: "/settings/import-export",
 				active: currentPage.value?.route.name === "import-export",
 			},
 			{
-				icon: "ph-speaker-none ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-speaker-none ph-lg`,
 				text: i18n.ts.instanceMute,
 				to: "/settings/instance-mute",
 				active: currentPage.value?.route.name === "instance-mute",
 			},
 			{
-				icon: "ph-prohibit ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-prohibit ph-lg`,
 				text: i18n.ts.muteAndBlock,
 				to: "/settings/mute-block",
 				active: currentPage.value?.route.name === "mute-block",
 			},
 			{
-				icon: "ph-speaker-x ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-speaker-x ph-lg`,
 				text: i18n.ts.wordMute,
 				to: "/settings/word-mute",
 				active: currentPage.value?.route.name === "word-mute",
 			},
 			{
-				icon: "ph-key ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-key ph-lg`,
 				text: "API",
 				to: "/settings/api",
 				active: currentPage.value?.route.name === "api",
 			},
 			{
-				icon: "ph-webhooks-logo ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-webhooks-logo ph-lg`,
 				text: "Webhook",
 				to: "/settings/webhook",
 				active: currentPage.value?.route.name === "webhook",
 			},
 			{
-				icon: "ph-dots-three-outline ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-dots-three-outline ph-lg`,
 				text: i18n.ts.other,
 				to: "/settings/other",
 				active: currentPage.value?.route.name === "other",
@@ -227,14 +228,14 @@ const menuDef = computed(() => [
 	{
 		items: [
 			{
-				icon: "ph-floppy-disk ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-floppy-disk ph-lg`,
 				text: i18n.ts.preferencesBackups,
 				to: "/settings/preferences-backups",
 				active: currentPage.value?.route.name === "preferences-backups",
 			},
 			{
 				type: "button",
-				icon: "ph-trash ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-trash ph-lg`,
 				text: i18n.ts.clearCache,
 				action: () => {
 					localStorage.removeItem("locale");
@@ -244,7 +245,7 @@ const menuDef = computed(() => [
 			},
 			{
 				type: "button",
-				icon: "ph-sign-in ph-bold ph-lg fa-flip-horizontal",
+				icon: `${defaultStore.state.iconSet} ph-sign-in ph-lg fa-flip-horizontal`,
 				text: i18n.ts.logout,
 				action: async () => {
 					const { canceled } = await os.confirm({

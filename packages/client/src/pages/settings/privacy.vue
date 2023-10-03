@@ -198,6 +198,6 @@ function save() {
 
 definePageMetadata({
 	title: i18n.ts.privacy,
-	icon: "ph-keyhole ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-keyhole ph-lg`,
 });
 </script>

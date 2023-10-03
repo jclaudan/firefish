@@ -13,7 +13,10 @@
 				<template v-if="provider === 'hcaptcha'">
 					<FormInput v-model="hcaptchaSiteKey" class="_formBlock">
 						<template #prefix
-							><i class="ph-key ph-bold ph-lg"></i
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-key ph-lg"
+							></i
 						></template>
 						<template #label>{{
 							i18n.ts.hcaptchaSiteKey
@@ -21,7 +24,10 @@
 					</FormInput>
 					<FormInput v-model="hcaptchaSecretKey" class="_formBlock">
 						<template #prefix
-							><i class="ph-key ph-bold ph-lg"></i
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-key ph-lg"
+							></i
 						></template>
 						<template #label>{{
 							i18n.ts.hcaptchaSecretKey
@@ -41,7 +47,10 @@
 				<template v-else-if="provider === 'recaptcha'">
 					<FormInput v-model="recaptchaSiteKey" class="_formBlock">
 						<template #prefix
-							><i class="ph-key ph-bold ph-lg"></i
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-key ph-lg"
+							></i
 						></template>
 						<template #label>{{
 							i18n.ts.recaptchaSiteKey
@@ -49,7 +58,10 @@
 					</FormInput>
 					<FormInput v-model="recaptchaSecretKey" class="_formBlock">
 						<template #prefix
-							><i class="ph-key ph-bold ph-lg"></i
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-key ph-lg"
+							></i
 						></template>
 						<template #label>{{
 							i18n.ts.recaptchaSecretKey
@@ -65,7 +77,10 @@
 				</template>
 
 				<FormButton primary @click="save"
-					><i class="ph-floppy-disk-back ph-bold ph-lg"></i>
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-floppy-disk-back ph-lg"
+					></i>
 					{{ i18n.ts.save }}</FormButton
 				>
 			</div>
@@ -83,6 +98,7 @@ import FormSlot from "@/components/form/slot.vue";
 import * as os from "@/os";
 import { fetchInstance } from "@/instance";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 const MkCaptcha = defineAsyncComponent(
 	() => import("@/components/MkCaptcha.vue"),

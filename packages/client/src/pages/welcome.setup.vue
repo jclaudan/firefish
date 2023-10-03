@@ -23,7 +23,10 @@
 			>
 				<template #label>{{ i18n.ts.password }}</template>
 				<template #prefix
-					><i class="ph-lock ph-bold ph-lg"></i
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-lock ph-lg"
+					></i
 				></template>
 			</MkInput>
 			<div class="bottom _formBlock">
@@ -50,6 +53,7 @@ import { host } from "@/config";
 import * as os from "@/os";
 import { login } from "@/account";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 const username = ref("");
 const password = ref("");

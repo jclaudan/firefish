@@ -103,7 +103,10 @@
 
 				<FormFolder :default-open="false" class="_formBlock">
 					<template #icon
-						><i class="ph-code ph-bold ph-lg"></i
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-code ph-lg"
+						></i
 					></template>
 					<template #label>{{ i18n.ts.editCode }}</template>
 
@@ -337,13 +340,13 @@ watch(theme, apply, { deep: true });
 const headerActions = computed(() => [
 	{
 		asFullButton: true,
-		icon: "ph-eye ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-eye ph-lg`,
 		text: i18n.ts.preview,
 		handler: showPreview,
 	},
 	{
 		asFullButton: true,
-		icon: "ph-check ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-check ph-lg`,
 		text: i18n.ts.saveAs,
 		handler: saveAs,
 	},
@@ -353,7 +356,7 @@ const headerTabs = computed(() => []);
 
 definePageMetadata({
 	title: i18n.ts.themeEditor,
-	icon: "ph-palette ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-palette ph-lg`,
 });
 </script>
 

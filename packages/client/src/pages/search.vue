@@ -84,12 +84,12 @@ const headerActions = computed(() => []);
 const headerTabs = computed(() => [
 	{
 		key: "notes",
-		icon: "ph-magnifying-glass ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-magnifying-glass ph-lg`,
 		title: i18n.ts.notes,
 	},
 	{
 		key: "users",
-		icon: "ph-users ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-users ph-lg`,
 		title: i18n.ts.users,
 	},
 ]);
@@ -116,7 +116,7 @@ onMounted(() => {
 definePageMetadata(
 	computed(() => ({
 		title: i18n.t("searchWith", { q: props.query }),
-		icon: "ph-magnifying-glass ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-magnifying-glass ph-lg`,
 	})),
 );
 </script>

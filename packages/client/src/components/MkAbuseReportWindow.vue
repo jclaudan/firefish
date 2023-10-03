@@ -8,7 +8,8 @@
 	>
 		<template #header>
 			<i
-				class="ph-warning-circle ph-bold ph-lg"
+				:class="defaultStore.state.iconSet"
+				class="ph-warning-circle ph-lg"
 				style="margin-right: 0.5em"
 			></i>
 			<I18n :src="i18n.ts.reportAbuseOf" tag="span">
@@ -47,6 +48,7 @@ import MkTextarea from "@/components/form/textarea.vue";
 import MkButton from "@/components/MkButton.vue";
 import * as os from "@/os";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 const props = defineProps<{
 	user: firefish.entities.User;

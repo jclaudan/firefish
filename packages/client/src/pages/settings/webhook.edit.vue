@@ -9,7 +9,12 @@
 		</FormInput>
 
 		<FormInput v-model="secret" class="_formBlock">
-			<template #prefix><i class="ph-lock ph-bold ph-lg"></i></template>
+			<template #prefix
+				><i
+					:class="defaultStore.state.iconSet"
+					class="ph-lock ph-lg"
+				></i
+			></template>
 			<template #label>Secret</template>
 		</FormInput>
 
@@ -46,7 +51,10 @@
 			style="display: flex; gap: var(--margin); flex-wrap: wrap"
 		>
 			<FormButton primary inline @click="save"
-				><i class="ph-check ph-bold ph-lg"></i>
+				><i
+					:class="defaultStore.state.iconSet"
+					class="ph-check ph-lg"
+				></i>
 				{{ i18n.ts.save }}</FormButton
 			>
 		</div>
@@ -63,6 +71,7 @@ import FormButton from "@/components/MkButton.vue";
 import * as os from "@/os";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
+import { defaultStore } from "@/store";
 
 const props = defineProps<{
 	webhookId: string;
@@ -106,6 +115,6 @@ async function save(): Promise<void> {
 
 definePageMetadata({
 	title: "Edit webhook",
-	icon: "ph-webhooks-logo ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-webhooks-logo ph-lg`,
 });
 </script>

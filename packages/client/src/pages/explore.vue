@@ -58,12 +58,12 @@ const headerActions = computed(() => []);
 const headerTabs = computed(() => [
 	{
 		key: "users",
-		icon: "ph-users ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-users ph-lg`,
 		title: i18n.ts.users,
 	},
 	{
 		key: "featured",
-		icon: "ph-lightning ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-lightning ph-lg`,
 		title: i18n.ts.featured,
 	},
 ]);
@@ -71,7 +71,7 @@ const headerTabs = computed(() => [
 definePageMetadata(
 	computed(() => ({
 		title: i18n.ts.explore,
-		icon: "ph-compass ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-compass ph-lg`,
 	})),
 );
 

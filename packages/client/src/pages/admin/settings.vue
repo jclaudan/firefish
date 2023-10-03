@@ -24,7 +24,10 @@
 
 						<FormInput v-model="tosUrl" class="_formBlock">
 							<template #prefix
-								><i class="ph-link-simple ph-bold ph-lg"></i
+								><i
+									:class="defaultStore.state.iconSet"
+									class="ph-link-simple ph-lg"
+								></i
 							></template>
 							<template #label>{{ i18n.ts.tosUrl }}</template>
 						</FormInput>
@@ -46,7 +49,8 @@
 							>
 								<template #prefix
 									><i
-										class="ph-envelope-simple-open ph-bold ph-lg"
+										:class="defaultStore.state.iconSet"
+										class="ph-envelope-simple-open ph-lg"
 									></i
 								></template>
 								<template #label>{{
@@ -59,7 +63,10 @@
 								class="_formBlock"
 							>
 								<template #prefix
-									><i class="ph-hand-heart ph-bold ph-lg"></i
+									><i
+										:class="defaultStore.state.iconSet"
+										class="ph-hand-heart ph-lg"
+									></i
 								></template>
 								<template #label>{{
 									i18n.ts.donationLink
@@ -167,7 +174,10 @@
 
 							<FormInput v-model="iconUrl" class="_formBlock">
 								<template #prefix
-									><i class="ph-link-simple ph-bold ph-lg"></i
+									><i
+										:class="defaultStore.state.iconSet"
+										class="ph-link-simple ph-lg"
+									></i
 								></template>
 								<template #label>{{
 									i18n.ts.iconUrl
@@ -176,7 +186,10 @@
 
 							<FormInput v-model="bannerUrl" class="_formBlock">
 								<template #prefix
-									><i class="ph-link-simple ph-bold ph-lg"></i
+									><i
+										:class="defaultStore.state.iconSet"
+										class="ph-link-simple ph-lg"
+									></i
 								></template>
 								<template #label>{{
 									i18n.ts.bannerUrl
@@ -188,7 +201,10 @@
 								class="_formBlock"
 							>
 								<template #prefix
-									><i class="ph-link-simple ph-bold ph-lg"></i
+									><i
+										:class="defaultStore.state.iconSet"
+										class="ph-link-simple ph-lg"
+									></i
 								></template>
 								<template #label>{{
 									i18n.ts.logoImageUrl
@@ -200,7 +216,10 @@
 								class="_formBlock"
 							>
 								<template #prefix
-									><i class="ph-link-simple ph-bold ph-lg"></i
+									><i
+										:class="defaultStore.state.iconSet"
+										class="ph-link-simple ph-lg"
+									></i
 								></template>
 								<template #label>{{
 									i18n.ts.backgroundImageUrl
@@ -209,7 +228,10 @@
 
 							<FormInput v-model="themeColor" class="_formBlock">
 								<template #prefix
-									><i class="ph-paconstte ph-bold ph-lg"></i
+									><i
+										:class="defaultStore.state.iconSet"
+										class="ph-paconstte ph-lg"
+									></i
 								></template>
 								<template #label>{{
 									i18n.ts.themeColor
@@ -338,7 +360,10 @@
 									class="_formBlock"
 								>
 									<template #prefix
-										><i class="ph-key ph-bold ph-lg"></i
+										><i
+											:class="defaultStore.state.iconSet"
+											class="ph-key ph-lg"
+										></i
 									></template>
 									<template #label>Public key</template>
 								</FormInput>
@@ -348,7 +373,10 @@
 									class="_formBlock"
 								>
 									<template #prefix
-										><i class="ph-key ph-bold ph-lg"></i
+										><i
+											:class="defaultStore.state.iconSet"
+											class="ph-key ph-lg"
+										></i
 									></template>
 									<template #label>Private key</template>
 								</FormInput>
@@ -384,7 +412,10 @@
 								class="_formBlock"
 							>
 								<template #prefix
-									><i class="ph-key ph-bold ph-lg"></i
+									><i
+										:class="defaultStore.state.iconSet"
+										class="ph-key ph-lg"
+									></i
 								></template>
 								<template #label>DeepL Auth Key</template>
 							</FormInput>
@@ -401,7 +432,10 @@
 								class="_formBlock"
 							>
 								<template #prefix
-									><i class="ph-link ph-bold ph-lg"></i
+									><i
+										:class="defaultStore.state.iconSet"
+										class="ph-link ph-lg"
+									></i
 								></template>
 								<template #label
 									>Libre Translate API URL</template
@@ -413,7 +447,10 @@
 								class="_formBlock"
 							>
 								<template #prefix
-									><i class="ph-key ph-bold ph-lg"></i
+									><i
+										:class="defaultStore.state.iconSet"
+										class="ph-key ph-lg"
+									></i
 								></template>
 								<template #label
 									>Libre Translate API Key</template
@@ -441,6 +478,7 @@ import * as os from "@/os";
 import { fetchInstance } from "@/instance";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
+import { defaultStore } from "@/store";
 
 const name = ref<string | null>(null);
 const description = ref<string | null>(null);
@@ -576,7 +614,7 @@ function save() {
 const headerActions = computed(() => [
 	{
 		asFullButton: true,
-		icon: "ph-check ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-check ph-lg`,
 		text: i18n.ts.save,
 		handler: save,
 	},
@@ -586,6 +624,6 @@ const headerTabs = computed(() => []);
 
 definePageMetadata({
 	title: i18n.ts.general,
-	icon: "ph-gear-six ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-gear-six ph-lg`,
 });
 </script>

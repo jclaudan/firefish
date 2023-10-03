@@ -17,10 +17,16 @@
 	>
 		<p class="name">
 			<template v-if="hover"
-				><i class="ph-folder-notch-open ph-bold ph-lg ph-fw ph-lg"></i
+				><i
+					:class="defaultStore.state.iconSet"
+					class="ph-folder-notch-open ph-lg ph-fw ph-lg"
+				></i
 			></template>
 			<template v-if="!hover"
-				><i class="ph-folder-notch ph-bold ph-lg ph-fw ph-lg"></i
+				><i
+					:class="defaultStore.state.iconSet"
+					class="ph-folder-notch ph-lg ph-fw ph-lg"
+				></i
 			></template>
 			{{ folder.name }}
 		</p>
@@ -248,7 +254,7 @@ function onContextmenu(ev: MouseEvent) {
 		[
 			{
 				text: i18n.ts.openInWindow,
-				icon: "ph-copy ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-copy ph-lg`,
 				action: () => {
 					os.popup(
 						defineAsyncComponent(
@@ -265,13 +271,13 @@ function onContextmenu(ev: MouseEvent) {
 			null,
 			{
 				text: i18n.ts.rename,
-				icon: "ph-cursor-text ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-cursor-text ph-lg`,
 				action: rename,
 			},
 			null,
 			{
 				text: i18n.ts.delete,
-				icon: "ph-trash ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-trash ph-lg`,
 				danger: true,
 				action: deleteFolder,
 			},

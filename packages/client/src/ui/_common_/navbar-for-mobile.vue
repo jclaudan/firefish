@@ -30,7 +30,7 @@
 					to="/"
 					exact
 				>
-					<i class="icon ph-house ph-bold ph-lg ph-fw ph-lg"></i
+					<i class="icon ph-house ph-lg ph-fw ph-lg"></i
 					><span class="text">{{ i18n.ts.timeline }}</span>
 				</MkA>
 				<template v-for="item in menu">
@@ -63,7 +63,8 @@
 							v-if="navbarItemDef[item].indicated"
 							class="indicator"
 							:class="{
-								animateIndicator: $store.state.animation,
+								animateIndicator:
+									defaultStore.state.iconSetanimation,
 							}"
 							><i class="icon ph-circle ph-fill"></i
 						></span>
@@ -77,18 +78,19 @@
 					active-class="active"
 					to="/admin"
 				>
-					<i class="icon ph-door ph-bold ph-lg ph-fw ph-lg"></i
+					<i class="icon ph-door ph-lg ph-fw ph-lg"></i
 					><span class="text">{{ i18n.ts.controlPanel }}</span>
 				</MkA>
 				<button v-click-anime class="item _button" @click="more">
-					<i
-						class="icon ph-dots-three-outline ph-bold ph-lg ph-fw ph-lg"
-					></i
+					<i class="icon ph-dots-three-outline ph-lg ph-fw ph-lg"></i
 					><span class="text">{{ i18n.ts.more }}</span>
 					<span
 						v-if="otherMenuItemIndicated"
 						class="indicator"
-						:class="{ animateIndicator: $store.state.animation }"
+						:class="{
+							animateIndicator:
+								defaultStore.state.iconSetanimation,
+						}"
 						><i class="icon ph-circle ph-fill"></i
 					></span>
 				</button>
@@ -98,7 +100,7 @@
 					active-class="active"
 					to="/settings"
 				>
-					<i class="icon ph-gear-six ph-bold ph-lg ph-fw ph-lg"></i
+					<i class="icon ph-gear-six ph-lg ph-fw ph-lg"></i
 					><span class="text">{{ i18n.ts.settings }}</span>
 				</MkA>
 			</div>
@@ -108,7 +110,7 @@
 					data-cy-open-post-form
 					@click="os.post"
 				>
-					<i class="icon ph-pencil ph-bold ph-lg ph-fw ph-lg"></i
+					<i class="icon ph-pencil ph-lg ph-fw ph-lg"></i
 					><span class="text">{{ i18n.ts.note }}</span>
 				</button>
 				<button
@@ -116,7 +118,7 @@
 					class="item _button help"
 					@click="openHelpMenu"
 				>
-					<i class="help icon ph-info ph-bold ph-xl ph-fw"></i>
+					<i class="help icon ph-info ph-xl ph-fw"></i>
 				</button>
 			</div>
 		</div>

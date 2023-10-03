@@ -15,7 +15,10 @@
 					class="_button"
 					@click="back()"
 				>
-					<i class="ph-caret-left ph-bold ph-lg"></i>
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-caret-left ph-lg"
+					></i>
 				</button>
 				<span v-else style="display: inline-block; width: 20px"></span>
 				<span v-if="pageMetadata?.value" class="title">
@@ -31,7 +34,10 @@
 					:aria-label="i18n.t('close')"
 					@click="$refs.modal.close()"
 				>
-					<i class="ph-x ph-bold ph-lg"></i>
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-x ph-lg"
+					></i>
 				</button>
 			</div>
 			<div class="body">
@@ -64,6 +70,7 @@ import { i18n } from "@/i18n";
 import type { PageMetadata } from "@/scripts/page-metadata";
 import { provideMetadataReceiver } from "@/scripts/page-metadata";
 import { Router } from "@/nirax";
+import { defaultStore } from "@/store";
 
 const props = defineProps<{
 	initialPath: string;
@@ -101,18 +108,18 @@ const contextmenu = computed(() => {
 			text: path.value,
 		},
 		{
-			icon: "ph-arrows-out-simple ph-bold ph-lg",
+			icon: `${defaultStore.state.iconSet} ph-arrows-out-simple ph-lg`,
 			text: i18n.ts.showInPage,
 			action: expand,
 		},
 		{
-			icon: "ph-arrow-square-out ph-bold ph-lg",
+			icon: `${defaultStore.state.iconSet} ph-arrow-square-out ph-lg`,
 			text: i18n.ts.popout,
 			action: popout,
 		},
 		null,
 		{
-			icon: "ph-arrow-square-out ph-bold ph-lg",
+			icon: `${defaultStore.state.iconSet} ph-arrow-square-out ph-lg`,
 			text: i18n.ts.openInNewTab,
 			action: () => {
 				window.open(pageUrl.value, "_blank");
@@ -120,7 +127,7 @@ const contextmenu = computed(() => {
 			},
 		},
 		{
-			icon: "ph-link-simple ph-bold ph-lg",
+			icon: `${defaultStore.state.iconSet} ph-link-simple ph-lg`,
 			text: i18n.ts.copyLink,
 			action: () => {
 				copyToClipboard(pageUrl.value);

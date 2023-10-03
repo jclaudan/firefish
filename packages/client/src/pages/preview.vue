@@ -9,11 +9,12 @@ import { computed } from "vue";
 import MkSample from "@/components/MkSample.vue";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
+import { defaultStore } from "@/store";
 
 definePageMetadata(
 	computed(() => ({
 		title: i18n.ts.preview,
-		icon: "ph-eye ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-eye ph-lg`,
 	})),
 );
 </script>

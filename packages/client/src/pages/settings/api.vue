@@ -22,6 +22,7 @@ import FormButton from "@/components/MkButton.vue";
 import * as os from "@/os";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
+import { defaultStore } from "@/store";
 
 const isDesktop = ref(window.innerWidth >= 1100);
 
@@ -53,6 +54,6 @@ function generateToken() {
 
 definePageMetadata({
 	title: "API",
-	icon: "ph-key ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-key ph-lg`,
 });
 </script>

@@ -95,7 +95,10 @@
 								external
 							>
 								<template #icon
-									><i class="ph-money ph-bold ph-lg"></i
+									><i
+										:class="defaultStore.state.iconSet"
+										class="ph-money ph-lg"
+									></i
 								></template>
 								{{
 									i18n.t("_aboutFirefish.donateHost", {
@@ -227,17 +230,17 @@ const theTabs = [
 	{
 		key: "overview",
 		title: i18n.ts.overview,
-		icon: "ph-map-trifold ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-map-trifold ph-lg`,
 	},
 	{
 		key: "emojis",
 		title: i18n.ts.customEmojis,
-		icon: "ph-smiley ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-smiley ph-lg`,
 	},
 	{
 		key: "charts",
 		title: i18n.ts.charts,
-		icon: "ph-chart-bar ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-chart-bar ph-lg`,
 	},
 ];
 
@@ -245,7 +248,7 @@ if (iAmModerator) {
 	theTabs.push({
 		key: "federation",
 		title: i18n.ts.federation,
-		icon: "ph-planet ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-planet ph-lg`,
 	});
 }
 
@@ -254,7 +257,7 @@ const headerTabs = computed(() => theTabs);
 definePageMetadata(
 	computed(() => ({
 		title: i18n.ts.instanceInfo,
-		icon: "ph-info ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-info ph-lg`,
 	})),
 );
 

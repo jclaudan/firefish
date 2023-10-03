@@ -2,7 +2,11 @@
 	<div class="_formRoot">
 		<FormSection v-if="instance.enableDiscordIntegration">
 			<template #label
-				><i class="ph-discord-logo ph-bold ph-lg"></i> Discord</template
+				><i
+					:class="defaultStore.state.iconSet"
+					class="ph-discord-logo ph-lg"
+				></i>
+				Discord</template
 			>
 			<p v-if="integrations.discord">
 				{{ i18n.ts.connectedTo }}:
@@ -28,7 +32,11 @@
 
 		<FormSection v-if="instance.enableGithubIntegration">
 			<template #label
-				><i class="ph-github-logo ph-bold ph-lg"></i> GitHub</template
+				><i
+					:class="defaultStore.state.iconSet"
+					class="ph-github-logo ph-lg"
+				></i>
+				GitHub</template
 			>
 			<p v-if="integrations.github">
 				{{ i18n.ts.connectedTo }}:
@@ -61,6 +69,7 @@ import { $i } from "@/account";
 import { instance } from "@/instance";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
+import { defaultStore } from "@/store";
 
 const twitterForm = ref<Window | null>(null);
 const discordForm = ref<Window | null>(null);
@@ -113,6 +122,6 @@ onMounted(() => {
 
 definePageMetadata({
 	title: i18n.ts.integration,
-	icon: "ph-share-network ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-share-network ph-lg`,
 });
 </script>

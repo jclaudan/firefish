@@ -80,7 +80,10 @@
 							class="_button button"
 							@click="changeProfile"
 						>
-							<i class="ph-caret-down ph-bold ph-lg"></i>
+							<i
+								:class="defaultStore.state.iconSet"
+								class="ph-caret-down ph-lg"
+							></i>
 						</button>
 						<button
 							v-if="deckStore.state.profile !== 'default'"
@@ -88,7 +91,10 @@
 							class="_button button"
 							@click="renameProfile"
 						>
-							<i class="ph-pencil ph-bold ph-lg"></i>
+							<i
+								:class="defaultStore.state.iconSet"
+								class="ph-pencil ph-lg"
+							></i>
 						</button>
 						<button
 							v-if="deckStore.state.profile !== 'default'"
@@ -96,7 +102,10 @@
 							class="_button button"
 							@click="deleteProfile"
 						>
-							<i class="ph-trash ph-bold ph-lg"></i>
+							<i
+								:class="defaultStore.state.iconSet"
+								class="ph-trash ph-lg"
+							></i>
 						</button>
 					</div>
 					<div class="middle">
@@ -105,7 +114,10 @@
 							class="_button button new"
 							@click="addColumn"
 						>
-							<i class="ph-plus ph-bold ph-lg"></i>
+							<i
+								:class="defaultStore.state.iconSet"
+								class="ph-plus ph-lg"
+							></i>
 						</button>
 					</div>
 					<div class="bottom">
@@ -114,7 +126,10 @@
 							class="_button button settings"
 							@click="showSettings"
 						>
-							<i class="ph-gear-six ph-bold ph-lg"></i>
+							<i
+								:class="defaultStore.state.iconSet"
+								class="ph-gear-six ph-lg"
+							></i>
 						</button>
 					</div>
 				</div>
@@ -127,12 +142,17 @@
 				class="button nav _button"
 				@click="drawerMenuShowing = true"
 			>
-				<i class="ph-list ph-bold ph-lg"></i
+				<i :class="defaultStore.state.iconSet" class="ph-list ph-lg"></i
 				><span
 					v-if="menuIndicated"
 					class="indicator"
-					:class="{ animateIndicator: $store.state.animation }"
-					><i class="ph-circle ph-fill"></i
+					:class="{
+						animateIndicator: defaultStore.state.iconSetanimation,
+					}"
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-circle ph-fill"
+					></i
 				></span>
 			</button>
 			<button
@@ -140,19 +160,27 @@
 				class="button home _button"
 				@click="mainRouter.push('/')"
 			>
-				<i class="ph-house ph-bold ph-lg"></i>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-house ph-lg"
+				></i>
 			</button>
 			<button
 				:aria-label="i18n.t('notifications')"
 				class="button notifications _button"
 				@click="mainRouter.push('/my/notifications')"
 			>
-				<i class="ph-bell ph-bold ph-lg"></i
+				<i :class="defaultStore.state.iconSet" class="ph-bell ph-lg"></i
 				><span
 					v-if="$i?.hasUnreadNotification"
 					class="indicator"
-					:class="{ animateIndicator: $store.state.animation }"
-					><i class="ph-circle ph-fill"></i
+					:class="{
+						animateIndicator: defaultStore.state.iconSetanimation,
+					}"
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-circle ph-fill"
+					></i
 				></span>
 			</button>
 			<button
@@ -160,11 +188,16 @@
 				class="button post _button"
 				@click="os.post()"
 			>
-				<i class="ph-pencil ph-bold ph-lg"></i>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-pencil ph-lg"
+				></i>
 			</button>
 		</div>
 
-		<transition :name="$store.state.animation ? 'menu-back' : ''">
+		<transition
+			:name="defaultStore.state.iconSetanimation ? 'menu-back' : ''"
+		>
 			<div
 				v-if="drawerMenuShowing"
 				class="menu-back _modalBg"
@@ -173,7 +206,7 @@
 			></div>
 		</transition>
 
-		<transition :name="$store.state.animation ? 'menu' : ''">
+		<transition :name="defaultStore.state.iconSetanimation ? 'menu' : ''">
 			<XDrawerMenu v-if="drawerMenuShowing" class="menu" />
 		</transition>
 
@@ -211,6 +244,7 @@ import { $i } from "@/account";
 import { i18n } from "@/i18n";
 import { mainRouter } from "@/router";
 import { unisonReload } from "@/scripts/unison-reload";
+import { defaultStore } from "@/store";
 const XStatusBars = defineAsyncComponent(
 	() => import("@/ui/_common_/statusbars.vue"),
 );
@@ -337,7 +371,7 @@ function changeProfile(ev: MouseEvent) {
 			null,
 			{
 				text: i18n.ts._deck.newProfile,
-				icon: "ph-plus ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-plus ph-lg`,
 				action: async () => {
 					const { canceled, result: name } = await os.inputText({
 						title: i18n.ts._deck.profile,

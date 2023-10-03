@@ -990,6 +990,7 @@ remindMeLater: "また後で"
 addRe: "閲覧注意の投稿への返信で、注釈の先頭に\"re:\"を追加する"
 languageForTranslation: "投稿翻訳に使用する言語"
 detectPostLanguage: "投稿の言語を自動検出し、外国語の投稿に翻訳ボタンを表示する"
+iconSet: "アイコンセット"
 
 _sensitiveMediaDetection:
   description: "機械学習を使って自動でセンシティブなメディアを検出し、モデレーションに役立てられます。サーバーの負荷が少し増えます。"
@@ -1990,3 +1991,9 @@ confirm: 確認
 exportZip: ZIPをエクスポート
 openServerInfo: "投稿内のサーバー名をクリックでサーバー情報を開く"
 indexableDescription: MastodonやFirefishなどの検索機能に、あなたの投稿が表示されるのを許可します。
+_iconSets:
+  bold: "ボールド"
+  light: "薄い"
+  regular: "標準の"
+  fill: "フィル"
+  duotone: "ダブルトーン"

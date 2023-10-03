@@ -38,7 +38,10 @@
 					uploadFolder ? uploadFolder.name : "-"
 				}}</template>
 				<template #suffixIcon
-					><i class="ph-folder-notch-open ph-bold ph-lg"></i
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-folder-notch-open ph-lg"
+					></i
 				></template>
 			</FormButton>
 			<FormSwitch v-model="keepOriginalUploading" class="_formBlock">
@@ -146,7 +149,7 @@ function saveProfile() {
 
 definePageMetadata({
 	title: i18n.ts.drive,
-	icon: "ph-cloud ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-cloud ph-lg`,
 });
 </script>
 

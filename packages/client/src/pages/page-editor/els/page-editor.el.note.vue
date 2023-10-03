@@ -1,7 +1,10 @@
 <template>
 	<XContainer :draggable="true" @remove="() => $emit('remove')">
 		<template #header
-			><i class="ph-sticker ph-bold ph-lg"></i>
+			><i
+				:class="defaultStore.state.iconSet"
+				class="ph-sticker ph-lg"
+			></i>
 			{{ i18n.ts._pages.blocks.note }}</template
 		>
 
@@ -43,6 +46,7 @@ import XNote from "@/components/MkNote.vue";
 import XNoteDetailed from "@/components/MkNoteDetailed.vue";
 import * as os from "@/os";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 const props = withDefaults(
 	defineProps<{

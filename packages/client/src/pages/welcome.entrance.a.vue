@@ -25,7 +25,10 @@
 					class="icon"
 				/>
 				<button class="_button _acrylic menu" @click="showMenu">
-					<i class="ph-dots-three-outline ph-bold ph-lg"></i>
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-dots-three-outline ph-lg"
+					></i>
 				</button>
 				<div class="fg">
 					<h1>
@@ -168,14 +171,14 @@ function showMenu(ev) {
 		[
 			{
 				text: i18n.ts.instanceInfo,
-				icon: "ph-info ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-info ph-lg`,
 				action: () => {
 					os.pageWindow("/about");
 				},
 			},
 			{
 				text: i18n.ts.aboutFirefish,
-				icon: "ph-info ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-info ph-lg`,
 				action: () => {
 					os.pageWindow("/about-firefish");
 				},
@@ -183,7 +186,7 @@ function showMenu(ev) {
 			instance.tosUrl
 				? {
 						text: i18n.ts.tos,
-						icon: "ph-scroll ph-bold ph-lg",
+						icon: `${defaultStore.state.iconSet} ph-scroll ph-lg`,
 						action: () => {
 							window.open(instance.tosUrl, "_blank");
 						},

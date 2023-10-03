@@ -6,7 +6,11 @@
 		@parent-focus="($event) => emit('parent-focus', $event)"
 	>
 		<template #header
-			><i class="ph-bell ph-bold ph-lg" style="margin-right: 8px"></i
+			><i
+				:class="defaultStore.state.iconSet"
+				class="ph-bell ph-lg"
+				style="margin-right: 8px"
+			></i
 			>{{ column.name }}</template
 		>
 
@@ -22,6 +26,7 @@ import type { Column } from "./deck-store";
 import XNotifications from "@/components/MkNotifications.vue";
 import * as os from "@/os";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 const props = defineProps<{
 	column: Column;
@@ -54,7 +59,7 @@ function func(): void {
 
 const menu = [
 	{
-		icon: "ph-pencil ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-pencil ph-lg`,
 		text: i18n.ts.notificationSetting,
 		action: func,
 	},

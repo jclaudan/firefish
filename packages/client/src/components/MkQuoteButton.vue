@@ -1,11 +1,11 @@
 <template>
 	<button
-		v-if="canRenote && $store.state.seperateRenoteQuote"
+		v-if="canRenote && defaultStore.state.iconSetseperateRenoteQuote"
 		v-tooltip.noDelay.bottom="i18n.ts.quote"
 		class="eddddedb _button"
 		@click.stop="quote()"
 	>
-		<i class="ph-quotes ph-bold ph-lg"></i>
+		<i :class="defaultStore.state.iconSet" class="ph-quotes ph-lg"></i>
 	</button>
 </template>
 
@@ -16,6 +16,7 @@ import { pleaseLogin } from "@/scripts/please-login";
 import * as os from "@/os";
 import { $i } from "@/account";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 const props = defineProps<{
 	note: Note;

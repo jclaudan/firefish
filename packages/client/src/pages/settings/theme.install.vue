@@ -12,7 +12,10 @@
 				:disabled="installThemeCode == null"
 				inline
 				@click="() => preview(installThemeCode)"
-				><i class="ph-eye ph-bold ph-lg"></i>
+				><i
+					:class="defaultStore.state.iconSet"
+					class="ph-eye ph-lg"
+				></i>
 				{{ i18n.ts.preview }}</FormButton
 			>
 			<FormButton
@@ -20,7 +23,10 @@
 				primary
 				inline
 				@click="() => install(installThemeCode)"
-				><i class="ph-check ph-bold ph-lg"></i>
+				><i
+					:class="defaultStore.state.iconSet"
+					class="ph-check ph-lg"
+				></i>
 				{{ i18n.ts.install }}</FormButton
 			>
 		</div>
@@ -38,6 +44,7 @@ import * as os from "@/os";
 import { addTheme, getThemes } from "@/theme-store";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
+import { defaultStore } from "@/store";
 
 const installThemeCode = ref(null);
 
@@ -88,6 +95,6 @@ async function install(code: string): Promise<void> {
 
 definePageMetadata({
 	title: i18n.ts._theme.install,
-	icon: "ph-download-simple ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-download-simple ph-lg`,
 });
 </script>

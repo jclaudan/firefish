@@ -45,6 +45,7 @@ import MkInfo from "@/components/MkInfo.vue";
 import * as os from "@/os";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
+import { defaultStore } from "@/store";
 
 const pagination = {
 	endpoint: "clips/list" as const,
@@ -84,9 +85,9 @@ const headerTabs = computed(() => []);
 
 definePageMetadata({
 	title: i18n.ts.clip,
-	icon: "ph-paperclip ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-paperclip ph-lg`,
 	action: {
-		icon: "ph-plus ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-plus ph-lg`,
 		handler: create,
 	},
 });

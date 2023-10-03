@@ -8,7 +8,10 @@
 							v-if="note.replyId"
 							class="reply"
 							:to="`/notes/${note.replyId}`"
-							><i class="ph-arrow-bend-up-left ph-bold ph-lg"></i
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-arrow-bend-up-left ph-lg"
+							></i
 						></MkA>
 						<Mfm
 							v-if="note.text"
@@ -38,6 +41,7 @@ import XReactionsViewer from "@/components/MkReactionsViewer.vue";
 import XMediaList from "@/components/MkMediaList.vue";
 import XPoll from "@/components/MkPoll.vue";
 import * as os from "@/os";
+import { defaultStore } from "@/store";
 
 export default defineComponent({
 	components: {

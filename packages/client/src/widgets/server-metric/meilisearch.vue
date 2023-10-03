@@ -7,7 +7,13 @@
 			:reverse="true"
 		/>
 		<div>
-			<p><i class="ph-file-search ph-bold ph-lg"></i>MeiliSearch</p>
+			<p>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-file-search ph-lg"
+				></i
+				>MeiliSearch
+			</p>
 			<p>{{ i18n.ts._widgets.meiliStatus }}: {{ available }}</p>
 			<p>{{ i18n.ts._widgets.meiliSize }}: {{ bytes(totalSize, 1) }}</p>
 			<p>{{ i18n.ts._widgets.meiliIndexCount }}: {{ indexCount }}</p>
@@ -22,6 +28,7 @@ import XPie from "./pie.vue";
 import bytes from "@/filters/bytes";
 import { i18n } from "@/i18n";
 import * as os from "@/os";
+import { defaultStore } from "@/store";
 
 const props = defineProps<{
 	connection: any;

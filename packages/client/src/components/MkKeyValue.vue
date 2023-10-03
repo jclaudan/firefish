@@ -12,7 +12,10 @@
 				style="margin-left: 0.5em"
 				@click="copy_"
 			>
-				<i class="ph-clipboard-text ph-bold"></i>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-clipboard-text"
+				></i>
 			</button>
 		</div>
 	</div>
@@ -23,6 +26,7 @@ import {} from "vue";
 import copyToClipboard from "@/scripts/copy-to-clipboard";
 import * as os from "@/os";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 const props = withDefaults(
 	defineProps<{

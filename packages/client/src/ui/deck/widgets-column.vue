@@ -7,7 +7,11 @@
 		@parent-focus="($event) => emit('parent-focus', $event)"
 	>
 		<template #header
-			><i class="ph-browser ph-bold ph-lg" style="margin-right: 8px"></i
+			><i
+				:class="defaultStore.state.iconSet"
+				class="ph-browser ph-lg"
+				style="margin-right: 8px"
+			></i
 			>{{ column.name }}</template
 		>
 		<div class="wtdtxvec">
@@ -44,6 +48,7 @@ import {
 } from "./deck-store";
 import XWidgets from "@/components/MkWidgets.vue";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 const props = defineProps<{
 	column: Column;
@@ -78,7 +83,7 @@ function func() {
 
 const menu = [
 	{
-		icon: "ph-pencil ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-pencil ph-lg`,
 		text: i18n.ts.editWidgets,
 		action: func,
 	},

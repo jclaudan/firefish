@@ -30,15 +30,59 @@
 			<template #label>{{ i18n.ts.overridedDeviceKind }}</template>
 			<option :value="null">{{ i18n.ts.auto }}</option>
 			<option value="smartphone">
-				<i class="ph-device-mobile ph-bold ph-lg" />
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-device-mobile ph-lg"
+				/>
 				{{ i18n.ts.smartphone }}
 			</option>
 			<option value="tablet">
-				<i class="ph-device-tablet ph-bold ph-lg" />
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-device-tablet ph-lg"
+				/>
 				{{ i18n.ts.tablet }}
 			</option>
 			<option value="desktop">
-				<i class="ph-desktop ph-bold ph-lg" /> {{ i18n.ts.desktop }}
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-desktop ph-lg"
+				/>
+				{{ i18n.ts.desktop }}
+			</option>
+		</FormRadios>
+
+		<FormRadios v-model="iconSet" class="_formBlock">
+			<template #label>{{ i18n.ts.iconSet }}</template>
+			<option value="ph-bold" :aria-label="i18n.ts._iconSets.bold">
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-bold ph-2x phosphor-logo"
+				></i>
+			</option>
+			<option value="ph-duotone" :aria-label="i18n.ts._iconSets.duotone">
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-duotone ph-2x phosphor-logo"
+				></i>
+			</option>
+			<option value="ph-fill" :aria-label="i18n.ts._iconSets.fill">
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-fill ph-2x phosphor-logo"
+				></i>
+			</option>
+			<option value="ph-regular" :aria-label="i18n.ts._iconSets.regular">
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-2x phosphor-logo"
+				></i>
+			</option>
+			<option value="ph-light" :aria-label="i18n.ts._iconSets.light">
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-light ph-2x phosphor-logo"
+				></i>
 			</option>
 		</FormRadios>
 
@@ -135,7 +179,8 @@
 				{{ i18n.ts._mfm.alwaysPlay }}
 				<template #caption>
 					<i
-						class="ph-warning ph-bold ph-lg"
+						:class="defaultStore.state.iconSet"
+						class="ph-warning ph-lg"
 						style="color: var(--warn)"
 					></i>
 					{{ i18n.ts._mfm.warn }}
@@ -275,7 +320,11 @@
 		}}</FormLink>
 
 		<FormLink to="/settings/custom-katex-macro" class="_formBlock"
-			><template #icon><i class="ph-radical ph-bold ph-lg"></i></template
+			><template #icon
+				><i
+					:class="defaultStore.state.iconSet"
+					class="ph-radical ph-lg"
+				></i></template
 			>{{ i18n.ts.customKaTeXMacro }}</FormLink
 		>
 	</div>
@@ -403,6 +452,7 @@ const detectPostLanguage = computed(
 const openServerInfo = computed(
 	defaultStore.makeGetterSetter("openServerInfo"),
 );
+const iconSet = computed(defaultStore.makeGetterSetter("iconSet"));
 
 // This feature (along with injectPromo) is currently disabled
 // function onChangeInjectFeaturedNote(v) {
@@ -415,6 +465,10 @@ const openServerInfo = computed(
 
 watch(swipeOnDesktop, () => {
 	defaultStore.set("swipeOnMobile", true);
+});
+
+watch(iconSet, () => {
+	defaultStore.set("iconSet", iconSet.value);
 });
 
 watch(lang, () => {
@@ -462,6 +516,7 @@ watch(
 		advancedMfm,
 		autoplayMfm,
 		expandOnNoteClick,
+		iconSet,
 	],
 	async () => {
 		await reloadAsk();
@@ -470,6 +525,6 @@ watch(
 
 definePageMetadata({
 	title: i18n.ts.general,
-	icon: "ph-gear-six ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-gear-six ph-lg`,
 });
 </script>

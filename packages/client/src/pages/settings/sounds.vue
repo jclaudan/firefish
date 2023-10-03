@@ -24,14 +24,20 @@
 						sounds[type].type || i18n.ts.none
 					}}</template>
 					<template #suffixIcon
-						><i class="ph-caret-down ph-bold ph-lg"></i
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-caret-down ph-lg"
+						></i
 					></template>
 				</FormButton>
 			</div>
 		</FormSection>
 
 		<FormButton danger class="_formBlock" @click="reset()"
-			><i class="ph-arrow-clockwise ph-bold ph-lg"></i>
+			><i
+				:class="defaultStore.state.iconSet"
+				class="ph-arrow-clockwise ph-lg"
+			></i>
 			{{ i18n.ts.default }}</FormButton
 		>
 	</div>
@@ -118,6 +124,6 @@ function reset() {
 
 definePageMetadata({
 	title: i18n.ts.sounds,
-	icon: "ph-speaker-high ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-speaker-high ph-lg`,
 });
 </script>

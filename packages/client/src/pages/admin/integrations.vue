@@ -10,7 +10,10 @@
 			<FormSuspense :p="init">
 				<FormFolder class="_formBlock">
 					<template #icon
-						><i class="ph-github-logo ph-bold ph-lg"></i
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-github-logo ph-lg"
+						></i
 					></template>
 					<template #label>GitHub</template>
 					<template #suffix>{{
@@ -22,7 +25,10 @@
 				</FormFolder>
 				<FormFolder class="_formBlock">
 					<template #icon
-						><i class="ph-discord-logo ph-bold ph-lg"></i
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-discord-logo ph-lg"
+						></i
 					></template>
 					<template #label>Discord</template>
 					<template #suffix>{{
@@ -47,6 +53,7 @@ import FormFolder from "@/components/form/folder.vue";
 import * as os from "@/os";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
+import { defaultStore } from "@/store";
 
 const enableGithubIntegration = ref(false);
 const enableDiscordIntegration = ref(false);
@@ -63,6 +70,6 @@ const headerTabs = computed(() => []);
 
 definePageMetadata({
 	title: i18n.ts.integration,
-	icon: "ph-plug ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-plug ph-lg`,
 });
 </script>

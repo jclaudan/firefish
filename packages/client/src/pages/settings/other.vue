@@ -5,12 +5,20 @@
 		}}</FormLink>
 
 		<FormLink to="/registry" class="_formBlock"
-			><template #icon><i class="ph-gear-six ph-bold ph-lg"></i></template
+			><template #icon
+				><i
+					:class="defaultStore.state.iconSet"
+					class="ph-gear-six ph-lg"
+				></i></template
 			>{{ i18n.ts.registry }}</FormLink
 		>
 
 		<FormLink to="/settings/delete-account" class="_formBlock"
-			><template #icon><i class="ph-warning ph-bold ph-lg"></i></template
+			><template #icon
+				><i
+					:class="defaultStore.state.iconSet"
+					class="ph-warning ph-lg"
+				></i></template
 			>{{ i18n.ts.closeAccount }}</FormLink
 		>
 	</div>
@@ -20,9 +28,10 @@
 import FormLink from "@/components/form/link.vue";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
+import { defaultStore } from "@/store";
 
 definePageMetadata({
 	title: i18n.ts.other,
-	icon: "ph-dots-three-outline ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-dots-three-outline ph-lg`,
 });
 </script>

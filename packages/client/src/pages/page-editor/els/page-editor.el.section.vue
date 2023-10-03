@@ -1,15 +1,24 @@
 <template>
 	<XContainer :draggable="true" @remove="() => $emit('remove')">
 		<template #header
-			><i class="ph-sticker ph-bold ph-lg"></i>
+			><i
+				:class="defaultStore.state.iconSet"
+				class="ph-sticker ph-lg"
+			></i>
 			{{ value.title }}</template
 		>
 		<template #func>
 			<button class="_button" @click="rename()">
-				<i class="ph-pencil ph-bold ph-lg"></i>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-pencil ph-lg"
+				></i>
 			</button>
 			<button class="_button" @click="add()">
-				<i class="ph-plus ph-bold ph-lg"></i>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-plus ph-lg"
+				></i>
 			</button>
 		</template>
 
@@ -25,6 +34,7 @@ import { v4 as uuid } from "uuid";
 import XContainer from "../page-editor.container.vue";
 import * as os from "@/os";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 const XBlocks = defineAsyncComponent(() => import("../page-editor.blocks.vue"));
 

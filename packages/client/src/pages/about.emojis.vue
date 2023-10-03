@@ -3,7 +3,10 @@
 		<div class="query">
 			<MkInput v-model="q" class="" :placeholder="i18n.ts.search">
 				<template #prefix
-					><i class="ph-magnifying-glass ph-bold ph-lg"></i
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-magnifying-glass ph-lg"
+					></i
 				></template>
 			</MkInput>
 
@@ -56,6 +59,7 @@ import MkFolder from "@/components/MkFolder.vue";
 import MkTab from "@/components/MkTab.vue";
 import { emojiCategories, emojiTags } from "@/instance";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 export default defineComponent({
 	components: {

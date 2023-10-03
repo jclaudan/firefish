@@ -111,7 +111,10 @@
 
 						<div class="_formBlock">
 							<MkButton danger @click="del"
-								><i class="ph-trash ph-bold ph-lg"></i>
+								><i
+									:class="defaultStore.state.iconSet"
+									class="ph-trash ph-lg"
+								></i>
 								{{ i18n.ts.delete }}</MkButton
 							>
 						</div>
@@ -224,7 +227,7 @@ async function toggleIsSensitive(v) {
 const headerActions = computed(() => [
 	{
 		text: i18n.ts.openInNewTab,
-		icon: "ph-arrow-square-out ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-arrow-square-out ph-lg`,
 		handler: () => {
 			window.open(file.value.url, "_blank");
 		},
@@ -235,19 +238,19 @@ const headerTabs = computed(() => [
 	{
 		key: "overview",
 		title: i18n.ts.overview,
-		icon: "ph-info ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-info ph-lg`,
 	},
 	iAmModerator
 		? {
 				key: "ip",
 				title: "IP",
-				icon: "ph-receipt ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-receipt ph-lg`,
 		  }
 		: null,
 	{
 		key: "raw",
 		title: "Raw data",
-		icon: "ph-code ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-code ph-lg`,
 	},
 ]);
 
@@ -256,7 +259,7 @@ definePageMetadata(
 		title: file.value
 			? i18n.ts.file + ": " + file.value.name
 			: i18n.ts.file,
-		icon: "ph-file ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-file ph-lg`,
 	})),
 );
 

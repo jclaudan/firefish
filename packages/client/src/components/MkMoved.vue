@@ -1,7 +1,8 @@
 <template>
 	<div class="msjugskd _block">
 		<i
-			class="ph-airplane-takeoff ph-bold ph-lg"
+			:class="defaultStore.state.iconSet"
+			class="ph-airplane-takeoff ph-lg"
 			style="margin-right: 8px"
 		/>
 		{{ i18n.ts.accountMoved }}
@@ -12,6 +13,7 @@
 <script lang="ts" setup>
 import MkMention from "./MkMention.vue";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 defineProps<{
 	acct: string;

@@ -9,27 +9,33 @@
 			<button class="_button" @click="choose">
 				<i
 					v-if="widgetProps.src === 'home'"
-					class="ph-house ph-bold ph-lg"
+					:class="defaultStore.state.iconSet"
+					class="ph-house ph-lg"
 				></i>
 				<i
 					v-else-if="widgetProps.src === 'local'"
-					class="ph-chats-circle ph-bold ph-lg"
+					:class="defaultStore.state.iconSet"
+					class="ph-chats-circle ph-lg"
 				></i>
 				<i
 					v-else-if="widgetProps.src === 'social'"
-					class="ph-share-network ph-bold ph-lg"
+					:class="defaultStore.state.iconSet"
+					class="ph-share-network ph-lg"
 				></i>
 				<i
 					v-else-if="widgetProps.src === 'global'"
-					class="ph-planet ph-bold ph-lg"
+					:class="defaultStore.state.iconSet"
+					class="ph-planet ph-lg"
 				></i>
 				<i
 					v-else-if="widgetProps.src === 'list'"
-					class="ph-list-bullets ph-bold ph-lg"
+					:class="defaultStore.state.iconSet"
+					class="ph-list-bullets ph-lg"
 				></i>
 				<i
 					v-else-if="widgetProps.src === 'antenna'"
-					class="ph-television ph-bold ph-lg"
+					:class="defaultStore.state.iconSet"
+					class="ph-television ph-lg"
 				></i>
 				<span style="margin-left: 8px">{{
 					widgetProps.src === "list"
@@ -39,11 +45,12 @@
 						: i18n.t("_timelines." + widgetProps.src)
 				}}</span>
 				<i
-					:class="
+					:class="[
 						menuOpened
-							? 'ph-caret-up ph-bold ph-lg'
-							: 'ph-caret-down ph-bold ph-lg'
-					"
+							? 'ph-caret-up ph-lg'
+							: 'ph-caret-down ph-lg',
+						defaultStore.state.iconSet,
+					]"
 					style="margin-left: 8px"
 				></i>
 			</button>
@@ -80,6 +87,7 @@ import MkContainer from "@/components/MkContainer.vue";
 import XTimeline from "@/components/MkTimeline.vue";
 import { $i } from "@/account";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 const name = "timeline";
 
@@ -139,7 +147,7 @@ const choose = async (ev) => {
 	]);
 	const antennaItems = antennas.map((antenna) => ({
 		text: antenna.name,
-		icon: "ph-flying-saucer ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-flying-saucer ph-lg`,
 		action: () => {
 			widgetProps.antenna = antenna;
 			setSrc("antenna");
@@ -147,7 +155,7 @@ const choose = async (ev) => {
 	}));
 	const listItems = lists.map((list) => ({
 		text: list.name,
-		icon: "ph-list-bullets ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-list-bullets ph-lg`,
 		action: () => {
 			widgetProps.list = list;
 			setSrc("list");
@@ -157,28 +165,28 @@ const choose = async (ev) => {
 		[
 			{
 				text: i18n.ts._timelines.home,
-				icon: "ph-house ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-house ph-lg`,
 				action: () => {
 					setSrc("home");
 				},
 			},
 			{
 				text: i18n.ts._timelines.local,
-				icon: "ph-chats-teardrop ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-chats-teardrop ph-lg`,
 				action: () => {
 					setSrc("local");
 				},
 			},
 			{
 				text: i18n.ts._timelines.social,
-				icon: "ph-share-network ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-share-network ph-lg`,
 				action: () => {
 					setSrc("social");
 				},
 			},
 			{
 				text: i18n.ts._timelines.global,
-				icon: "ph-planet ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-planet ph-lg`,
 				action: () => {
 					setSrc("global");
 				},

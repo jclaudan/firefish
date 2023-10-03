@@ -80,7 +80,10 @@
 								class="_formBlock"
 							>
 								<template #prefix
-									><i class="ph-key ph-bold ph-lg"></i
+									><i
+										:class="defaultStore.state.iconSet"
+										class="ph-key ph-lg"
+									></i
 								></template>
 								<template #label>Access key</template>
 							</FormInput>
@@ -91,7 +94,10 @@
 								class="_formBlock"
 							>
 								<template #prefix
-									><i class="ph-key ph-bold ph-lg"></i
+									><i
+										:class="defaultStore.state.iconSet"
+										class="ph-key ph-lg"
+									></i
 								></template>
 								<template #label>Secret key</template>
 							</FormInput>
@@ -159,6 +165,7 @@ import * as os from "@/os";
 import { fetchInstance } from "@/instance";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
+import { defaultStore } from "@/store";
 
 const useObjectStorage = ref(false);
 const objectStorageBaseUrl = ref<string | null>(null);
@@ -214,7 +221,7 @@ function save() {
 const headerActions = computed(() => [
 	{
 		asFullButton: true,
-		icon: "ph-check ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-check ph-lg`,
 		text: i18n.ts.save,
 		handler: save,
 	},
@@ -224,6 +231,6 @@ const headerTabs = computed(() => []);
 
 definePageMetadata({
 	title: i18n.ts.objectStorage,
-	icon: "ph-cloud ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-cloud ph-lg`,
 });
 </script>

@@ -5,7 +5,12 @@
 			class="sensitive"
 			@click="hide = false"
 		>
-			<span class="icon"><i class="ph-warning ph-bold ph-lg"></i></span>
+			<span class="icon"
+				><i
+					:class="defaultStore.state.iconSet"
+					class="ph-warning ph-lg"
+				></i
+			></span>
 			<b>{{ i18n.ts.sensitive }}</b>
 			<span>{{ i18n.ts.clickToShow }}</span>
 		</div>
@@ -48,7 +53,10 @@
 			:download="media.name"
 		>
 			<span class="icon"
-				><i class="ph-download-simple ph-bold ph-lg"></i
+				><i
+					:class="defaultStore.state.iconSet"
+					class="ph-download-simple ph-lg"
+				></i
 			></span>
 			<b>{{ media.name }}</b>
 		</a>

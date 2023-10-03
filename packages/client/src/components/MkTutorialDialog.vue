@@ -17,7 +17,10 @@
 								:disabled="tutorial === 0"
 								@click="tutorial--"
 							>
-								<i class="ph-caret-left ph-bold ph-lg"></i>
+								<i
+									:class="defaultStore.state.iconSet"
+									class="ph-caret-left ph-lg"
+								></i>
 							</button>
 							<span>{{ tutorial + 1 }} / 6</span>
 							<button
@@ -25,7 +28,10 @@
 								:disabled="tutorial === 5"
 								@click="tutorial++"
 							>
-								<i class="ph-caret-right ph-bold ph-lg"></i>
+								<i
+									:class="defaultStore.state.iconSet"
+									class="ph-caret-right ph-lg"
+								></i>
 							</button>
 						</div>
 						<MkButton
@@ -33,18 +39,27 @@
 							class="ok"
 							primary
 							@click="close"
-							><i class="ph-check ph-bold ph-lg"></i>
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-check ph-lg"
+							></i>
 							{{ i18n.ts.gotIt }}</MkButton
 						>
 						<MkButton v-else class="ok" primary @click="tutorial++"
-							><i class="ph-check ph-bold ph-lg"></i>
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-check ph-lg"
+							></i>
 							{{ i18n.ts.next }}</MkButton
 						>
 					</div>
 					<Transition name="fade">
 						<section v-if="tutorial === 0" key="1" class="_content">
 							<h2 class="_title title">
-								<i class="ph-info ph-bold ph-lg"></i>
+								<i
+									:class="defaultStore.state.iconSet"
+									class="ph-info ph-lg"
+								></i>
 								{{ i18n.ts._tutorial.title }}
 							</h2>
 							<h3>{{ i18n.ts._tutorial.step1_1 }}</h3>
@@ -53,7 +68,7 @@
 							<!-- <FormSwitch v-model="autoplayMfm" class="_formBlock">
 								{{ i18n.ts._mfm.alwaysPlay }}
 								<template #caption>
-									<i class="ph-warning ph-bold ph-lg" style="color: var(--warn)"></i>
+									<i :class="defaultStore.state.iconSet" class="ph-warning ph-lg" style="color: var(--warn)"></i>
 									{{ i18n.ts._mfm.warn }}
 								</template>
 							</FormSwitch> -->
@@ -85,7 +100,10 @@
 							<XFeaturedUsers />
 							<br />
 							<MkButton class="ok" primary @click="tutorial++"
-								><i class="ph-check ph-bold ph-lg"></i>
+								><i
+									:class="defaultStore.state.iconSet"
+									class="ph-check ph-lg"
+								></i>
 								{{ i18n.ts.next }}</MkButton
 							>
 						</section>
@@ -126,7 +144,15 @@
 										tag="div"
 									>
 										<template #icon>
-											<i class="ph-house ph-bold ph-lg" />
+											<i
+												:class="
+													defaultStore.state.iconSet
+												"
+												:class="
+													defaultStore.state.iconSet
+												"
+												class="ph-house ph-lg"
+											/>
 										</template>
 									</I18n>
 								</li>
@@ -136,7 +162,15 @@
 										tag="div"
 									>
 										<template #icon>
-											<i class="ph-users ph-bold ph-lg" />
+											<i
+												:class="
+													defaultStore.state.iconSet
+												"
+												:class="
+													defaultStore.state.iconSet
+												"
+												class="ph-users ph-lg"
+											/>
 										</template>
 									</I18n>
 								</li>
@@ -147,7 +181,10 @@
 									>
 										<template #icon>
 											<i
-												class="ph-handshake ph-bold ph-lg"
+												:class="
+													defaultStore.state.iconSet
+												"
+												class="ph-handshake ph-lg"
 											/>
 										</template>
 									</I18n>
@@ -159,7 +196,10 @@
 									>
 										<template #icon>
 											<i
-												class="ph-thumbs-up ph-bold ph-lg"
+												:class="
+													defaultStore.state.iconSet
+												"
+												class="ph-thumbs-up ph-lg"
 											/>
 										</template>
 									</I18n>
@@ -171,7 +211,10 @@
 									>
 										<template #icon>
 											<i
-												class="ph-planet ph-bold ph-lg"
+												:class="
+													defaultStore.state.iconSet
+												"
+												class="ph-planet ph-lg"
 											/>
 										</template>
 									</I18n>

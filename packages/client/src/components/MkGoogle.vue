@@ -2,7 +2,10 @@
 	<div class="mk-google" @click.stop>
 		<input v-model="query" type="search" :placeholder="q" />
 		<button @click="search">
-			<i class="ph-magnifying-glass ph-bold ph-lg"></i>
+			<i
+				:class="defaultStore.state.iconSet"
+				class="ph-magnifying-glass ph-lg"
+			></i>
 			{{ i18n.ts.searchByGoogle }}
 		</button>
 	</div>
@@ -12,6 +15,7 @@
 import { ref } from "vue";
 import { i18n } from "@/i18n";
 import { useRouter } from "@/router";
+import { defaultStore } from "@/store";
 
 const router = useRouter();
 

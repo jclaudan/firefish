@@ -61,6 +61,6 @@ watch(localCustomKaTeXMacro, async () => {
 
 definePageMetadata({
 	title: i18n.ts.customKaTeXMacro,
-	icon: "ph-radical ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-radical ph-lg`,
 });
 </script>

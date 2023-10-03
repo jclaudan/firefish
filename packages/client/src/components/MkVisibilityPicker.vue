@@ -15,7 +15,10 @@
 				@click="choose('public')"
 			>
 				<div :class="$style.icon">
-					<i class="ph-planet ph-bold ph-lg"></i>
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-planet ph-lg"
+					></i>
 				</div>
 				<div :class="$style.body">
 					<span :class="$style.itemTitle">{{
@@ -34,7 +37,10 @@
 				@click="choose('home')"
 			>
 				<div :class="$style.icon">
-					<i class="ph-house ph-bold ph-lg"></i>
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-house ph-lg"
+					></i>
 				</div>
 				<div :class="$style.body">
 					<span :class="$style.itemTitle">{{
@@ -53,7 +59,10 @@
 				@click="choose('followers')"
 			>
 				<div :class="$style.icon">
-					<i class="ph-lock ph-bold ph-lg"></i>
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-lock ph-lg"
+					></i>
 				</div>
 				<div :class="$style.body">
 					<span :class="$style.itemTitle">{{
@@ -73,7 +82,10 @@
 				@click="choose('specified')"
 			>
 				<div :class="$style.icon">
-					<i class="ph-envelope-simple-open ph-bold ph-lg"></i>
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-envelope-simple-open ph-lg"
+					></i>
 				</div>
 				<div :class="$style.body">
 					<span :class="$style.itemTitle">{{
@@ -97,7 +109,10 @@
 				@click="localOnly = !localOnly"
 			>
 				<div :class="$style.icon">
-					<i class="ph-users ph-bold ph-lg"></i>
+					<i
+						:class="defaultStore.state.iconSet"
+						class="ph-users ph-lg"
+					></i>
 				</div>
 				<div :class="$style.body">
 					<span :class="$style.itemTitle">{{
@@ -109,11 +124,12 @@
 				</div>
 				<div :class="$style.toggle">
 					<i
-						:class="
+						:class="[
 							localOnly
-								? 'ph-toggle-right ph-bold ph-lg'
-								: 'ph-toggle-left ph-bold ph-lg'
-						"
+								? 'ph-toggle-right ph-lg'
+								: 'ph-toggle-left ph-lg',
+							defaultStore.state.iconSet,
+						]"
 					></i>
 				</div>
 			</button>
@@ -126,6 +142,7 @@ import { nextTick, ref, shallowRef, watch } from "vue";
 import type * as firefish from "firefish-js";
 import MkModal from "@/components/MkModal.vue";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 const modal = shallowRef<InstanceType<typeof MkModal>>();
 

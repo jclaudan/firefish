@@ -52,7 +52,10 @@
 											"
 										>
 											<i
-												class="ph-warning ph-bold ph-lg"
+												:class="
+													defaultStore.state.iconSet
+												"
+												class="ph-warning ph-lg"
 											></i>
 											{{ i18n.ts.silenced }}
 										</span>
@@ -64,7 +67,10 @@
 											"
 										>
 											<i
-												class="ph-warning ph-bold ph-lg"
+												:class="
+													defaultStore.state.iconSet
+												"
+												class="ph-warning ph-lg"
 											></i>
 											{{ i18n.ts.suspended }}
 										</span>
@@ -87,23 +93,35 @@
 										v-if="user.isAdmin"
 										v-tooltip.noDelay="i18n.ts.isAdmin"
 										style="color: var(--badge)"
-										><i class="ph-crown ph-bold ph-lg"></i
+										><i
+											:class="defaultStore.state.iconSet"
+											class="ph-crown ph-lg"
+										></i
 									></span>
 									<span
 										v-if="!user.isAdmin && user.isModerator"
 										v-tooltip.noDelay="i18n.ts.isModerator"
 										style="color: var(--badge)"
-										><i class="ph-gavel ph-bold ph-lg"></i
+										><i
+											:class="defaultStore.state.iconSet"
+											class="ph-gavel ph-lg"
+										></i
 									></span>
 									<span
 										v-if="user.isLocked"
 										v-tooltip.noDelay="i18n.ts.isLocked"
-										><i class="ph-lock ph-bold ph-lg"></i
+										><i
+											:class="defaultStore.state.iconSet"
+											class="ph-lock ph-lg"
+										></i
 									></span>
 									<span
 										v-if="user.isBot"
 										v-tooltip.noDelay="i18n.ts.isBot"
-										><i class="ph-robot ph-bold ph-lg"></i
+										><i
+											:class="defaultStore.state.iconSet"
+											class="ph-robot ph-lg"
+										></i
 									></span>
 									<span
 										v-if="
@@ -116,7 +134,8 @@
 										v-tooltip.noDelay="i18n.ts.isPatron"
 										style="color: var(--badge)"
 										><i
-											class="ph-hand-coins ph-bold ph-lg"
+											:class="defaultStore.state.iconSet"
+											class="ph-hand-coins ph-lg"
 										></i
 									></span>
 								</div>
@@ -149,7 +168,10 @@
 										v-if="user.isSilenced"
 										style="color: var(--warn); padding: 5px"
 									>
-										<i class="ph-warning ph-bold ph-lg"></i>
+										<i
+											:class="defaultStore.state.iconSet"
+											class="ph-warning ph-lg"
+										></i>
 										{{ i18n.ts.silenced }}
 									</span>
 									<span
@@ -159,7 +181,10 @@
 											padding: 5px;
 										"
 									>
-										<i class="ph-warning ph-bold ph-lg"></i>
+										<i
+											:class="defaultStore.state.iconSet"
+											class="ph-warning ph-lg"
+										></i>
 										{{ i18n.ts.suspended }}
 									</span>
 								</div>
@@ -172,7 +197,10 @@
 									v-if="user.isAdmin"
 									v-tooltip.noDelay="i18n.ts.isAdmin"
 									style="color: var(--badge)"
-									><i class="ph-crown ph-bold ph-lg"></i
+									><i
+										:class="defaultStore.state.iconSet"
+										class="ph-crown ph-lg"
+									></i
 								></span>
 								<span
 									v-if="!user.isAdmin && user.isModerator"
@@ -181,17 +209,26 @@
 										color: var(--badge);
 										margin-left: 0.5rem;
 									"
-									><i class="ph-gavel ph-bold ph-lg"></i
+									><i
+										:class="defaultStore.state.iconSet"
+										class="ph-gavel ph-lg"
+									></i
 								></span>
 								<span
 									v-if="user.isLocked"
 									v-tooltip.noDelay="i18n.ts.isLocked"
-									><i class="ph-lock ph-bold ph-lg"></i
+									><i
+										:class="defaultStore.state.iconSet"
+										class="ph-lock ph-lg"
+									></i
 								></span>
 								<span
 									v-if="user.isBot"
 									v-tooltip.noDelay="i18n.ts.isBot"
-									><i class="ph-robot ph-bold ph-lg"></i
+									><i
+										:class="defaultStore.state.iconSet"
+										class="ph-robot ph-lg"
+									></i
 								></span>
 								<span
 									v-if="
@@ -203,7 +240,10 @@
 									"
 									v-tooltip.noDelay="i18n.ts.isPatron"
 									style="color: var(--badge)"
-									><i class="ph-hand-coins ph-bold ph-lg"></i
+									><i
+										:class="defaultStore.state.iconSet"
+										class="ph-hand-coins ph-lg"
+									></i
 								></span>
 							</div>
 						</div>
@@ -236,7 +276,8 @@
 							<dl v-if="user.location" class="field">
 								<dt class="name">
 									<i
-										class="ph-map-pin ph-bold ph-lg ph-fw ph-lg"
+										:class="defaultStore.state.iconSet"
+										class="ph-map-pin ph-lg ph-fw ph-lg"
 									></i>
 									{{ i18n.ts.location }}
 								</dt>
@@ -247,7 +288,8 @@
 							<dl v-if="user.birthday" class="field">
 								<dt class="name">
 									<i
-										class="ph-cake ph-bold ph-lg ph-fw ph-lg"
+										:class="defaultStore.state.iconSet"
+										class="ph-cake ph-lg ph-fw ph-lg"
 									></i>
 									{{ i18n.ts.birthday }}
 								</dt>
@@ -263,7 +305,8 @@
 							<dl class="field">
 								<dt class="name">
 									<i
-										class="ph-calendar-blank ph-bold ph-lg ph-fw ph-lg"
+										:class="defaultStore.state.iconSet"
+										class="ph-calendar-blank ph-lg ph-fw ph-lg"
 									></i>
 									{{ i18n.ts.registeredDate }}
 								</dt>
@@ -288,7 +331,8 @@
 									<i
 										v-if="field.verified"
 										v-tooltip="i18n.ts.verifiedLink"
-										class="ph-bold ph-seal-check ph-lg ph-fw"
+										:class="defaultStore.state.iconSet"
+										class="ph-seal-check ph-lg ph-fw"
 										style="padding: 5px"
 									></i>
 									<Mfm

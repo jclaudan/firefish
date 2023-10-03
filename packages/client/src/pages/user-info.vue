@@ -129,7 +129,8 @@
 										class="_link"
 										>{{ user.host }}
 										<i
-											class="ph-caret-right ph-bold ph-lg"
+											:class="defaultStore.state.iconSet"
+											class="ph-caret-right ph-lg"
 										></i></MkA
 								></template>
 							</MkKeyValue>
@@ -165,7 +166,10 @@
 							v-if="user.host != null"
 							class="_formBlock"
 							@click="updateRemoteUser"
-							><i class="ph-arrows-clockwise ph-bold ph-lg"></i>
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-arrows-clockwise ph-lg"
+							></i>
 							{{ i18n.ts.updateRemoteUser }}</FormButton
 						>
 
@@ -208,14 +212,20 @@
 							inline
 							style="margin-bottom: 0.4rem"
 							@click="resetPassword"
-							><i class="ph-password ph-bold ph-lg"></i>
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-password ph-lg"
+							></i>
 							{{ i18n.ts.resetPassword }}</FormButton
 						>
 						<FormButton
 							v-if="user.host == null && iAmModerator"
 							inline
 							@click="sendModMail"
-							><i class="ph-warning-diamond ph-bold ph-lg"></i>
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-warning-diamond ph-lg"
+							></i>
 							{{ i18n.ts.sendModMail }}</FormButton
 						>
 						<FormButton
@@ -223,7 +233,10 @@
 							inline
 							danger
 							@click="delete2fa"
-							><i class="ph-key ph-bold ph-lg"></i>
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-key ph-lg"
+							></i>
 							{{ i18n.ts.delete2fa }}</FormButton
 						>
 						<FormButton
@@ -231,7 +244,10 @@
 							inline
 							danger
 							@click="deletePasskeys"
-							><i class="ph-poker-chip ph-bold ph-lg"></i>
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-poker-chip ph-lg"
+							></i>
 							{{ i18n.ts.deletePasskeys }}</FormButton
 						>
 						<FormButton
@@ -240,7 +256,10 @@
 							primary
 							danger
 							@click="deleteAccount"
-							><i class="ph-user-minus ph-bold ph-lg"></i>
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-user-minus ph-lg"
+							></i>
 							{{ i18n.ts.deleteAccount }}</FormButton
 						>
 					</div>
@@ -380,6 +399,7 @@ import { definePageMetadata } from "@/scripts/page-metadata";
 import { i18n } from "@/i18n";
 import { iAmAdmin, iAmModerator } from "@/account";
 import { instance } from "@/instance";
+import { defaultStore } from "@/store";
 
 const props = defineProps<{
 	userId: string;
@@ -637,24 +657,24 @@ const headerTabs = computed(() =>
 		{
 			key: "overview",
 			title: i18n.ts.overview,
-			icon: "ph-info ph-bold ph-lg",
+			icon: `${defaultStore.state.iconSet} ph-info ph-lg`,
 		},
 		iAmModerator
 			? {
 					key: "moderation",
 					title: i18n.ts.moderation,
-					icon: "ph-shield ph-bold ph-lg",
+					icon: `${defaultStore.state.iconSet} ph-shield ph-lg`,
 			  }
 			: null,
 		{
 			key: "chart",
 			title: i18n.ts.charts,
-			icon: "ph-chart-bar ph-bold ph-lg",
+			icon: `${defaultStore.state.iconSet} ph-chart-bar ph-lg`,
 		},
 		{
 			key: "raw",
 			title: "Raw",
-			icon: "ph-code ph-bold ph-lg",
+			icon: `${defaultStore.state.iconSet} ph-code ph-lg`,
 		},
 	].filter((x) => x != null),
 );
@@ -662,7 +682,7 @@ const headerTabs = computed(() =>
 definePageMetadata(
 	computed(() => ({
 		title: user.value ? acct(user.value) : i18n.ts.userInfo,
-		icon: "ph-info ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-info ph-lg`,
 	})),
 );
 </script>

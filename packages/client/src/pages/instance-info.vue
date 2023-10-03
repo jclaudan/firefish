@@ -112,7 +112,8 @@
 							</FormSuspense>
 							<MkButton @click="refreshMetadata"
 								><i
-									class="ph-arrows-clockwise ph-bold ph-lg"
+									:class="defaultStore.state.iconSet"
+									class="ph-arrows-clockwise ph-lg"
 								></i>
 								Refresh metadata</MkButton
 							>
@@ -471,7 +472,7 @@ fetch();
 const headerActions = computed(() => [
 	{
 		text: `https://${props.host}`,
-		icon: "ph-arrow-square-out ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-arrow-square-out ph-lg`,
 		handler: () => {
 			window.open(`https://${props.host}`, "_blank");
 		},
@@ -482,7 +483,7 @@ const theTabs = [
 	{
 		key: "overview",
 		title: i18n.ts.overview,
-		icon: "ph-info ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-info ph-lg`,
 	},
 ];
 
@@ -491,17 +492,17 @@ if (iAmAdmin) {
 		{
 			key: "chart",
 			title: i18n.ts.charts,
-			icon: "ph-chart-bar ph-bold ph-lg",
+			icon: `${defaultStore.state.iconSet} ph-chart-bar ph-lg`,
 		},
 		{
 			key: "users",
 			title: i18n.ts.users,
-			icon: "ph-users ph-bold ph-lg",
+			icon: `${defaultStore.state.iconSet} ph-users ph-lg`,
 		},
 		{
 			key: "raw",
 			title: "Raw",
-			icon: "ph-code ph-bold ph-lg",
+			icon: `${defaultStore.state.iconSet} ph-code ph-lg`,
 		},
 	);
 }
@@ -510,7 +511,7 @@ const headerTabs = computed(() => theTabs);
 
 definePageMetadata({
 	title: props.host,
-	icon: "ph-hard-drives ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-hard-drives ph-lg`,
 });
 
 let swiperRef = null;

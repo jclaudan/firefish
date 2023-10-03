@@ -22,10 +22,16 @@
 						@click="() => (showBanner = !showBanner)"
 					>
 						<template v-if="showBanner"
-							><i class="ph-caret-up ph-bold ph-lg"></i
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-caret-up ph-lg"
+							></i
 						></template>
 						<template v-else
-							><i class="ph-caret-down ph-bold ph-lg"></i
+							><i
+								:class="defaultStore.state.iconSet"
+								class="ph-caret-down ph-lg"
+							></i
 						></template>
 					</button>
 					<div v-if="!showBanner" class="hideOverlay"></div>
@@ -40,7 +46,8 @@
 						<div class="status">
 							<div>
 								<i
-									class="ph-users ph-bold ph-lg ph-fw ph-lg"
+									:class="defaultStore.state.iconSet"
+									class="ph-users ph-lg ph-fw ph-lg"
 								></i
 								><I18n
 									:src="i18n.ts._channel.usersCount"
@@ -55,7 +62,8 @@
 							</div>
 							<div>
 								<i
-									class="ph-pencil ph-bold ph-lg ph-fw ph-lg"
+									:class="defaultStore.state.iconSet"
+									class="ph-pencil ph-lg ph-fw ph-lg"
 								></i
 								><I18n
 									:src="i18n.ts._channel.notesCount"
@@ -110,6 +118,7 @@ import { useRouter } from "@/router";
 import { $i } from "@/account";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
+import { defaultStore } from "@/store";
 
 const router = useRouter();
 
@@ -138,7 +147,7 @@ const headerActions = computed(() => [
 	...(channel.value && channel.value?.userId === $i?.id
 		? [
 				{
-					icon: "ph-gear-six ph-bold ph-lg",
+					icon: `${defaultStore.state.iconSet} ph-gear-six ph-lg`,
 					text: i18n.ts.edit,
 					handler: edit,
 				},
@@ -153,7 +162,7 @@ definePageMetadata(
 		channel.value
 			? {
 					title: channel.value.name,
-					icon: "ph-television ph-bold ph-lg",
+					icon: `${defaultStore.state.iconSet} ph-television ph-lg`,
 			  }
 			: null,
 	),

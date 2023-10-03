@@ -1,12 +1,15 @@
 <template>
 	<XContainer :draggable="true" @remove="() => $emit('remove')">
 		<template #header
-			><i class="ph-image ph-bold ph-lg"></i>
+			><i :class="defaultStore.state.iconSet" class="ph-image ph-lg"></i>
 			{{ i18n.ts._pages.blocks.image }}</template
 		>
 		<template #func>
 			<button @click="choose()">
-				<i class="ph-folder-notch-open ph-bold ph-lg"></i>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-folder-notch-open ph-lg"
+				></i>
 			</button>
 		</template>
 
@@ -28,6 +31,7 @@ import XContainer from "../page-editor.container.vue";
 import MkDriveFileThumbnail from "@/components/MkDriveFileThumbnail.vue";
 import * as os from "@/os";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 const props = withDefaults(
 	defineProps<{

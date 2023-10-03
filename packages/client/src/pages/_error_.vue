@@ -1,6 +1,9 @@
 <template>
 	<MkLoading v-if="!loaded" />
-	<transition :name="$store.state.animation ? 'zoom' : ''" appear>
+	<transition
+		:name="defaultStore.state.iconSetanimation ? 'zoom' : ''"
+		appear
+	>
 		<div v-show="loaded" class="mjndxjch">
 			<img
 				src="/static-assets/badges/error.webp"
@@ -9,7 +12,10 @@
 			/>
 			<p>
 				<b
-					><i class="ph-warning ph-bold ph-lg"></i>
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-warning ph-lg"
+					></i>
 					{{ i18n.ts.pageLoadError }}</b
 				>
 			</p>
@@ -44,6 +50,7 @@ import * as os from "@/os";
 import { unisonReload } from "@/scripts/unison-reload";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
+import { defaultStore } from "@/store";
 
 const props = withDefaults(
 	defineProps<{
@@ -77,7 +84,7 @@ function reload() {
 
 definePageMetadata({
 	title: i18n.ts.error,
-	icon: "ph-warning ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-warning ph-lg`,
 });
 </script>
 

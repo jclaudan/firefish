@@ -6,7 +6,8 @@
 			<MkFolder>
 				<template #icon
 					><i
-						class="ph-shield-check ph-bold ph-lg"
+						:class="defaultStore.state.iconSet"
+						class="ph-shield-check ph-lg"
 						style="margin-right: 0.5rem"
 					></i
 				></template>
@@ -17,7 +18,8 @@
 					<template v-if="$i.securityKeysList.length > 0">
 						<MkButton @click="renewTOTP"
 							><i
-								class="ph-shield-check ph-bold ph-lg"
+								:class="defaultStore.state.iconSet"
+								class="ph-shield-check ph-lg"
 								style="margin-right: 0.5rem"
 							></i
 							>{{ i18n.ts._2fa.renewTOTP }}</MkButton
@@ -26,7 +28,8 @@
 					</template>
 					<MkButton v-else @click="unregisterTOTP"
 						><i
-							class="ph-shield-slash ph-bold ph-lg"
+							:class="defaultStore.state.iconSet"
+							class="ph-shield-slash ph-lg"
 							style="margin-right: 0.5rem"
 						></i
 						>{{ i18n.ts.unregister }}</MkButton
@@ -43,7 +46,8 @@
 			<MkFolder>
 				<template #icon
 					><i
-						class="ph-key ph-bold ph-lg"
+						:class="defaultStore.state.iconSet"
+						class="ph-key ph-lg"
 						style="margin-right: 0.5rem"
 					></i
 				></template>
@@ -69,7 +73,8 @@
 					<template v-else>
 						<MkButton primary @click="addSecurityKey"
 							><i
-								class="ph-key ph-bold ph-lg"
+								:class="defaultStore.state.iconSet"
+								class="ph-key ph-lg"
 								style="margin-right: 0.5rem"
 							></i
 							>{{ i18n.ts._2fa.registerSecurityKey }}</MkButton
@@ -85,12 +90,16 @@
 							<div class="_flexList">
 								<MkButton @click="renameKey(key)"
 									><i
-										class="ph-pencil-line ph-bold ph-lg"
+										:class="defaultStore.state.iconSet"
+										class="ph-pencil-line ph-lg"
 									></i>
 									{{ i18n.ts.rename }}</MkButton
 								>
 								<MkButton danger @click="unregisterKey(key)"
-									><i class="ph-trash ph-bold ph-lg"></i>
+									><i
+										:class="defaultStore.state.iconSet"
+										class="ph-trash ph-lg"
+									></i>
 									{{ i18n.ts.unregister }}</MkButton
 								>
 							</div>
@@ -127,6 +136,7 @@ import MkFolder from "@/components/MkFolder.vue";
 import * as os from "@/os";
 import { $i } from "@/account";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 // メモ: 各エンドポイントはmeUpdatedを発行するため、refreshAccountは不要
 

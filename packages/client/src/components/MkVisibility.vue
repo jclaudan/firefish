@@ -3,24 +3,24 @@
 		<i
 			v-if="note.visibility === 'home'"
 			v-tooltip="i18n.ts._visibility.home"
-			class="ph-house ph-bold ph-lg"
+			:class="defaultStore.state.iconSet"
+			class="ph-house ph-lg"
 		></i>
 		<i
 			v-else-if="note.visibility === 'followers'"
 			v-tooltip="i18n.ts._visibility.followers"
-			class="ph-lock ph-bold ph-lg"
+			:class="defaultStore.state.iconSet"
+			class="ph-lock ph-lg"
 		></i>
 		<i
 			v-else-if="note.visibility === 'specified'"
 			ref="specified"
-			class="ph-envelope-simple-open ph-bold ph-lg"
+			:class="defaultStore.state.iconSet"
+			class="ph-envelope-simple-open ph-lg"
 		></i>
 	</span>
 	<span v-if="note.localOnly" :class="$style.localOnly"
-		><i
-			v-tooltip="i18n.ts._visibility.localOnly"
-			class="ph-users ph-bold ph-lg"
-		></i
+		><i v-tooltip="i18n.ts._visibility.localOnly" class="ph-users ph-lg"></i
 	></span>
 </template>
 

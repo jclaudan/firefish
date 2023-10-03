@@ -30,7 +30,8 @@
 									).toLocaleTimeString(),
 								})
 							"
-							class="ph-pencil ph-bold"
+							:class="defaultStore.state.iconSet"
+							class="ph-pencil"
 							style="margin-left: 0.4rem"
 						></i>
 					</MkA>

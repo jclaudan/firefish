@@ -54,7 +54,10 @@
 			</div>
 		</div>
 		<MkButton primary inline :disabled="!changed" @click="save()"
-			><i class="ph-floppy-disk-back ph-bold ph-lg"></i>
+			><i
+				:class="defaultStore.state.iconSet"
+				class="ph-floppy-disk-back ph-lg"
+			></i>
 			{{ i18n.ts.save }}</MkButton
 		>
 	</div>
@@ -171,6 +174,6 @@ async function save() {
 
 definePageMetadata({
 	title: i18n.ts.wordMute,
-	icon: "ph-speaker-x ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-speaker-x ph-lg`,
 });
 </script>

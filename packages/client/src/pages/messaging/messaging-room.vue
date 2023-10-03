@@ -353,7 +353,7 @@ onMounted(() => {
 	definePageMetadata(
 		computed(() => ({
 			title: group.value != null ? group.value.name : user.value?.name,
-			icon: "ph-chats-teardrop-bold ph-lg",
+			icon: `${defaultStore.state.iconSet} ph-chats-teardrop-bold ph-lg`,
 		})),
 	);
 });

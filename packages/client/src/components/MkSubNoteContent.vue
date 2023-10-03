@@ -9,7 +9,7 @@
 			class="reply-icon"
 			@click.stop
 		>
-			<i class="ph-quotes ph-bold ph-lg"></i>
+			<i :class="defaultStore.state.iconSet" class="ph-quotes ph-lg"></i>
 		</MkA>
 		<MkA
 			v-else-if="!detailed && note.replyId"
@@ -23,7 +23,10 @@
 			class="reply-icon"
 			@click.stop
 		>
-			<i class="ph-arrow-bend-left-up ph-bold ph-lg"></i>
+			<i
+				:class="defaultStore.state.iconSet"
+				class="ph-arrow-bend-left-up ph-lg"
+			></i>
 		</MkA>
 		<Mfm
 			v-if="note.cw != ''"
@@ -81,7 +84,10 @@
 						class="reply-icon"
 						@click.stop
 					>
-						<i class="ph-quotes ph-bold ph-lg"></i>
+						<i
+							:class="defaultStore.state.iconSet"
+							class="ph-quotes ph-lg"
+						></i>
 					</MkA>
 					<MkA
 						v-else-if="!detailed && note.replyId"
@@ -95,7 +101,10 @@
 						class="reply-icon"
 						@click.stop
 					>
-						<i class="ph-arrow-bend-left-up ph-bold ph-lg"></i>
+						<i
+							:class="defaultStore.state.iconSet"
+							class="ph-arrow-bend-left-up ph-lg"
+						></i>
 					</MkA>
 				</template>
 				<Mfm
@@ -162,10 +171,12 @@
 			@click.stop="toggleMfm"
 		>
 			<template v-if="disableMfm">
-				<i class="ph-play ph-bold"></i> {{ i18n.ts._mfm.play }}
+				<i :class="defaultStore.state.iconSet" class="ph-play"></i>
+				{{ i18n.ts._mfm.play }}
 			</template>
 			<template v-else>
-				<i class="ph-stop ph-bold"></i> {{ i18n.ts._mfm.stop }}
+				<i :class="defaultStore.state.iconSet" class="ph-stop"></i>
+				{{ i18n.ts._mfm.stop }}
 			</template>
 		</MkButton>
 		<!-- <div

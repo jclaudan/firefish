@@ -132,6 +132,7 @@ import { lookupUser } from "@/scripts/lookup-user";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
 import MkUserCardMini from "@/components/MkUserCardMini.vue";
+import { defaultStore } from "@/store";
 
 const paginationComponent = ref<InstanceType<typeof MkPagination>>();
 
@@ -185,19 +186,19 @@ function show(user) {
 
 const headerActions = computed(() => [
 	{
-		icon: "ph-magnifying-glass ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-magnifying-glass ph-lg`,
 		text: i18n.ts.search,
 		handler: searchUser,
 	},
 	{
 		asFullButton: true,
-		icon: "ph-plus ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-plus ph-lg`,
 		text: i18n.ts.addUser,
 		handler: addUser,
 	},
 	{
 		asFullButton: true,
-		icon: "ph-magnifying-glass ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-magnifying-glass ph-lg`,
 		text: i18n.ts.lookup,
 		handler: lookupUser,
 	},
@@ -208,7 +209,7 @@ const headerTabs = computed(() => []);
 definePageMetadata(
 	computed(() => ({
 		title: i18n.ts.users,
-		icon: "ph-users ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-users ph-lg`,
 	})),
 );
 </script>

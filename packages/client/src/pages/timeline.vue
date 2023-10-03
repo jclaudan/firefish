@@ -11,7 +11,7 @@
 		<MkSpacer :content-max="800">
 			<div ref="rootEl" v-hotkey.global="keymap" class="cmuxhskf">
 				<XPostForm
-					v-if="$store.reactiveState.showFixedPostForm.value"
+					v-if="defaultStore.reactiveState.showFixedPostForm.value"
 					class="post-form _block"
 					fixed
 				/>
@@ -139,7 +139,7 @@ async function chooseList(ev: MouseEvent) {
 			{
 				type: "link" as const,
 				text: i18n.ts.manageLists,
-				icon: "ph-faders-horizontal ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-faders-horizontal ph-lg`,
 				to: "/my/lists",
 			},
 		].concat(
@@ -162,7 +162,7 @@ async function chooseAntenna(ev: MouseEvent) {
 				type: "link" as const,
 				indicate: false,
 				text: i18n.ts.manageAntennas,
-				icon: "ph-faders-horizontal ph-bold ph-lg",
+				icon: `${defaultStore.state.iconSet} ph-faders-horizontal ph-lg`,
 				to: "/my/antennas",
 			},
 		].concat(
@@ -193,20 +193,20 @@ function focus(): void {
 
 const headerActions = computed(() => [
 	{
-		icon: "ph-list-bullets ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-list-bullets ph-lg`,
 		title: i18n.ts.lists,
 		text: i18n.ts.lists,
 		iconOnly: true,
 		handler: chooseList,
 	},
 	{
-		icon: "ph-flying-saucer ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-flying-saucer ph-lg`,
 		title: i18n.ts.antennas,
 		text: i18n.ts.antennas,
 		iconOnly: true,
 		handler: chooseAntenna,
 	} /* **TODO: fix timetravel** {
-	icon: 'ph-calendar-blank ph-bold ph-lg',
+	icon: `${defaultStore.state.iconSet} ph-calendar-blank ph-lg`,
 	title: i18n.ts.jumpToSpecifiedDate,
 	iconOnly: true,
 	handler: timetravel,
@@ -217,7 +217,7 @@ const headerTabs = computed(() => [
 	{
 		key: "home",
 		title: i18n.ts._timelines.home,
-		icon: "ph-house ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-house ph-lg`,
 		iconOnly: true,
 	},
 	...(isLocalTimelineAvailable
@@ -225,7 +225,7 @@ const headerTabs = computed(() => [
 				{
 					key: "local",
 					title: i18n.ts._timelines.local,
-					icon: "ph-users ph-bold ph-lg",
+					icon: `${defaultStore.state.iconSet} ph-users ph-lg`,
 					iconOnly: true,
 				},
 		  ]
@@ -235,7 +235,7 @@ const headerTabs = computed(() => [
 				{
 					key: "social",
 					title: i18n.ts._timelines.social,
-					icon: "ph-handshake ph-bold ph-lg",
+					icon: `${defaultStore.state.iconSet} ph-handshake ph-lg`,
 					iconOnly: true,
 				},
 		  ]
@@ -245,7 +245,7 @@ const headerTabs = computed(() => [
 				{
 					key: "recommended",
 					title: i18n.ts._timelines.recommended,
-					icon: "ph-thumbs-up ph-bold ph-lg",
+					icon: `${defaultStore.state.iconSet} ph-thumbs-up ph-lg`,
 					iconOnly: true,
 				},
 		  ]
@@ -255,7 +255,7 @@ const headerTabs = computed(() => [
 				{
 					key: "global",
 					title: i18n.ts._timelines.global,
-					icon: "ph-planet ph-bold ph-lg",
+					icon: `${defaultStore.state.iconSet} ph-planet ph-lg`,
 					iconOnly: true,
 				},
 		  ]
@@ -267,14 +267,14 @@ definePageMetadata(
 		title: i18n.ts.timeline,
 		icon:
 			src.value === "local"
-				? "ph-users ph-bold ph-lg"
+				? "ph-users ph-lg"
 				: src.value === "social"
-				? "ph-handshake ph-bold ph-lg"
+				? "ph-handshake ph-lg"
 				: src.value === "recommended"
-				? "ph-thumbs-up ph-bold ph-lg"
+				? "ph-thumbs-up ph-lg"
 				: src.value === "global"
-				? "ph-planet ph-bold ph-lg"
-				: "ph-house ph-bold ph-lg",
+				? "ph-planet ph-lg"
+				: "ph-house ph-lg",
 	})),
 );
 

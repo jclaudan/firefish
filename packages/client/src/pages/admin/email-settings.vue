@@ -103,6 +103,7 @@ import * as os from "@/os";
 import { fetchInstance, instance } from "@/instance";
 import { i18n } from "@/i18n";
 import { definePageMetadata } from "@/scripts/page-metadata";
+import { defaultStore } from "@/store";
 
 const enableEmail = ref(false);
 const email: any = ref(null);
@@ -154,13 +155,13 @@ function save() {
 const headerActions = computed(() => [
 	{
 		asFullButton: true,
-		icon: "ph-test-tube ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-test-tube ph-lg`,
 		text: i18n.ts.testEmail,
 		handler: testEmail,
 	},
 	{
 		asFullButton: true,
-		icon: "ph-check ph-bold ph-lg",
+		icon: `${defaultStore.state.iconSet} ph-check ph-lg`,
 		text: i18n.ts.save,
 		handler: save,
 	},
@@ -170,6 +171,6 @@ const headerTabs = computed(() => []);
 
 definePageMetadata({
 	title: i18n.ts.emailServer,
-	icon: "ph-envelope-simple-open ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-envelope-simple-open ph-lg`,
 });
 </script>

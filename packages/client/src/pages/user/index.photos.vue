@@ -1,7 +1,11 @@
 <template>
 	<MkContainer id="photos-container" :max-height="300" :foldable="true">
 		<template #header
-			><i class="ph-image ph-bold ph-lg" style="margin-right: 0.5em"></i
+			><i
+				:class="defaultStore.state.iconSet"
+				class="ph-image ph-lg"
+				style="margin-right: 0.5em"
+			></i
 			>{{ i18n.ts.images }}</template
 		>
 		<div class="ujigsodd">

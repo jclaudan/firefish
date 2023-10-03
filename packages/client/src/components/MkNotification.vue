@@ -25,43 +25,53 @@
 			<div class="sub-icon" :class="notification.type">
 				<i
 					v-if="notification.type === 'follow'"
-					class="ph-hand-waving ph-bold"
+					:class="defaultStore.state.iconSet"
+					class="ph-hand-waving"
 				></i>
 				<i
 					v-else-if="notification.type === 'receiveFollowRequest'"
-					class="ph-clock ph-bold"
+					:class="defaultStore.state.iconSet"
+					class="ph-clock"
 				></i>
 				<i
 					v-else-if="notification.type === 'followRequestAccepted'"
-					class="ph-check ph-bold"
+					:class="defaultStore.state.iconSet"
+					class="ph-check"
 				></i>
 				<i
 					v-else-if="notification.type === 'groupInvited'"
-					class="ph-identification-card ph-bold"
+					:class="defaultStore.state.iconSet"
+					class="ph-identification-card"
 				></i>
 				<i
 					v-else-if="notification.type === 'renote'"
-					class="ph-rocket-launch ph-bold"
+					:class="defaultStore.state.iconSet"
+					class="ph-rocket-launch"
 				></i>
 				<i
 					v-else-if="notification.type === 'reply'"
-					class="ph-arrow-bend-up-left ph-bold"
+					:class="defaultStore.state.iconSet"
+					class="ph-arrow-bend-up-left"
 				></i>
 				<i
 					v-else-if="notification.type === 'mention'"
-					class="ph-at ph-bold"
+					:class="defaultStore.state.iconSet"
+					class="ph-at"
 				></i>
 				<i
 					v-else-if="notification.type === 'quote'"
-					class="ph-quotes ph-bold"
+					:class="defaultStore.state.iconSet"
+					class="ph-quotes"
 				></i>
 				<i
 					v-else-if="notification.type === 'pollVote'"
-					class="ph-microphone-stage ph-bold"
+					:class="defaultStore.state.iconSet"
+					class="ph-microphone-stage"
 				></i>
 				<i
 					v-else-if="notification.type === 'pollEnded'"
-					class="ph-microphone-stage ph-bold"
+					:class="defaultStore.state.iconSet"
+					class="ph-microphone-stage"
 				></i>
 				<!-- notification.reaction が null になることはまずないが、ここでoptional chaining使うと一部ブラウザで刺さるので念の為 -->
 				<XReactionIcon
@@ -115,14 +125,20 @@
 				:title="getNoteSummary(notification.note)"
 			>
 				<span>{{ i18n.ts._notification.reacted }}</span>
-				<i class="ph-quotes ph-fill ph-lg"></i>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-quotes ph-fill ph-lg"
+				></i>
 				<Mfm
 					:text="getNoteSummary(notification.note)"
 					:plain="true"
 					:nowrap="!full"
 					:custom-emojis="notification.note.emojis"
 				/>
-				<i class="ph-quotes ph-fill ph-lg"></i>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-quotes ph-fill ph-lg"
+				></i>
 			</MkA>
 			<MkA
 				v-if="notification.type === 'renote'"
@@ -131,14 +147,20 @@
 				:title="getNoteSummary(notification.note.renote)"
 			>
 				<span>{{ i18n.ts._notification.renoted }}</span>
-				<i class="ph-quotes ph-fill ph-lg"></i>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-quotes ph-fill ph-lg"
+				></i>
 				<Mfm
 					:text="getNoteSummary(notification.note.renote)"
 					:plain="true"
 					:nowrap="!full"
 					:custom-emojis="notification.note.renote.emojis"
 				/>
-				<i class="ph-quotes ph-fill ph-lg"></i>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-quotes ph-fill ph-lg"
+				></i>
 			</MkA>
 			<MkA
 				v-if="notification.type === 'reply'"
@@ -186,14 +208,20 @@
 				:title="getNoteSummary(notification.note)"
 			>
 				<span>{{ i18n.ts._notification.voted }}</span>
-				<i class="ph-quotes ph-fill ph-lg"></i>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-quotes ph-fill ph-lg"
+				></i>
 				<Mfm
 					:text="getNoteSummary(notification.note)"
 					:plain="true"
 					:nowrap="!full"
 					:custom-emojis="notification.note.emojis"
 				/>
-				<i class="ph-quotes ph-fill ph-lg"></i>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-quotes ph-fill ph-lg"
+				></i>
 			</MkA>
 			<MkA
 				v-if="notification.type === 'pollEnded'"
@@ -201,14 +229,20 @@
 				:to="notePage(notification.note)"
 				:title="getNoteSummary(notification.note)"
 			>
-				<i class="ph-quotes ph-fill ph-lg"></i>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-quotes ph-fill ph-lg"
+				></i>
 				<Mfm
 					:text="getNoteSummary(notification.note)"
 					:plain="true"
 					:nowrap="!full"
 					:custom-emojis="notification.note.emojis"
 				/>
-				<i class="ph-quotes ph-fill ph-lg"></i>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-quotes ph-fill ph-lg"
+				></i>
 			</MkA>
 			<span
 				v-if="notification.type === 'follow'"

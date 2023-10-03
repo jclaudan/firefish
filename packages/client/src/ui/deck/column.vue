@@ -31,10 +31,16 @@
 				@click="toggleActive"
 			>
 				<template v-if="active"
-					><i class="ph-caret-up ph-bold ph-lg"></i
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-caret-up ph-lg"
+					></i
 				></template>
 				<template v-else
-					><i class="ph-caret-down ph-bold ph-lg"></i
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-caret-down ph-lg"
+					></i
 				></template>
 			</button>
 			<div class="action">
@@ -46,7 +52,10 @@
 				class="menu _button"
 				@click.stop="showSettingsMenu"
 			>
-				<i class="ph-dots-three-outline-vertical ph-bold ph-lg"></i>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-dots-three-outline-vertical ph-lg"
+				></i>
 			</button>
 		</header>
 		<div v-show="active" ref="body">
@@ -81,6 +90,7 @@ import {
 import * as os from "@/os";
 import { i18n } from "@/i18n";
 import type { MenuItem } from "@/types/menu";
+import { defaultStore } from "@/store";
 
 provide("shouldHeaderThin", true);
 provide("shouldOmitHeaderTitle", true);
@@ -156,7 +166,7 @@ function toggleActive() {
 function getMenu() {
 	let items = [
 		{
-			icon: "ph-gear-six ph-bold ph-lg",
+			icon: `${defaultStore.state.iconSet} ph-gear-six ph-lg`,
 			text: i18n.ts._deck.configureColumn,
 			action: async () => {
 				const { canceled, result } = await os.form(props.column.name, {
@@ -183,17 +193,17 @@ function getMenu() {
 		{
 			type: "parent",
 			text: i18n.ts.move + "...",
-			icon: "ph-arrows-out-cardinal ph-bold ph-lg",
+			icon: `${defaultStore.state.iconSet} ph-arrows-out-cardinal ph-lg`,
 			children: [
 				{
-					icon: "ph-caret-left ph-bold ph-lg",
+					icon: `${defaultStore.state.iconSet} ph-caret-left ph-lg`,
 					text: i18n.ts._deck.swapLeft,
 					action: () => {
 						swapLeftColumn(props.column.id);
 					},
 				},
 				{
-					icon: "ph-caret-right ph-bold ph-lg",
+					icon: `${defaultStore.state.iconSet} ph-caret-right ph-lg`,
 					text: i18n.ts._deck.swapRight,
 					action: () => {
 						swapRightColumn(props.column.id);
@@ -201,7 +211,7 @@ function getMenu() {
 				},
 				props.isStacked
 					? {
-							icon: "ph-caret-up ph-bold ph-lg",
+							icon: `${defaultStore.state.iconSet} ph-caret-up ph-lg`,
 							text: i18n.ts._deck.swapUp,
 							action: () => {
 								swapUpColumn(props.column.id);
@@ -210,7 +220,7 @@ function getMenu() {
 					: undefined,
 				props.isStacked
 					? {
-							icon: "ph-caret-down ph-bold ph-lg",
+							icon: `${defaultStore.state.iconSet} ph-caret-down ph-lg`,
 							text: i18n.ts._deck.swapDown,
 							action: () => {
 								swapDownColumn(props.column.id);
@@ -220,7 +230,7 @@ function getMenu() {
 			],
 		},
 		{
-			icon: "ph-copy ph-bold ph-lg",
+			icon: `${defaultStore.state.iconSet} ph-copy ph-lg`,
 			text: i18n.ts._deck.stackLeft,
 			action: () => {
 				stackLeftColumn(props.column.id);
@@ -228,7 +238,7 @@ function getMenu() {
 		},
 		props.isStacked
 			? {
-					icon: "ph-browser ph-bold ph-lg",
+					icon: `${defaultStore.state.iconSet} ph-browser ph-lg`,
 					text: i18n.ts._deck.popRight,
 					action: () => {
 						popRightColumn(props.column.id);
@@ -237,7 +247,7 @@ function getMenu() {
 			: undefined,
 		null,
 		{
-			icon: "ph-trash ph-bold ph-lg",
+			icon: `${defaultStore.state.iconSet} ph-trash ph-lg`,
 			text: i18n.ts.remove,
 			danger: true,
 			action: () => {

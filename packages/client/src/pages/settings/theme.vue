@@ -37,7 +37,10 @@
 			<FormSelect v-model="lightThemeId" large class="select">
 				<template #label>{{ i18n.ts.themeForLightMode }}</template>
 				<template #prefix
-					><i class="ph-sun ph-bold ph-lg"></i
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-sun ph-lg"
+					></i
 				></template>
 				<option
 					v-if="instanceLightTheme"
@@ -71,7 +74,10 @@
 			<FormSelect v-model="darkThemeId" large class="select">
 				<template #label>{{ i18n.ts.themeForDarkMode }}</template>
 				<template #prefix
-					><i class="ph-moon ph-bold ph-lg"></i
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-moon ph-lg"
+					></i
 				></template>
 				<option
 					v-if="instanceDarkTheme"
@@ -109,27 +115,33 @@
 				<FormLink to="/settings/theme/manage"
 					><template #icon
 						><i
-							class="ph-folder-notch-open ph-bold ph-lg"
+							:class="defaultStore.state.iconSet"
+							class="ph-folder-notch-open ph-lg"
 						></i></template
 					>{{ i18n.ts._theme.manage
 					}}<template #suffix>{{ themesCount }}</template></FormLink
 				>
 				<FormLink to="https://assets.firefish.io/theme/list" external
 					><template #icon
-						><i class="ph-planet ph-bold ph-lg"></i></template
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-planet ph-lg"
+						></i></template
 					>{{ i18n.ts._theme.explore }}</FormLink
 				>
 				<FormLink to="/settings/theme/install"
 					><template #icon
 						><i
-							class="ph-download-simple ph-bold ph-lg"
+							:class="defaultStore.state.iconSet"
+							class="ph-download-simple ph-lg"
 						></i></template
 					>{{ i18n.ts._theme.install }}</FormLink
 				>
 				<FormLink to="/theme-editor"
 					><template #icon
 						><i
-							class="ph-paint-brush-broad ph-bold ph-lg"
+							:class="defaultStore.state.iconSet"
+							class="ph-paint-brush-broad ph-lg"
 						></i></template
 					>{{ i18n.ts._theme.make }}</FormLink
 				>
@@ -137,7 +149,11 @@
 		</FormSection>
 		<FormSection>
 			<FormLink to="/settings/custom-css" class="_formBlock"
-				><template #icon><i class="ph-code ph-bold ph-lg"></i></template
+				><template #icon
+					><i
+						:class="defaultStore.state.iconSet"
+						class="ph-code ph-lg"
+					></i></template
 				>{{ i18n.ts.customCss }}</FormLink
 			>
 		</FormSection>
@@ -273,7 +289,7 @@ function setWallpaper(event) {
 
 definePageMetadata({
 	title: i18n.ts.theme,
-	icon: "ph-palette ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-palette ph-lg`,
 });
 </script>
 

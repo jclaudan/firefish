@@ -32,7 +32,10 @@
 						</div>
 					</VueDraggable>
 					<button class="_button add" @click="chooseEmoji">
-						<i class="ph-plus ph-bold ph-lg"></i>
+						<i
+							:class="defaultStore.state.iconSet"
+							class="ph-plus ph-lg"
+						></i>
 					</button>
 				</div>
 				<template #caption
@@ -97,12 +100,16 @@
 			<FormSection>
 				<div style="display: flex; gap: var(--margin); flex-wrap: wrap">
 					<FormButton inline @click="preview"
-						><i class="ph-eye ph-bold ph-lg"></i>
+						><i
+							:class="defaultStore.state.iconSet"
+							class="ph-eye ph-lg"
+						></i>
 						{{ i18n.ts.preview }}</FormButton
 					>
 					<FormButton inline danger @click="setDefault"
 						><i
-							class="ph-arrow-counter-clockwise ph-bold ph-lg"
+							:class="defaultStore.state.iconSet"
+							class="ph-arrow-counter-clockwise ph-lg"
 						></i>
 						{{ i18n.ts.default }}</FormButton
 					>
@@ -239,7 +246,7 @@ watch(reactionPickerSkinTone.value, async () => {
 
 definePageMetadata({
 	title: i18n.ts.reaction,
-	icon: "ph-smiley ph-bold ph-lg",
+	icon: `${defaultStore.state.iconSet} ph-smiley ph-lg`,
 });
 </script>
 

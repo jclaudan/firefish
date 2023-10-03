@@ -2,14 +2,18 @@
 	<MkContainer>
 		<template #header
 			><i
-				class="ph-chart-bar ph-bold ph-lg"
+				:class="defaultStore.state.iconSet"
+				class="ph-chart-bar ph-lg"
 				style="margin-right: 0.5em"
 			></i
 			>{{ i18n.ts.activity }}</template
 		>
 		<template #func>
 			<button class="_button" @click="showMenu">
-				<i class="ph-dots-three-outline ph-bold ph-lg"></i>
+				<i
+					:class="defaultStore.state.iconSet"
+					class="ph-dots-three-outline ph-lg"
+				></i>
 			</button>
 		</template>
 
@@ -36,6 +40,7 @@ import MkContainer from "@/components/MkContainer.vue";
 import MkChart from "@/components/MkChart.vue";
 import * as os from "@/os";
 import { i18n } from "@/i18n";
+import { defaultStore } from "@/store";
 
 const props = withDefaults(
 	defineProps<{
