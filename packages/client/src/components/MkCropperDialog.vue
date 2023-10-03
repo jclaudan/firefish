@@ -22,7 +22,7 @@
 						ref="cropper"
 						:img="imgUrl"
 						:options="{
-							aspectRatio: aspectRatio ? aspectRatio[0] / aspectRatio[1] : null,
+							aspectRatio: aspectRatio ?? null,
 							viewMode: 1,
 						}"
 					></VuePictureCropper>
@@ -52,7 +52,7 @@ const emit = defineEmits<{
 
 const props = defineProps<{
 	file: firefish.entities.DriveFile;
-	aspectRatio?: Array<number>;
+	aspectRatio?: number;
 }>();
 
 const imgUrl = `${url}/proxy/image.webp?${query({
