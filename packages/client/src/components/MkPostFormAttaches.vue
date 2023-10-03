@@ -78,7 +78,6 @@ function toggleSensitive(file) {
 }
 
 function cropImage(file) {
-	if (!["png", "webp", "jpg", "jpeg"].includes(file.type)) return;
 	os.cropImage(file).then((newFile) => {
 		emits("cropImage", newFile);
 	});
@@ -155,7 +154,7 @@ function showFileMenu(file, ev: MouseEvent) {
 					describe(file);
 				},
 			},
-			["png", "webp", "jpg", "jpeg"].includes(file.type) ? {
+			["image/png", "image/webp", "image/jpeg"].includes(file.type) ? {
 				text: i18n.ts.cropImage,
 				icon: "ph-crop ph-bold ph-lg",
 				action: () => {
