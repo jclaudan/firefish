@@ -65,6 +65,7 @@ export default async (job: Bull.Job<DeliverJobData>) => {
 
 		if (res instanceof StatusError) {
 			// 4xx
+			logger.error(`ERROR_VIVALDI_STATUSERROR error for ${host} host ${job.data.to} deliveryto: ${res.statusCode} ${res.statusMessage} ${res}`)
 			if (res.isClientError) {
 				// HTTPステータスコード4xxはクライアントエラーであり、それはつまり
 				// 何回再送しても成功することはないということなのでエラーにはしないでおく
@@ -75,7 +76,7 @@ export default async (job: Bull.Job<DeliverJobData>) => {
 			throw new Error(`${res.statusCode} ${res.statusMessage}`);
 		} else {
 			// DNS error, socket error, timeout ...
-			logger.error(`ERROR_VIVALDI error for ${host} host ${job.data.to} deliveryto: ${res}`)
+			logger.error(`ERROR_VIVALDI_OTHERRES error for ${host} host ${job.data.to} deliveryto: ${res}`)
 			throw res;
 		}
 	}
