@@ -20,6 +20,13 @@ const logger = new Logger("deliver");
 let latest: string | null = null;
 
 export default async (job: Bull.Job<DeliverJobData>) => {
+	try {
+		const testUrl = new URL(job.data.to);
+		const testHost = toPuny(testUrl.host);
+		logger.info(`TEST_VIVALDI Delivering ${testUrl}: ${testHost}`);
+	} catch (e) {
+		logger.error(`TEST_VIVALDI Couldn't deliver ${job.data.to}: ${e.message}`)
+	}
 	const { host } = new URL(job.data.to);
 	const puny = toPuny(host);
 
