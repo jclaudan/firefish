@@ -22,12 +22,13 @@ let latest: string | null = null;
 export default async (job: Bull.Job<DeliverJobData>) => {
 	try {
 		const testUrl = new URL(job.data.to);
+		logger.info(`TEST_VIVALDI Delivering nopuny ${testUrl}: ${testUrl}`);
 		const testHost = toPuny(testUrl.host);
-		logger.info(`TEST_VIVALDI Delivering ${testUrl}: ${testHost}`);
+		logger.info(`TEST_VIVALDI Delivering puny ${testUrl}: ${testHost}`);
 	} catch (e) {
 		logger.error(`TEST_VIVALDI Couldn't deliver ${job.data.to}: ${e.message}`)
 	}
-	const { host } = new URL(job.data.to);
+	const { host } = new URL(job.data.to) ?? 'social.vivaldi.net';
 	const puny = toPuny(host);
 
 	if (await shouldSkipInstance(puny)) return "skip";
