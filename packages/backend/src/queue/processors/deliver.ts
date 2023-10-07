@@ -20,15 +20,7 @@ const logger = new Logger("deliver");
 let latest: string | null = null;
 
 export default async (job: Bull.Job<DeliverJobData>) => {
-	try {
-		const testUrl = new URL(job.data.to);
-		logger.info(`TEST_VIVALDI Delivering nopuny ${testUrl}: ${testUrl}`);
-		const testHost = toPuny(testUrl.host);
-		logger.info(`TEST_VIVALDI Delivering puny ${testUrl}: ${testHost}`);
-	} catch (e) {
-		logger.error(`TEST_VIVALDI Couldn't deliver ${job.data.to}: ${e.message}`)
-	}
-	const { host } = new URL(job.data.to) ?? 'social.vivaldi.net';
+	const { host } = new URL(job.data.to);
 	const puny = toPuny(host);
 
 	if (await shouldSkipInstance(puny)) return "skip";
@@ -83,6 +75,7 @@ export default async (job: Bull.Job<DeliverJobData>) => {
 			throw new Error(`${res.statusCode} ${res.statusMessage}`);
 		} else {
 			// DNS error, socket error, timeout ...
+			logger.error(`ERROR_VIVALDI error for ${host} host ${job.data.to} deliveryto: ${res}`)
 			throw res;
 		}
 	}
